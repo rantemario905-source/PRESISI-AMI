@@ -1,0 +1,79 @@
+/**
+ * ==========================================================================
+ * Service: Master Shift & Jadwal Shift
+ * ==========================================================================
+ */
+import { supabase } from '../utils/supabaseClient.js'
+import { daftarTanggal } from '../utils/format.js'
+
+/* ------------------------------- Master -------------------------------- */
+
+export async function ambilMasterShift() {
+  const { data, error } = await supabase
+    .from('shift_master')
+    .select('id, nama_shift, jam_mulai, jam_selesai')
+    .order('jam_mulai')
+
+  if (error) throw error
+  return data ?? []
+}
+
+export async function simpanMasterShift({ id, nama_shift, jam_mulai, jam_selesai }) {
+  const baris = { nama_shift: nama_shift.trim(), jam_mulai, jam_selesai }
+
+  const { error } = id
+    ? await supabase.from('shift_master').update(baris).eq('id', id)
+    : await supabase.from('shift_master').insert(baris)
+
+  if (error) throw error
+}
+
+export async function hapusMasterShift(id) {
+  const { error } = await supabase.from('shift_master').delete().eq('id', id)
+  if (error) throw error
+}
+
+/* ------------------------------- Jadwal -------------------------------- */
+
+/** Jadwal shift pada rentang tanggal (inklusif), lengkap dengan nama shift & pegawai */
+export async function ambilJadwalRentang(mulai, selesai) {
+  const { data, error } = await supabase
+    .from('jadwal_shift')
+    .select(
+      'id, user_id, tanggal, shift_id, shift_master ( nama_shift ), pegawai:pegawai!jadwal_shift_user_id_fkey ( nama, unit_kerja )',
+    )
+    .gte('tanggal', mulai)
+    .lte('tanggal', selesai)
+    .order('tanggal', { ascending: false })
+    .order('nama', { referencedTable: 'pegawai', ascending: true })
+
+  if (error) throw error
+  return data ?? []
+}
+
+/**
+ * Simpan jadwal untuk banyak pegawai & banyak tanggal sekaligus.
+ * @param {{ userIds: string[], shiftId: string, mulai: string, selesai: string }} params
+ * @returns {Promise<number>} jumlah baris jadwal yang ditulis
+ */
+export async function simpanJadwalMassal({ userIds, shiftId, mulai, selesai }) {
+  const tanggal = daftarTanggal(mulai, selesai)
+  if (!userIds?.length) throw new Error('Pilih minimal satu pegawai.')
+  if (!tanggal.length) throw new Error('Rentang tanggal tidak valid.')
+
+  const baris = userIds.flatMap((userId) =>
+    tanggal.map((tgl) => ({ user_id: userId, tanggal: tgl, shift_id: shiftId })),
+  )
+
+  const { error } = await supabase
+    .from('jadwal_shift')
+    .upsert(baris, { onConflict: 'user_id,tanggal' })
+
+  if (error) throw error
+  return baris.length
+}
+
+export async function hapusJadwal(id) {
+  const { error } = await supabase.from('jadwal_shift').delete().eq('id', id)
+  if (error) throw error
+}
