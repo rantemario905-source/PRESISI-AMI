@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-25 12:48 WITA |
+| Terakhir diperbarui | 2026-10-25 12:49 WITA |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -98,7 +98,8 @@ Fase 8 (impor jadwal) maupun pekerjaan UI 25 Okt. README juga belum mencantumkan
   `2c8a775… refs/heads/main`; `git status -sb` → `## main...origin/main`
   (working tree bersih).
 - **Catatan/risiko:** repo GitHub sebelumnya kosong sehingga tidak ada konflik.
-  Deploy Vercel belum dilakukan; migrasi DB tetap perlu dikonfirmasi.
+  Deploy Vercel belum dilakukan; migrasi DB tetap perlu dikonfirmasi. Pembaruan
+  dokumen audit di-commit terpisah (`4739c4a`) lalu di-push.
 
 ### 2026-10-25 12:37 WITA — Commit & push untuk tahap deploy
 - **Perubahan:** mereview seluruh perubahan yang belum di-commit (Fase 4–8, impor

@@ -131,7 +131,8 @@ seluruh migrasi untuk instalasi sekali jalan.
 - OS: Windows, shell **PowerShell 5.1**. Gunakan `;` atau `if ($?) { ... }`, bukan
   `&&`. Gunakan `workdir`, jangan `cd`.
 - Repo: branch `main`; remote `origin` =
-  `https://github.com/rantemario905-source/PRESISI-AMI.git`; commit terakhir
-  `2c8a775` (Fase 4–8 + UI). Working tree bersih pada 2026-10-25 12:48.
+  `https://github.com/rantemario905-source/PRESISI-AMI.git`; commit fitur
+  `2c8a775` (Fase 4–8 + UI) dan commit dokumen audit `4739c4a`. Working tree
+  bersih pada 2026-10-25 12:49.
 - Timezone aplikasi: `Asia/Makassar` (WITA, UTC+8).
 - `dist/` dan `.env` sudah diabaikan Git.
