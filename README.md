@@ -394,35 +394,52 @@ Promosi/penurunan role Super Admin tetap hanya melalui SQL oleh Admin IT.
   jadwal, presensi, dan pengajuan tetap utuh.
 - `dist/` dan `.env` sudah masuk `.gitignore`.
 
-## 10. Deploy produksi (GitHub + Vercel)
+## 10. Deploy produksi (GitHub Pages)
 
-1. Buat repository **kosong** di GitHub (tanpa README / .gitignore).
-2. Dari folder proyek, jalankan:
+Aplikasi ini SPA Vite dan dipublikasikan lewat **GitHub Actions** ke GitHub Pages
+dengan base path `/PRESISI-AMI/`.
 
-   ```bash
-   git init
-   git add .
-   git commit -m "PRESISI AMI - siap produksi"
-   git branch -M main
-   git remote add origin https://github.com/<username>/<nama-repo>.git
-   git push -u origin main
-   ```
+**A. Aktifkan GitHub Pages**
 
-3. Buka [vercel.com](https://vercel.com) → **Add New → Project** → import repository tersebut.
-4. Vercel mendeteksi **Vite** secara otomatis (`npm run build`, output `dist`).
-5. Tambahkan **Environment Variables**:
+1. Buka repository → **Settings → Pages**.
+2. Pada **Build and deployment → Source**, pilih **GitHub Actions**.
+3. Buka **Settings → Secrets and variables → Actions → New repository secret**,
+   lalu tambahkan:
 
    | Nama | Nilai |
    |---|---|
    | `VITE_SUPABASE_URL` | URL project Supabase |
    | `VITE_SUPABASE_ANON_KEY` | anon/public key Supabase |
 
-6. Klik **Deploy**. File `vercel.json` sudah mengatur rewrite SPA agar rute seperti
-   `/riwayat` dan `/superadmin-portal` tidak 404 saat di-refresh.
-7. Setelah dapat domain Vercel, buka **Supabase → Authentication → URL Configuration**
-   dan isi **Site URL** dengan domain tersebut.
-8. GPS hanya berjalan di **HTTPS** (otomatis dari Vercel) dan harus diuji di HP
-   dalam radius 100 m dari RSUD AMI.
+   Ambil di **Supabase → Project Settings → API**. Gunakan anon/public key,
+   **bukan** `service_role`.
+4. Push ke branch `main`. Workflow `.github/workflows/deploy.yml` akan
+   menjalankan `npm ci`, build, lalu deploy otomatis.
+5. URL aplikasi: `https://rantemario905-source.github.io/PRESISI-AMI/`.
+
+**B. Hubungkan Supabase Auth**
+
+- **Authentication → URL Configuration → Site URL:**
+  `https://rantemario905-source.github.io/PRESISI-AMI/`
+- **Redirect URLs:** tambahkan
+  `https://rantemario905-source.github.io/PRESISI-AMI/**` dan
+  `http://localhost:5173/**` untuk pengembangan.
+
+**C. Catatan GitHub Pages**
+
+- Workflow menyalin `dist/index.html` menjadi `dist/404.html` dan menambahkan
+  `.nojekyll`, sehingga rute seperti `/riwayat` atau `/superadmin-portal` tetap
+  terbuka saat di-refresh.
+- Base path diatur lewat `VITE_BASE_PATH` di workflow. Untuk local dev, base
+  tetap `/`.
+- Bila kelak memakai **custom domain**, ubah `VITE_BASE_PATH` menjadi `/` agar
+  aset tidak mencari folder `/PRESISI-AMI/`.
+- GPS hanya berjalan di **HTTPS**; GitHub Pages sudah menyediakannya.
+
+**D. Vercel (opsional)**
+
+`vercel.json` tetap disimpan sebagai alternatif. Import repo di Vercel, isi dua
+environment variable yang sama, lalu deploy.
 
 **Membersihkan data uji sebelum go-live:** jalankan `supabase/cleanup_data_uji.sql`
 di SQL Editor. Skrip ini menghapus presensi, izin, koreksi, jadwal beserta status

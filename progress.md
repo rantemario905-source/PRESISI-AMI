@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-25 12:49 WITA |
+| Terakhir diperbarui | 2026-10-25 13:01 WITA |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -35,8 +35,9 @@
 ## 1. Status Terkini
 
 **Ringkasan:** seluruh fitur inti (Fase 1–8 + penyempurnaan UI navigasi) sudah ada
-di kode dan sudah di-commit serta di-push ke GitHub. Yang belum: konfirmasi
-penerapan migrasi 09–14 beserta skrip verifikasinya di Supabase, dan deploy Vercel.
+di kode dan sudah di-commit serta di-push ke GitHub. Deploy dipindahkan ke
+**GitHub Pages**; konfigurasi selesai tetapi belum aktif karena menunggu secrets
+Actions. Yang belum: konfirmasi migrasi 09–14 dan skrip verifikasi di Supabase.
 
 | Aspek | Status | Bukti |
 |---|---|---|
@@ -48,19 +49,21 @@ penerapan migrasi 09–14 beserta skrip verifikasinya di Supabase, dan deploy Ve
 | Build produksi | **Lulus** — 266 modul, 6,46 dtk | `npm run build` (2026-10-25 12:24) |
 | Lint/unit test | Tidak tersedia di `package.json` | `package.json` |
 | Alfa otomatis | Fitur ada, **default nonaktif** | migrasi 12, `PengaturanPresensi.jsx` |
-| Deploy Vercel | Dikonfigurasi (`vercel.json`), status live tidak diketahui | `vercel.json` |
+| Deploy GitHub Pages | **Konfigurasi siap** — menunggu secrets + push | `.github/workflows/deploy.yml`, `vite.config.js` |
 
 **Pekerjaan terakhir sebelum audit:** penyempurnaan navigasi UI (tab bar, navigasi
 bawah, menu kepala ruangan, layout portal kepala) pada 2026-10-25 11:28–11:49.
 
 **Langkah berikutnya yang disarankan:**
-1. Deploy ke Vercel: import repo, isi `VITE_SUPABASE_URL` +
-   `VITE_SUPABASE_ANON_KEY`, lalu set Site URL di Supabase.
-2. Pastikan migrasi 09–14 sudah dijalankan berurutan dan seluruh
+1. Di GitHub: tambahkan secrets `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`,
+   set **Settings → Pages → Source: GitHub Actions**, lalu push agar workflow
+   deploy berjalan.
+2. Set **Site URL** Supabase ke `https://rantemario905-source.github.io/PRESISI-AMI/`.
+3. Pastikan migrasi 09–14 sudah dijalankan berurutan dan seluruh
    `supabase/verifikasi_*.sql` bernilai `true`.
-3. Jangan aktifkan Alfa otomatis sebelum jadwal bulan pertama lengkap, hari libur
+4. Jangan aktifkan Alfa otomatis sebelum jadwal bulan pertama lengkap, hari libur
    terisi, dan finalisasi diuji.
-4. Uji manual alur UI navigasi baru di HP (tab bar & navigasi bawah).
+5. Uji manual alur UI navigasi baru di HP (tab bar & navigasi bawah).
 
 ---
 
@@ -88,6 +91,18 @@ Fase 8 (impor jadwal) maupun pekerjaan UI 25 Okt. README juga belum mencantumkan
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-25 13:01 WITA — Konfigurasi deploy GitHub Pages
+- **Perubahan:** mengganti target deploy dari Vercel ke GitHub Pages; menambah
+  workflow Actions, dukungan base path `/PRESISI-AMI/`, `basename` pada router,
+  fallback rute SPA (`404.html`), dan `.nojekyll`; memperbarui README.
+- **File:** `.github/workflows/deploy.yml` (baru), `vite.config.js`,
+  `src/App.jsx`, `public/.nojekyll`, `README.md`, `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `VITE_BASE_PATH=/PRESISI-AMI/ npm run build` **lulus**;
+  `dist/index.html` memakai aset `/PRESISI-AMI/…`; `dist/.nojekyll` ada.
+- **Catatan/risiko:** workflow membutuhkan secrets `VITE_SUPABASE_URL` +
+  `VITE_SUPABASE_ANON_KEY` dan **Pages Source = GitHub Actions**. Belum di-push,
+  jadi belum ada URL live.
 
 ### 2026-10-25 12:48 WITA — Push ke GitHub berhasil
 - **Perubahan:** menambahkan remote `origin`, push branch `main`, dan verifikasi
@@ -234,7 +249,8 @@ Fase 8 (impor jadwal) maupun pekerjaan UI 25 Okt. README juga belum mencantumkan
 | B-7 | Alfa otomatis belum tentu nonaktif di DB | Risiko Alfa salah dibuat | Cek `Pengaturan Presensi` |
 | B-8 | Tidak ada lint/unit test | Regresi hanya tertangkap manual | Pertimbangkan uji dasar bila diminta |
 | B-9 | Tidak ada `.env.example` yang diperbarui? — ada, tapi nilainya harus dicek | Setup developer baru | Pastikan sesuai variabel terpakai |
-| B-10 | Deploy Vercel status tidak diketahui | Domain produksi mungkin belum sinkron | Cek dashboard Vercel |
+| B-10 | Deploy GitHub Pages belum aktif | Belum ada URL live | Tambah secrets + set Pages source, lalu push |
+| B-11 | Base path `/PRESISI-AMI/` terikat nama repo | Custom domain perlu ubah `VITE_BASE_PATH` | Ubah ke `/` bila pindah domain |
 
 ---
 

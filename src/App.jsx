@@ -53,7 +53,7 @@ const Rekapitulasi = lazy(() => import('./pages/admin/Rekapitulasi.jsx'))
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Suspense fallback={<LayarMemuat label="Memuat halaman…" />}>
         <Routes>
           <Route path="/login" element={<Login />} />
