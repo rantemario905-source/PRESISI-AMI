@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-25 12:23 WITA |
+| Terakhir diperbarui | 2026-10-25 12:48 WITA |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -35,14 +35,14 @@
 ## 1. Status Terkini
 
 **Ringkasan:** seluruh fitur inti (Fase 1–8 + penyempurnaan UI navigasi) sudah ada
-di kode. Yang belum: commit Git untuk pekerjaan setelah Fase 3, dan konfirmasi
-penerapan migrasi 09–14 beserta skrip verifikasinya di Supabase.
+di kode dan sudah di-commit serta di-push ke GitHub. Yang belum: konfirmasi
+penerapan migrasi 09–14 beserta skrip verifikasinya di Supabase, dan deploy Vercel.
 
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 8 + UI navigasi | `src/`, `supabase/migrations/01–14` |
-| Commit Git | **Tertinggal** — hanya `6a4fb89` (Fase 1–3) | `git log` |
-| Perubahan belum di-commit | **Ya** — puluhan file `M` dan `??` | `git status` |
+| Commit Git | **Sinkron** — `2c8a775` (Fase 4–8 + UI) | `git log`, `origin/main` |
+| Perubahan belum di-commit | **Tidak ada** — working tree bersih | `git status` |
 | Migrasi DB 01–14 | **Tidak diketahui** di proyek Supabase | perlu cek SQL Editor |
 | Skrip `supabase/verifikasi_*.sql` | **Tidak diketahui** sudah dijalankan atau belum | perlu cek manual |
 | Build produksi | **Lulus** — 266 modul, 6,46 dtk | `npm run build` (2026-10-25 12:24) |
@@ -54,10 +54,10 @@ penerapan migrasi 09–14 beserta skrip verifikasinya di Supabase.
 bawah, menu kepala ruangan, layout portal kepala) pada 2026-10-25 11:28–11:49.
 
 **Langkah berikutnya yang disarankan:**
-1. Pastikan migrasi 09–14 sudah dijalankan berurutan dan seluruh
+1. Deploy ke Vercel: import repo, isi `VITE_SUPABASE_URL` +
+   `VITE_SUPABASE_ANON_KEY`, lalu set Site URL di Supabase.
+2. Pastikan migrasi 09–14 sudah dijalankan berurutan dan seluruh
    `supabase/verifikasi_*.sql` bernilai `true`.
-2. Commit pekerjaan Fase 4–8 + UI (setelah review diff) agar riwayat Git sejalan
-   dengan `progress.md`.
 3. Jangan aktifkan Alfa otomatis sebelum jadwal bulan pertama lengkap, hari libur
    terisi, dan finalisasi diuji.
 4. Uji manual alur UI navigasi baru di HP (tab bar & navigasi bawah).
@@ -88,6 +88,17 @@ Fase 8 (impor jadwal) maupun pekerjaan UI 25 Okt. README juga belum mencantumkan
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-25 12:48 WITA — Push ke GitHub berhasil
+- **Perubahan:** menambahkan remote `origin`, push branch `main`, dan verifikasi
+  ref remote; menyinkronkan status dokumen audit.
+- **File:** `.git/config` (remote `origin`), `progress.md`, `AGENTS.md`,
+  `README.md` (status Fase 1–8 + `verifikasi_10.sql`).
+- **Verifikasi:** `git ls-remote --heads origin` →
+  `2c8a775… refs/heads/main`; `git status -sb` → `## main...origin/main`
+  (working tree bersih).
+- **Catatan/risiko:** repo GitHub sebelumnya kosong sehingga tidak ada konflik.
+  Deploy Vercel belum dilakukan; migrasi DB tetap perlu dikonfirmasi.
 
 ### 2026-10-25 12:37 WITA — Commit & push untuk tahap deploy
 - **Perubahan:** mereview seluruh perubahan yang belum di-commit (Fase 4–8, impor
@@ -213,12 +224,12 @@ Fase 8 (impor jadwal) maupun pekerjaan UI 25 Okt. README juga belum mencantumkan
 
 | # | Item | Dampak | Tindakan |
 |---|---|---|---|
-| B-1 | Belum ada commit untuk Fase 4–8 + UI | Riwayat Git menyesatkan; risiko kehilangan pekerjaan | Review diff lalu commit bertahap |
+| B-1 | ~~Belum ada commit untuk Fase 4–8 + UI~~ | — | **Selesai:** commit `2c8a775` + push 2026-10-25 12:48 |
 | B-2 | Status migrasi 09–14 di Supabase belum diketahui | Fitur bisa gagal saat dipakai | Cek SQL Editor / jalankan migrasi berurutan |
 | B-3 | Hasil `supabase/verifikasi_09..14.sql` belum diketahui | Jaminan integritas DB belum ada | Jalankan dan pastikan semua `true` |
 | B-4 | ~~`npm run build` belum dijalankan~~ | — | **Selesai:** lulus 2026-10-25 12:24 |
-| B-5 | README menyebut Fase 1–7 saja | Dokumen tidak sinkron dengan kode | Perbarui setelah commit |
-| B-6 | `verifikasi_10.sql` tidak ada di diagram README | Kebingungan saat audit DB | Tambahkan ke README |
+| B-5 | ~~README menyebut Fase 1–7 saja~~ | — | **Selesai:** diperbarui ke Fase 1–8 + impor |
+| B-6 | ~~`verifikasi_10.sql` tidak ada di diagram README~~ | — | **Selesai:** ditambahkan ke struktur |
 | B-7 | Alfa otomatis belum tentu nonaktif di DB | Risiko Alfa salah dibuat | Cek `Pengaturan Presensi` |
 | B-8 | Tidak ada lint/unit test | Regresi hanya tertangkap manual | Pertimbangkan uji dasar bila diminta |
 | B-9 | Tidak ada `.env.example` yang diperbarui? — ada, tapi nilainya harus dicek | Setup developer baru | Pastikan sesuai variabel terpakai |

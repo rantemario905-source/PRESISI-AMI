@@ -6,11 +6,11 @@ Aplikasi web absensi pegawai non-ASN berbasis **React (Vite) + Tailwind CSS + Su
 dengan geofencing radius 100 m, proteksi Fake GPS, penguncian perangkat (device binding),
 dan pemisahan hak akses antara **Pegawai** dan **Super Admin**.
 
-> Status: **Fase 1–7 selesai di kode** — fondasi, database + RLS, login, geofencing,
+> Status: **Fase 1–8 selesai di kode** — fondasi, database + RLS, login, geofencing,
 > device binding, halaman absensi pegawai, Portal Super Admin, administrasi
-> Dinas & Sakit / Cuti, serta **jadwal shift per grup, finalisasi jadwal,
+> Dinas & Sakit / Cuti, **jadwal shift per grup, finalisasi jadwal,
 > pengelolaan jadwal oleh kepala ruangan, hari libur, deteksi keterlambatan,
-> dan Alfa otomatis**.
+> Alfa otomatis**, serta **impor jadwal CSV/XLSX**.
 
 > **Dokumentasi audit:** progres pekerjaan tercatat di [`progress.md`](progress.md)
 > dan aturan kerja agen serta log instruksi user di [`AGENTS.md`](AGENTS.md).
@@ -157,6 +157,7 @@ update public.pegawai
 │   ├── schema.sql              # Skema DB + RLS + RPC (instalasi sekali jalan)
 │   ├── migrations/             # 01–14, dijalankan bertahap
 │   ├── verifikasi_09.sql       # Pemeriksaan fitur Dinas & Sakit / Cuti
+│   ├── verifikasi_10.sql       # Pemeriksaan RPC perubahan role (opsional)
 │   ├── verifikasi_11.sql       # Pemeriksaan pengaturan kepala ruangan
 │   ├── verifikasi_12.sql       # Pemeriksaan jadwal, keterlambatan, Alfa
 │   ├── verifikasi_13.sql       # Pemeriksaan jadwal kepala, finalisasi, audit
