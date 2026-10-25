@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-25 13:01 WITA |
+| Terakhir diperbarui | 2026-10-25 13:19 WITA |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -35,9 +35,9 @@
 ## 1. Status Terkini
 
 **Ringkasan:** seluruh fitur inti (Fase 1–8 + penyempurnaan UI navigasi) sudah ada
-di kode dan sudah di-commit serta di-push ke GitHub. Deploy dipindahkan ke
-**GitHub Pages**; konfigurasi selesai tetapi belum aktif karena menunggu secrets
-Actions. Yang belum: konfirmasi migrasi 09–14 dan skrip verifikasi di Supabase.
+di kode, sudah di-commit, dan **live di GitHub Pages**. Yang belum: pengaturan
+**Site URL Supabase**, konfirmasi migrasi 09–14 beserta skrip verifikasi, dan uji
+fungsional di perangkat.
 
 | Aspek | Status | Bukti |
 |---|---|---|
@@ -49,21 +49,20 @@ Actions. Yang belum: konfirmasi migrasi 09–14 dan skrip verifikasi di Supabase
 | Build produksi | **Lulus** — 266 modul, 6,46 dtk | `npm run build` (2026-10-25 12:24) |
 | Lint/unit test | Tidak tersedia di `package.json` | `package.json` |
 | Alfa otomatis | Fitur ada, **default nonaktif** | migrasi 12, `PengaturanPresensi.jsx` |
-| Deploy GitHub Pages | **Konfigurasi siap** — menunggu secrets + push | `.github/workflows/deploy.yml`, `vite.config.js` |
+| Deploy GitHub Pages | **Aktif** — workflow run #1 sukses | https://rantemario905-source.github.io/PRESISI-AMI/ |
 
 **Pekerjaan terakhir sebelum audit:** penyempurnaan navigasi UI (tab bar, navigasi
 bawah, menu kepala ruangan, layout portal kepala) pada 2026-10-25 11:28–11:49.
 
 **Langkah berikutnya yang disarankan:**
-1. Di GitHub: tambahkan secrets `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`,
-   set **Settings → Pages → Source: GitHub Actions**, lalu push agar workflow
-   deploy berjalan.
-2. Set **Site URL** Supabase ke `https://rantemario905-source.github.io/PRESISI-AMI/`.
+1. Set **Site URL** Supabase ke `https://rantemario905-source.github.io/PRESISI-AMI/`
+   dan tambahkan redirect URL yang sama (`/**`) + `http://localhost:5173/**`.
+2. Uji login Super Admin di URL live, lalu buka Portal Super Admin.
 3. Pastikan migrasi 09–14 sudah dijalankan berurutan dan seluruh
    `supabase/verifikasi_*.sql` bernilai `true`.
 4. Jangan aktifkan Alfa otomatis sebelum jadwal bulan pertama lengkap, hari libur
    terisi, dan finalisasi diuji.
-5. Uji manual alur UI navigasi baru di HP (tab bar & navigasi bawah).
+5. Uji absensi di HP (HTTPS + izin lokasi) dalam radius 100 m dari RSUD AMI.
 
 ---
 
@@ -91,6 +90,17 @@ Fase 8 (impor jadwal) maupun pekerjaan UI 25 Okt. README juga belum mencantumkan
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-25 13:19 WITA — Deploy GitHub Pages aktif
+- **Perubahan:** push commit `ba5e68d`; workflow **Deploy ke GitHub Pages**
+  berjalan otomatis (build + deploy) dan berhasil.
+- **File:** tidak ada perubahan kode; pembaruan `progress.md` dan `AGENTS.md`.
+- **Verifikasi:** run `#1` (id `40164926480`) `completed/success` — job build dan
+  deploy sukses. `GET /PRESISI-AMI/` → `200`, 730 B, aset `/PRESISI-AMI/…`;
+  `GET /PRESISI-AMI/riwayat` → `404` dengan body `index.html` (734 B), jadi
+  fallback SPA bekerja.
+- **Catatan/risiko:** langkah berikutnya **Site URL Supabase** dan uji login.
+  Secrets GitHub sudah terpasang; setiap push ke `main` akan redeploy otomatis.
 
 ### 2026-10-25 13:01 WITA — Konfigurasi deploy GitHub Pages
 - **Perubahan:** mengganti target deploy dari Vercel ke GitHub Pages; menambah
@@ -249,7 +259,7 @@ Fase 8 (impor jadwal) maupun pekerjaan UI 25 Okt. README juga belum mencantumkan
 | B-7 | Alfa otomatis belum tentu nonaktif di DB | Risiko Alfa salah dibuat | Cek `Pengaturan Presensi` |
 | B-8 | Tidak ada lint/unit test | Regresi hanya tertangkap manual | Pertimbangkan uji dasar bila diminta |
 | B-9 | Tidak ada `.env.example` yang diperbarui? — ada, tapi nilainya harus dicek | Setup developer baru | Pastikan sesuai variabel terpakai |
-| B-10 | Deploy GitHub Pages belum aktif | Belum ada URL live | Tambah secrets + set Pages source, lalu push |
+| B-10 | ~~Deploy GitHub Pages belum aktif~~ | — | **Selesai:** live 2026-10-25 13:19 |
 | B-11 | Base path `/PRESISI-AMI/` terikat nama repo | Custom domain perlu ubah `VITE_BASE_PATH` | Ubah ke `/` bila pindah domain |
 
 ---

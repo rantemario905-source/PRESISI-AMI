@@ -123,7 +123,7 @@ seluruh migrasi untuk instalasi sekali jalan.
 | I-002 | 2026-10-25 12:18 | "setuju" | Menyetujui rencana (rekonstruksi lengkap, verbatim + ringkasan, tautan README) | selesai | 2026-10-25 12:23 — Audit trail |
 | I-003 | 2026-10-25 12:23 | "kerjakan" | Eksekusi pembuatan `progress.md`, `AGENTS.md`, dan tautan di `README.md` | selesai | 2026-10-25 12:23 — Audit trail |
 | I-004 | 2026-10-25 12:37 | "selanjutnya kita commit dan push ke githup untuk masuk tahap deploying" | Review perubahan, commit seluruh pekerjaan Fase 4–8 + UI + dokumen audit, lalu push ke GitHub | selesai | 2026-10-25 12:48 — Push ke GitHub berhasil |
-| I-005 | 2026-10-25 12:55 | "tahap 1 sudah selesai, deploy vercel tidak perlu cukup menggunakan github langsung sjaa" | Mengganti target deploy ke GitHub Pages: workflow Actions, base path, basename router, fallback 404 | berjalan | 2026-10-25 13:01 — Konfigurasi deploy GitHub Pages |
+| I-005 | 2026-10-25 12:55 | "tahap 1 sudah selesai, deploy vercel tidak perlu cukup menggunakan github langsung sjaa" | Mengganti target deploy ke GitHub Pages: workflow Actions, base path, basename router, fallback 404 | selesai | 2026-10-25 13:19 — Deploy GitHub Pages aktif |
 | I-006 | 2026-10-25 13:00 | "GitHub Pages (Recommended)" (jawaban pilihan) | Menyetujui GitHub Pages sebagai target deploy | selesai | 2026-10-25 13:01 — Konfigurasi deploy GitHub Pages |
 
 ---
@@ -136,8 +136,9 @@ seluruh migrasi untuk instalasi sekali jalan.
   `https://github.com/rantemario905-source/PRESISI-AMI.git`; commit fitur
   `2c8a775` (Fase 4–8 + UI) dan commit dokumen audit `4739c4a`. Working tree
   bersih pada 2026-10-25 12:49.
-- **Deploy:** GitHub Pages lewat `.github/workflows/deploy.yml`; URL
+- **Deploy:** GitHub Pages lewat `.github/workflows/deploy.yml`; URL live
   `https://rantemario905-source.github.io/PRESISI-AMI/`; base path
   `/PRESISI-AMI/`; secrets `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`.
+  Setiap push ke `main` otomatis build + deploy.
 - Timezone aplikasi: `Asia/Makassar` (WITA, UTC+8).
 - `dist/` dan `.env` sudah diabaikan Git.
