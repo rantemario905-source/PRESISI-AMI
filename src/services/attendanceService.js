@@ -34,17 +34,40 @@ export async function kirimPresensi({ deviceToken, tipe, lat, lng, akurasi, isMo
   return data
 }
 
-/** Presensi hari ini milik user (null bila belum ada) */
+/**
+ * Presensi hari ini milik user. Bila hari ini belum ada, cari presensi
+ * terbuka dari shift malam kemarin agar tombol absen pulang tetap aktif.
+ */
 export async function ambilPresensiHariIni(userId) {
+  const hari = hariIni()
+  const kemarin = new Date(Date.parse(`${hari}T00:00:00Z`) - 86_400_000)
+    .toISOString()
+    .slice(0, 10)
+
+  // Prioritaskan presensi kemarin yang masih terbuka agar shift malam
+  // (atau presensi yang lupa absen pulang) tidak tertutup oleh baris Alfa
+  // hari ini dan tombol absen pulang tetap tersedia.
+  const { data: terbuka, error: galatTerbuka } = await supabase
+    .from('presensi')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('tanggal', kemarin)
+    .not('jam_masuk', 'is', null)
+    .is('jam_pulang', null)
+    .maybeSingle()
+
+  if (galatTerbuka) throw galatTerbuka
+  if (terbuka) return terbuka
+
   const { data, error } = await supabase
     .from('presensi')
     .select('*')
     .eq('user_id', userId)
-    .eq('tanggal', hariIni())
+    .eq('tanggal', hari)
     .maybeSingle()
 
   if (error) throw error
-  return data
+  return data ?? null
 }
 
 /** Riwayat presensi terbaru milik user (untuk tabel riwayat) */
@@ -60,15 +83,30 @@ export async function ambilRiwayatPresensi(userId, limit = 7) {
   return data ?? []
 }
 
-/** Jadwal shift hari ini milik user (null → Non-Shift) */
+/**
+ * Jadwal kerja hari ini (reguler atau shift) dari server.
+ * Server juga menentukan apakah pegawai boleh absen pada hari tersebut.
+ */
 export async function ambilJadwalHariIni(userId) {
-  const { data, error } = await supabase
-    .from('jadwal_shift')
-    .select('id, tanggal, shift_master ( id, nama_shift, jam_mulai, jam_selesai )')
-    .eq('user_id', userId)
-    .eq('tanggal', hariIni())
-    .maybeSingle()
+  return ambilJadwalTanggal(userId, hariIni())
+}
+
+/** Jadwal kerja pada tanggal tertentu (dipakai untuk shift malam kemarin). */
+export async function ambilJadwalTanggal(userId, tanggal) {
+  const { data, error } = await supabase.rpc('jadwal_kerja', {
+    p_user: userId,
+    p_tanggal: tanggal,
+  })
 
   if (error) throw error
-  return data
+  return data?.[0] ?? null
+}
+
+/** Jadwal kemarin dalam WITA, untuk mendeteksi shift malam yang masih berjalan. */
+export async function ambilJadwalKemarin(userId) {
+  const hari = hariIni()
+  const kemarin = new Date(Date.parse(`${hari}T00:00:00Z`) - 86_400_000)
+    .toISOString()
+    .slice(0, 10)
+  return ambilJadwalTanggal(userId, kemarin)
 }

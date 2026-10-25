@@ -6,15 +6,20 @@
    Dasar gaya PRESISI AMI
    Skema warna logo RSUD AMI: biru (sky) sebagai aksen utama,
    hijau (green) sebagai indikator sukses, slate untuk teks & netral.
+   Dirancang mobile-first untuk pemakaian utama di HP.
    ========================================================================= */
 
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5rem;
   }
 
   body {
     @apply bg-slate-50 text-slate-800 antialiased;
+    min-width: 320px;
+    overflow-x: hidden;
     font-family:
       'Inter',
       ui-sans-serif,
@@ -26,24 +31,100 @@
       Arial,
       sans-serif;
   }
+
+  #root {
+    min-height: 100dvh;
+  }
+
+  button,
+  a,
+  [role='button'] {
+    touch-action: manipulation;
+  }
+
+  /* Cegah zoom otomatis iOS saat fokus ke input */
+  @media (max-width: 639px) {
+    input,
+    select,
+    textarea {
+      font-size: 16px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer components {
   /* Kartu standar dasbor */
   .kartu {
-    @apply rounded-2xl border border-slate-200 bg-white p-5 shadow-kartu;
+    @apply rounded-2xl border border-slate-200 bg-white p-4 shadow-kartu sm:p-5;
   }
 
   /* Label input baku */
   .label-input {
-    @apply mb-1.5 block text-sm font-semibold text-slate-700;
+    @apply mb-1.5 block text-[13px] font-semibold text-slate-700 sm:text-sm;
   }
 
-  /* Input baku */
+  /* Input baku — minimal 44 px agar nyaman disentuh */
   .input-dasar {
-    @apply block w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800
-           placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200
-           disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500;
+    @apply block min-h-[44px] w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5
+           text-base text-slate-800 placeholder:text-slate-400 focus:border-sky-500
+           focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:cursor-not-allowed
+           disabled:bg-slate-100 disabled:text-slate-500 sm:text-sm;
+  }
+
+  /* Baris aksi di dalam modal: menumpuk di HP, sejajar di desktop */
+  .aksi-modal {
+    @apply mt-5 flex flex-col-reverse gap-2 border-t border-slate-100 pt-4
+           sm:flex-row sm:items-center sm:justify-end;
+  }
+
+  .aksi-modal > * {
+    @apply w-full sm:w-auto;
+  }
+
+  /* Baris aksi pada kepala halaman admin */
+  .aksi-halaman {
+    @apply flex w-full flex-wrap items-center gap-2 sm:w-auto;
+  }
+
+  .aksi-halaman > * {
+    @apply flex-1 sm:flex-none;
+  }
+}
+
+/* =========================================================================
+   Safe area (notch iPhone / gesture bar Android)
+   ========================================================================= */
+.atas-aman {
+  padding-top: max(0.75rem, env(safe-area-inset-top));
+}
+
+.safe-atas {
+  padding-top: env(safe-area-inset-top);
+}
+
+.bawah-aman {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+/* Ruang agar konten tidak tertutup navigasi bawah */
+.pb-navigasi {
+  padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 640px) {
+  .pb-navigasi {
+    padding-bottom: 2rem;
   }
 }
 
@@ -60,7 +141,8 @@
     background: #fff;
   }
 
-  .tanpa-cetak {
+  .tanpa-cetak,
+  .navigasi-bawah {
     display: none !important;
   }
 

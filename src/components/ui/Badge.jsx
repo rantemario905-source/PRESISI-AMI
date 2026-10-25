@@ -10,7 +10,7 @@ const VARIASI = {
 export default function Badge({ variant = 'netral', className = '', children }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+      className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold sm:px-2.5 sm:text-xs ${
         VARIASI[variant] ?? VARIASI.netral
       } ${className}`}
     >

@@ -9,14 +9,17 @@ const VARIASI = {
 export default function Alert({ variant = 'info', title, children, className = '' }) {
   const v = VARIASI[variant] ?? VARIASI.info
   return (
-    <div role="alert" className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${v.wadah} ${className}`}>
+    <div
+      role="alert"
+      className={`flex items-start gap-2.5 rounded-xl border px-3.5 py-3 text-[13px] leading-relaxed sm:gap-3 sm:px-4 sm:text-sm ${v.wadah} ${className}`}
+    >
       <span
         aria-hidden="true"
         className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/70 text-xs font-bold"
       >
         {v.ikon}
       </span>
-      <div>
+      <div className="min-w-0 break-words">
         {title && <p className="font-bold">{title}</p>}
         {typeof children === 'string' ? <p>{children}</p> : children}
       </div>

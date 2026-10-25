@@ -15,11 +15,11 @@ import {
 } from '../services/deviceService.js'
 import {
   ambilJadwalHariIni,
+  ambilJadwalKemarin,
   ambilPresensiHariIni,
   ambilRiwayatPresensi,
 } from '../services/attendanceService.js'
-import { formatTanggal } from '../utils/format.js'
-import { NAMA_APLIKASI } from '../config/constants.js'
+import { formatTanggal, inisialNama } from '../utils/format.js'
 import { Alert, LayarMemuat } from '../components/ui/index.js'
 import KartuProfil from '../components/kartu/KartuProfil.jsx'
 import KartuShift from '../components/kartu/KartuShift.jsx'
@@ -27,15 +27,17 @@ import KartuStatusPerangkat from '../components/kartu/KartuStatusPerangkat.jsx'
 import KartuRiwayat from '../components/kartu/KartuRiwayat.jsx'
 import PanelAbsen from '../components/PanelAbsen.jsx'
 import BarAtas from '../components/BarAtas.jsx'
+import MenuKepala from '../components/MenuKepala.jsx'
 
 export default function Dashboard() {
-  const { profil, keluar } = useAuth()
+  const { profil, keluar, apakahKepalaRuangan } = useAuth()
 
   const [memuatData, setMemuatData] = useState(true)
   const [galatData, setGalatData] = useState(null)
   const [statusPerangkat, setStatusPerangkat] = useState('belum_terdaftar')
   const [presensi, setPresensi] = useState(null)
   const [jadwal, setJadwal] = useState(null)
+  const [jadwalKemarin, setJadwalKemarin] = useState(null)
   const [riwayat, setRiwayat] = useState([])
   const [sedangMengajukan, setSedangMengajukan] = useState(false)
   const [pesanAjukan, setPesanAjukan] = useState(null)
@@ -47,15 +49,18 @@ export default function Dashboard() {
     setMemuatData(true)
     setGalatData(null)
     try {
-      const [status, dataPresensi, dataJadwal, dataRiwayat] = await Promise.all([
-        ambilStatusPerangkat(profil.id, deviceToken),
-        ambilPresensiHariIni(profil.id),
-        ambilJadwalHariIni(profil.id),
-        ambilRiwayatPresensi(profil.id, 7),
-      ])
+      const [status, dataPresensi, dataJadwal, dataJadwalKemarin, dataRiwayat] =
+        await Promise.all([
+          ambilStatusPerangkat(profil.id, deviceToken),
+          ambilPresensiHariIni(profil.id),
+          ambilJadwalHariIni(profil.id),
+          ambilJadwalKemarin(profil.id),
+          ambilRiwayatPresensi(profil.id, 7),
+        ])
       setStatusPerangkat(status.status)
       setPresensi(dataPresensi)
       setJadwal(dataJadwal)
+      setJadwalKemarin(dataJadwalKemarin)
       setRiwayat(dataRiwayat)
     } catch (err) {
       setGalatData(err?.message || 'Gagal memuat data dashboard.')
@@ -96,65 +101,94 @@ export default function Dashboard() {
   if (!profil) return <LayarMemuat label="Memuat profil…" />
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-[100dvh] bg-slate-50">
       <BarAtas onKeluar={keluar} />
 
-      <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
-        {/* Sapaan + tanggal */}
-        <div className="mb-5">
-          <h1 className="text-xl font-extrabold text-slate-800">
-            Halo, {profil.nama.split(' ')[0]} 👋
-          </h1>
-          <p className="text-sm text-slate-500">
-            {NAMA_APLIKASI} — {formatTanggal(new Date().toISOString(), { weekday: undefined })}
-          </p>
+      <main
+        id="konten"
+        className="pb-navigasi mx-auto w-full max-w-5xl px-4 pt-4 sm:px-6 sm:pt-6"
+      >
+        {/* Sapaan + identitas ringkas */}
+        <div className="mb-4 flex items-center gap-3 sm:mb-6">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-sky-600 text-sm font-extrabold text-white shadow-sm sm:h-12 sm:w-12 sm:text-base">
+            {inisialNama(profil.nama)}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-sky-700 sm:text-[11px]">
+              Selamat datang
+            </p>
+            <h1 className="text-base font-extrabold leading-snug text-slate-900 sm:text-xl">
+              Halo, {profil.nama}
+            </h1>
+            <p className="text-[11px] leading-snug text-slate-500 sm:text-xs">
+              {profil.unit_kerja} · {formatTanggal(new Date().toISOString())}
+            </p>
+          </div>
         </div>
 
         {galatData && (
-          <Alert variant="bahaya" title="Gagal Memuat Data" className="mb-5">
+          <Alert variant="bahaya" title="Gagal Memuat Data" className="mb-4">
             {galatData}{' '}
-            <button className="font-bold underline" onClick={muatData}>
+            <button type="button" className="font-bold underline" onClick={muatData}>
               Coba lagi
             </button>
           </Alert>
         )}
 
         {pesanAjukan && (
-          <Alert variant={pesanAjukan.tipe} className="mb-5">
+          <Alert variant={pesanAjukan.tipe} className="mb-4">
             {pesanAjukan.teks}
           </Alert>
         )}
 
         {memuatData ? (
-          <div className="kartu flex justify-center py-12">
+          <div className="kartu flex justify-center py-14">
             <LayarMemuatDalam />
           </div>
         ) : (
-          <div className="grid gap-5 lg:grid-cols-3">
-            {/* Kolom kiri: profil, shift, riwayat */}
-            <div className="space-y-5 lg:col-span-2">
-              <div className="grid gap-5 sm:grid-cols-2">
-                <KartuProfil profil={profil} />
-                <KartuShift jadwal={jadwal} />
-              </div>
+          <div className="space-y-4 sm:space-y-5">
+            {apakahKepalaRuangan && (
+              <MenuKepala unitKerja={profil.unit_kerja} />
+            )}
 
-              <PanelAbsen
-                statusPerangkat={statusPerangkat}
-                presensi={presensi}
-                deviceToken={deviceToken}
-                onBerhasil={muatData}
-              />
-
-              <KartuRiwayat riwayat={riwayat} />
-            </div>
-
-            {/* Kolom kanan: status perangkat */}
-            <div className="space-y-5">
+            {/* Bila perangkat belum disetujui, tampilkan peringatan setelah menu unit */}
+            {statusPerangkat !== 'approved' && (
               <KartuStatusPerangkat
                 status={statusPerangkat}
                 sedangMengajukan={sedangMengajukan}
                 onAjukan={tanganiAjukanPerangkat}
               />
+            )}
+
+            <PanelAbsen
+              statusPerangkat={statusPerangkat}
+              presensi={presensi}
+              jadwal={jadwal}
+              jadwalKemarin={jadwalKemarin}
+              deviceToken={deviceToken}
+              onBerhasil={muatData}
+            />
+
+            <div className="grid gap-4 lg:grid-cols-3 lg:gap-5">
+              <div className="order-2 lg:order-1 lg:col-span-2">
+                <KartuRiwayat riwayat={riwayat} />
+              </div>
+
+              <div className="order-1 space-y-4 lg:order-2">
+                <KartuShift jadwal={jadwal} />
+
+                <div className="hidden lg:block">
+                  <KartuProfil profil={profil} />
+                </div>
+
+                {statusPerangkat === 'approved' && (
+                  <KartuStatusPerangkat
+                    status={statusPerangkat}
+                    sedangMengajukan={sedangMengajukan}
+                    onAjukan={tanganiAjukanPerangkat}
+                  />
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -167,7 +201,7 @@ export default function Dashboard() {
 function LayarMemuatDalam() {
   return (
     <div className="flex flex-col items-center gap-2 py-6 text-slate-500">
-      <svg className="h-7 w-7 animate-spin text-sky-600" viewBox="0 0 24 24" fill="none">
+      <svg className="h-7 w-7 animate-spin text-sky-600" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
       </svg>

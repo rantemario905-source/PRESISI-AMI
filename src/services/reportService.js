@@ -25,7 +25,7 @@ export async function ambilRekapBulanan({ periode, unit = 'semua' }) {
   let kueri = supabase
     .from('presensi')
     .select(
-      'id, user_id, tanggal, jam_masuk, jam_pulang, status_kehadiran, jarak_masuk, pegawai:pegawai!presensi_user_id_fkey!inner ( nama, unit_kerja )',
+      'id, user_id, tanggal, jam_masuk, jam_pulang, status_kehadiran, menit_terlambat, jarak_masuk, pegawai:pegawai!presensi_user_id_fkey!inner ( nama, unit_kerja )',
     )
     .gte('tanggal', mulai)
     .lte('tanggal', selesai)

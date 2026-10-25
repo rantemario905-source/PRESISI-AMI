@@ -12,8 +12,8 @@ import { supabase } from '../utils/supabaseClient.js'
 export async function ambilPresensiPeriode({ mulai, selesai, unit = 'semua' }) {
   const kolom =
     unit === 'semua'
-      ? 'id, user_id, tanggal, jam_masuk, jam_pulang, status_kehadiran, jarak_masuk, jarak_pulang, dikoreksi_oleh, alasan_koreksi, pegawai:pegawai!presensi_user_id_fkey ( nama, unit_kerja )'
-      : 'id, user_id, tanggal, jam_masuk, jam_pulang, status_kehadiran, jarak_masuk, jarak_pulang, dikoreksi_oleh, alasan_koreksi, pegawai:pegawai!presensi_user_id_fkey!inner ( nama, unit_kerja )'
+      ? 'id, user_id, tanggal, jam_masuk, jam_pulang, status_kehadiran, menit_terlambat, jarak_masuk, jarak_pulang, dikoreksi_oleh, alasan_koreksi, pegawai:pegawai!presensi_user_id_fkey ( nama, unit_kerja )'
+      : 'id, user_id, tanggal, jam_masuk, jam_pulang, status_kehadiran, menit_terlambat, jarak_masuk, jarak_pulang, dikoreksi_oleh, alasan_koreksi, pegawai:pegawai!presensi_user_id_fkey!inner ( nama, unit_kerja )'
 
   let kueri = supabase
     .from('presensi')

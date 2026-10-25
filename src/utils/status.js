@@ -10,11 +10,25 @@ export function labelStatusPerangkat(status) {
 }
 
 export function varianStatusIzin(status) {
-  return { menunggu: 'peringatan', disetujui: 'sukses', ditolak: 'bahaya' }[status] ?? 'netral'
+  return (
+    {
+      menunggu: 'peringatan',
+      disetujui: 'sukses',
+      ditolak: 'bahaya',
+      dibatalkan: 'netral',
+    }[status] ?? 'netral'
+  )
 }
 
 export function labelStatusIzin(status) {
-  return { menunggu: 'Menunggu', disetujui: 'Disetujui', ditolak: 'Ditolak' }[status] ?? status
+  return (
+    {
+      menunggu: 'Menunggu',
+      disetujui: 'Disetujui',
+      ditolak: 'Ditolak',
+      dibatalkan: 'Dibatalkan',
+    }[status] ?? status
+  )
 }
 
 export function varianStatusKehadiran(status) {
@@ -22,7 +36,6 @@ export function varianStatusKehadiran(status) {
     {
       Hadir: 'sukses',
       Alfa: 'bahaya',
-      Izin: 'info',
       Sakit: 'info',
       Cuti: 'info',
       'Dinas Luar': 'info',

@@ -23,10 +23,17 @@ import {
   periodeBulanIni,
 } from '../../utils/format.js'
 import { varianStatusKehadiran } from '../../utils/status.js'
-import { Alert, Badge, Button, Modal, Spinner } from '../../components/ui/index.js'
+import { Alert, Badge, Button, Modal, Spinner, TabBar } from '../../components/ui/index.js'
 import KepalaHalaman from '../../components/admin/KepalaHalaman.jsx'
 
-const STATUS = ['Hadir', 'Izin', 'Sakit', 'Cuti', 'Dinas Luar', 'Alfa', 'Koreksi']
+const STATUS = ['Hadir', 'Sakit', 'Cuti', 'Dinas Luar', 'Alfa', 'Koreksi']
+const TAB = [
+  { nilai: 'data', label: 'Data Presensi' },
+  { nilai: 'audit', label: 'Audit Trail' },
+]
+
+/** "20:02 WITA" → "20:02" untuk kartu HP */
+const jamSingkat = (iso) => (iso ? formatJam(iso).replace(' WITA', '') : '—')
 
 export default function KoreksiPresensi() {
   const [tab, setTab] = useState('data')
@@ -37,6 +44,7 @@ export default function KoreksiPresensi() {
   const [audit, setAudit] = useState([])
   const [memuat, setMemuat] = useState(true)
   const [galat, setGalat] = useState(null)
+  const [galatModal, setGalatModal] = useState(null)
   const [pesan, setPesan] = useState(null)
 
   const [pilih, setPilih] = useState(null)
@@ -79,6 +87,7 @@ export default function KoreksiPresensi() {
 
   const bukaKoreksi = (baris) => {
     setPilih(baris)
+    setGalatModal(null)
     setForm({
       jamMasuk: formatJamInput(baris.jam_masuk),
       jamPulang: formatJamInput(baris.jam_pulang),
@@ -89,7 +98,7 @@ export default function KoreksiPresensi() {
 
   const simpan = async (event) => {
     event.preventDefault()
-    setGalat(null)
+    setGalatModal(null)
     setPesan(null)
 
     try {
@@ -119,7 +128,7 @@ export default function KoreksiPresensi() {
       setPesan('Koreksi presensi tersimpan dan tercatat pada audit trail.')
       await muat()
     } catch (err) {
-      setGalat(err.message || 'Gagal menyimpan koreksi.')
+      setGalatModal(err.message || 'Gagal menyimpan koreksi.')
     } finally {
       setMenyimpan(false)
     }
@@ -148,30 +157,11 @@ export default function KoreksiPresensi() {
         </Alert>
       )}
 
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setTab('data')}
-          className={`rounded-lg px-3.5 py-2 text-xs font-bold ${
-            tab === 'data' ? 'bg-sky-600 text-white shadow-sm' : 'border border-slate-300 bg-white text-slate-600'
-          }`}
-        >
-          Data Presensi
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab('audit')}
-          className={`rounded-lg px-3.5 py-2 text-xs font-bold ${
-            tab === 'audit' ? 'bg-sky-600 text-white shadow-sm' : 'border border-slate-300 bg-white text-slate-600'
-          }`}
-        >
-          Audit Trail
-        </button>
-      </div>
+      <TabBar daftar={TAB} nilai={tab} onChange={setTab} label="Jenis data koreksi" />
 
       {tab === 'data' && (
         <>
-          <div className="mb-4 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-kartu sm:grid-cols-2 lg:max-w-xl">
+          <div className="mb-4 grid gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-kartu sm:grid-cols-2 sm:p-4 lg:max-w-xl">
             <div>
               <label className="label-input" htmlFor="koreksi-periode">
                 Bulan
@@ -210,61 +200,139 @@ export default function KoreksiPresensi() {
                 <Spinner /> Memuat presensi…
               </div>
             ) : daftar.length === 0 ? (
-              <div className="py-14 text-center text-sm text-slate-500">
-                Tidak ada data presensi pada periode & unit ini.
+              <div className="px-4 py-14 text-center text-sm text-slate-500">
+                Tidak ada data presensi pada periode &amp; unit ini.
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[940px] text-left text-sm">
-                  <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                    <tr>
-                      <th className="px-5 py-3 font-semibold">Tanggal</th>
-                      <th className="px-5 py-3 font-semibold">Pegawai</th>
-                      <th className="px-5 py-3 font-semibold">Masuk</th>
-                      <th className="px-5 py-3 font-semibold">Pulang</th>
-                      <th className="px-5 py-3 font-semibold">Status</th>
-                      <th className="px-5 py-3 font-semibold">Keterangan</th>
-                      <th className="px-5 py-3 text-right font-semibold">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {daftar.map((baris) => (
-                      <tr key={baris.id} className="align-top hover:bg-slate-50/70">
-                        <td className="whitespace-nowrap px-5 py-3 text-slate-700">
-                          {formatTanggalRingkas(baris.tanggal)}
-                        </td>
-                        <td className="px-5 py-3">
-                          <p className="font-semibold text-slate-800">{baris.pegawai?.nama ?? '—'}</p>
-                          <p className="text-xs text-slate-500">{baris.pegawai?.unit_kerja ?? '—'}</p>
-                        </td>
-                        <td className="whitespace-nowrap px-5 py-3 text-slate-700">
-                          {baris.jam_masuk ? formatJam(baris.jam_masuk) : '—'}
-                        </td>
-                        <td className="whitespace-nowrap px-5 py-3 text-slate-700">
-                          {baris.jam_pulang ? formatJam(baris.jam_pulang) : '—'}
-                        </td>
-                        <td className="px-5 py-3">
-                          <Badge variant={varianStatusKehadiran(baris.status_kehadiran)}>
-                            {baris.status_kehadiran}
-                          </Badge>
-                        </td>
-                        <td className="max-w-[240px] px-5 py-3 text-xs text-slate-500">
-                          {baris.dikoreksi_oleh ? (
-                            <span className="font-semibold text-amber-700">Dikoreksi: {baris.alasan_koreksi}</span>
-                          ) : (
-                            '—'
-                          )}
-                        </td>
-                        <td className="px-5 py-3 text-right">
-                          <Button size="sm" variant="sekunder" onClick={() => bukaKoreksi(baris)}>
-                            Koreksi
-                          </Button>
-                        </td>
+              <>
+                {/* HP: kartu presensi */}
+                <div className="divide-y divide-slate-100 md:hidden">
+                  {daftar.map((baris) => (
+                    <article key={baris.id} className="px-4 py-3.5">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="truncate text-[13px] font-bold text-slate-800">
+                            {baris.pegawai?.nama ?? '—'}
+                          </p>
+                          <p className="truncate text-[11px] text-slate-500">
+                            {baris.pegawai?.unit_kerja ?? '—'} ·{' '}
+                            {formatTanggalRingkas(baris.tanggal)}
+                          </p>
+                        </div>
+                        <Badge variant={varianStatusKehadiran(baris.status_kehadiran)}>
+                          {baris.status_kehadiran}
+                        </Badge>
+                      </div>
+
+                      <div className="mt-2.5 grid grid-cols-2 divide-x divide-slate-200 rounded-lg bg-slate-50 py-2 text-center">
+                        <div>
+                          <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">
+                            Masuk
+                          </p>
+                          <p className="mt-0.5 text-[13px] font-bold tabular-nums text-slate-800">
+                            {jamSingkat(baris.jam_masuk)}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">
+                            Pulang
+                          </p>
+                          <p className="mt-0.5 text-[13px] font-bold tabular-nums text-slate-800">
+                            {jamSingkat(baris.jam_pulang)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {Number(baris.menit_terlambat) > 0 && (
+                        <p className="mt-2 text-[11px] font-semibold text-amber-700">
+                          Terlambat {baris.menit_terlambat} menit
+                        </p>
+                      )}
+
+                      {baris.dikoreksi_oleh && (
+                        <p className="mt-2 rounded-lg bg-amber-50 px-2.5 py-2 text-[11px] leading-relaxed text-amber-800">
+                          <span className="font-semibold">Dikoreksi:</span>{' '}
+                          {baris.alasan_koreksi}
+                        </p>
+                      )}
+
+                      <Button
+                        size="sm"
+                        variant="sekunder"
+                        className="mt-3 w-full"
+                        onClick={() => bukaKoreksi(baris)}
+                      >
+                        Koreksi Presensi
+                      </Button>
+                    </article>
+                  ))}
+                </div>
+
+                {/* Desktop: tabel */}
+                <div className="hidden overflow-x-auto md:block">
+                  <table className="w-full min-w-[940px] text-left text-sm">
+                    <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                      <tr>
+                        <th className="px-5 py-3 font-semibold">Tanggal</th>
+                        <th className="px-5 py-3 font-semibold">Pegawai</th>
+                        <th className="px-5 py-3 font-semibold">Masuk</th>
+                        <th className="px-5 py-3 font-semibold">Pulang</th>
+                        <th className="px-5 py-3 font-semibold">Terlambat</th>
+                        <th className="px-5 py-3 font-semibold">Status</th>
+                        <th className="px-5 py-3 font-semibold">Keterangan</th>
+                        <th className="px-5 py-3 text-right font-semibold">Aksi</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {daftar.map((baris) => (
+                        <tr key={baris.id} className="align-top hover:bg-slate-50/70">
+                          <td className="whitespace-nowrap px-5 py-3 text-slate-700">
+                            {formatTanggalRingkas(baris.tanggal)}
+                          </td>
+                          <td className="px-5 py-3">
+                            <p className="font-semibold text-slate-800">{baris.pegawai?.nama ?? '—'}</p>
+                            <p className="text-xs text-slate-500">{baris.pegawai?.unit_kerja ?? '—'}</p>
+                          </td>
+                          <td className="whitespace-nowrap px-5 py-3 text-slate-700">
+                            {baris.jam_masuk ? formatJam(baris.jam_masuk) : '—'}
+                          </td>
+                          <td className="whitespace-nowrap px-5 py-3 text-slate-700">
+                            {baris.jam_pulang ? formatJam(baris.jam_pulang) : '—'}
+                          </td>
+                          <td className="whitespace-nowrap px-5 py-3 text-xs tabular-nums">
+                            {Number(baris.menit_terlambat) > 0 ? (
+                              <span className="font-semibold text-amber-700">
+                                {baris.menit_terlambat} mnt
+                              </span>
+                            ) : (
+                              <span className="text-slate-400">—</span>
+                            )}
+                          </td>
+                          <td className="px-5 py-3">
+                            <Badge variant={varianStatusKehadiran(baris.status_kehadiran)}>
+                              {baris.status_kehadiran}
+                            </Badge>
+                          </td>
+                          <td className="max-w-[240px] px-5 py-3 text-xs text-slate-500">
+                            {baris.dikoreksi_oleh ? (
+                              <span className="font-semibold text-amber-700">
+                                Dikoreksi: {baris.alasan_koreksi}
+                              </span>
+                            ) : (
+                              '—'
+                            )}
+                          </td>
+                          <td className="px-5 py-3 text-right">
+                            <Button size="sm" variant="sekunder" onClick={() => bukaKoreksi(baris)}>
+                              Koreksi
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </section>
         </>
@@ -272,51 +340,96 @@ export default function KoreksiPresensi() {
 
       {tab === 'audit' && (
         <section className="rounded-2xl border border-slate-200 bg-white shadow-kartu">
-          <div className="border-b border-slate-200 px-5 py-4">
+          <div className="border-b border-slate-200 px-4 py-3.5 sm:px-5 sm:py-4">
             <h2 className="text-sm font-bold text-slate-800">Audit Trail Koreksi</h2>
-            <p className="text-xs text-slate-500">100 koreksi terakhir beserta admin pelaksana</p>
+            <p className="text-[11px] text-slate-500 sm:text-xs">
+              100 koreksi terakhir beserta admin pelaksana
+            </p>
           </div>
 
           {audit.length === 0 ? (
-            <div className="py-14 text-center text-sm text-slate-500">Belum ada koreksi tercatat.</div>
+            <div className="px-4 py-14 text-center text-sm text-slate-500">
+              Belum ada koreksi tercatat.
+            </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[860px] text-left text-sm">
-                <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                  <tr>
-                    <th className="px-5 py-3 font-semibold">Waktu Koreksi</th>
-                    <th className="px-5 py-3 font-semibold">Pegawai</th>
-                    <th className="px-5 py-3 font-semibold">Tanggal Presensi</th>
-                    <th className="px-5 py-3 font-semibold">Admin</th>
-                    <th className="px-5 py-3 font-semibold">Alasan</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {audit.map((baris) => (
-                    <tr key={baris.id} className="align-top hover:bg-slate-50/70">
-                      <td className="whitespace-nowrap px-5 py-3 text-xs text-slate-600">
-                        {formatTanggal(baris.waktu_koreksi)}
-                      </td>
-                      <td className="px-5 py-3">
-                        <p className="font-semibold text-slate-800">
+            <>
+              {/* HP: kartu audit */}
+              <div className="divide-y divide-slate-100 md:hidden">
+                {audit.map((baris) => (
+                  <article key={baris.id} className="px-4 py-3.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="truncate text-[13px] font-bold text-slate-800">
                           {baris.presensi?.pegawai?.nama ?? '—'}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="truncate text-[11px] text-slate-500">
                           {baris.presensi?.pegawai?.unit_kerja ?? '—'}
                         </p>
-                      </td>
-                      <td className="whitespace-nowrap px-5 py-3 text-xs text-slate-600">
-                        {baris.presensi?.tanggal ? formatTanggalRingkas(baris.presensi.tanggal) : '—'}
-                      </td>
-                      <td className="px-5 py-3 text-xs font-semibold text-slate-700">
-                        {baris.pegawai?.nama ?? '—'}
-                      </td>
-                      <td className="max-w-[280px] px-5 py-3 text-xs text-slate-600">{baris.alasan}</td>
+                      </div>
+                      <span className="shrink-0 text-[10px] text-slate-400">
+                        {baris.presensi?.tanggal
+                          ? formatTanggalRingkas(baris.presensi.tanggal)
+                          : '—'}
+                      </span>
+                    </div>
+
+                    <p className="mt-2 rounded-lg bg-slate-50 px-2.5 py-2 text-[11px] leading-relaxed text-slate-600">
+                      {baris.alasan}
+                    </p>
+
+                    <div className="mt-2 flex flex-wrap items-center justify-between gap-1 text-[10px] text-slate-400">
+                      <span>
+                        Oleh <b className="font-semibold text-slate-600">{baris.pegawai?.nama ?? '—'}</b>
+                      </span>
+                      <span>{formatTanggal(baris.waktu_koreksi)}</span>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              {/* Desktop: tabel */}
+              <div className="hidden overflow-x-auto md:block">
+                <table className="w-full min-w-[860px] text-left text-sm">
+                  <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                    <tr>
+                      <th className="px-5 py-3 font-semibold">Waktu Koreksi</th>
+                      <th className="px-5 py-3 font-semibold">Pegawai</th>
+                      <th className="px-5 py-3 font-semibold">Tanggal Presensi</th>
+                      <th className="px-5 py-3 font-semibold">Admin</th>
+                      <th className="px-5 py-3 font-semibold">Alasan</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {audit.map((baris) => (
+                      <tr key={baris.id} className="align-top hover:bg-slate-50/70">
+                        <td className="whitespace-nowrap px-5 py-3 text-xs text-slate-600">
+                          {formatTanggal(baris.waktu_koreksi)}
+                        </td>
+                        <td className="px-5 py-3">
+                          <p className="font-semibold text-slate-800">
+                            {baris.presensi?.pegawai?.nama ?? '—'}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {baris.presensi?.pegawai?.unit_kerja ?? '—'}
+                          </p>
+                        </td>
+                        <td className="whitespace-nowrap px-5 py-3 text-xs text-slate-600">
+                          {baris.presensi?.tanggal
+                            ? formatTanggalRingkas(baris.presensi.tanggal)
+                            : '—'}
+                        </td>
+                        <td className="px-5 py-3 text-xs font-semibold text-slate-700">
+                          {baris.pegawai?.nama ?? '—'}
+                        </td>
+                        <td className="max-w-[280px] px-5 py-3 text-xs text-slate-600">
+                          {baris.alasan}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </section>
       )}
@@ -324,6 +437,12 @@ export default function KoreksiPresensi() {
       <Modal terbuka={Boolean(pilih)} onTutup={() => setPilih(null)} judul="Koreksi Presensi">
         {pilih && (
           <form onSubmit={simpan} className="space-y-4">
+            {galatModal && (
+              <Alert variant="bahaya" title="Gagal Menyimpan">
+                {galatModal}
+              </Alert>
+            )}
+
             <div className="rounded-xl bg-slate-50 p-3 text-sm">
               <p className="font-bold text-slate-800">{pilih.pegawai?.nama}</p>
               <p className="text-xs text-slate-500">
@@ -393,7 +512,7 @@ export default function KoreksiPresensi() {
               </p>
             </div>
 
-            <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+            <div className="aksi-modal">
               <Button variant="sekunder" onClick={() => setPilih(null)}>
                 Batal
               </Button>

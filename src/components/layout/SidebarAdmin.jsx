@@ -2,17 +2,16 @@
  * ==========================================================================
  * Sidebar Portal Super Admin
  * --------------------------------------------------------------------------
- * Menu putih dengan aksen sky-600 (gaya PRAKTIS-NG). Di layar kecil
- * sidebar tampil sebagai drawer yang bisa ditutup.
+ * Menu dikelompokkan agar tidak menumpuk. Grup dapat dibuka/tutup; grup yang
+ * sedang aktif otomatis terbuka. Di HP tampil sebagai drawer.
  * ==========================================================================
  */
-import { NavLink } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 import { NAMA_APLIKASI, NAMA_RUMAH_SAKIT } from '../../config/constants.js'
 
 const IKON = {
-  dashboard: (
-    <path d="M3 12l9-9 9 9M5 10v10h5v-6h4v6h5V10" />
-  ),
+  dashboard: <path d="M3 12l9-9 9 9M5 10v10h5v-6h4v6h5V10" />,
   pegawai: (
     <>
       <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
@@ -26,10 +25,34 @@ const IKON = {
       <path d="M11 18h2" />
     </>
   ),
+  grup: (
+    <>
+      <path d="M12 2l9 5-9 5-9-5 9-5z" />
+      <path d="M3 12l9 5 9-5M3 17l9 5 9-5" />
+    </>
+  ),
   shift: (
     <>
       <rect x="3" y="4" width="18" height="17" rx="2" />
       <path d="M8 2v4M16 2v4M3 10h18M8 15h3" />
+    </>
+  ),
+  jadwal: (
+    <>
+      <rect x="3" y="4" width="18" height="17" rx="2" />
+      <path d="M8 2v4M16 2v4M3 10h18M8 14h2M14 14h2M8 18h2M14 18h2" />
+    </>
+  ),
+  libur: (
+    <>
+      <rect x="3" y="4" width="18" height="17" rx="2" />
+      <path d="M8 2v4M16 2v4M3 10h18M9 15h6" />
+    </>
+  ),
+  pengaturan: (
+    <>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.7 1.7 0 00.34 1.88l.06.06a2 2 0 11-2.83 2.83l-.06-.06A1.7 1.7 0 0015 19.4a1.7 1.7 0 00-1 .6 1.7 1.7 0 00-.4 1.1V21a2 2 0 11-4 0v-.09A1.7 1.7 0 009 19.4a1.7 1.7 0 00-1.88.34l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.7 1.7 0 004.6 15a1.7 1.7 0 00-.6-1 1.7 1.7 0 00-1.1-.4H3a2 2 0 110-4h.09A1.7 1.7 0 004.6 9a1.7 1.7 0 00-.34-1.88l-.06-.06a2 2 0 112.83-2.83l.06.06A1.7 1.7 0 009 4.6a1.7 1.7 0 001-.6 1.7 1.7 0 00.4-1.1V3a2 2 0 114 0v.09A1.7 1.7 0 0015 4.6a1.7 1.7 0 001.88-.34l.06-.06a2 2 0 112.83 2.83l-.06.06A1.7 1.7 0 0019.4 9c.14.37.36.7.66.96.3.26.67.4 1.06.4H21a2 2 0 110 4h-.09a1.7 1.7 0 00-1.51.64z" />
     </>
   ),
   koreksi: (
@@ -44,6 +67,12 @@ const IKON = {
       <path d="M14 2v6h6M9 15l2 2 4-4" />
     </>
   ),
+  cuti: (
+    <>
+      <rect x="3" y="4" width="18" height="17" rx="3" />
+      <path d="M8 2v4M16 2v4M3 10h18M8 14h3" />
+    </>
+  ),
   rekap: (
     <>
       <path d="M3 3v18h18" />
@@ -52,14 +81,42 @@ const IKON = {
   ),
 }
 
-const MENU = [
-  { label: 'Dashboard Utama', ke: '/superadmin-portal', akhir: true, ikon: 'dashboard' },
-  { label: 'Data Pegawai', ke: '/superadmin-portal/pegawai', ikon: 'pegawai' },
-  { label: 'Verifikasi Perangkat', ke: '/superadmin-portal/perangkat', ikon: 'perangkat' },
-  { label: 'Master & Jadwal Shift', ke: '/superadmin-portal/shift', ikon: 'shift' },
-  { label: 'Koreksi Presensi', ke: '/superadmin-portal/koreksi', ikon: 'koreksi' },
-  { label: 'Izin / Cuti / Dinas', ke: '/superadmin-portal/izin', ikon: 'izin' },
-  { label: 'Rekapitulasi Laporan', ke: '/superadmin-portal/rekap', ikon: 'rekap' },
+const GRUP_MENU = [
+  {
+    id: 'struktur',
+    label: 'Data & Struktur',
+    items: [
+      { label: 'Data Pegawai', ke: '/superadmin-portal/pegawai', ikon: 'pegawai' },
+      { label: 'Grup Shift', ke: '/superadmin-portal/grup-shift', ikon: 'grup' },
+      { label: 'Master Shift', ke: '/superadmin-portal/shift', ikon: 'shift' },
+    ],
+  },
+  {
+    id: 'penjadwalan',
+    label: 'Penjadwalan & Presensi',
+    items: [
+      { label: 'Jadwal Shift', ke: '/superadmin-portal/jadwal-shift', ikon: 'jadwal' },
+      { label: 'Hari Libur', ke: '/superadmin-portal/hari-libur', ikon: 'libur' },
+      { label: 'Koreksi Presensi', ke: '/superadmin-portal/koreksi', ikon: 'koreksi' },
+      { label: 'Pengaturan Presensi', ke: '/superadmin-portal/pengaturan', ikon: 'pengaturan' },
+    ],
+  },
+  {
+    id: 'layanan',
+    label: 'Layanan & Laporan',
+    items: [
+      { label: 'Dinas & Sakit', ke: '/superadmin-portal/dinas-sakit', ikon: 'izin' },
+      { label: 'Cuti', ke: '/superadmin-portal/cuti', ikon: 'cuti' },
+      { label: 'Rekapitulasi Laporan', ke: '/superadmin-portal/rekap', ikon: 'rekap' },
+    ],
+  },
+  {
+    id: 'keamanan',
+    label: 'Keamanan',
+    items: [
+      { label: 'Verifikasi Perangkat', ke: '/superadmin-portal/perangkat', ikon: 'perangkat' },
+    ],
+  },
 ]
 
 function Ikon({ nama }) {
@@ -79,67 +136,148 @@ function Ikon({ nama }) {
   )
 }
 
+function grupAktif(pathname) {
+  return GRUP_MENU.find((grup) =>
+    grup.items.some(
+      (item) => pathname === item.ke || pathname.startsWith(`${item.ke}/`),
+    ),
+  )?.id
+}
+
 export default function SidebarAdmin({ terbuka, onTutup }) {
+  const { pathname } = useLocation()
+  const [grupTerbuka, setGrupTerbuka] = useState(() => {
+    const aktif = grupAktif(pathname)
+    return aktif ? { [aktif]: true } : {}
+  })
+
+  useEffect(() => {
+    const aktif = grupAktif(pathname)
+    if (!aktif) return
+    setGrupTerbuka({ [aktif]: true })
+  }, [pathname])
+
+  function toggleGrup(id) {
+    setGrupTerbuka((lama) => ({ ...lama, [id]: !lama[id] }))
+  }
+
   return (
     <>
-      {/* Latar gelap saat drawer terbuka di layar kecil */}
       {terbuka && (
-        <div
-          className="fixed inset-0 z-40 bg-slate-900/40 lg:hidden"
+        <button
+          type="button"
+          className="fixed inset-0 z-40 h-full w-full cursor-default bg-slate-900/40 lg:hidden"
           onClick={onTutup}
-          aria-hidden="true"
+          aria-label="Tutup menu"
         />
       )}
 
       <aside
-        className={`tanpa-cetak fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-slate-200 bg-white transition-transform duration-200 lg:translate-x-0 ${
+        id="sidebar-admin"
+        className={`tanpa-cetak safe-atas fixed inset-y-0 left-0 z-50 flex w-[min(18rem,85vw)] flex-col border-r border-slate-200 bg-white shadow-2xl transition-transform duration-200 lg:w-64 lg:translate-x-0 lg:shadow-none ${
           terbuka ? 'translate-x-0' : '-translate-x-full'
         }`}
         aria-label="Menu Super Admin"
       >
-        <div className="flex h-16 items-center gap-3 border-b border-slate-200 px-5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-600 text-sm font-extrabold text-white shadow-sm">
+        <div className="flex min-h-16 items-center gap-3 border-b border-slate-200 px-4 sm:px-5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-600 text-sm font-extrabold text-white shadow-sm">
             PA
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-extrabold tracking-tight text-slate-900">{NAMA_APLIKASI}</p>
-            <p className="truncate text-[11px] text-slate-500">{NAMA_RUMAH_SAKIT}</p>
+            <p className="truncate text-sm font-extrabold tracking-tight text-slate-900">
+              {NAMA_APLIKASI}
+            </p>
+            <p className="truncate text-[10px] text-slate-500 sm:text-[11px]">
+              {NAMA_RUMAH_SAKIT}
+            </p>
+            <p className="mt-0.5 inline-flex rounded-full bg-sky-50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-sky-700">
+              Super Admin
+            </p>
           </div>
           <button
             type="button"
             onClick={onTutup}
-            className="ml-auto rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 lg:hidden"
+            className="ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 lg:hidden"
             aria-label="Tutup menu"
           >
             ✕
           </button>
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-            Manajemen Presensi
-          </p>
-          {MENU.map((item) => (
-            <NavLink
-              key={item.ke}
-              to={item.ke}
-              end={item.akhir}
-              onClick={onTutup}
-              className={({ isActive }) =>
-                `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
-                  isActive
-                    ? 'bg-sky-50 text-sky-700'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`
-              }
-            >
-              <Ikon nama={item.ikon} />
-              <span className="truncate">{item.label}</span>
-            </NavLink>
-          ))}
+        <nav className="flex-1 overflow-y-auto px-3 py-3">
+          <NavLink
+            to="/superadmin-portal"
+            end
+            onClick={onTutup}
+            className={({ isActive }) =>
+              `flex min-h-[44px] items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:text-sm ${
+                isActive
+                  ? 'bg-sky-50 text-sky-700 ring-1 ring-inset ring-sky-100'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+              }`
+            }
+          >
+            <Ikon nama="dashboard" />
+            <span className="truncate">Dashboard Utama</span>
+          </NavLink>
+
+          <div className="my-3 border-t border-slate-100" />
+
+          {GRUP_MENU.map((grup) => {
+            const dibuka = Boolean(grupTerbuka[grup.id])
+            return (
+              <div key={grup.id} className="mb-1">
+                <button
+                  type="button"
+                  onClick={() => toggleGrup(grup.id)}
+                  aria-expanded={dibuka}
+                  aria-controls={`menu-${grup.id}`}
+                  className="flex min-h-[44px] w-full items-center justify-between gap-2 rounded-lg px-3 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                >
+                  <span>{grup.label}</span>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={`h-3.5 w-3.5 shrink-0 transition-transform ${
+                      dibuka ? 'rotate-90' : ''
+                    }`}
+                    aria-hidden="true"
+                  >
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
+
+                {dibuka && (
+                  <div id={`menu-${grup.id}`} className="space-y-1 pb-2">
+                    {grup.items.map((item) => (
+                      <NavLink
+                        key={item.ke}
+                        to={item.ke}
+                        onClick={onTutup}
+                        className={({ isActive }) =>
+                          `flex min-h-[42px] items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:text-sm ${
+                            isActive
+                              ? 'bg-sky-50 text-sky-700 ring-1 ring-inset ring-sky-100'
+                              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                          }`
+                        }
+                      >
+                        <Ikon nama={item.ikon} />
+                        <span className="truncate">{item.label}</span>
+                      </NavLink>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </nav>
 
-        <div className="border-t border-slate-200 px-5 py-4">
+        <div className="border-t border-slate-200 px-5 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
           <p className="text-[11px] font-semibold text-slate-500">PRESISI AMI</p>
           <p className="text-[11px] text-slate-400">Portal Super Admin · v2.0</p>
         </div>

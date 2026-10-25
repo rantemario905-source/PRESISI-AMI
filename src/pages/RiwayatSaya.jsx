@@ -3,7 +3,7 @@
  * Pegawai — Riwayat & Rekap Presensi Bulanan
  * --------------------------------------------------------------------------
  * Menampilkan ringkasan status kehadiran dan detail harian milik pegawai.
- * Data izin/cuti yang disetujui otomatis ikut tampil (ditandai di presensi).
+ * Data Sakit/Cuti/Dinas Luar yang disetujui otomatis ikut tampil.
  * ==========================================================================
  */
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -21,14 +21,16 @@ import { Alert, Badge, Button, Spinner } from '../components/ui/index.js'
 import BarAtas from '../components/BarAtas.jsx'
 
 const STATUS = [
-  { nama: 'Hadir', warna: 'bg-green-100 text-green-800' },
-  { nama: 'Izin', warna: 'bg-sky-100 text-sky-800' },
-  { nama: 'Sakit', warna: 'bg-sky-100 text-sky-800' },
+  { nama: 'Hadir', warna: 'bg-green-50 text-green-800' },
+  { nama: 'Sakit', warna: 'bg-sky-50 text-sky-800' },
   { nama: 'Cuti', warna: 'bg-slate-100 text-slate-700' },
-  { nama: 'Dinas Luar', warna: 'bg-amber-100 text-amber-800' },
-  { nama: 'Alfa', warna: 'bg-red-100 text-red-800' },
-  { nama: 'Koreksi', warna: 'bg-amber-100 text-amber-800' },
+  { nama: 'Dinas Luar', warna: 'bg-amber-50 text-amber-800' },
+  { nama: 'Alfa', warna: 'bg-red-50 text-red-800' },
+  { nama: 'Koreksi', warna: 'bg-amber-50 text-amber-800' },
 ]
+
+/** "20:02 WITA" → "20:02" agar pas di kartu ringkas */
+const jamSingkat = (iso) => (iso ? formatJam(iso).replace(' WITA', '') : '—')
 
 export default function RiwayatSaya() {
   const { profil, keluar } = useAuth()
@@ -64,27 +66,34 @@ export default function RiwayatSaya() {
   }, [riwayat])
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-[100dvh] bg-slate-50">
       <BarAtas onKeluar={keluar} />
 
-      <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+      <main
+        id="konten"
+        className="pb-navigasi mx-auto w-full max-w-5xl px-4 pt-4 sm:px-6 sm:pt-6"
+      >
+        <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-xl font-extrabold text-slate-800">Riwayat &amp; Rekap Presensi</h1>
-            <p className="text-sm text-slate-500">
+            <h1 className="text-xl font-extrabold tracking-tight text-slate-900">
+              Riwayat &amp; Rekap Presensi
+            </h1>
+            <p className="mt-0.5 text-[13px] leading-relaxed text-slate-500 sm:text-sm">
               Ringkasan kehadiran Anda pada {namaBulan(periode)}.
             </p>
           </div>
-          <div>
+          <div className="w-full sm:w-auto">
             <label className="label-input" htmlFor="riwayat-periode">
               Bulan
             </label>
             <input
               id="riwayat-periode"
               type="month"
-              className="input-dasar max-w-[190px]"
+              className="input-dasar w-full sm:max-w-[190px]"
               value={periode}
-              onChange={(e) => setPeriode(e.target.value)}
+              onChange={(e) =>
+                setPeriode(e.target.value || periodeBulanIni())
+              }
             />
           </div>
         </div>
@@ -95,16 +104,17 @@ export default function RiwayatSaya() {
           </Alert>
         )}
 
-        <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+        {/* Ringkasan status */}
+        <div className="mb-4 grid grid-cols-3 gap-2 sm:mb-5 sm:grid-cols-6">
           {STATUS.map((s) => (
             <div
               key={s.nama}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-center shadow-kartu"
+              className={`rounded-xl border border-slate-200 px-1.5 py-2.5 text-center shadow-kartu sm:px-2 ${s.warna}`}
             >
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+              <p className="text-[9px] font-bold uppercase leading-tight tracking-wide text-slate-500 sm:text-[10px]">
                 {s.nama}
               </p>
-              <p className={`mx-auto mt-1.5 w-fit rounded-full px-2.5 py-0.5 text-sm font-extrabold ${s.warna}`}>
+              <p className="mt-1 text-lg font-extrabold tabular-nums leading-none sm:text-xl">
                 {hitungan[s.nama]}
               </p>
             </div>
@@ -112,7 +122,7 @@ export default function RiwayatSaya() {
         </div>
 
         <section className="rounded-2xl border border-slate-200 bg-white shadow-kartu">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-5 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-3.5 sm:px-5 sm:py-4">
             <div>
               <h2 className="text-sm font-bold text-slate-800">Detail Harian</h2>
               <p className="text-xs text-slate-500">{riwayat.length} catatan presensi</p>
@@ -127,49 +137,122 @@ export default function RiwayatSaya() {
               <Spinner /> Memuat riwayat…
             </div>
           ) : riwayat.length === 0 ? (
-            <div className="py-14 text-center">
+            <div className="px-4 py-12 text-center">
               <p className="text-sm font-semibold text-slate-600">Belum ada catatan pada bulan ini</p>
-              <p className="mt-1 text-xs text-slate-400">Pilih bulan lain atau lakukan absensi terlebih dahulu.</p>
+              <p className="mt-1 text-xs text-slate-400">
+                Pilih bulan lain atau lakukan absensi terlebih dahulu.
+              </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[720px] text-left text-sm">
-                <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                  <tr>
-                    <th className="px-5 py-3 font-semibold">Tanggal</th>
-                    <th className="px-5 py-3 font-semibold">Jam Masuk</th>
-                    <th className="px-5 py-3 font-semibold">Jam Pulang</th>
-                    <th className="px-5 py-3 font-semibold">Jarak</th>
-                    <th className="px-5 py-3 font-semibold">Status</th>
-                    <th className="px-5 py-3 font-semibold">Keterangan</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {riwayat.map((baris) => (
-                    <tr key={baris.id} className="hover:bg-slate-50/70">
-                      <td className="whitespace-nowrap px-5 py-3 font-medium text-slate-700">
+            <>
+              {/* HP: kartu harian */}
+              <div className="space-y-2.5 p-3 sm:hidden">
+                {riwayat.map((baris) => (
+                  <article
+                    key={baris.id}
+                    className="rounded-xl border border-slate-200 bg-slate-50/50 p-3"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-[13px] font-bold text-slate-800">
                         {formatTanggalRingkas(baris.tanggal)}
-                      </td>
-                      <td className="whitespace-nowrap px-5 py-3 text-slate-600">
-                        {baris.jam_masuk ? formatJam(baris.jam_masuk) : '—'}
-                      </td>
-                      <td className="whitespace-nowrap px-5 py-3 text-slate-600">
-                        {baris.jam_pulang ? formatJam(baris.jam_pulang) : '—'}
-                      </td>
-                      <td className="px-5 py-3 text-slate-600">{formatJarak(baris.jarak_masuk)}</td>
-                      <td className="px-5 py-3">
-                        <Badge variant={varianStatusKehadiran(baris.status_kehadiran)}>
-                          {baris.status_kehadiran}
-                        </Badge>
-                      </td>
-                      <td className="max-w-[220px] px-5 py-3 text-xs text-slate-500">
-                        {baris.alasan_koreksi || '—'}
-                      </td>
+                      </p>
+                      <Badge variant={varianStatusKehadiran(baris.status_kehadiran)}>
+                        {baris.status_kehadiran}
+                      </Badge>
+                    </div>
+
+                    <div className="mt-2.5 grid grid-cols-3 divide-x divide-slate-200 rounded-lg bg-white py-2 text-center ring-1 ring-slate-200">
+                      <div>
+                        <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">
+                          Masuk
+                        </p>
+                        <p className="mt-0.5 text-[13px] font-bold tabular-nums text-slate-800">
+                          {jamSingkat(baris.jam_masuk)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">
+                          Pulang
+                        </p>
+                        <p className="mt-0.5 text-[13px] font-bold tabular-nums text-slate-800">
+                          {jamSingkat(baris.jam_pulang)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">
+                          Jarak
+                        </p>
+                        <p className="mt-0.5 text-[13px] font-bold text-slate-800">
+                          {formatJarak(baris.jarak_masuk)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {Number(baris.menit_terlambat) > 0 && (
+                      <p className="mt-2 text-[11px] font-semibold text-amber-700">
+                        Terlambat {baris.menit_terlambat} menit
+                      </p>
+                    )}
+
+                    {baris.alasan_koreksi && (
+                      <p className="mt-2 rounded-lg bg-amber-50 px-2.5 py-2 text-[11px] leading-relaxed text-amber-800">
+                        <span className="font-semibold">Koreksi:</span> {baris.alasan_koreksi}
+                      </p>
+                    )}
+                  </article>
+                ))}
+              </div>
+
+              {/* Desktop: tabel */}
+              <div className="hidden overflow-x-auto sm:block">
+                <table className="w-full min-w-[720px] text-left text-sm">
+                  <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                    <tr>
+                      <th className="px-5 py-3 font-semibold">Tanggal</th>
+                      <th className="px-5 py-3 font-semibold">Jam Masuk</th>
+                      <th className="px-5 py-3 font-semibold">Jam Pulang</th>
+                      <th className="px-5 py-3 font-semibold">Terlambat</th>
+                      <th className="px-5 py-3 font-semibold">Jarak</th>
+                      <th className="px-5 py-3 font-semibold">Status</th>
+                      <th className="px-5 py-3 font-semibold">Keterangan</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {riwayat.map((baris) => (
+                      <tr key={baris.id} className="hover:bg-slate-50/70">
+                        <td className="whitespace-nowrap px-5 py-3 font-medium text-slate-700">
+                          {formatTanggalRingkas(baris.tanggal)}
+                        </td>
+                        <td className="whitespace-nowrap px-5 py-3 tabular-nums text-slate-600">
+                          {baris.jam_masuk ? formatJam(baris.jam_masuk) : '—'}
+                        </td>
+                        <td className="whitespace-nowrap px-5 py-3 tabular-nums text-slate-600">
+                          {baris.jam_pulang ? formatJam(baris.jam_pulang) : '—'}
+                        </td>
+                        <td className="whitespace-nowrap px-5 py-3 text-xs tabular-nums">
+                          {Number(baris.menit_terlambat) > 0 ? (
+                            <span className="font-semibold text-amber-700">
+                              {baris.menit_terlambat} mnt
+                            </span>
+                          ) : (
+                            <span className="text-slate-400">—</span>
+                          )}
+                        </td>
+                        <td className="px-5 py-3 text-slate-600">{formatJarak(baris.jarak_masuk)}</td>
+                        <td className="px-5 py-3">
+                          <Badge variant={varianStatusKehadiran(baris.status_kehadiran)}>
+                            {baris.status_kehadiran}
+                          </Badge>
+                        </td>
+                        <td className="max-w-[220px] px-5 py-3 text-xs text-slate-500">
+                          {baris.alasan_koreksi || '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </section>
       </main>

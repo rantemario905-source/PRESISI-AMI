@@ -13,7 +13,7 @@ import { akhirBulan } from '../utils/format.js'
 export async function ambilRiwayatBulanan(userId, periode) {
   const { data, error } = await supabase
     .from('presensi')
-    .select('id, tanggal, jam_masuk, jam_pulang, jarak_masuk, status_kehadiran, alasan_koreksi')
+    .select('id, tanggal, jam_masuk, jam_pulang, jarak_masuk, status_kehadiran, menit_terlambat, alasan_koreksi')
     .eq('user_id', userId)
     .gte('tanggal', `${periode}-01`)
     .lte('tanggal', akhirBulan(periode))

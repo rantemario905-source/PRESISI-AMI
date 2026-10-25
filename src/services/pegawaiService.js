@@ -7,32 +7,45 @@ import { supabase } from '../utils/supabaseClient.js'
 
 /**
  * Ambil daftar pegawai.
- * @param {{ hanyaPegawai?: boolean }} opsi - default hanya role 'pegawai'
+ * @param {{ hanyaPegawai?: boolean, unitKerja?: string|null }} opsi
+ *        default hanya role 'pegawai'; kepala ruangan otomatis dibatasi RLS
  */
-export async function ambilSemuaPegawai({ hanyaPegawai = true } = {}) {
-  let kueri = supabase.from('pegawai').select('id, nama, unit_kerja, role').order('nama')
+export async function ambilSemuaPegawai({ hanyaPegawai = true, unitKerja = null } = {}) {
+  let kueri = supabase
+    .from('pegawai')
+    .select('id, nama, unit_kerja, role, kepala_ruangan, pola_kerja')
+    .order('nama')
   if (hanyaPegawai) kueri = kueri.eq('role', 'pegawai')
+  if (unitKerja) kueri = kueri.eq('unit_kerja', unitKerja)
 
   const { data, error } = await kueri
   if (error) throw error
   return data ?? []
 }
 
-/** Daftar unit kerja unik (terurut) */
+/** Daftar unit kerja dari master grup (termasuk grup kosong), terurut. */
 export async function ambilUnitKerja() {
-  const pegawai = await ambilSemuaPegawai()
-  return [...new Set(pegawai.map((p) => p.unit_kerja).filter(Boolean))].sort((a, b) =>
-    a.localeCompare(b, 'id'),
-  )
+  const { data, error } = await supabase
+    .from('grup_shift')
+    .select('nama')
+    .order('nama')
+
+  if (error) throw error
+  return (data ?? []).map((g) => g.nama)
 }
 
 /**
- * Data seluruh pegawai + ringkasan status perangkatnya (khusus Super Admin).
+ * Data pegawai non-ASN + ringkasan status perangkatnya (khusus Super Admin).
+ * Akun ber-role superadmin tidak ditampilkan karena bukan pegawai.
  * Status perangkat: 'approved' | 'pending' | 'rejected' | 'none'.
  */
 export async function ambilDataPegawai() {
   const [hasilPegawai, hasilPerangkat] = await Promise.all([
-    supabase.from('pegawai').select('id, nama, unit_kerja, role, dibuat_pada').order('nama'),
+    supabase
+      .from('pegawai')
+      .select('id, nama, unit_kerja, role, kepala_ruangan, pola_kerja, dibuat_pada')
+      .eq('role', 'pegawai')
+      .order('nama'),
     supabase.from('perangkat').select('user_id, status'),
   ])
 
@@ -60,14 +73,24 @@ export async function ambilDataPegawai() {
 }
 
 /**
- * Perbarui nama & unit kerja pegawai. Role tidak dapat diubah dari sini.
- * @param {{ id: string, nama: string, unitKerja: string }} params
+ * Perbarui nama, unit kerja, status kepala ruangan, dan pola kerja lewat RPC
+ * yang dilindungi. Jika unit tujuan sudah punya kepala, server memindahkan
+ * status kepala lama secara otomatis. Role Super Admin tidak diubah dari sini.
+ * @param {{ id: string, nama: string, unitKerja: string, kepalaRuangan: boolean, polaKerja: 'shift'|'reguler' }} params
  */
-export async function perbaruiPegawai({ id, nama, unitKerja }) {
-  const { data, error } = await supabase.rpc('perbarui_pegawai', {
+export async function perbaruiPegawai({
+  id,
+  nama,
+  unitKerja,
+  kepalaRuangan,
+  polaKerja,
+}) {
+  const { data, error } = await supabase.rpc('perbarui_pegawai_dan_jadwal', {
     p_id: id,
     p_nama: nama,
     p_unit_kerja: unitKerja,
+    p_kepala_ruangan: Boolean(kepalaRuangan),
+    p_pola_kerja: polaKerja,
   })
 
   if (error) throw error

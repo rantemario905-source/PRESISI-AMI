@@ -1,45 +1,30 @@
 /**
  * ==========================================================================
- * Service: Pengajuan Izin/Cuti oleh Pegawai
+ * Service: Riwayat Dinas & Sakit / Cuti milik pegawai
  * --------------------------------------------------------------------------
- * RLS membatasi pegawai hanya dapat membaca & mengajukan izin miliknya
- * sendiri dengan status awal 'menunggu'. Pengajuan tidak dapat dibatalkan
- * atau diubah oleh pegawai setelah dikirim.
+ * Halaman pegawai bersifat READ-ONLY. Pegawai tidak dapat mengajukan,
+ * mengubah, atau menghapus pengajuan. Pencatatan dilakukan oleh kepala
+ * ruangan atau Super Admin; persetujuan oleh Super Admin.
  * ==========================================================================
  */
 import { supabase } from '../utils/supabaseClient.js'
+import { kelompokkanIzin } from '../utils/izin.js'
 
+const KOLOM =
+  'id, grup_id, user_id, jenis, tanggal_mulai, tanggal_selesai, alasan, status, ' +
+  'dokumen_path, dokumen_nama, dokumen_tipe, dokumen_ukuran, catatan_admin, ' +
+  'alasan_pembatalan, dibuat_pada, disetujui_pada'
+
+/** Riwayat pengajuan milik pegawai, dikelompokkan per grup Dinas. */
 export async function ambilIzinSaya(userId) {
+  if (!userId) return []
+
   const { data, error } = await supabase
     .from('izin_cuti')
-    .select(
-      'id, jenis, tanggal_mulai, tanggal_selesai, alasan, status, catatan_admin, dibuat_pada, disetujui_pada',
-    )
+    .select(KOLOM)
     .eq('user_id', userId)
     .order('dibuat_pada', { ascending: false })
 
   if (error) throw error
-  return data ?? []
-}
-
-/**
- * Ajukan izin/cuti baru (status otomatis 'menunggu').
- * @param {{ userId: string, jenis: string, tanggalMulai: string, tanggalSelesai: string, alasan: string }} params
- */
-export async function ajukanIzinSaya({ userId, jenis, tanggalMulai, tanggalSelesai, alasan }) {
-  const { data, error } = await supabase
-    .from('izin_cuti')
-    .insert({
-      user_id: userId,
-      jenis,
-      tanggal_mulai: tanggalMulai,
-      tanggal_selesai: tanggalSelesai,
-      alasan: alasan.trim(),
-      status: 'menunggu',
-    })
-    .select('id, status, dibuat_pada')
-    .single()
-
-  if (error) throw error
-  return data
+  return kelompokkanIzin(data ?? [])
 }

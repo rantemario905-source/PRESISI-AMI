@@ -31,13 +31,16 @@ export function AuthProvider({ children }) {
       if (session) {
         try {
           const data = await ambilProfil(session.user.id)
+          if (!data) throw new Error('Profil pegawai tidak ditemukan. Hubungi Admin IT.')
           setProfil(data)
+          setGalat(null)
         } catch (err) {
           setProfil(null)
           setGalat(err.message || 'Gagal memuat profil pegawai.')
         }
       } else {
         setProfil(null)
+        setGalat(null)
       }
       setMemuat(false)
     })
@@ -49,10 +52,30 @@ export function AuthProvider({ children }) {
     setGalat(null)
     const user = await masukAuth(email, password)
     const data = await ambilProfil(user.id)
+    if (!data) throw new Error('Profil pegawai tidak ditemukan. Hubungi Admin IT.')
     setSesi({ user })
     setProfil(data)
     return data
   }, [])
+
+  /** Coba muat ulang profil tanpa memaksa pengguna login ulang. */
+  const muatProfil = useCallback(async () => {
+    if (!sesi?.user) return null
+    setMemuat(true)
+    setGalat(null)
+    try {
+      const data = await ambilProfil(sesi.user.id)
+      if (!data) throw new Error('Profil pegawai tidak ditemukan. Hubungi Admin IT.')
+      setProfil(data)
+      return data
+    } catch (err) {
+      setProfil(null)
+      setGalat(err.message || 'Gagal memuat profil pegawai.')
+      return null
+    } finally {
+      setMemuat(false)
+    }
+  }, [sesi])
 
   const keluar = useCallback(async () => {
     try {
@@ -60,6 +83,7 @@ export function AuthProvider({ children }) {
     } finally {
       setSesi(null)
       setProfil(null)
+      setGalat(null)
     }
   }, [])
 
@@ -70,10 +94,12 @@ export function AuthProvider({ children }) {
       memuat,
       galat,
       masuk,
+      muatProfil,
       keluar,
       apakahSuperadmin: profil?.role === 'superadmin',
+      apakahKepalaRuangan: profil?.role === 'pegawai' && profil?.kepala_ruangan === true,
     }),
-    [sesi, profil, memuat, galat, masuk, keluar],
+    [sesi, profil, memuat, galat, masuk, muatProfil, keluar],
   )
 
   return <AuthContext.Provider value={nilai}>{children}</AuthContext.Provider>

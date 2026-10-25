@@ -119,6 +119,7 @@ export function daftarTanggal(mulai, selesai) {
 
 /** Tanggal akhir bulan dari periode "YYYY-MM" */
 export function akhirBulan(periode) {
+  if (!/^\d{4}-\d{2}$/.test(String(periode ?? ''))) return ''
   const [tahun, bulan] = periode.split('-').map(Number)
   return new Date(Date.UTC(tahun, bulan, 0)).toISOString().slice(0, 10)
 }
@@ -130,6 +131,7 @@ export function periodeBulanIni() {
 
 /** "Oktober 2026" dari periode "2026-10" */
 export function namaBulan(periode) {
+  if (!/^\d{4}-\d{2}$/.test(String(periode ?? ''))) return '—'
   const [tahun, bulan] = periode.split('-').map(Number)
   return new Intl.DateTimeFormat('id-ID', {
     month: 'long',

@@ -15,6 +15,9 @@ import { Alert, Badge, Button, Spinner } from '../../components/ui/index.js'
 import KepalaHalaman from '../../components/admin/KepalaHalaman.jsx'
 import KartuStatistik from '../../components/admin/KartuStatistik.jsx'
 
+/** "20:02 WITA" → "20:02" untuk tampilan ringkas di HP */
+const jamSingkat = (iso) => (iso ? formatJam(iso).replace(' WITA', '') : '—')
+
 export default function DashboardUtama() {
   const [statistik, setStatistik] = useState(null)
   const [daftar, setDaftar] = useState([])
@@ -73,7 +76,7 @@ export default function DashboardUtama() {
         </Alert>
       )}
 
-      <div className="mb-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-4 grid grid-cols-2 gap-2.5 sm:mb-5 sm:gap-4 xl:grid-cols-4">
         <KartuStatistik
           label="Total Pegawai Non-ASN"
           nilai={statistik?.totalPegawai ?? '—'}
@@ -105,10 +108,12 @@ export default function DashboardUtama() {
       </div>
 
       <section className="rounded-2xl border border-slate-200 bg-white shadow-kartu">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-5 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-3.5 sm:px-5 sm:py-4">
           <div>
             <h2 className="text-sm font-bold text-slate-800">Pemantauan Presensi Hari Ini</h2>
-            <p className="text-xs text-slate-500">Diperbarui otomatis saat ada absensi baru</p>
+            <p className="text-[11px] text-slate-500 sm:text-xs">
+              Diperbarui otomatis saat ada absensi baru
+            </p>
           </div>
           <Badge variant="info">{daftar.length} catatan</Badge>
         </div>
@@ -118,63 +123,123 @@ export default function DashboardUtama() {
             <Spinner /> Memuat data…
           </div>
         ) : daftar.length === 0 ? (
-          <div className="py-14 text-center">
+          <div className="px-4 py-12 text-center">
             <p className="text-sm font-semibold text-slate-600">Belum ada presensi hari ini</p>
             <p className="mt-1 text-xs text-slate-400">Data akan muncul otomatis saat pegawai absen.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[820px] text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th className="px-5 py-3 font-semibold">Pegawai</th>
-                  <th className="px-5 py-3 font-semibold">Jam Masuk</th>
-                  <th className="px-5 py-3 font-semibold">Jam Pulang</th>
-                  <th className="px-5 py-3 font-semibold">Status</th>
-                  <th className="px-5 py-3 font-semibold">Lokasi Masuk</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {daftar.map((baris) => {
-                  const lokasi = baris.lokasi_masuk
-                  return (
-                    <tr key={baris.id} className="hover:bg-slate-50/70">
-                      <td className="px-5 py-3">
-                        <p className="font-semibold text-slate-800">{baris.pegawai?.nama ?? '—'}</p>
-                        <p className="text-xs text-slate-500">{baris.pegawai?.unit_kerja ?? '—'}</p>
-                      </td>
-                      <td className="px-5 py-3 font-medium text-slate-700">{formatJam(baris.jam_masuk)}</td>
-                      <td className="px-5 py-3 font-medium text-slate-700">
-                        {baris.jam_pulang ? formatJam(baris.jam_pulang) : <span className="text-slate-400">—</span>}
-                      </td>
-                      <td className="px-5 py-3">
-                        <Badge variant={varianStatusKehadiran(baris.status_kehadiran)}>
-                          {baris.status_kehadiran}
-                        </Badge>
-                      </td>
-                      <td className="px-5 py-3">
-                        {lokasi?.lat && lokasi?.lng ? (
-                          <div className="space-y-0.5">
-                            <a
-                              href={`https://www.google.com/maps?q=${lokasi.lat},${lokasi.lng}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-xs font-semibold text-sky-700 hover:underline"
-                            >
-                              Lihat peta
-                            </a>
-                            <p className="text-[11px] text-slate-400">{formatJarak(baris.jarak_masuk)} dari titik pusat</p>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-slate-400">—</span>
-                        )}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+          <>
+            {/* HP: daftar kartu */}
+            <div className="divide-y divide-slate-100 md:hidden">
+              {daftar.map((baris) => {
+                const lokasi = baris.lokasi_masuk
+                return (
+                  <article key={baris.id} className="px-4 py-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="truncate text-[13px] font-bold text-slate-800">
+                          {baris.pegawai?.nama ?? '—'}
+                        </p>
+                        <p className="truncate text-[11px] text-slate-500">
+                          {baris.pegawai?.unit_kerja ?? '—'}
+                        </p>
+                      </div>
+                      <Badge variant={varianStatusKehadiran(baris.status_kehadiran)}>
+                        {baris.status_kehadiran}
+                      </Badge>
+                    </div>
+
+                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
+                      <span>
+                        Masuk{' '}
+                        <b className="font-bold tabular-nums text-slate-800">
+                          {jamSingkat(baris.jam_masuk)}
+                        </b>
+                      </span>
+                      <span>
+                        Pulang{' '}
+                        <b className="font-bold tabular-nums text-slate-800">
+                          {jamSingkat(baris.jam_pulang)}
+                        </b>
+                      </span>
+                      {lokasi?.lat && lokasi?.lng && (
+                        <a
+                          href={`https://www.google.com/maps?q=${lokasi.lat},${lokasi.lng}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-bold text-sky-700 hover:underline"
+                        >
+                          Peta · {formatJarak(baris.jarak_masuk)}
+                        </a>
+                      )}
+                    </div>
+                  </article>
+                )
+              })}
+            </div>
+
+            {/* Desktop: tabel */}
+            <div className="hidden overflow-x-auto md:block">
+              <table className="w-full min-w-[820px] text-left text-sm">
+                <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                  <tr>
+                    <th className="px-5 py-3 font-semibold">Pegawai</th>
+                    <th className="px-5 py-3 font-semibold">Jam Masuk</th>
+                    <th className="px-5 py-3 font-semibold">Jam Pulang</th>
+                    <th className="px-5 py-3 font-semibold">Status</th>
+                    <th className="px-5 py-3 font-semibold">Lokasi Masuk</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {daftar.map((baris) => {
+                    const lokasi = baris.lokasi_masuk
+                    return (
+                      <tr key={baris.id} className="hover:bg-slate-50/70">
+                        <td className="px-5 py-3">
+                          <p className="font-semibold text-slate-800">{baris.pegawai?.nama ?? '—'}</p>
+                          <p className="text-xs text-slate-500">{baris.pegawai?.unit_kerja ?? '—'}</p>
+                        </td>
+                        <td className="whitespace-nowrap px-5 py-3 font-medium tabular-nums text-slate-700">
+                          {formatJam(baris.jam_masuk)}
+                        </td>
+                        <td className="whitespace-nowrap px-5 py-3 font-medium tabular-nums text-slate-700">
+                          {baris.jam_pulang ? (
+                            formatJam(baris.jam_pulang)
+                          ) : (
+                            <span className="text-slate-400">—</span>
+                          )}
+                        </td>
+                        <td className="px-5 py-3">
+                          <Badge variant={varianStatusKehadiran(baris.status_kehadiran)}>
+                            {baris.status_kehadiran}
+                          </Badge>
+                        </td>
+                        <td className="px-5 py-3">
+                          {lokasi?.lat && lokasi?.lng ? (
+                            <div className="space-y-0.5">
+                              <a
+                                href={`https://www.google.com/maps?q=${lokasi.lat},${lokasi.lng}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-xs font-semibold text-sky-700 hover:underline"
+                              >
+                                Lihat peta
+                              </a>
+                              <p className="text-[11px] text-slate-400">
+                                {formatJarak(baris.jarak_masuk)} dari titik pusat
+                              </p>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-slate-400">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </section>
     </>

@@ -1,13 +1,6 @@
 /**
- * ==========================================================================
- * Kartu Status Perangkat (Device Binding)
- * --------------------------------------------------------------------------
- * Tiga kondisi sesuai spesifikasi:
- *   a. belum terdaftar → tombol "Ajukan Verifikasi Perangkat" (status pending)
- *   b. pending         → pesan menunggu persetujuan Admin IT, absen terkunci
- *   c. approved        → absen aktif (kartu menampilkan status sah)
- *   (+ rejected        → bisa diajukan ulang)
- * ==========================================================================
+ * Kartu status perangkat (Device Binding).
+ * Tiga kondisi utama: belum terdaftar, menunggu, disetujui (+ ditolak).
  */
 import Alert from '../ui/Alert.jsx'
 import Badge from '../ui/Badge.jsx'
@@ -46,8 +39,10 @@ export default function KartuStatusPerangkat({ status, sedangMengajukan, onAjuka
 
   return (
     <section className="kartu">
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-bold uppercase tracking-wide text-slate-500">Status Perangkat</h3>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-[11px] font-bold uppercase tracking-wide text-slate-500 sm:text-sm">
+          Status Perangkat
+        </h3>
         <Badge variant={info.varian}>{info.label}</Badge>
       </div>
 
@@ -58,6 +53,7 @@ export default function KartuStatusPerangkat({ status, sedangMengajukan, onAjuka
       {info.aksi && (
         <Button
           variant="utama"
+          size="md"
           className="w-full"
           onClick={onAjukan}
           disabled={sedangMengajukan}

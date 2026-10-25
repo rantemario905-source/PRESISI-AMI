@@ -6,7 +6,7 @@
  * sebagai child route lewat <Outlet />.
  * ==========================================================================
  */
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { NAMA_APLIKASI, NAMA_RUMAH_SAKIT } from '../../config/constants.js'
@@ -18,9 +18,14 @@ const JUDUL_HALAMAN = {
   '/superadmin-portal': 'Dashboard Utama',
   '/superadmin-portal/pegawai': 'Data Pegawai',
   '/superadmin-portal/perangkat': 'Verifikasi & Reset Perangkat',
-  '/superadmin-portal/shift': 'Master & Jadwal Shift',
+  '/superadmin-portal/grup-shift': 'Grup Shift & Seksi',
+  '/superadmin-portal/shift': 'Master Shift',
+  '/superadmin-portal/jadwal-shift': 'Jadwal Shift',
+  '/superadmin-portal/hari-libur': 'Hari Libur',
+  '/superadmin-portal/pengaturan': 'Pengaturan Presensi',
   '/superadmin-portal/koreksi': 'Koreksi Presensi & Audit Trail',
-  '/superadmin-portal/izin': 'Pengajuan Izin / Cuti / Dinas Luar',
+  '/superadmin-portal/dinas-sakit': 'Pengajuan Dinas & Sakit',
+  '/superadmin-portal/cuti': 'Pengajuan Cuti',
   '/superadmin-portal/rekap': 'Rekapitulasi & Cetak Laporan',
 }
 
@@ -30,41 +35,64 @@ export default function PortalAdminLayout() {
   const { pathname } = useLocation()
   const judul = JUDUL_HALAMAN[pathname] ?? 'Portal Super Admin'
 
+  // Kunci scroll & tutup drawer dengan Esc saat menu HP terbuka
+  useEffect(() => {
+    if (!menuTerbuka) return undefined
+    const tanganiTombol = (event) => {
+      if (event.key === 'Escape') setMenuTerbuka(false)
+    }
+    document.addEventListener('keydown', tanganiTombol)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', tanganiTombol)
+      document.body.style.overflow = ''
+    }
+  }, [menuTerbuka])
+
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-[100dvh] bg-slate-50">
       <SidebarAdmin terbuka={menuTerbuka} onTutup={() => setMenuTerbuka(false)} />
 
       <div className="lg:pl-64">
-        <header className="tanpa-cetak sticky top-0 z-30 border-b border-slate-200 bg-white">
-          <div className="flex h-16 items-center gap-3 px-4 sm:px-6">
+        <header className="tanpa-cetak safe-atas sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+          <a
+            href="#konten"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[60] focus:rounded-lg focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:font-bold focus:text-sky-700 focus:shadow-lg"
+          >
+            Lewati ke konten
+          </a>
+
+          <div className="flex min-h-14 items-center gap-2 px-3 py-2 sm:min-h-16 sm:gap-3 sm:px-6">
             <button
               type="button"
               onClick={() => setMenuTerbuka(true)}
-              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 lg:hidden"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 lg:hidden"
               aria-label="Buka menu"
+              aria-expanded={menuTerbuka}
+              aria-controls="sidebar-admin"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5" aria-hidden="true">
                 <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" />
               </svg>
             </button>
 
             <div className="min-w-0 flex-1">
-              <h2 className="truncate text-sm font-bold text-slate-800 sm:text-base">{judul}</h2>
+              <h1 className="truncate text-[13px] font-bold text-slate-800 sm:text-base">{judul}</h1>
               <p className="hidden truncate text-[11px] text-slate-400 sm:block">{NAMA_RUMAH_SAKIT}</p>
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="hidden text-right sm:block">
+            <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+              <div className="hidden text-right md:block">
                 <p className="max-w-[180px] truncate text-sm font-bold text-slate-800">{profil?.nama}</p>
                 <p className="text-[11px] font-semibold text-sky-600">Super Admin</p>
               </div>
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sky-100 text-xs font-extrabold text-sky-700">
+              <div className="hidden h-9 w-9 items-center justify-center rounded-full bg-sky-100 text-xs font-extrabold text-sky-700 sm:flex">
                 {inisialNama(profil?.nama ?? '')}
               </div>
               <button
                 type="button"
                 onClick={keluar}
-                className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                className="flex min-h-[44px] items-center rounded-lg border border-slate-300 px-2.5 text-[11px] font-semibold text-slate-600 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:min-h-[38px] sm:px-3 sm:text-xs"
               >
                 Keluar
               </button>
@@ -72,7 +100,10 @@ export default function PortalAdminLayout() {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
+        <main
+          id="konten"
+          className="mx-auto w-full max-w-7xl px-3.5 py-4 sm:px-6 sm:py-6"
+        >
           {/* Boundary lokal: sidebar tetap tampil saat chunk halaman diunduh */}
           <Suspense
             fallback={
@@ -85,7 +116,7 @@ export default function PortalAdminLayout() {
           </Suspense>
         </main>
 
-        <footer className="tanpa-cetak mx-auto w-full max-w-7xl px-4 pb-6 text-center text-[11px] text-slate-400 sm:px-6">
+        <footer className="tanpa-cetak mx-auto w-full max-w-7xl px-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] text-center text-[10px] text-slate-400 sm:px-6 sm:pb-6 sm:text-[11px]">
           {NAMA_APLIKASI} — Presensi Sistem Informasi Staf Integrasi
         </footer>
       </div>

@@ -7,7 +7,7 @@
 --   • seluruh presensi (termasuk presensi mock / hasil koreksi)
 --   • seluruh audit koreksi presensi
 --   • seluruh pengajuan izin/cuti/dinas
---   • seluruh jadwal shift
+--   • seluruh jadwal shift beserta status finalisasinya
 --   • seluruh data perangkat (device binding)
 --
 -- Yang DIPERTAHANKAN:
@@ -27,6 +27,7 @@ begin;
 delete from public.koreksi_presensi;
 delete from public.presensi;
 delete from public.izin_cuti;
+delete from public.jadwal_shift_final;
 delete from public.jadwal_shift;
 delete from public.perangkat;
 
@@ -40,6 +41,8 @@ union all
 select 'koreksi_presensi', count(*) from public.koreksi_presensi
 union all
 select 'izin_cuti',        count(*) from public.izin_cuti
+union all
+select 'jadwal_shift_final', count(*) from public.jadwal_shift_final
 union all
 select 'jadwal_shift',     count(*) from public.jadwal_shift
 union all

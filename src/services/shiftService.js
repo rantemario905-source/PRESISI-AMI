@@ -40,7 +40,7 @@ export async function ambilJadwalRentang(mulai, selesai) {
   const { data, error } = await supabase
     .from('jadwal_shift')
     .select(
-      'id, user_id, tanggal, shift_id, shift_master ( nama_shift ), pegawai:pegawai!jadwal_shift_user_id_fkey ( nama, unit_kerja )',
+      'id, user_id, tanggal, shift_id, shift_master ( id, nama_shift, jam_mulai, jam_selesai ), pegawai:pegawai!jadwal_shift_user_id_fkey ( nama, unit_kerja )',
     )
     .gte('tanggal', mulai)
     .lte('tanggal', selesai)
@@ -76,4 +76,76 @@ export async function simpanJadwalMassal({ userIds, shiftId, mulai, selesai }) {
 export async function hapusJadwal(id) {
   const { error } = await supabase.from('jadwal_shift').delete().eq('id', id)
   if (error) throw error
+}
+
+/** Simpan/ubah satu sel jadwal (satu pegawai, satu tanggal). */
+export async function simpanJadwalSel({ userId, tanggal, shiftId }) {
+  if (!userId || !tanggal || !shiftId) throw new Error('Data jadwal belum lengkap.')
+  const { error } = await supabase
+    .from('jadwal_shift')
+    .upsert(
+      { user_id: userId, tanggal, shift_id: shiftId },
+      { onConflict: 'user_id,tanggal' },
+    )
+  if (error) throw error
+}
+
+/** Hapus jadwal satu pegawai pada satu tanggal. */
+export async function hapusJadwalSel(userId, tanggal) {
+  const { error } = await supabase
+    .from('jadwal_shift')
+    .delete()
+    .eq('user_id', userId)
+    .eq('tanggal', tanggal)
+  if (error) throw error
+}
+
+/** Simpan banyak baris jadwal sekaligus (dipakai untuk salin pola). */
+export async function simpanJadwalBanyak(baris) {
+  if (!baris?.length) return 0
+  const { error } = await supabase
+    .from('jadwal_shift')
+    .upsert(baris, { onConflict: 'user_id,tanggal' })
+  if (error) throw error
+  return baris.length
+}
+
+/* --------------------------- Finalisasi bulan --------------------------- */
+
+/** Status finalisasi jadwal satu unit pada periode "YYYY-MM-01". */
+export async function ambilFinalJadwal(unitKerja, periode) {
+  if (!unitKerja || !periode) return null
+  const { data, error } = await supabase
+    .from('jadwal_shift_final')
+    .select('unit_kerja, periode, final_oleh, final_pada')
+    .eq('unit_kerja', unitKerja)
+    .eq('periode', periode)
+    .maybeSingle()
+  if (error) throw error
+  return data ?? null
+}
+
+/** Finalisasi atau buka finalisasi jadwal unit. Hanya lewat RPC. */
+export async function finalisasiJadwal({ unitKerja, periode, final = true }) {
+  const { data, error } = await supabase.rpc('finalisasi_jadwal_unit', {
+    p_unit: unitKerja,
+    p_periode: periode,
+    p_final: Boolean(final),
+  })
+  if (error) throw error
+  return data
+}
+
+/**
+ * Impor perubahan jadwal dari template CSV/XLSX.
+ * Server memvalidasi ulang unit, tanggal, shift, dan status finalisasi.
+ */
+export async function imporJadwalShift({ unitKerja, periode, baris }) {
+  const { data, error } = await supabase.rpc('impor_jadwal_shift', {
+    p_unit: unitKerja,
+    p_periode: periode,
+    p_baris: baris,
+  })
+  if (error) throw error
+  return data
 }

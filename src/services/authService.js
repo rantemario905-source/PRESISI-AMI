@@ -22,7 +22,7 @@ export async function keluar() {
 export async function ambilProfil(userId) {
   const { data, error } = await supabase
     .from('pegawai')
-    .select('id, nama, unit_kerja, role')
+    .select('id, nama, unit_kerja, role, kepala_ruangan, pola_kerja')
     .eq('id', userId)
     .maybeSingle()
 

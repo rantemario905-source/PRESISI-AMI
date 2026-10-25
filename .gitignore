@@ -10,6 +10,16 @@ dist-ssr/
 .env.local
 .env.*.local
 
+# Data impor akun & rahasia (jangan pernah di-commit)
+data-pegawai*.csv
+data-pegawai*.xlsx
+hasil-impor-*.csv
+secret-key*.txt
+supabase-secret*.txt
+
+# Supabase CLI temp
+supabase/.temp/
+
 # Editor & OS
 .vscode/*
 !.vscode/extensions.json
