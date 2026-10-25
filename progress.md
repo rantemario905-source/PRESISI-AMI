@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-25 13:19 WITA |
+| Terakhir diperbarui | 2026-10-25 13:37 WITA |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -35,9 +35,9 @@
 ## 1. Status Terkini
 
 **Ringkasan:** seluruh fitur inti (Fase 1–8 + penyempurnaan UI navigasi) sudah ada
-di kode, sudah di-commit, dan **live di GitHub Pages**. Yang belum: pengaturan
-**Site URL Supabase**, konfirmasi migrasi 09–14 beserta skrip verifikasi, dan uji
-fungsional di perangkat.
+di kode, live di GitHub Pages, dan **login Super Admin serta pegawai sudah berhasil**.
+Yang belum: uji verifikasi perangkat + absensi GPS, konfirmasi migrasi 09–14 dan
+skrip verifikasi, serta penyiapan data operasional sebelum Alfa diaktifkan.
 
 | Aspek | Status | Bukti |
 |---|---|---|
@@ -50,19 +50,21 @@ fungsional di perangkat.
 | Lint/unit test | Tidak tersedia di `package.json` | `package.json` |
 | Alfa otomatis | Fitur ada, **default nonaktif** | migrasi 12, `PengaturanPresensi.jsx` |
 | Deploy GitHub Pages | **Aktif** — workflow run #1 sukses | https://rantemario905-source.github.io/PRESISI-AMI/ |
+| Uji login live | **Lulus** — Super Admin (desktop) + pegawai (mobile) | Laporan user 2026-10-25 13:37 |
 
 **Pekerjaan terakhir sebelum audit:** penyempurnaan navigasi UI (tab bar, navigasi
 bawah, menu kepala ruangan, layout portal kepala) pada 2026-10-25 11:28–11:49.
 
 **Langkah berikutnya yang disarankan:**
-1. Set **Site URL** Supabase ke `https://rantemario905-source.github.io/PRESISI-AMI/`
-   dan tambahkan redirect URL yang sama (`/**`) + `http://localhost:5173/**`.
-2. Uji login Super Admin di URL live, lalu buka Portal Super Admin.
+1. Uji verifikasi perangkat: pegawai ajukan perangkat → Super Admin setujui di
+   **Verifikasi Perangkat** → tombol absen terbuka.
+2. Uji absensi (HTTPS + izin lokasi) dalam radius 100 m dari RSUD AMI; cek jarak,
+   akurasi, keterlambatan, dan larangan Fake GPS.
 3. Pastikan migrasi 09–14 sudah dijalankan berurutan dan seluruh
    `supabase/verifikasi_*.sql` bernilai `true`.
-4. Jangan aktifkan Alfa otomatis sebelum jadwal bulan pertama lengkap, hari libur
-   terisi, dan finalisasi diuji.
-5. Uji absensi di HP (HTTPS + izin lokasi) dalam radius 100 m dari RSUD AMI.
+4. Lengkapi data operasional: seksi **Grup Shift**, pola kerja di **Data Pegawai**,
+   **Jadwal Shift**, **Hari Libur**, lalu **Finalisasi**.
+5. Bersihkan data uji, lalu aktifkan Alfa otomatis + `pg_cron` paling akhir.
 
 ---
 
@@ -90,6 +92,14 @@ Fase 8 (impor jadwal) maupun pekerjaan UI 25 Okt. README juga belum mencantumkan
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-25 13:37 WITA — Login live berhasil (Super Admin + pegawai)
+- **Perubahan:** tidak ada perubahan kode; verifikasi fungsional di URL produksi.
+- **File:** `progress.md` (pembaruan status).
+- **Verifikasi:** user berhasil login Super Admin di desktop dan login pegawai di
+  mobile lewat `https://rantemario905-source.github.io/PRESISI-AMI/`.
+- **Catatan/risiko:** lanjut ke uji verifikasi perangkat + absensi GPS. Pastikan
+  perangkat pegawai disetujui dan jadwal hari tersebut tersedia sebelum uji absen.
 
 ### 2026-10-25 13:19 WITA — Deploy GitHub Pages aktif
 - **Perubahan:** push commit `ba5e68d`; workflow **Deploy ke GitHub Pages**
