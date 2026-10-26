@@ -76,8 +76,8 @@ export default function SidebarKepala({ terbuka, onTutup }) {
           </button>
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+        <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-3">
+          <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
             Administrasi Unit
           </p>
           {MENU.map((item) => (
@@ -86,7 +86,7 @@ export default function SidebarKepala({ terbuka, onTutup }) {
               to={item.ke}
               onClick={onTutup}
               className={({ isActive }) =>
-                `flex min-h-[44px] items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:text-sm ${
+                `flex min-h-[40px] items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:text-sm ${
                   isActive
                     ? 'bg-sky-50 text-sky-700'
                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -109,12 +109,12 @@ export default function SidebarKepala({ terbuka, onTutup }) {
             </NavLink>
           ))}
 
-          <div className="pt-3">
+          <div className="pt-2">
             <NavLink
               to="/"
               end
               onClick={onTutup}
-              className="flex min-h-[44px] items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:text-sm"
+              className="flex min-h-[40px] items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:text-sm"
             >
               <svg
                 viewBox="0 0 24 24"

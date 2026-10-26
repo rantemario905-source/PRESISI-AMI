@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-26 15:31 WITA |
+| Terakhir diperbarui | 2026-10-26 22:20 WITA |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -50,18 +50,19 @@ Penyempurnaan terbaru: **favicon dan apple-touch-icon memakai logo resmi**, labe
 **Super Admin** di header sidebar dihapus, **label dashboard disederhanakan**
 (“Dashboard”, “Total Pegawai”, “Non ASN”, tanggal aktual, dan “Perlu Verifikasi”),
 serta **tombol Keluar dipindahkan ke menu avatar** di kanan atas (responsif HP)
-dengan **animasi buka/tutup halus**, serta **animasi gulir submenu sidebar**
-Super Admin. Yang belum: konfirmasi migrasi 09–18 & skrip verifikasi, penyiapan data operasional
+dengan **animasi buka/tutup halus**, serta **animasi gulir submenu sidebar** Super Admin, dan **perapian jarak menu
+sidebar** Super Admin/kepala ruangan plus **latar biru muda transparan pada
+seluruh halaman portal** Super Admin dan Kepala Ruangan. Yang belum: konfirmasi migrasi 09–18 & skrip verifikasi, penyiapan data operasional
 (grup shift, jadwal, hari libur), dan persiapan go-live.
 
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 8 + UI navigasi + migrasi 15–18 | `src/`, `supabase/migrations/01–18` |
-| Commit Git | **HEAD** — `4938341` (sinkronisasi dokumen audit) | `git log` |
-| Perubahan lokal | **Ada** — logo resmi, favicon, perapian sidebar, label dashboard, menu akun, animasi dropdown, dan animasi submenu sidebar (belum di-commit, menunggu uji lokal) | `git status` |
+| Commit Git | **HEAD** — `cb80100` (logo resmi, menu akun, animasi navigasi) | `git log` |
+| Perubahan lokal | **Ada** — perapian jarak sidebar Super Admin/kepala ruangan dan latar biru muda seluruh halaman portal (belum di-commit, menunggu uji lokal) | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Skrip `supabase/verifikasi_*.sql` | **Tidak diketahui** sudah dijalankan atau belum | perlu cek manual |
-| Build produksi | **Lulus** — 272 modul, 11,66 dtk; build base `/PRESISI-AMI/` 10,61 dtk | `npm run build` (2026-10-26 15:31) |
+| Build produksi | **Lulus** — 272 modul, 8,12 dtk (base `/`); build base `/PRESISI-AMI/` 7,81 dtk dengan heap 4096 MB | `npm run build` (2026-10-26 22:20) |
 | Jendela waktu absen | **Ada di kode** — masuk 20 menit sebelum, pulang 1 menit setelah | migrasi 17, `PanelAbsen.jsx`, `jadwalAbsen.js` |
 | Hapus grup kosong | **Ada di kode** — semua grup 0 pegawai; "Belum ditentukan" (akun sistem) disembunyikan bila kosong | migrasi 18, `GrupShift.jsx` |
 | Bilah progres | **Ada di kode** — bilah biru muda di atas layar saat navigasi, login, logout, dan muat ulang profil | `ProgressContext.jsx`, `BilahProgres.jsx`, `PengamatRute.jsx` |
@@ -69,21 +70,20 @@ Super Admin. Yang belum: konfirmasi migrasi 09–18 & skrip verifikasi, penyiapa
 | Dashboard admin | **Ada di kode** — “Dashboard”, “Total Pegawai” (Non ASN), “Hadir Hari Ini” dan “Sudah Absen Pulang” dengan tanggal aktual, “Perlu Verifikasi” | `DashboardUtama.jsx`, `SidebarAdmin.jsx`, `PortalAdminLayout.jsx` |
 | Menu akun | **Ada di kode** — avatar kanan atas membuka menu **Keluar** dengan animasi buka/tutup di portal pegawai, Super Admin, dan kepala ruangan; tampil di desktop dan HP | `MenuAkun.jsx`, `BarAtas.jsx`, `PortalAdminLayout.jsx`, `PortalKepalaLayout.jsx`, `tailwind.config.js` |
 | Animasi sidebar | **Ada di kode** — submenu grup Super Admin dibuka/tutup dengan animasi gulir; grup aktif terbuka otomatis; submenu tertutup tidak dapat difokuskan | `SidebarAdmin.jsx` |
+| Kerapatan sidebar | **Ada di kode** — jarak menu Super Admin dan Kepala Ruangan dirapatkan (rapat sedang, target sentuh 38–40 px) | `SidebarAdmin.jsx`, `SidebarKepala.jsx` |
+| Latar Dashboard | **Ada di kode** — gradasi biru muda transparan pada seluruh halaman portal Super Admin dan Kepala Ruangan | `PortalAdminLayout.jsx`, `PortalKepalaLayout.jsx` |
 | Lint/unit test | Tidak tersedia di `package.json` | `package.json` |
 | Alfa otomatis | Fitur ada, **default nonaktif** | migrasi 12, `PengaturanPresensi.jsx` |
 | Deploy GitHub Pages | **Aktif** — workflow run #1 sukses | https://rantemario905-source.github.io/PRESISI-AMI/ |
 | Uji login live | **Lulus** — Super Admin (desktop) + pegawai (mobile) | Laporan user 2026-10-25 13:37 |
 | Uji perangkat & absensi | **Lulus** — verifikasi perangkat, radius, akurasi, duplikasi | Laporan user 2026-10-25 14:04 |
 
-**Pekerjaan terakhir:** mengganti logo aplikasi dengan logo resmi RSUD AMI
-(`src/assets/logo-rsud-ami.png`) di halaman login, header pegawai, sidebar portal
-Super Admin, dan kepala ruangan; mengganti favicon/tab dan apple-touch-icon dengan
-logo resmi; menghapus label **Super Admin** dari header sidebar; menyederhanakan
-label dashboard admin; menampilkan tanggal aktual pada kartu **Hadir Hari Ini** dan
-**Sudah Absen Pulang**; memindahkan tombol **Keluar** ke menu avatar kanan atas;
-serta menambahkan animasi buka/tutup halus pada menu tersebut dan animasi
-gulir pada submenu grup sidebar Super Admin (2026-10-26;
-**belum di-commit**, menunggu uji visual lokal).
+**Pekerjaan terakhir:** merapatkan jarak vertikal menu sidebar Super Admin dan
+kepala ruangan (rapat sedang) dan menerapkan latar gradasi biru muda transparan
+ke seluruh halaman portal Super Admin dan Kepala Ruangan (2026-10-26;
+**belum di-commit**, menunggu uji visual lokal). Aset
+`src/assets/logo kutai kartanegara.png` disimpan untuk pekerjaan kop RSUD AMI
+berikutnya dan belum dipakai di UI.
 
 **Langkah berikutnya yang disarankan:**
 1. Jalankan migrasi **15**, **16**, **17**, lalu **18** berurutan di SQL Editor,
@@ -97,7 +97,9 @@ gulir pada submenu grup sidebar Super Admin (2026-10-26;
    **Belum ditentukan** kini tersembunyi selama tidak berisi pegawai. Periksa
    juga favicon tab browser, header sidebar Super Admin tanpa label role, label
    dashboard (“Dashboard”, “Total Pegawai”, tanggal aktual, “Perlu Verifikasi”),
-   dan menu **Keluar** di avatar kanan atas pada desktop serta HP.
+   dan menu **Keluar** di avatar kanan atas pada desktop serta HP. Periksa juga
+   kerapatan menu sidebar Super Admin/kepala ruangan dan latar biru muda
+   transparan pada seluruh halaman portal Super Admin dan Kepala Ruangan.
 3. Lengkapi data operasional: seksi **Grup Shift**, pola kerja di **Data Pegawai**,
    **Jadwal Shift**, dan **Hari Libur**.
 4. Pastikan migrasi 09–14 sudah dijalankan berurutan dan seluruh
@@ -131,6 +133,8 @@ gulir pada submenu grup sidebar Super Admin (2026-10-26;
 | 14 | Favicon/tab dan apple-touch-icon memakai logo resmi; label "Super Admin" dihapus dari header sidebar | `index.html`, `public/favicon-32x32.png`, `public/apple-touch-icon.png`, `src/components/layout/SidebarAdmin.jsx` | selesai | - | build lulus (base `/` dan `/PRESISI-AMI/`); uji visual belum tercatat |
 | 15 | Label dashboard disederhanakan: Dashboard, Total Pegawai, Non ASN, tanggal aktual pada Hadir dan Sudah Absen Pulang, Perlu Verifikasi | `src/pages/admin/DashboardUtama.jsx`, `src/components/layout/SidebarAdmin.jsx`, `src/components/layout/PortalAdminLayout.jsx` | selesai | - | build lulus (base `/` dan `/PRESISI-AMI/`); uji visual belum tercatat |
 | 16 | Menu akun avatar di kanan atas untuk **Keluar**; tombol Keluar mandiri dihapus dari header; responsif desktop/HP | `src/components/layout/MenuAkun.jsx`, `src/components/BarAtas.jsx`, `src/components/layout/PortalAdminLayout.jsx`, `src/components/layout/PortalKepalaLayout.jsx` | selesai | - | build lulus (base `/` dan `/PRESISI-AMI/`); uji visual belum tercatat |
+| 17 | Sidebar Super Admin/kepala ruangan lebih rapat; latar Dashboard biru muda transparan; aset logo kop RSUD AMI disimpan untuk pekerjaan berikutnya | `src/components/layout/SidebarAdmin.jsx`, `src/components/layout/SidebarKepala.jsx`, `src/components/layout/PortalAdminLayout.jsx`, `src/assets/logo kutai kartanegara.png` | selesai | - | build lulus (base `/` dan `/PRESISI-AMI/`); uji visual belum tercatat |
+| 18 | Latar biru muda transparan diterapkan ke seluruh halaman portal Super Admin dan Kepala Ruangan | `src/components/layout/PortalAdminLayout.jsx`, `src/components/layout/PortalKepalaLayout.jsx` | selesai | - | build lulus (base `/` dan `/PRESISI-AMI/`); uji visual belum tercatat |
 | UI | Penyempurnaan navigasi: tab bar, navigasi bawah mobile, menu kepala, layout portal | `src/components/ui/TabBar.jsx`, `src/components/NavigasiBawah.jsx`, `src/components/BarAtas.jsx`, `src/components/MenuKepala.jsx`, `src/components/layout/PortalKepalaLayout.jsx`, `src/index.css`, `src/pages/Dashboard.jsx` | selesai `(inferred)` | — | build lulus; uji manual belum tercatat |
 
 **Catatan:** README sudah diperbarui ke Fase 1–8 + migrasi 15–18. `verifikasi_13`
@@ -141,6 +145,46 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-26 22:20 WITA — Latar biru semua menu portal
+- **Perubahan:** latar gradasi biru muda transparan
+  (`from-sky-50/90 via-sky-50/60 to-slate-50`) yang sebelumnya hanya dipakai
+  halaman Dashboard kini diterapkan ke seluruh halaman portal Super Admin dan
+  Kepala Ruangan. Header, sidebar, dan kartu tetap putih; tidak ada perubahan
+  tata letak maupun data.
+- **File:** `src/components/layout/PortalAdminLayout.jsx`,
+  `src/components/layout/PortalKepalaLayout.jsx`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` **lulus** — 272 modul, 8,12 dtk (base `/`);
+  build `VITE_BASE_PATH=/PRESISI-AMI/` **lulus** — 7,81 dtk
+  (`NODE_OPTIONS=--max-old-space-size=4096`). Kelas gradasi terverifikasi ada di
+  CSS hasil build.
+- **Catatan/risiko:** latar kini mengikuti tinggi konten; pada halaman yang
+  sangat pendek sisa area bawah tetap slate. Belum diuji visual di browser.
+  Tidak ada perubahan database; perubahan belum di-commit. Aset
+  `src/assets/logo kutai kartanegara.png` tetap belum dipakai.
+
+### 2026-10-26 22:05 WITA — Sidebar rapat & latar dashboard
+- **Perubahan:** merapatkan jarak vertikal menu sidebar Super Admin dan Kepala
+  Ruangan dengan kerapatan sedang: padding `nav` dikurangi, item menu menjadi
+  38–40 px (sebelumnya 42–44 px), jarak antargrup dan antarsubmenu diperkecil,
+  header grup lebih ringkas, serta garis pemisah Dashboard dirapatkan. Halaman
+  **Dashboard Super Admin** kini memakai latar gradasi biru muda transparan
+  (`from-sky-50/90 via-sky-50/60 to-slate-50`) pada kolom konten; halaman admin
+  lain tetap berlatar slate. Header, sidebar, dan kartu tetap putih.
+- **File:** `src/components/layout/SidebarAdmin.jsx`,
+  `src/components/layout/SidebarKepala.jsx`,
+  `src/components/layout/PortalAdminLayout.jsx`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` **lulus** — 272 modul, 13,28 dtk (base `/`);
+  build `VITE_BASE_PATH=/PRESISI-AMI/` **lulus** — 6,56 dtk setelah
+  `NODE_OPTIONS=--max-old-space-size=4096` (percobaan pertama kena
+  `JavaScript heap out of memory`). `git diff --stat` hanya menyentuh tiga file
+  layout.
+- **Catatan/risiko:** gradasi hanya aktif bila `pathname` tepat
+  `/superadmin-portal`; sub-route Dashboard tidak ada. Jarak 38 px masih di atas
+  batas minimum sentuh yang nyaman, tetapi perlu uji visual di HP. Tidak ada
+  perubahan database; perubahan belum di-commit. Aset
+  `src/assets/logo kutai kartanegara.png` belum dipakai dan disisihkan untuk
+  pekerjaan kop RSUD AMI berikutnya.
 
 ### 2026-10-26 15:31 WITA — Animasi submenu sidebar Super Admin
 - **Perubahan:** submenu grup sidebar Super Admin (**Data & Struktur**,
@@ -526,6 +570,7 @@ dan `verifikasi_18` untuk hapus grup kosong.
 | B-14 | ~~Perubahan migrasi 15–17 belum di-commit~~ | - | **Selesai:** commit `c21ecf9` + push 2026-10-26 12:01 |
 | B-15 | Aturan jendela waktu (migrasi 17) belum dijalankan/diuji | Absen bisa ditolak atau tidak sesuai harapan | Jalankan 17 + `verifikasi_17.sql`, lalu uji absen 07.40 dan 16.31 |
 | B-16 | ~~Migrasi 18 dan UI grup sistem belum diuji/di-commit~~ | - | **Selesai:** commit `6343111` + push 2026-10-26 13:19; sisa uji `verifikasi_18.sql` |
+| B-17 | Kerapatan sidebar dan latar portal baru diuji lewat build | Tampilan di layar kecil/desktop belum terbukti | Uji visual `npm run dev` di desktop dan HP, lalu sesuaikan bila terlalu rapat/terlalu pucat |
 | B-4 | ~~`npm run build` belum dijalankan~~ | — | **Selesai:** lulus 2026-10-25 12:24 |
 | B-5 | ~~README menyebut Fase 1–7 saja~~ | — | **Selesai:** diperbarui ke Fase 1–8 + impor |
 | B-6 | ~~`verifikasi_10.sql` tidak ada di diagram README~~ | — | **Selesai:** ditambahkan ke struktur |

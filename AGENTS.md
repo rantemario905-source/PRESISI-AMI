@@ -152,6 +152,8 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-020 | 2026-10-26 15:07 | "dan juga tombol keluar dihilangkan saja, masukkan ke tombol keluar di avatar user di kanan atas jadi ketika user klik avatar di pojok kanan atas akan muncul layout tombol keluar agar lebih rapih, sesuaikan juga dengan tampilan mobile" | Membuat komponen `MenuAkun`, menghapus tombol Keluar mandiri di header portal pegawai/Super Admin/kepala ruangan, dan menampilkan logout lewat dropdown avatar yang responsif di HP | selesai | 2026-10-26 15:07 — Tanggal kartu pulang & menu akun avatar |
 | I-021 | 2026-10-26 15:17 | "tutup juga, terapkan" | Menambahkan animasi buka (160 ms) dan tutup (140 ms) pada dropdown avatar, menahan elemen saat animasi tutup lalu melepasnya dari DOM; fokus kembali ke avatar saat Esc; verifikasi build base `/` dan `/PRESISI-AMI/` | selesai | 2026-10-26 15:17 — Animasi buka/tutup menu akun |
 | I-022 | 2026-10-26 15:31 | "maksud saya menu di portal super admin di sidebar kiri ada banyak menu data & struktur dan yang lainnya itu ketika di klik dan menampilkan menu buat animasi bergulis ke bawah" | Menambahkan animasi gulir buka/tutup pada submenu grup sidebar Super Admin memakai transisi `grid-template-rows` + opacity/translate; submenu tertutup tidak dapat difokuskan; verifikasi build base `/` dan `/PRESISI-AMI/` | selesai | 2026-10-26 15:31 — Animasi submenu sidebar Super Admin |
+| I-023 | 2026-10-26 22:05 | "itu adalah logo untuk kop rsudami itu nanti kita kerjakan, [Image 1] kemudian saya minta di menu sidebar kiri portal superadmin dan kepala ruangan agar lebih mepet dan rapih lagi karna saya liat jarak pilihan tiap menu itu terlalu berjarak [Image 2] dan buat agar background dashboard dibuat background agar sedikit rapih dengan warna biru muda transparan dan menu dibawahnya dibuat sedikit lebih rapat agar kelihatan rapih" + "lnjut" | Merapatkan jarak vertikal menu sidebar Super Admin dan Kepala Ruangan (rapat sedang, target sentuh 38–40 px); menambahkan latar gradasi biru muda transparan khusus halaman Dashboard Super Admin; aset `logo kutai kartanegara.png` disimpan untuk pekerjaan kop RSUD AMI berikutnya; verifikasi build base `/` dan `/PRESISI-AMI/` | selesai | 2026-10-26 22:05 — Sidebar rapat & latar dashboard |
+| I-024 | 2026-10-26 22:20 | "berikan background latar biru untuk semua menu seperti dashboard yang barusan kamu kerjakan" | Menerapkan latar gradasi biru muda transparan ke seluruh halaman portal Super Admin dan Kepala Ruangan, bukan hanya Dashboard; verifikasi build base `/` dan `/PRESISI-AMI/` | selesai | 2026-10-26 22:20 — Latar biru semua menu portal |
 
 ---
 
@@ -164,11 +166,13 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   `2c8a775` (Fase 4-8 + UI), commit dokumen audit `4739c4a`, commit
   `c21ecf9` (migrasi 15-17, jendela absen, satu perangkat), commit
   `6343111` (hapus grup kosong, grup sistem), commit `7e32c0e` (sinkronisasi
-  dokumen audit), commit `900e916` (bilah progres navigasi), dan commit
-  `4938341` (sinkronisasi dokumen audit) yang di-push 2026-10-26 13:50.
-  Working tree berisi perubahan logo resmi, favicon, perapian sidebar, label
-  dashboard, menu akun avatar, animasi buka/tutup dropdown, dan animasi submenu
-  sidebar yang belum di-commit.
+  dokumen audit), commit `900e916` (bilah progres navigasi), commit
+  `4938341` (sinkronisasi dokumen audit), dan commit `cb80100` (logo resmi,
+  menu akun, animasi navigasi). Working tree berisi perapian jarak sidebar
+  Super Admin/kepala ruangan dan latar biru muda pada seluruh halaman portal
+  Super Admin/kepala ruangan yang belum di-commit, serta aset baru
+  `src/assets/logo kutai kartanegara.png` (untracked) untuk kop RSUD AMI yang
+  akan dikerjakan terpisah.
 - **Deploy:** GitHub Pages lewat `.github/workflows/deploy.yml`; URL live
   `https://rantemario905-source.github.io/PRESISI-AMI/`; base path
   `/PRESISI-AMI/`; secrets `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`.

@@ -200,13 +200,13 @@ export default function SidebarAdmin({ terbuka, onTutup }) {
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-3 py-3">
+        <nav className="flex-1 overflow-y-auto px-3 py-2">
           <NavLink
             to="/superadmin-portal"
             end
             onClick={onTutup}
             className={({ isActive }) =>
-              `flex min-h-[44px] items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:text-sm ${
+              `flex min-h-[40px] items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:text-sm ${
                 isActive
                   ? 'bg-sky-50 text-sky-700 ring-1 ring-inset ring-sky-100'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -217,18 +217,18 @@ export default function SidebarAdmin({ terbuka, onTutup }) {
             <span className="truncate">Dashboard</span>
           </NavLink>
 
-          <div className="my-3 border-t border-slate-100" />
+          <div className="my-2 border-t border-slate-100" />
 
           {GRUP_MENU.map((grup) => {
             const dibuka = Boolean(grupTerbuka[grup.id])
             return (
-              <div key={grup.id} className="mb-1">
+              <div key={grup.id} className="mb-0.5">
                 <button
                   type="button"
                   onClick={() => toggleGrup(grup.id)}
                   aria-expanded={dibuka}
                   aria-controls={`menu-${grup.id}`}
-                  className="flex min-h-[44px] w-full items-center justify-between gap-2 rounded-lg px-3 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                  className="flex min-h-[34px] w-full items-center justify-between gap-2 rounded-lg px-3 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
                 >
                   <span>{grup.label}</span>
                   <svg
@@ -255,7 +255,7 @@ export default function SidebarAdmin({ terbuka, onTutup }) {
                   }`}
                 >
                   <div
-                    className={`min-h-0 space-y-1 overflow-hidden pb-2 transition-[opacity,transform] duration-200 ease-out ${
+                    className={`min-h-0 space-y-0.5 overflow-hidden pb-1 transition-[opacity,transform] duration-200 ease-out ${
                       dibuka ? 'translate-y-0 opacity-100' : '-translate-y-1 opacity-0'
                     }`}
                   >
@@ -266,7 +266,7 @@ export default function SidebarAdmin({ terbuka, onTutup }) {
                         onClick={onTutup}
                         tabIndex={dibuka ? undefined : -1}
                         className={({ isActive }) =>
-                          `flex min-h-[42px] items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:text-sm ${
+                          `flex min-h-[38px] items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:text-sm ${
                             isActive
                               ? 'bg-sky-50 text-sky-700 ring-1 ring-inset ring-sky-100'
                               : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
