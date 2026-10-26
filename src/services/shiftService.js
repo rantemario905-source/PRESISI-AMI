@@ -110,35 +110,9 @@ export async function simpanJadwalBanyak(baris) {
   return baris.length
 }
 
-/* --------------------------- Finalisasi bulan --------------------------- */
-
-/** Status finalisasi jadwal satu unit pada periode "YYYY-MM-01". */
-export async function ambilFinalJadwal(unitKerja, periode) {
-  if (!unitKerja || !periode) return null
-  const { data, error } = await supabase
-    .from('jadwal_shift_final')
-    .select('unit_kerja, periode, final_oleh, final_pada')
-    .eq('unit_kerja', unitKerja)
-    .eq('periode', periode)
-    .maybeSingle()
-  if (error) throw error
-  return data ?? null
-}
-
-/** Finalisasi atau buka finalisasi jadwal unit. Hanya lewat RPC. */
-export async function finalisasiJadwal({ unitKerja, periode, final = true }) {
-  const { data, error } = await supabase.rpc('finalisasi_jadwal_unit', {
-    p_unit: unitKerja,
-    p_periode: periode,
-    p_final: Boolean(final),
-  })
-  if (error) throw error
-  return data
-}
-
 /**
  * Impor perubahan jadwal dari template CSV/XLSX.
- * Server memvalidasi ulang unit, tanggal, shift, dan status finalisasi.
+ * Server memvalidasi ulang unit, tanggal, dan shift.
  */
 export async function imporJadwalShift({ unitKerja, periode, baris }) {
   const { data, error } = await supabase.rpc('impor_jadwal_shift', {

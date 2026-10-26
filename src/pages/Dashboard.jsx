@@ -35,6 +35,7 @@ export default function Dashboard() {
   const [memuatData, setMemuatData] = useState(true)
   const [galatData, setGalatData] = useState(null)
   const [statusPerangkat, setStatusPerangkat] = useState('belum_terdaftar')
+  const [perangkatAktif, setPerangkatAktif] = useState(null)
   const [presensi, setPresensi] = useState(null)
   const [jadwal, setJadwal] = useState(null)
   const [jadwalKemarin, setJadwalKemarin] = useState(null)
@@ -58,6 +59,7 @@ export default function Dashboard() {
           ambilRiwayatPresensi(profil.id, 7),
         ])
       setStatusPerangkat(status.status)
+      setPerangkatAktif(status.data)
       setPresensi(dataPresensi)
       setJadwal(dataJadwal)
       setJadwalKemarin(dataJadwalKemarin)
@@ -155,6 +157,7 @@ export default function Dashboard() {
             {statusPerangkat !== 'approved' && (
               <KartuStatusPerangkat
                 status={statusPerangkat}
+                perangkatAktif={perangkatAktif}
                 sedangMengajukan={sedangMengajukan}
                 onAjukan={tanganiAjukanPerangkat}
               />
@@ -184,6 +187,7 @@ export default function Dashboard() {
                 {statusPerangkat === 'approved' && (
                   <KartuStatusPerangkat
                     status={statusPerangkat}
+                    perangkatAktif={perangkatAktif}
                     sedangMengajukan={sedangMengajukan}
                     onAjukan={tanganiAjukanPerangkat}
                   />

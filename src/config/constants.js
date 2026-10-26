@@ -30,3 +30,13 @@ export const MAX_AKURASI_METERS = 50
 
 /** Zona waktu rumah sakit (WITA) untuk penentuan "hari ini" */
 export const ZONA_WAKTU = 'Asia/Makassar'
+
+/**
+ * Jendela waktu absensi. Nilai yang sama juga dipakai server pada fungsi
+ * submit_presensi (supabase/schema.sql) — ubah keduanya bila berubah.
+ *
+ * - Absen masuk dibuka 20 menit sebelum jam masuk jadwal.
+ * - Absen pulang dibuka 1 menit setelah jam pulang jadwal.
+ */
+export const MENIT_AWAL_ABSEN_MASUK = 20
+export const MENIT_JEDA_ABSEN_PULANG = 1

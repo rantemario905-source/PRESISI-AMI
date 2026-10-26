@@ -147,7 +147,7 @@ export default function PengaturanPresensi() {
                   <p className="mt-0.5 text-[11px] leading-relaxed text-slate-600 sm:text-xs">
                     Tidak ada mode transisi. Pegawai shift yang belum dijadwalkan
                     tidak dapat absen dan tidak akan dibuatkan Alfa. Pastikan
-                    jadwal sudah difinalisasi sebelum periode berjalan.
+                    jadwal sudah lengkap sebelum periode berjalan.
                   </p>
                 </div>
                 <Badge variant="info">Terkunci</Badge>

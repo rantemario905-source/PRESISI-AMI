@@ -4,7 +4,7 @@
 -- Dua cara pakai:
 --   A. Satu file: jalankan seluruh file ini di SQL Editor.
 --   B. Bertahap : jalankan supabase/migrations/01_tabel.sql s.d.
---      14_impor_jadwal_shift.sql, satu per satu (disarankan bila ingin
+--      17_batas_waktu_absen.sql, satu per satu (disarankan bila ingin
 --      meminimalisir error).
 --
 -- Urutan PENTING: tabel dibuat lebih dulu, karena fungsi `is_superadmin`
@@ -442,7 +442,7 @@ on conflict (nama_shift) do nothing;
 -- ==========================================================================
 
 -- ==========================================================================
--- BAGIAN ADMIN (FASE 2) � RPC admin, policy izin, realtime
+-- BAGIAN ADMIN (FASE 2) — RPC admin, policy izin, realtime
 -- ==========================================================================
 
 -- ==========================================================================
@@ -2037,15 +2037,15 @@ commit;
 
 
 -- ==========================================================================
--- 12 â€” POLA KERJA, GRUP SHIFT, HARI LIBUR, TERLAMBAT & ALFA OTOMATIS
+-- 12 — POLA KERJA, GRUP SHIFT, HARI LIBUR, TERLAMBAT & ALFA OTOMATIS
 -- Syarat: 01 s.d. 11 sudah dijalankan.
 --
 -- Ringkasan:
 --   1. Setiap pegawai memiliki pola kerja: shift (default) atau reguler.
 --   2. Grup shift memakai master tersendiri sehingga grup kosong tetap bisa
 --      dibuat dan rename grup otomatis memperbarui unit pegawai (FK cascade).
---   3. Jam kerja reguler: Seninâ€“Kamis 08.00â€“16.30, Jumat 08.00â€“16.00,
---      Sabtuâ€“Minggu libur. Hari libur nasional/cuti bersama diinput manual.
+--   3. Jam kerja reguler: Senin–Kamis 08.00–16.30, Jumat 08.00–16.00,
+--      Sabtu–Minggu libur. Hari libur nasional/cuti bersama diinput manual.
 --   4. Presensi reguler dikunci pada akhir pekan/hari libur. Pegawai shift
 --      hanya boleh absen bila dijadwalkan, kecuali mode transisi diaktifkan.
 --   5. Keterlambatan dihitung tanpa toleransi; 08.00.01 = 1 menit.
@@ -3888,6 +3888,561 @@ $$;
 revoke execute on function public.impor_jadwal_shift(text, date, jsonb)
   from public, anon;
 grant execute on function public.impor_jadwal_shift(text, date, jsonb)
+  to authenticated;
+
+commit;
+
+-- ==========================================================================
+-- 15 - HAPUS FINALISASI JADWAL
+-- ==========================================================================
+
+begin;
+
+drop policy if exists "jadwal_kelola_kepala_unit" on public.jadwal_shift;
+
+drop function if exists public.finalisasi_jadwal_unit(text, date, boolean);
+drop function if exists public.jadwal_bulan_final(uuid, date);
+
+create or replace function public.impor_jadwal_shift(
+  p_unit text,
+  p_periode date,
+  p_baris jsonb
+) returns jsonb
+language plpgsql security definer
+set search_path = public
+as $$
+declare
+  v_unit text := trim(coalesce(p_unit, ''));
+  v_periode date;
+  v_hari_ini date := (now() at time zone 'Asia/Makassar')::date;
+  v_super boolean := public.is_superadmin();
+  v_unit_saya text := public.unit_saya();
+  v_input record;
+  v_lama public.jadwal_shift%rowtype;
+  v_jumlah integer := 0;
+  v_dibuat integer := 0;
+  v_diperbarui integer := 0;
+  v_dihapus integer := 0;
+  v_dilewati integer := 0;
+  v_duplikat integer := 0;
+begin
+  if auth.uid() is null then
+    raise exception 'Sesi login tidak valid.';
+  end if;
+
+  if v_unit = '' then
+    raise exception 'Unit kerja wajib dipilih.';
+  end if;
+
+  if p_periode is null then
+    raise exception 'Periode wajib dipilih.';
+  end if;
+
+  v_periode := date_trunc('month', p_periode)::date;
+
+  if not exists (
+    select 1 from public.grup_shift g where g.nama = v_unit
+  ) then
+    raise exception 'Grup shift tidak ditemukan.';
+  end if;
+
+  if p_baris is null or jsonb_typeof(p_baris) <> 'array' then
+    raise exception 'Data impor tidak valid.';
+  end if;
+
+  if jsonb_array_length(p_baris) = 0 then
+    raise exception 'Tidak ada baris jadwal yang akan diimpor.';
+  end if;
+
+  if jsonb_array_length(p_baris) > 10000 then
+    raise exception 'Jumlah baris impor terlalu banyak (maksimal 10.000).';
+  end if;
+
+  if not v_super then
+    if not public.is_kepala_ruangan()
+       or v_unit_saya is distinct from v_unit then
+      raise exception 'Anda hanya dapat mengimpor jadwal unit sendiri.';
+    end if;
+
+    if v_periode < date_trunc('month', v_hari_ini)::date then
+      raise exception 'Jadwal bulan yang sudah lewat hanya dapat diimpor Super Admin.';
+    end if;
+  end if;
+
+  for v_input in
+    select *
+      from jsonb_to_recordset(p_baris)
+        as x(user_id uuid, tanggal date, shift_id uuid, aksi text)
+  loop
+    v_jumlah := v_jumlah + 1;
+
+    if v_input.user_id is null then
+      raise exception 'Baris %: user_id wajib diisi.', v_jumlah;
+    end if;
+
+    if v_input.tanggal is null then
+      raise exception 'Baris %: tanggal wajib diisi.', v_jumlah;
+    end if;
+
+    if v_input.tanggal < v_periode
+       or v_input.tanggal >= (v_periode + interval '1 month')::date then
+      raise exception 'Baris %: tanggal % di luar periode %.',
+        v_jumlah,
+        v_input.tanggal,
+        to_char(v_periode, 'YYYY-MM');
+    end if;
+
+    if lower(trim(coalesce(v_input.aksi, ''))) not in ('simpan', 'hapus') then
+      raise exception 'Baris %: aksi harus simpan atau hapus.', v_jumlah;
+    end if;
+
+    if not exists (
+      select 1
+        from public.pegawai p
+       where p.id = v_input.user_id
+         and p.role = 'pegawai'
+         and p.pola_kerja = 'shift'
+         and p.unit_kerja = v_unit
+    ) then
+      raise exception 'Baris %: pegawai bukan pegawai shift di unit ini.', v_jumlah;
+    end if;
+
+    if lower(trim(v_input.aksi)) = 'simpan' then
+      if v_input.shift_id is null then
+        raise exception 'Baris %: shift wajib dipilih.', v_jumlah;
+      end if;
+
+      if not exists (
+        select 1 from public.shift_master s where s.id = v_input.shift_id
+      ) then
+        raise exception 'Baris %: shift tidak ditemukan.', v_jumlah;
+      end if;
+    end if;
+
+    if not v_super and v_input.tanggal < v_hari_ini then
+      raise exception 'Baris %: tanggal sebelum hari ini hanya dapat diubah Super Admin.',
+        v_jumlah;
+    end if;
+  end loop;
+
+  select count(*) into v_duplikat
+    from (
+      select user_id, tanggal
+        from jsonb_to_recordset(p_baris)
+          as x(user_id uuid, tanggal date, shift_id uuid, aksi text)
+       group by user_id, tanggal
+      having count(*) > 1
+    ) d;
+
+  if v_duplikat > 0 then
+    raise exception 'Terdapat % pasangan pegawai/tanggal ganda dalam file.', v_duplikat;
+  end if;
+
+  for v_input in
+    select *
+      from jsonb_to_recordset(p_baris)
+        as x(user_id uuid, tanggal date, shift_id uuid, aksi text)
+  loop
+    select * into v_lama
+      from public.jadwal_shift js
+     where js.user_id = v_input.user_id
+       and js.tanggal = v_input.tanggal
+     for update;
+
+    if lower(trim(v_input.aksi)) = 'hapus' then
+      if found then
+        delete from public.jadwal_shift
+         where user_id = v_input.user_id
+           and tanggal = v_input.tanggal;
+        v_dihapus := v_dihapus + 1;
+      else
+        v_dilewati := v_dilewati + 1;
+      end if;
+    elsif found then
+      if v_lama.shift_id is distinct from v_input.shift_id then
+        update public.jadwal_shift
+           set shift_id = v_input.shift_id
+         where user_id = v_input.user_id
+           and tanggal = v_input.tanggal;
+        v_diperbarui := v_diperbarui + 1;
+      else
+        v_dilewati := v_dilewati + 1;
+      end if;
+    else
+      insert into public.jadwal_shift (user_id, tanggal, shift_id)
+      values (v_input.user_id, v_input.tanggal, v_input.shift_id);
+      v_dibuat := v_dibuat + 1;
+    end if;
+  end loop;
+
+  return jsonb_build_object(
+    'status', 'ok',
+    'unit_kerja', v_unit,
+    'periode', v_periode,
+    'dibuat', v_dibuat,
+    'diperbarui', v_diperbarui,
+    'dihapus', v_dihapus,
+    'dilewati', v_dilewati
+  );
+end;
+$$;
+
+revoke execute on function public.impor_jadwal_shift(text, date, jsonb)
+  from public, anon;
+grant execute on function public.impor_jadwal_shift(text, date, jsonb)
+  to authenticated;
+
+drop table if exists public.jadwal_shift_final;
+
+create policy "jadwal_kelola_kepala_unit" on public.jadwal_shift
+  for all to authenticated
+  using (
+    public.is_kepala_ruangan()
+    and public.bisa_kelola_jadwal(user_id)
+    and tanggal >= (now() at time zone 'Asia/Makassar')::date
+  )
+  with check (
+    public.is_kepala_ruangan()
+    and public.bisa_kelola_jadwal(user_id)
+    and tanggal >= (now() at time zone 'Asia/Makassar')::date
+  );
+
+commit;
+
+-- ==========================================================================
+-- 16 - SATU PERANGKAT AKTIF PER PEGAWAI
+-- ==========================================================================
+
+begin;
+
+delete from public.perangkat;
+
+drop index if exists public.uq_perangkat_disetujui;
+
+create unique index if not exists uq_perangkat_aktif
+  on public.perangkat (user_id)
+  where status in ('pending', 'approved');
+
+create or replace function public.punya_perangkat_aktif(p_user uuid)
+returns boolean
+language sql stable security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+      from public.perangkat
+     where user_id = p_user
+       and status in ('pending', 'approved')
+  );
+$$;
+
+revoke execute on function public.punya_perangkat_aktif(uuid) from public, anon;
+grant execute on function public.punya_perangkat_aktif(uuid) to authenticated;
+
+drop policy if exists "perangkat_ajukan_pending" on public.perangkat;
+create policy "perangkat_ajukan_pending" on public.perangkat
+  for insert to authenticated
+  with check (
+    user_id = auth.uid()
+    and status = 'pending'
+    and not public.punya_perangkat_aktif(auth.uid())
+  );
+
+drop policy if exists "perangkat_ajukan_ulang" on public.perangkat;
+create policy "perangkat_ajukan_ulang" on public.perangkat
+  for update to authenticated
+  using (
+    user_id = auth.uid()
+    and status <> 'approved'
+    and not public.punya_perangkat_aktif(auth.uid())
+  )
+  with check (user_id = auth.uid() and status = 'pending');
+
+create or replace function public.setujui_perangkat(p_id uuid)
+returns jsonb
+language plpgsql security definer
+set search_path = public
+as $$
+declare
+  v_user uuid;
+  v_status text;
+begin
+  if not public.is_superadmin() then
+    raise exception 'Hanya Super Admin yang dapat menyetujui perangkat.';
+  end if;
+
+  select user_id, status
+    into v_user, v_status
+    from public.perangkat
+   where id = p_id
+   for update;
+
+  if v_user is null then
+    raise exception 'Pengajuan perangkat tidak ditemukan.';
+  end if;
+
+  if v_status <> 'pending' then
+    raise exception 'Hanya pengajuan yang masih menunggu yang dapat disetujui.';
+  end if;
+
+  if exists (
+    select 1
+      from public.perangkat
+     where user_id = v_user
+       and status = 'approved'
+       and id <> p_id
+  ) then
+    raise exception 'Pegawai masih memiliki perangkat aktif. Reset perangkat lama terlebih dahulu.';
+  end if;
+
+  update public.perangkat
+     set status = 'rejected',
+         catatan = coalesce(catatan, 'Ditolak karena ada pengajuan perangkat lain')
+   where user_id = v_user
+     and status = 'pending'
+     and id <> p_id;
+
+  update public.perangkat
+     set status = 'approved',
+         disetujui_pada = now(),
+         disetujui_oleh = auth.uid(),
+         catatan = null
+   where id = p_id;
+
+  return jsonb_build_object('status', 'ok', 'pesan', 'Perangkat disetujui.');
+end;
+$$;
+
+revoke execute on function public.setujui_perangkat(uuid) from public, anon;
+grant execute on function public.setujui_perangkat(uuid) to authenticated;
+
+commit;
+
+-- ==========================================================================
+-- 17 - BATAS WAKTU ABSEN
+-- ==========================================================================
+
+begin;
+
+create or replace function public.submit_presensi(
+  p_device_token text,
+  p_tipe text,
+  p_lat double precision,
+  p_lng double precision,
+  p_akurasi double precision,
+  p_is_mocked boolean default false
+) returns jsonb
+language plpgsql security definer
+set search_path = public
+as $$
+declare
+  v_user uuid := auth.uid();
+  v_hari date := (now() at time zone 'Asia/Makassar')::date;
+  v_waktu timestamptz := now();
+  v_status text;
+  v_jarak double precision;
+  v_row public.presensi%rowtype;
+  v_jadwal record;
+  v_jadwal_kemarin record;
+  v_tanggal_kerja date := v_hari;
+  v_mulai timestamptz;
+  v_selesai timestamptz;
+  v_menit integer := 0;
+begin
+  if v_user is null then
+    raise exception 'Sesi Anda tidak valid. Silakan login kembali.';
+  end if;
+  if p_tipe not in ('masuk', 'pulang') then
+    raise exception 'Jenis absensi tidak dikenal.';
+  end if;
+
+  select status into v_status
+    from public.perangkat
+   where user_id = v_user and device_token = p_device_token;
+
+  if v_status is null then
+    raise exception 'Perangkat ini belum terdaftar. Ajukan verifikasi perangkat terlebih dahulu.';
+  end if;
+  if v_status <> 'approved' then
+    raise exception 'Perangkat Anda sedang menunggu persetujuan Admin IT. Tombol absen terkunci.';
+  end if;
+
+  if coalesce(p_is_mocked, false) or p_akurasi is null or p_akurasi <= 0 then
+    raise exception 'Terdeteksi menggunakan Fake GPS / Mock Location. Absensi dibatalkan.';
+  end if;
+  if p_akurasi > 50 then
+    raise exception 'Akurasi GPS tidak wajar (% m). Coba lagi di ruang terbuka.', round(p_akurasi)::text;
+  end if;
+
+  select public.haversine(-0.23861315731059254, 117.41485548535888, p_lat, p_lng)
+    into v_jarak;
+  if v_jarak > 100 then
+    raise exception 'Anda berada di luar radius 100 meter dari RSUD AMI. Jarak Anda saat ini % meter.',
+      round(v_jarak)::text;
+  end if;
+
+  if p_tipe = 'masuk' then
+    select * into v_jadwal from public.jadwal_kerja(v_user, v_hari);
+
+    if v_jadwal.pola_kerja = 'shift' and not v_jadwal.terjadwal then
+      select * into v_jadwal_kemarin from public.jadwal_kerja(v_user, v_hari - 1);
+      if v_jadwal_kemarin.pola_kerja = 'shift'
+         and v_jadwal_kemarin.terjadwal
+         and v_jadwal_kemarin.jam_mulai is not null
+         and v_jadwal_kemarin.jam_selesai is not null
+         and v_jadwal_kemarin.jam_selesai <= v_jadwal_kemarin.jam_mulai then
+        v_selesai := public.waktu_wita(v_hari - 1, v_jadwal_kemarin.jam_selesai) + interval '1 day';
+        if v_waktu <= v_selesai then
+          v_tanggal_kerja := v_hari - 1;
+          v_jadwal := v_jadwal_kemarin;
+        end if;
+      end if;
+    end if;
+
+    if not coalesce(v_jadwal.boleh_absen, false) then
+      raise exception '%', coalesce(v_jadwal.pesan_jadwal, 'Anda tidak dijadwalkan untuk absensi hari ini.');
+    end if;
+
+    if coalesce(v_jadwal.terjadwal, false)
+       and v_jadwal.jam_mulai is not null
+       and v_jadwal.jam_selesai is not null then
+      v_mulai := public.waktu_wita(v_tanggal_kerja, v_jadwal.jam_mulai);
+      v_selesai := public.waktu_wita(v_tanggal_kerja, v_jadwal.jam_selesai);
+      if v_jadwal.jam_selesai <= v_jadwal.jam_mulai then
+        v_selesai := v_selesai + interval '1 day';
+      end if;
+
+      if v_waktu < v_mulai - interval '20 minutes' then
+        raise exception 'Absen masuk baru dapat dilakukan mulai pukul % WITA (20 menit sebelum jam masuk %).',
+          to_char((v_mulai - interval '20 minutes') at time zone 'Asia/Makassar', 'HH24:MI'),
+          to_char(v_mulai at time zone 'Asia/Makassar', 'HH24:MI');
+      end if;
+
+      if v_waktu > v_selesai then
+        raise exception 'Jam kerja Anda sudah berakhir. Absensi tidak dapat dilakukan.';
+      end if;
+
+      if v_waktu > v_mulai then
+        v_menit := ceil(extract(epoch from (v_waktu - v_mulai)) / 60.0)::int;
+      else
+        v_menit := 0;
+      end if;
+    end if;
+
+    select * into v_row
+      from public.presensi
+     where user_id = v_user and tanggal = v_tanggal_kerja
+     for update;
+
+    if found then
+      if v_row.jam_masuk is not null then
+        raise exception 'Anda sudah melakukan absen masuk pada hari kerja tersebut.';
+      end if;
+      if v_row.status_kehadiran in ('Sakit', 'Cuti', 'Dinas Luar') then
+        raise exception 'Anda tercatat % pada hari kerja tersebut. Absensi tidak dapat dilakukan.',
+          v_row.status_kehadiran;
+      end if;
+      if v_row.status_kehadiran = 'Koreksi' or v_row.dikoreksi_oleh is not null then
+        raise exception 'Presensi pada hari kerja tersebut sudah dikoreksi oleh Super Admin.';
+      end if;
+
+      update public.presensi
+         set jam_masuk = v_waktu,
+             lokasi_masuk = jsonb_build_object(
+               'lat', p_lat,
+               'lng', p_lng,
+               'akurasi', round(p_akurasi::numeric, 1)
+             ),
+             jarak_masuk = round(v_jarak::numeric, 1),
+             status_kehadiran = 'Hadir',
+             menit_terlambat = v_menit,
+             device_token = p_device_token
+       where id = v_row.id
+       returning * into v_row;
+    else
+      insert into public.presensi
+        (user_id, tanggal, jam_masuk, lokasi_masuk, jarak_masuk,
+         status_kehadiran, menit_terlambat, device_token)
+      values
+        (v_user, v_tanggal_kerja, v_waktu,
+         jsonb_build_object(
+           'lat', p_lat,
+           'lng', p_lng,
+           'akurasi', round(p_akurasi::numeric, 1)
+         ),
+         round(v_jarak::numeric, 1), 'Hadir', v_menit, p_device_token)
+      returning * into v_row;
+    end if;
+  else
+    select * into v_row
+      from public.presensi
+     where user_id = v_user
+       and jam_masuk is not null
+       and jam_pulang is null
+       and tanggal >= v_hari - 1
+     order by tanggal desc
+     limit 1
+     for update;
+
+    if not found then
+      if exists (
+        select 1 from public.presensi
+         where user_id = v_user and tanggal = v_hari and jam_masuk is null
+      ) then
+        raise exception 'Anda belum melakukan absen masuk. Silakan absen hadir terlebih dahulu.';
+      end if;
+      raise exception 'Anda sudah melakukan absen pulang hari ini.';
+    end if;
+
+    select * into v_jadwal from public.jadwal_kerja(v_user, v_row.tanggal);
+    if coalesce(v_jadwal.terjadwal, false)
+       and v_jadwal.jam_mulai is not null
+       and v_jadwal.jam_selesai is not null then
+      v_mulai := public.waktu_wita(v_row.tanggal, v_jadwal.jam_mulai);
+      v_selesai := public.waktu_wita(v_row.tanggal, v_jadwal.jam_selesai);
+      if v_jadwal.jam_selesai <= v_jadwal.jam_mulai then
+        v_selesai := v_selesai + interval '1 day';
+      end if;
+
+      if v_waktu < v_selesai + interval '1 minute' then
+        raise exception 'Absen pulang baru dapat dilakukan mulai pukul % WITA (setelah jam pulang %).',
+          to_char((v_selesai + interval '1 minute') at time zone 'Asia/Makassar', 'HH24:MI'),
+          to_char(v_selesai at time zone 'Asia/Makassar', 'HH24:MI');
+      end if;
+    end if;
+
+    update public.presensi
+       set jam_pulang = v_waktu,
+           lokasi_pulang = jsonb_build_object(
+             'lat', p_lat,
+             'lng', p_lng,
+             'akurasi', round(p_akurasi::numeric, 1)
+           ),
+           jarak_pulang = round(v_jarak::numeric, 1)
+     where id = v_row.id
+     returning * into v_row;
+  end if;
+
+  return jsonb_build_object(
+    'status', 'ok',
+    'tipe', p_tipe,
+    'tanggal', v_row.tanggal,
+    'waktu', case when p_tipe = 'masuk' then v_row.jam_masuk else v_row.jam_pulang end,
+    'jarak', round(v_jarak::numeric, 1),
+    'menit_terlambat', coalesce(v_row.menit_terlambat, 0),
+    'pesan', case
+      when p_tipe = 'masuk' and coalesce(v_row.menit_terlambat, 0) > 0
+        then 'Absen hadir berhasil dicatat. Terlambat ' || v_row.menit_terlambat || ' menit.'
+      when p_tipe = 'masuk' then 'Absen hadir berhasil dicatat.'
+      else 'Absen pulang berhasil dicatat.'
+    end
+  );
+end;
+$$;
+
+revoke execute on function public.submit_presensi(text, text, double precision, double precision, double precision, boolean)
+  from public, anon;
+grant execute on function public.submit_presensi(text, text, double precision, double precision, double precision, boolean)
   to authenticated;
 
 commit;

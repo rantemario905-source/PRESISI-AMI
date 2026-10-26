@@ -140,7 +140,7 @@ export default function VerifikasiPerangkat() {
     <>
       <KepalaHalaman
         judul="Verifikasi & Reset Perangkat"
-        deskripsi="Setiap pegawai hanya boleh memiliki satu perangkat aktif untuk absensi."
+        deskripsi="Setiap pegawai hanya boleh memiliki satu perangkat aktif. Untuk mengganti perangkat, reset perangkat lama terlebih dahulu, lalu pegawai mengajukan dari perangkat baru."
         aksi={
           <Button variant="sekunder" size="sm" onClick={() => muat(tab)} disabled={memuat}>
             Muat ulang

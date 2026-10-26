@@ -11,9 +11,11 @@ Aplikasi absensi pegawai non-ASN RSUD Aji Muhammad Idris.
 
 - **Frontend:** React 18 + Vite 5 + Tailwind CSS 3 + React Router 6.
 - **Backend:** Supabase (Postgres, Auth, Storage, RPC `SECURITY DEFINER`).
-- **Fitur inti:** geofencing 100 m, anti Fake GPS, device binding, presensi
-  shift/reguler, jadwal shift, hari libur, keterlambatan, Alfa otomatis,
-  Dinas/Sakit/Cuti, koreksi presensi, rekapitulasi, impor jadwal CSV/XLSX.
+- **Fitur inti:** geofencing 100 m, anti Fake GPS, device binding satu perangkat
+  aktif per pegawai, presensi shift/reguler dengan jendela waktu (masuk 20 menit
+  sebelum jam masuk, pulang 1 menit setelah jam pulang), jadwal shift, hari
+  libur, keterlambatan, Alfa otomatis, Dinas/Sakit/Cuti, koreksi presensi,
+  rekapitulasi, impor jadwal CSV/XLSX.
 - **Peran:** `pegawai`, `superadmin`, dan status `kepala_ruangan` (bukan role
   terpisah).
 - **Bahasa:** UI, dokumentasi, dan komentar ditulis dalam **Bahasa Indonesia**.
@@ -36,7 +38,7 @@ npm run preview      # pratinjau hasil build
 - Skrip bantu (butuh Secret key, jangan pernah di-commit):
   `node scripts/impor-akun.mjs ...`, `node scripts/verifikasi-impor.mjs ...`.
 
-**Urutan migrasi wajib:** `01 → 02 → ... → 14`, satu per satu. Jangan mengulang
+**Urutan migrasi wajib:** `01 → 02 → ... → 17`, satu per satu. Jangan mengulang
 migrasi lama bila tidak diperlukan. `supabase/schema.sql` adalah gabungan
 seluruh migrasi untuk instalasi sekali jalan.
 
@@ -56,7 +58,7 @@ seluruh migrasi untuk instalasi sekali jalan.
 | UI dasar | `src/components/ui/*` | Button, Badge, Alert, Modal, TabBar, dll. |
 | Layout | `src/components/layout/*` | Portal admin & kepala ruangan |
 | Halaman | `src/pages/**` | `admin/` untuk portal Super Admin/kepala |
-| Database | `supabase/migrations/01–14` | Skema, RLS, RPC, seed |
+| Database | `supabase/migrations/01–17` | Skema, RLS, RPC, seed |
 | Verifikasi DB | `supabase/verifikasi_*.sql` | Pemeriksaan pasca-migrasi |
 | Cron Alfa | `supabase/jadwal_alfa.sql` | Opsional, butuh `pg_cron` |
 
@@ -64,7 +66,9 @@ seluruh migrasi untuk instalasi sekali jalan.
 
 ## 4. Aturan Wajib
 
-1. **Jangan commit** kecuali user meminta secara eksplisit.
+1. **Jangan commit atau push** kecuali user memerintahkan secara eksplisit.
+   Setelah tugas selesai, biarkan perubahan di working tree agar user dapat
+   menguji lokal terlebih dahulu.
 2. **Jangan menyentuh `.env`** dan jangan pernah menulis secret/API key ke repo,
    log, atau dokumen.
 3. **Koordinat pusat ada di dua tempat:** `src/config/constants.js` dan
@@ -72,8 +76,8 @@ seluruh migrasi untuk instalasi sekali jalan.
 4. **Bucket `dokumen-izin` tetap privat.** Jangan mengubah policy menjadi publik.
 5. **Validasi server adalah sumber kebenaran.** Jangan memindahkan aturan keamanan
    (jarak, jadwal, peran, duplikasi) hanya ke klien.
-6. **Jangan mengaktifkan Alfa otomatis** sebelum jadwal lengkap, hari libur
-   terisi, dan finalisasi diuji.
+6. **Jangan mengaktifkan Alfa otomatis** sebelum jadwal lengkap dan hari libur
+   terisi. Tidak ada finalisasi bulanan; sel kosong berarti belum dijadwalkan.
 7. **Migrasi bertahap** dan jangan mengubah migrasi yang sudah dijalankan di
    produksi; buat migrasi baru.
 8. **Placeholder & teks UI dalam Bahasa Indonesia.** Jangan menambah komentar kode
@@ -81,6 +85,10 @@ seluruh migrasi untuk instalasi sekali jalan.
 9. **Verifikasi sebelum klaim selesai:** jalankan `npm run build` bila mengubah
    kode, dan sebutkan bukti/keluarannya.
 10. **Perbarui dokumentasi audit** setiap selesai tugas (lihat bagian 6).
+
+**Alur Git (wajib):** pekerjaan selesai → perubahan **tetap lokal** → user uji
+lokal → perbaiki bila ada temuan → **commit/push hanya setelah perintah user**.
+Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 
 ---
 
@@ -93,10 +101,13 @@ seluruh migrasi untuk instalasi sekali jalan.
 3. **Saat bekerja:** ikuti konvensi file/folder yang ada; jangan mengubah gaya
    kode secara sepihak.
 4. **Setelah selesai:** tambahkan entri di `progress.md` (Log Kronologis) dan
-   perbarui Status Terkini + backlog.
-5. **Klaim "selesai"/"lulus" hanya dengan bukti** perintah verifikasi dan
+   perbarui Status Terkini + backlog — **tanpa commit/push**. Laporkan file yang
+   berubah dan tunggu perintah user.
+5. **Commit/push hanya bila user memerintahkan.** Sebelum itu, verifikasi lokal
+   (`npm run build` dan/atau uji manual) dan perbaiki temuan.
+6. **Klaim "selesai"/"lulus" hanya dengan bukti** perintah verifikasi dan
    hasilnya. Bila belum dijalankan, tulis "belum diverifikasi".
-6. Bila user meminta sesuatu yang bertentangan dengan aturan keamanan di atas,
+7. Bila user meminta sesuatu yang bertentangan dengan aturan keamanan di atas,
    tolak dengan singkat dan tawarkan alternatif.
 
 ---
@@ -125,6 +136,10 @@ seluruh migrasi untuk instalasi sekali jalan.
 | I-004 | 2026-10-25 12:37 | "selanjutnya kita commit dan push ke githup untuk masuk tahap deploying" | Review perubahan, commit seluruh pekerjaan Fase 4–8 + UI + dokumen audit, lalu push ke GitHub | selesai | 2026-10-25 12:48 — Push ke GitHub berhasil |
 | I-005 | 2026-10-25 12:55 | "tahap 1 sudah selesai, deploy vercel tidak perlu cukup menggunakan github langsung sjaa" | Mengganti target deploy ke GitHub Pages: workflow Actions, base path, basename router, fallback 404 | selesai | 2026-10-25 13:19 — Deploy GitHub Pages aktif |
 | I-006 | 2026-10-25 13:00 | "GitHub Pages (Recommended)" (jawaban pilihan) | Menyetujui GitHub Pages sebagai target deploy | selesai | 2026-10-25 13:01 — Konfigurasi deploy GitHub Pages |
+| I-007 | 2026-10-25 14:04 | "sudah saya coba dan berhasil semua, cuma saya akan kasih perintah ke kamu bahwa kamu tidak boleh commit dan push ke github sbeelum saya perintahkan karna saya mau tes local dulu jika ada kerjaan selesai baru jika fix baru commit dan push" | Menetapkan alur Git baru: perubahan ditahan lokal, user uji dulu, commit/push hanya setelah perintah eksplisit; memperbarui `AGENTS.md` + `progress.md` tanpa commit | selesai | 2026-10-25 14:04 — Aturan commit/push & uji perangkat |
+| I-008 | 2026-10-25 14:2x | Instruksi sesi yang terputus (teks verbatim tidak tersimpan): hapus finalisasi jadwal + terapkan satu perangkat aktif per pegawai `(rekonstruksi dari TODO panel & diff working tree)` | Membuat migrasi 15 & 16, verifikasi 15 & 16, menyesuaikan schema/cleanup/frontend/dokumen | berjalan → dilanjutkan pada I-009 | 2026-10-26 — Migrasi 15–16 |
+| I-009 | 2026-10-26 | "kemarin pekerjaan terhenti karna limit kamu lanjutkan pekerjaan yang belum selesai kemarin" | Melanjutkan pekerjaan I-008: cek diff, perbaiki mojibake, lengkapi dokumen, jalankan `npm run build` | selesai | 2026-10-26 — Migrasi 15–16 |
+| I-010 | 2026-10-26 | "sudah testing absen dan kita set akan jam absen masuk baru bisa di klik 15 menit sebelum jam terlambat semisal jam 8 pagi pegawai baru bisa absen 20 menit sebelum jam 8 dan mengisi jam pulang baru bisa di isi sebelum jam pulang lewat emisal jam pulnag 16:30 absen pulang baru bisa di isi di jam 16:31" | Menambahkan jendela waktu absensi (klarifikasi user: masuk dibuka 20 menit sebelum jam masuk; pulang dibuka 16.31 untuk jam pulang 16.30; berlaku reguler & shift termasuk lintas hari): validasi klien + server, pesan jam buka, migrasi 17 | selesai | 2026-10-26 — Jendela waktu absensi |
 
 ---
 

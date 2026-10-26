@@ -6,16 +6,14 @@
  * Hanya pegawai pola Shift yang ditampilkan. Pegawai Reguler memakai jam
  * kerja tetap dan tidak perlu dijadwalkan di sini.
  *
- * Mode kepala ruangan: unit terkunci ke unit sendiri, hanya tanggal besok
- * dan seterusnya, serta tidak dapat menulis setelah bulan difinalisasi.
+ * Mode kepala ruangan: unit terkunci ke unit sendiri dan hanya tanggal hari
+ * ini (WITA) serta seterusnya. Setiap perubahan sel langsung disimpan.
  * ==========================================================================
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ambilFinalJadwal,
   ambilJadwalRentang,
   ambilMasterShift,
-  finalisasiJadwal,
   hapusJadwalSel,
   imporJadwalShift,
   simpanJadwalBanyak,
@@ -29,7 +27,6 @@ import { useAuth } from '../../context/AuthContext.jsx'
 import {
   akhirBulan,
   daftarTanggal,
-  formatJam,
   formatTanggal,
   formatTanggalRingkas,
   hariIni,
@@ -97,11 +94,6 @@ function jamPendek(jam) {
   return String(jam ?? '').slice(0, 5)
 }
 
-function tanggalBesok() {
-  const [tahun, bulan, hari] = hariIni().split('-').map(Number)
-  return new Date(Date.UTC(tahun, bulan - 1, hari + 1)).toISOString().slice(0, 10)
-}
-
 export default function JadwalShift({ mode = 'admin' }) {
   const { profil } = useAuth()
   const modeKepala = mode === 'kepala'
@@ -112,9 +104,6 @@ export default function JadwalShift({ mode = 'admin' }) {
   const [pegawai, setPegawai] = useState([])
   const [jadwal, setJadwal] = useState([])
   const [liburMap, setLiburMap] = useState(new Map())
-  const [finalJadwal, setFinalJadwal] = useState(null)
-  const [memuatFinal, setMemuatFinal] = useState(false)
-  const [memprosesFinal, setMemprosesFinal] = useState(false)
 
   const [periode, setPeriode] = useState(periodeBulanIni())
   const [seksi, setSeksi] = useState('semua')
@@ -201,24 +190,6 @@ export default function JadwalShift({ mode = 'admin' }) {
     }
   }, [periode])
 
-  const muatFinal = useCallback(async () => {
-    if (!grupNama || !periodeValid(periode)) {
-      setFinalJadwal(null)
-      setMemuatFinal(false)
-      return
-    }
-    setMemuatFinal(true)
-    setFinalJadwal(null)
-    try {
-      const data = await ambilFinalJadwal(grupNama, `${periode}-01`)
-      setFinalJadwal(data)
-    } catch (err) {
-      setGalat(err.message || 'Gagal memuat status finalisasi jadwal.')
-    } finally {
-      setMemuatFinal(false)
-    }
-  }, [grupNama, periode])
-
   useEffect(() => {
     muatAwal()
   }, [muatAwal])
@@ -226,10 +197,6 @@ export default function JadwalShift({ mode = 'admin' }) {
   useEffect(() => {
     muatJadwal()
   }, [muatJadwal])
-
-  useEffect(() => {
-    muatFinal()
-  }, [muatFinal])
 
   const grupTersaring = useMemo(() => {
     if (modeKepala) return grup.filter((g) => g.nama === unitKepala)
@@ -303,15 +270,12 @@ export default function JadwalShift({ mode = 'admin' }) {
   )
 
   const pegawaiMobile = pegawaiGrup.find((p) => p.id === pegawaiMobileId)
-  const finalTerkunci = modeKepala && Boolean(finalJadwal)
   const periodeMasaDepan = !modeKepala || periode >= periodeBulanIni()
-  const bolehFinalisasi = periodeMasaDepan
 
   const tanggalTemplate = useMemo(() => {
     if (!modeKepala) return tanggalList
-    if (memuatFinal || finalTerkunci) return []
-    return tanggalList.filter((tanggal) => tanggal > hariIni())
-  }, [modeKepala, memuatFinal, finalTerkunci, tanggalList])
+    return tanggalList.filter((tanggal) => tanggal >= hariIni())
+  }, [modeKepala, tanggalList])
 
   const bisaTemplate =
     Boolean(grupNama) &&
@@ -320,17 +284,13 @@ export default function JadwalShift({ mode = 'admin' }) {
     tanggalTemplate.length > 0 &&
     !memuat &&
     !memuatJadwal &&
-    !memuatFinal &&
-    (!modeKepala || (periodeMasaDepan && !finalTerkunci))
+    (!modeKepala || periodeMasaDepan)
 
   function alasanTemplate() {
-    if (memuat || memuatJadwal || memuatFinal) return 'Memuat data jadwal…'
+    if (memuat || memuatJadwal) return 'Memuat data jadwal…'
     if (!grupNama) return 'Pilih grup/unit terlebih dahulu.'
     if (!pegawaiGrup.length) return 'Tidak ada pegawai shift di grup ini.'
     if (!master.length) return 'Master shift belum tersedia.'
-    if (modeKepala && finalTerkunci) {
-      return 'Jadwal bulan ini sudah final. Hubungi Super Admin untuk koreksi.'
-    }
     if (modeKepala && !periodeMasaDepan) {
       return 'Bulan lampau hanya dapat dikelola Super Admin.'
     }
@@ -342,19 +302,12 @@ export default function JadwalShift({ mode = 'admin' }) {
 
   function bolehUbahTanggal(tanggal) {
     if (!modeKepala) return true
-    if (memuatFinal || finalTerkunci) return false
-    return tanggal > hariIni()
+    return tanggal >= hariIni()
   }
 
   function alasanTerkunci(tanggal) {
-    if (memuatFinal) {
-      return 'Memuat status finalisasi jadwal…'
-    }
-    if (finalTerkunci) {
-      return 'Jadwal bulan ini sudah final. Hubungi Super Admin untuk koreksi.'
-    }
-    if (modeKepala && tanggal <= hariIni()) {
-      return 'Tanggal hari ini dan sebelumnya hanya dapat diubah Super Admin.'
+    if (modeKepala && tanggal < hariIni()) {
+      return 'Tanggal sebelum hari ini hanya dapat diubah Super Admin.'
     }
     return undefined
   }
@@ -445,10 +398,6 @@ export default function JadwalShift({ mode = 'admin' }) {
       setGalat('Pilih bulan terlebih dahulu.')
       return
     }
-    if (modeKepala && finalTerkunci) {
-      setGalat('Jadwal bulan ini sudah final. Hubungi Super Admin untuk koreksi.')
-      return
-    }
     if (modeKepala && periode < periodeBulanIni()) {
       setGalat('Jadwal bulan yang sudah lewat hanya dapat diubah Super Admin.')
       return
@@ -457,7 +406,7 @@ export default function JadwalShift({ mode = 'admin' }) {
     const sumber = geserBulan(periode, -1)
     const konfirmasi = window.confirm(
       `Salin pola jadwal ${namaBulan(sumber)} ke ${namaBulan(periode)} untuk ${pegawaiGrup.length} pegawai shift di ${grupNama}? Jadwal pada tanggal yang sama akan ditimpa. Tanggal tanpa jadwal sumber tidak diubah.${
-        modeKepala ? ' Hanya tanggal setelah hari ini yang akan diisi.' : ''
+        modeKepala ? ' Hanya tanggal hari ini dan seterusnya yang akan diisi.' : ''
       }`,
     )
     if (!konfirmasi) return
@@ -498,13 +447,13 @@ export default function JadwalShift({ mode = 'admin' }) {
       }
 
       const barisTersalin = modeKepala
-        ? barisBaru.filter((baris) => baris.tanggal > hariIni())
+        ? barisBaru.filter((baris) => baris.tanggal >= hariIni())
         : barisBaru
 
       if (!barisTersalin.length) {
         setGalat(
           modeKepala
-            ? 'Tidak ada tanggal setelah hari ini yang dapat disalin. Pilih bulan berikutnya.'
+            ? 'Tidak ada tanggal hari ini atau setelahnya yang dapat disalin. Pilih bulan berikutnya.'
             : 'Tidak ada jadwal yang dapat disalin.',
         )
         return
@@ -513,7 +462,7 @@ export default function JadwalShift({ mode = 'admin' }) {
       const jumlah = await simpanJadwalBanyak(barisTersalin)
       setPesan(
         `${jumlah} baris jadwal disalin dari ${namaBulan(sumber)} ke ${namaBulan(periode)}.${
-          modeKepala ? ' Tanggal hari ini dan sebelumnya dilewati.' : ''
+          modeKepala ? ' Tanggal sebelum hari ini dilewati.' : ''
         }`,
       )
       await muatJadwal()
@@ -525,10 +474,6 @@ export default function JadwalShift({ mode = 'admin' }) {
   }
 
   function bukaCepat() {
-    if (modeKepala && finalTerkunci) {
-      setGalat('Jadwal bulan ini sudah final. Hubungi Super Admin untuk koreksi.')
-      return
-    }
     if (modeKepala && periode < periodeBulanIni()) {
       setGalat('Jadwal bulan yang sudah lewat hanya dapat diubah Super Admin.')
       return
@@ -536,15 +481,15 @@ export default function JadwalShift({ mode = 'admin' }) {
     const bulan = periodeValid(periode) ? periode : periodeBulanIni()
     let mulai = `${bulan}-01`
     if (modeKepala) {
-      const besok = tanggalBesok()
-      if (besok > akhirBulan(bulan)) {
+      const hari = hariIni()
+      if (hari > akhirBulan(bulan)) {
         setGalat(
           'Tidak ada tanggal tersisa di bulan ini. Pilih bulan berikutnya untuk mengisi jadwal.',
         )
         return
       }
-      // Bulan berjalan mulai besok; bulan berikutnya mulai tanggal 1.
-      mulai = besok > `${bulan}-01` ? besok : `${bulan}-01`
+      // Bulan berjalan mulai hari ini; bulan berikutnya mulai tanggal 1.
+      mulai = hari > `${bulan}-01` ? hari : `${bulan}-01`
     }
     setFormCepat({
       shiftId: master[0]?.id ?? '',
@@ -562,18 +507,13 @@ export default function JadwalShift({ mode = 'admin' }) {
     setMenyimpanCepat(true)
     setGalatCepat(null)
     try {
-      if (modeKepala && finalTerkunci) {
-        throw new Error(
-          'Jadwal bulan ini sudah final. Hubungi Super Admin untuk koreksi.',
-        )
-      }
       if (!formCepat.shiftId) throw new Error('Pilih shift terlebih dahulu.')
       if (!formCepat.mulai || !formCepat.selesai) {
         throw new Error('Lengkapi rentang tanggal.')
       }
-      if (modeKepala && formCepat.mulai <= hariIni()) {
+      if (modeKepala && formCepat.mulai < hariIni()) {
         throw new Error(
-          'Untuk kepala ruangan, tanggal mulai minimal besok. Hari ini dan tanggal lampau hanya dapat diubah Super Admin.',
+          'Untuk kepala ruangan, tanggal mulai minimal hari ini. Tanggal lampau hanya dapat diubah Super Admin.',
         )
       }
       if (formCepat.selesai < formCepat.mulai) {
@@ -603,44 +543,6 @@ export default function JadwalShift({ mode = 'admin' }) {
       setGalatCepat(err.message || 'Gagal menyimpan jadwal.')
     } finally {
       setMenyimpanCepat(false)
-    }
-  }
-
-  async function ubahFinalisasi() {
-    if (!grupNama || !periodeValid(periode)) return
-    if (modeKepala && periode < periodeBulanIni()) {
-      setGalat('Jadwal bulan yang sudah lewat hanya dapat difinalisasi Super Admin.')
-      return
-    }
-    const akanFinal = !finalJadwal
-    if (!akanFinal && modeKepala) return
-
-    const konfirmasi = window.confirm(
-      akanFinal
-        ? `Finalisasi jadwal ${grupNama} untuk ${namaBulan(periode)}? Setelah final, sel kosong dianggap libur dan kepala ruangan tidak dapat mengubah jadwal lagi.`
-        : `Buka finalisasi jadwal ${grupNama} untuk ${namaBulan(periode)}? Kepala ruangan dapat mengubah jadwal lagi setelah dibuka.`,
-    )
-    if (!konfirmasi) return
-
-    setMemprosesFinal(true)
-    setGalat(null)
-    setPesan(null)
-    try {
-      await finalisasiJadwal({
-        unitKerja: grupNama,
-        periode: `${periode}-01`,
-        final: akanFinal,
-      })
-      setPesan(
-        akanFinal
-          ? `Jadwal ${grupNama} ${namaBulan(periode)} berhasil difinalisasi.`
-          : `Finalisasi jadwal ${grupNama} ${namaBulan(periode)} dibuka kembali.`,
-      )
-      await muatFinal()
-    } catch (err) {
-      setGalat(err.message || 'Gagal memproses finalisasi jadwal.')
-    } finally {
-      setMemprosesFinal(false)
     }
   }
 
@@ -801,7 +703,7 @@ export default function JadwalShift({ mode = 'admin' }) {
         judul="Jadwal Shift"
         deskripsi={
           modeKepala
-            ? 'Atur jadwal shift unit Anda untuk tanggal besok dan seterusnya. Gunakan Template & Impor untuk mengisi banyak tanggal sekaligus.'
+            ? 'Atur jadwal shift unit Anda untuk tanggal hari ini dan seterusnya. Setiap perubahan sel langsung tersimpan.'
             : 'Atur jadwal pegawai shift per grup. Klik sel untuk mengubah satu tanggal, atau gunakan Template & Impor/Isi Cepat/Salin Bulan Lalu.'
         }
         aksi={
@@ -825,8 +727,6 @@ export default function JadwalShift({ mode = 'admin' }) {
                 memuat ||
                 menyalin ||
                 !pegawaiGrup.length ||
-                finalTerkunci ||
-                memuatFinal ||
                 !periodeMasaDepan
               }
             >
@@ -840,39 +740,11 @@ export default function JadwalShift({ mode = 'admin' }) {
               disabled={
                 memuat ||
                 !master.length ||
-                finalTerkunci ||
-                memuatFinal ||
                 !periodeMasaDepan
               }
             >
               Isi Cepat
             </Button>
-            {(!modeKepala || !finalJadwal) && (
-              <Button
-                variant={finalJadwal ? 'sekunder' : 'utama'}
-                size="sm"
-                className="w-full sm:w-auto"
-                onClick={ubahFinalisasi}
-                disabled={
-                  memprosesFinal ||
-                  memuatFinal ||
-                  !grupNama ||
-                  !pegawaiGrup.length ||
-                  !bolehFinalisasi
-                }
-                title={
-                  !bolehFinalisasi
-                    ? 'Jadwal bulan lampau hanya dapat difinalisasi Super Admin.'
-                    : undefined
-                }
-              >
-                {memprosesFinal
-                  ? 'Memproses…'
-                  : finalJadwal
-                    ? 'Buka Finalisasi'
-                    : 'Finalisasi Jadwal'}
-              </Button>
-            )}
           </div>
         }
       />
@@ -961,54 +833,36 @@ export default function JadwalShift({ mode = 'admin' }) {
             </div>
           </section>
 
-          {modeKepala && finalJadwal && (
-            <Alert variant="sukses" title="Jadwal sudah final" className="mb-4">
-              Sel kosong berarti libur. Jadwal final tidak dapat diubah dari
-              portal kepala ruangan
-              {finalJadwal.final_pada
-                ? ` sejak ${formatTanggalRingkas(finalJadwal.final_pada)}`
-                : ''}
-              . Hubungi Super Admin untuk koreksi.
-            </Alert>
-          )}
-
-          {modeKepala && !finalJadwal && !memuatFinal && (
+          {modeKepala && (
             <Alert
               variant="info"
-              title={periodeMasaDepan ? 'Jadwal belum final' : 'Jadwal bulan lampau'}
+              title={periodeMasaDepan ? 'Jadwal tersimpan otomatis' : 'Jadwal bulan lampau'}
               className="mb-4"
             >
               {periodeMasaDepan ? (
                 <>
-                  Sel kosong masih dianggap belum diatur. Setelah selesai menyusun
-                  jadwal, tekan <b>Finalisasi Jadwal</b>. Setelah final, sel kosong
-                  berarti libur.
+                  Setiap perubahan sel langsung disimpan. Sel kosong berarti belum
+                  dijadwalkan, bukan libur. Tanggal hari ini dan seterusnya dapat
+                  diubah.
                 </>
               ) : (
                 <>
-                  Bulan ini sudah lewat. Jadwal hanya dapat dilihat; koreksi dan
-                  finalisasi dilakukan Super Admin.
+                  Bulan ini sudah lewat. Jadwal hanya dapat dilihat; koreksi
+                  dilakukan Super Admin.
                 </>
               )}
             </Alert>
           )}
 
           {!memuatJadwal &&
-            !memuatFinal &&
             pegawaiGrup.length > 0 &&
             pegawaiTanpaJadwal.length > 0 && (
-            <Alert
-              variant={finalJadwal ? 'peringatan' : 'info'}
-              title="Kelengkapan jadwal"
-              className="mb-4"
-            >
+            <Alert variant="info" title="Kelengkapan jadwal" className="mb-4">
               {pegawaiTanpaJadwal.length} pegawai shift belum memiliki jadwal
               pada bulan ini.{' '}
-              {finalJadwal
-                ? 'Jadwal sudah final; sel kosong berarti libur. Pastikan hal ini memang disengaja.'
-                : periodeMasaDepan
-                  ? 'Lengkapi jadwal mereka sebelum finalisasi.'
-                  : 'Bulan ini sudah lewat; lengkapi melalui Super Admin.'}
+              {periodeMasaDepan
+                ? 'Lengkapi jadwal mereka bila diperlukan.'
+                : 'Bulan ini sudah lewat; lengkapi melalui Super Admin.'}
             </Alert>
           )}
 
@@ -1039,18 +893,7 @@ export default function JadwalShift({ mode = 'admin' }) {
                     <p className="text-[11px] text-slate-500 sm:text-xs">
                       {pegawaiGrup.length} pegawai shift · {tanggalList.length} tanggal
                     </p>
-                    <Badge variant={finalJadwal ? 'sukses' : 'peringatan'}>
-                      {memuatFinal
-                        ? 'Memuat status…'
-                        : finalJadwal
-                          ? 'Final'
-                          : 'Belum final'}
-                    </Badge>
-                    {finalJadwal?.final_pada && (
-                      <span className="text-[10px] text-slate-400">
-                        {formatJam(finalJadwal.final_pada)}
-                      </span>
-                    )}
+                    <Badge variant="info">Simpan otomatis</Badge>
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-1.5">
@@ -1737,8 +1580,8 @@ export default function JadwalShift({ mode = 'admin' }) {
               </div>
 
               <p className="text-[11px] leading-relaxed text-slate-500">
-                Impor hanya mengubah jadwal shift. Status finalisasi, presensi,
-                dan aturan Alfa tidak berubah.
+                Impor hanya mengubah jadwal shift. Presensi dan aturan Alfa
+                tidak berubah.
               </p>
             </>
           )}

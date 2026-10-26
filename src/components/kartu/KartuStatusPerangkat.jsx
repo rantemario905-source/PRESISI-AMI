@@ -1,6 +1,7 @@
 /**
  * Kartu status perangkat (Device Binding).
- * Tiga kondisi utama: belum terdaftar, menunggu, disetujui (+ ditolak).
+ * Kondisi: belum terdaftar, menunggu, disetujui, ditolak, atau terikat ke
+ * perangkat lain. Satu pegawai hanya boleh punya satu perangkat aktif.
  */
 import Alert from '../ui/Alert.jsx'
 import Badge from '../ui/Badge.jsx'
@@ -32,10 +33,30 @@ const STATUS = {
     pesan: 'Pengajuan perangkat ditolak Admin IT. Ajukan ulang bila Anda merasa ini keliru.',
     aksi: 'Ajukan Ulang Verifikasi',
   },
+  terikat_perangkat_lain: {
+    varian: 'bahaya',
+    label: 'Perangkat Lain',
+    pesan:
+      'Akun ini sudah terikat pada perangkat lain. Absensi hanya dapat dilakukan dari perangkat yang sudah disetujui. Hubungi Admin IT untuk reset perangkat bila Anda mengganti perangkat.',
+    aksi: null,
+  },
+  pending_perangkat_lain: {
+    varian: 'peringatan',
+    label: 'Menunggu di Perangkat Lain',
+    pesan:
+      'Pengajuan perangkat lain untuk akun ini sedang menunggu persetujuan Admin IT. Perangkat ini tidak dapat mengajukan verifikasi baru.',
+    aksi: null,
+  },
 }
 
-export default function KartuStatusPerangkat({ status, sedangMengajukan, onAjukan }) {
+export default function KartuStatusPerangkat({
+  status,
+  perangkatAktif,
+  sedangMengajukan,
+  onAjukan,
+}) {
   const info = STATUS[status] ?? STATUS.belum_terdaftar
+  const infoAktif = perangkatAktif?.info_perangkat
 
   return (
     <section className="kartu">
@@ -48,6 +69,11 @@ export default function KartuStatusPerangkat({ status, sedangMengajukan, onAjuka
 
       <Alert variant={info.varian === 'sukses' ? 'sukses' : info.varian} className="mb-4">
         {info.pesan}
+        {infoAktif && (
+          <span className="mt-2 block text-[11px] font-semibold opacity-80">
+            Perangkat aktif: {infoAktif}
+          </span>
+        )}
       </Alert>
 
       {info.aksi && (

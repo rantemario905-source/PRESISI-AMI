@@ -9,10 +9,17 @@
  *   4. Notifikasi sukses / gagal + jarak aktual
  * ==========================================================================
  */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { MENIT_AWAL_ABSEN_MASUK, MENIT_JEDA_ABSEN_PULANG } from '../config/constants.js'
 import { dapatkanLokasi, periksaLokasi } from '../utils/geofencing.js'
 import { kirimPresensi } from '../services/attendanceService.js'
 import { formatJam, formatJarak, formatTanggalRingkas, hariIni } from '../utils/format.js'
+import {
+  bukaAbsenMasuk,
+  bukaAbsenPulang,
+  formatJamBuka,
+  formatJamJadwal,
+} from '../utils/jadwalAbsen.js'
 import Alert from './ui/Alert.jsx'
 import Button from './ui/Button.jsx'
 import Spinner from './ui/Spinner.jsx'
@@ -104,6 +111,13 @@ export default function PanelAbsen({
 }) {
   const [proses, setProses] = useState(null) // 'masuk' | 'pulang' | null
   const [hasil, setHasil] = useState(null) // { tipe: 'sukses'|'galat', pesan }
+  const [sekarang, setSekarang] = useState(() => Date.now())
+
+  // Perbarui status tombol saat jendela waktu absensi terbuka.
+  useEffect(() => {
+    const timer = setInterval(() => setSekarang(Date.now()), 15_000)
+    return () => clearInterval(timer)
+  }, [])
 
   const perangkatTerkunci = statusPerangkat !== 'approved'
   const jadwalTerkunci = jadwal?.boleh_absen === false
@@ -113,9 +127,23 @@ export default function PanelAbsen({
     Boolean(presensi?.tanggal) && presensi.tanggal !== hariIni() && !sudahPulang
   const malamKemarinAktif =
     !sudahMasuk && !sudahPulang && malamKemarinBerlangsung(jadwalKemarin)
+
+  const jadwalMasuk = malamKemarinAktif ? jadwalKemarin : jadwal
+  const bukaMasuk = bukaAbsenMasuk(jadwalMasuk)
+  const masukBelumDibuka =
+    !sudahMasuk && Boolean(bukaMasuk) && sekarang < bukaMasuk.getTime()
+
+  const jadwalPulang =
+    presensi?.tanggal && presensi.tanggal === jadwalKemarin?.tanggal
+      ? jadwalKemarin
+      : jadwal
+  const bukaPulang = bukaAbsenPulang(jadwalPulang)
+  const pulangBelumDibuka =
+    sudahMasuk && !sudahPulang && Boolean(bukaPulang) && sekarang < bukaPulang.getTime()
+
   const terkunciMasuk =
-    perangkatTerkunci || (jadwalTerkunci && !malamKemarinAktif)
-  const terkunciPulang = perangkatTerkunci
+    perangkatTerkunci || (jadwalTerkunci && !malamKemarinAktif) || masukBelumDibuka
+  const terkunciPulang = perangkatTerkunci || pulangBelumDibuka
 
   /** "20:02" tanpa akhiran WITA, agar pas di kartu jam */
   const jamSingkat = (iso) => (iso ? formatJam(iso).replace(' WITA', '') : '--:--')
@@ -247,7 +275,11 @@ export default function PanelAbsen({
 
         {perangkatTerkunci && (
           <Alert variant="peringatan" title="Tombol Absen Terkunci" className="mb-4">
-            Hanya perangkat yang sudah disetujui Admin IT yang dapat melakukan absensi.
+            {statusPerangkat === 'terikat_perangkat_lain'
+              ? 'Akun ini sudah terikat pada perangkat lain. Absensi hanya dapat dilakukan dari perangkat yang disetujui. Hubungi Admin IT untuk reset perangkat.'
+              : statusPerangkat === 'pending_perangkat_lain'
+                ? 'Pengajuan perangkat lain sedang menunggu persetujuan Admin IT. Perangkat ini belum dapat digunakan untuk absensi.'
+                : 'Hanya perangkat yang sudah disetujui Admin IT yang dapat melakukan absensi.'}
           </Alert>
         )}
 
@@ -261,6 +293,22 @@ export default function PanelAbsen({
           <Alert variant="info" title="Shift Malam Kemarin" className="mb-4">
             Jadwal shift malam kemarin masih berlangsung. Absen masuk akan dicatat
             pada tanggal {formatTanggalRingkas(jadwalKemarin.tanggal)}.
+          </Alert>
+        )}
+
+        {masukBelumDibuka && !jadwalTerkunci && (
+          <Alert variant="info" title="Absen Masuk Belum Dibuka" className="mb-4">
+            Absen masuk dibuka pukul <b>{formatJamBuka(bukaMasuk)} WITA</b> (
+            {MENIT_AWAL_ABSEN_MASUK} menit sebelum jam masuk{' '}
+            {formatJamJadwal(jadwalMasuk?.jam_mulai)}).
+          </Alert>
+        )}
+
+        {pulangBelumDibuka && (
+          <Alert variant="info" title="Absen Pulang Belum Dibuka" className="mb-4">
+            Absen pulang dibuka pukul <b>{formatJamBuka(bukaPulang)} WITA</b>, yaitu{' '}
+            {MENIT_JEDA_ABSEN_PULANG} menit setelah jam pulang{' '}
+            {formatJamJadwal(jadwalPulang?.jam_selesai)}.
           </Alert>
         )}
 
@@ -289,6 +337,10 @@ export default function PanelAbsen({
               <>
                 <IkonCentang /> Sudah Absen Hadir
               </>
+            ) : masukBelumDibuka ? (
+              <>
+                <IkonMasuk /> Dibuka {formatJamBuka(bukaMasuk)}
+              </>
             ) : (
               <>
                 <IkonMasuk /> Absen Hadir
@@ -310,6 +362,10 @@ export default function PanelAbsen({
             ) : sudahPulang ? (
               <>
                 <IkonCentang /> Sudah Absen Pulang
+              </>
+            ) : pulangBelumDibuka ? (
+              <>
+                <IkonPulang /> Dibuka {formatJamBuka(bukaPulang)}
               </>
             ) : (
               <>

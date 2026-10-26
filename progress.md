@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-25 13:37 WITA |
+| Terakhir diperbarui | 2026-10-26 11:52 WITA |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -27,6 +27,9 @@
 - **Status kode:** `selesai` / `berjalan` / `belum`.
 - **Status DB:** `terpasang` / `belum` / `tidak diketahui` — hanya dapat dipastikan
   lewat Supabase SQL Editor, bukan dari repo.
+- **Alur Git:** perubahan **ditahan di working tree** untuk diuji user; `commit`
+  dan `push` hanya dilakukan setelah perintah eksplisit. Ini termasuk perubahan
+  dokumen audit.
 - Satu entri log = satu unit pekerjaan bermakna. Sertakan file yang berubah,
   cara verifikasi, dan risiko/utang teknis.
 
@@ -35,36 +38,47 @@
 ## 1. Status Terkini
 
 **Ringkasan:** seluruh fitur inti (Fase 1–8 + penyempurnaan UI navigasi) sudah ada
-di kode, live di GitHub Pages, dan **login Super Admin serta pegawai sudah berhasil**.
-Yang belum: uji verifikasi perangkat + absensi GPS, konfirmasi migrasi 09–14 dan
-skrip verifikasi, serta penyiapan data operasional sebelum Alfa diaktifkan.
+di kode, live di GitHub Pages, dan **login, verifikasi perangkat, serta absensi
+sudah berhasil diuji**. Pekerjaan terbaru: **migrasi 15 (hapus finalisasi jadwal)**,
+**migrasi 16 (satu perangkat aktif per pegawai)**, dan **migrasi 17 (jendela waktu
+absen: masuk dibuka 20 menit sebelum jam masuk, pulang dibuka 1 menit setelah jam
+pulang)** beserta penyesuaian frontend dan dokumen — **belum di-commit** dan
+**belum dijalankan di Supabase**. Yang belum: konfirmasi migrasi 09–17 & skrip
+verifikasi, penyiapan data operasional (grup shift, jadwal, hari libur), dan
+persiapan go-live.
 
 | Aspek | Status | Bukti |
 |---|---|---|
-| Kode aplikasi | Selesai sampai Fase 8 + UI navigasi | `src/`, `supabase/migrations/01–14` |
+| Kode aplikasi | Selesai sampai Fase 8 + UI navigasi + migrasi 15–17 | `src/`, `supabase/migrations/01–17` |
 | Commit Git | **Sinkron** — `2c8a775` (Fase 4–8 + UI) | `git log`, `origin/main` |
-| Perubahan belum di-commit | **Tidak ada** — working tree bersih | `git status` |
-| Migrasi DB 01–14 | **Tidak diketahui** di proyek Supabase | perlu cek SQL Editor |
+| Perubahan belum di-commit | **Ada** — migrasi 15–17, frontend, dokumen (menunggu uji lokal) | `git status` |
+| Migrasi DB 01–17 | **Tidak diketahui** di proyek Supabase | perlu cek SQL Editor |
 | Skrip `supabase/verifikasi_*.sql` | **Tidak diketahui** sudah dijalankan atau belum | perlu cek manual |
-| Build produksi | **Lulus** — 266 modul, 6,46 dtk | `npm run build` (2026-10-25 12:24) |
+| Build produksi | **Lulus** — 267 modul, 6,76 dtk | `npm run build` (2026-10-26 11:52) |
+| Jendela waktu absen | **Ada di kode** — masuk 20 menit sebelum, pulang 1 menit setelah | migrasi 17, `PanelAbsen.jsx`, `jadwalAbsen.js` |
 | Lint/unit test | Tidak tersedia di `package.json` | `package.json` |
 | Alfa otomatis | Fitur ada, **default nonaktif** | migrasi 12, `PengaturanPresensi.jsx` |
 | Deploy GitHub Pages | **Aktif** — workflow run #1 sukses | https://rantemario905-source.github.io/PRESISI-AMI/ |
 | Uji login live | **Lulus** — Super Admin (desktop) + pegawai (mobile) | Laporan user 2026-10-25 13:37 |
+| Uji perangkat & absensi | **Lulus** — verifikasi perangkat, radius, akurasi, duplikasi | Laporan user 2026-10-25 14:04 |
 
-**Pekerjaan terakhir sebelum audit:** penyempurnaan navigasi UI (tab bar, navigasi
-bawah, menu kepala ruangan, layout portal kepala) pada 2026-10-25 11:28–11:49.
+**Pekerjaan terakhir:** migrasi 15–17 + penyesuaian frontend/dokumen (2026-10-26;
+**belum di-commit**, menunggu uji lokal user).
 
 **Langkah berikutnya yang disarankan:**
-1. Uji verifikasi perangkat: pegawai ajukan perangkat → Super Admin setujui di
-   **Verifikasi Perangkat** → tombol absen terbuka.
-2. Uji absensi (HTTPS + izin lokasi) dalam radius 100 m dari RSUD AMI; cek jarak,
-   akurasi, keterlambatan, dan larangan Fake GPS.
-3. Pastikan migrasi 09–14 sudah dijalankan berurutan dan seluruh
+1. Jalankan migrasi **15**, **16**, lalu **17** berurutan di SQL Editor, kemudian
+   `supabase/verifikasi_15.sql`, `verifikasi_16.sql`, dan `verifikasi_17.sql`
+   sampai semua `true`. Migrasi 16 **mengosongkan tabel `perangkat`** (data uji).
+2. Uji lokal: kepala ruangan mengubah jadwal hari ini, pegawai mengajukan
+   perangkat kedua (harus ditolak sampai Admin IT reset), dan tombol absen
+   terkunci sebelum jam buka (masuk 20 menit sebelum, pulang 1 menit setelah).
+3. Lengkapi data operasional: seksi **Grup Shift**, pola kerja di **Data Pegawai**,
+   **Jadwal Shift**, dan **Hari Libur**.
+4. Pastikan migrasi 09–14 sudah dijalankan berurutan dan seluruh
    `supabase/verifikasi_*.sql` bernilai `true`.
-4. Lengkapi data operasional: seksi **Grup Shift**, pola kerja di **Data Pegawai**,
-   **Jadwal Shift**, **Hari Libur**, lalu **Finalisasi**.
-5. Bersihkan data uji, lalu aktifkan Alfa otomatis + `pg_cron` paling akhir.
+5. Bersihkan data uji dengan `supabase/cleanup_data_uji.sql` sebelum go-live.
+6. Aktifkan Alfa otomatis + `pg_cron` **paling akhir**, setelah jadwal lengkap dan
+   hari libur terisi.
 
 ---
 
@@ -81,17 +95,82 @@ bawah, menu kepala ruangan, layout portal kepala) pada 2026-10-25 11:28–11:49.
 | 4 | Dinas & Sakit/Cuti: kepala ruangan, grup Dinas 1–4 pegawai, dokumen wajib, bucket privat, status `dibatalkan` | `migrations/09_dinas_sakit_cuti.sql`, `src/utils/izin.js`, `dokumenIzin.js`, `src/services/leaveService.js`, `izinPegawaiService.js`, `src/pages/IzinSaya.jsx`, `src/pages/admin/PengajuanIzin.jsx` | selesai | tidak diketahui | `supabase/verifikasi_09.sql` |
 | 5 | Pengaturan kepala ruangan dari Data Pegawai (satu kepala per unit) | `migrations/11_kepala_ruangan.sql`, `migrations/10_kelola_role.sql` (opsional, tidak dipakai UI), `src/context/AuthContext.jsx`, `src/components/ProtectedRoute.jsx` | selesai | tidak diketahui | `supabase/verifikasi_11.sql`, `verifikasi_10.sql` |
 | 6 | Pola kerja Reguler/Shift, grup shift + seksi, jam reguler, hari libur, keterlambatan, Alfa otomatis | `migrations/12_pola_kerja_jadwal_alfa.sql`, `supabase/jadwal_alfa.sql`, `src/pages/admin/GrupShift.jsx`, `HariLibur.jsx`, `PengaturanPresensi.jsx`, `src/services/groupShiftService.js`, `hariLiburService.js`, `pengaturanService.js` | selesai | tidak diketahui | `supabase/verifikasi_12.sql` |
-| 7 | Kepala ruangan kelola jadwal unit, audit jadwal, finalisasi bulanan, hapus mode transisi | `migrations/13_kepala_jadwal_final.sql`, `src/components/layout/PortalKepalaLayout.jsx`, `SidebarKepala.jsx`, `src/components/MenuKepala.jsx`, `src/pages/admin/JadwalShift.jsx` | selesai | tidak diketahui | `supabase/verifikasi_13.sql` |
-| 8 | Impor massal jadwal shift CSV/XLSX, validasi ulang di server, atomik | `migrations/14_impor_jadwal_shift.sql`, `src/utils/templateJadwal.js`, `src/services/shiftService.js`, `src/pages/admin/JadwalShift.jsx` | selesai | tidak diketahui | `supabase/verifikasi_14.sql` |
+| 7 | Kepala ruangan kelola jadwal unit, audit jadwal, finalisasi bulanan, hapus mode transisi | `migrations/13_kepala_jadwal_final.sql`, `src/components/layout/PortalKepalaLayout.jsx`, `SidebarKepala.jsx`, `src/components/MenuKepala.jsx`, `src/pages/admin/JadwalShift.jsx` | selesai (finalisasi dihapus oleh migrasi 15) | tidak diketahui | `supabase/verifikasi_13.sql` (berlaku sebelum migrasi 15) |
+| 8 | Impor massal jadwal shift CSV/XLSX, validasi ulang di server, atomik | `migrations/14_impor_jadwal_shift.sql`, `src/utils/templateJadwal.js`, `src/services/shiftService.js`, `src/pages/admin/JadwalShift.jsx` | selesai | tidak diketahui | `supabase/verifikasi_14.sql` (berlaku sebelum migrasi 15) |
+| 9 | Tanpa finalisasi jadwal; kepala ruangan boleh mengubah mulai hari ini; satu perangkat aktif per pegawai | `migrations/15_hapus_finalisasi_jadwal.sql`, `migrations/16_satu_perangkat.sql`, `src/services/deviceService.js`, `src/services/shiftService.js`, `JadwalShift.jsx`, `KartuStatusPerangkat.jsx`, `PanelAbsen.jsx`, `Dashboard.jsx` | selesai | tidak diketahui | `supabase/verifikasi_15.sql`, `verifikasi_16.sql` |
+| 10 | Jendela waktu absensi: masuk 20 menit sebelum jam masuk, pulang 1 menit setelah jam pulang (reguler & shift, termasuk lintas hari) | `migrations/17_batas_waktu_absen.sql`, `src/config/constants.js`, `src/utils/jadwalAbsen.js`, `src/components/PanelAbsen.jsx` | selesai | tidak diketahui | `supabase/verifikasi_17.sql` |
 | UI | Penyempurnaan navigasi: tab bar, navigasi bawah mobile, menu kepala, layout portal | `src/components/ui/TabBar.jsx`, `src/components/NavigasiBawah.jsx`, `src/components/BarAtas.jsx`, `src/components/MenuKepala.jsx`, `src/components/layout/PortalKepalaLayout.jsx`, `src/index.css`, `src/pages/Dashboard.jsx` | selesai `(inferred)` | — | build lulus; uji manual belum tercatat |
 
-**Catatan:** README baris status masih menyebut **Fase 1–7** dan belum menyebut
-Fase 8 (impor jadwal) maupun pekerjaan UI 25 Okt. README juga belum mencantumkan
-`verifikasi_10.sql` pada diagram struktur, padahal filenya ada.
+**Catatan:** README sudah diperbarui ke Fase 1–8 + migrasi 15–17. `verifikasi_13`
+dan `verifikasi_14` kini **tidak valid** setelah migrasi 15 dan digantikan
+`verifikasi_15`/`verifikasi_16`, ditambah `verifikasi_17` untuk batas waktu absen.
 
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-26 11:43 WITA — Jendela waktu absensi (migrasi 17)
+- **Perubahan:** menambahkan batas waktu absensi sesuai klarifikasi user —
+  **Absen Hadir** baru dapat diklik **20 menit sebelum jam masuk** (jadwal 08.00
+  → 07.40), dan **Absen Pulang** baru dapat diisi **1 menit setelah jam pulang**
+  (jadwal 16.30 → 16.31). Berlaku untuk pola Reguler dan Shift, termasuk shift
+  malam lintas hari. Tombol terkunci sebelum jendela dibuka, menampilkan jam buka
+  dan alasan; server memvalidasi ulang lewat RPC `submit_presensi`.
+- **File:** `supabase/migrations/17_batas_waktu_absen.sql` (baru),
+  `supabase/verifikasi_17.sql` (baru), `supabase/schema.sql`,
+  `src/config/constants.js`, `src/utils/jadwalAbsen.js` (baru),
+  `src/components/PanelAbsen.jsx`, `README.md`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` **lulus** — 267 modul, 9,25 dtk
+  (2026-10-26 11:42); verifikasi ulang pukul 11:52 juga **lulus** — 267 modul,
+  6,76 dtk. Validasi SQL belum dijalankan di Supabase.
+- **Catatan/risiko:** migrasi 17 belum dijalankan di database dan aturan belum
+  diuji manual. Nilai 20 menit & 1 menit ditulis di server dan
+  `src/config/constants.js`; ubah keduanya bila aturan berubah.
+
+### 2026-10-26 11:04 WITA — Lanjutan migrasi 15–16: perbaikan & verifikasi build
+- **Perubahan:** melanjutkan pekerjaan yang terhenti karena limit. Memeriksa seluruh
+  diff working tree, memperbaiki teks rusak (mojibake) pada pesan loading
+  `JadwalShift.jsx` dan komentar `schema.sql`, membuat pemeriksaan index pada
+  `verifikasi_16.sql` cocok dengan format `pg_indexes` (predikat partial index
+  dinormalisasi PostgreSQL), menyesuaikan dokumentasi (README bagian cleanup,
+  AGENTS aturan Alfa + peta migrasi, progress.md), lalu menjalankan build produksi.
+- **File:** `src/pages/admin/JadwalShift.jsx`, `supabase/schema.sql`,
+  `supabase/verifikasi_16.sql`, `README.md`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` **lulus** — 266 modul, 8,45 dtk (2026-10-26 11:04).
+  Tidak ada lagi karakter `U+FFFD` di `src/`, `supabase/`, `scripts/`, README,
+  AGENTS, progress.
+- **Catatan/risiko:** migrasi 15–16 **belum dijalankan** di Supabase dan fitur
+  belum diuji manual. Sesuai aturan, semua perubahan tetap di working tree.
+
+### 2026-10-25 14:10–14:59 WITA — Migrasi 15–16: hapus finalisasi & satu perangkat `(rekonstruksi)`
+- **Perubahan:** menghapus finalisasi jadwal bulanan (tabel, fungsi status, RPC,
+  tombol UI, alur impor) dan mengizinkan kepala ruangan mengubah jadwal mulai
+  hari ini; menerapkan aturan satu perangkat aktif (pending/approved) per pegawai
+  dengan unique index, helper RLS, policy pengajuan, dan persetujuan yang menolak
+  bila masih ada perangkat approved lain. Data perangkat uji dikosongkan.
+- **File:** `supabase/migrations/15_hapus_finalisasi_jadwal.sql` (baru),
+  `16_satu_perangkat.sql` (baru), `supabase/verifikasi_15.sql` (baru),
+  `verifikasi_16.sql` (baru), `supabase/schema.sql`, `supabase/cleanup_data_uji.sql`,
+  `src/services/shiftService.js`, `src/services/deviceService.js`,
+  `src/pages/admin/JadwalShift.jsx`, `src/pages/admin/PengaturanPresensi.jsx`,
+  `src/pages/admin/VerifikasiPerangkat.jsx`, `src/components/PanelAbsen.jsx`,
+  `src/components/kartu/KartuStatusPerangkat.jsx`, `src/pages/Dashboard.jsx`,
+  `README.md`, `AGENTS.md`.
+- **Verifikasi:** belum diverifikasi pada sesi tersebut (terputus karena limit);
+  skrip verifikasi DB sudah dibuat tetapi belum dijalankan.
+- **Catatan/risiko:** migrasi 16 menghapus seluruh data `perangkat`; pegawai perlu
+  verifikasi ulang. Waktu entri adalah perkiraan dari `LastWriteTime`.
+
+### 2026-10-25 14:04 WITA — Uji perangkat & absensi lulus + aturan commit/push
+- **Perubahan:** mencatat aturan baru bahwa **commit/push hanya setelah perintah
+  user**; pekerjaan ditahan lokal untuk diuji lebih dahulu. Mencatat hasil uji
+  verifikasi perangkat dan absensi.
+- **File:** `AGENTS.md` (Aturan Wajib #1, Protokol Kerja, Log Instruksi `I-007`),
+  `progress.md`.
+- **Verifikasi:** laporan user — verifikasi perangkat, absensi, radius, akurasi,
+  dan penolakan duplikasi berhasil; absensi juga dicoba di mobile.
+- **Catatan/risiko:** pembaruan dokumen ini **sengaja belum di-commit/di-push**
+  sesuai aturan baru. Perubahan menunggu perintah user.
 
 ### 2026-10-25 13:37 WITA — Login live berhasil (Super Admin + pegawai)
 - **Perubahan:** tidak ada perubahan kode; verifikasi fungsional di URL produksi.
@@ -261,8 +340,12 @@ Fase 8 (impor jadwal) maupun pekerjaan UI 25 Okt. README juga belum mencantumkan
 | # | Item | Dampak | Tindakan |
 |---|---|---|---|
 | B-1 | ~~Belum ada commit untuk Fase 4–8 + UI~~ | — | **Selesai:** commit `2c8a775` + push 2026-10-25 12:48 |
-| B-2 | Status migrasi 09–14 di Supabase belum diketahui | Fitur bisa gagal saat dipakai | Cek SQL Editor / jalankan migrasi berurutan |
-| B-3 | Hasil `supabase/verifikasi_09..14.sql` belum diketahui | Jaminan integritas DB belum ada | Jalankan dan pastikan semua `true` |
+| B-2 | Status migrasi 09–17 di Supabase belum diketahui | Fitur bisa gagal saat dipakai | Cek SQL Editor / jalankan migrasi berurutan |
+| B-3 | Hasil `supabase/verifikasi_09..17.sql` belum diketahui | Jaminan integritas DB belum ada | Jalankan dan pastikan semua `true` |
+| B-12 | Migrasi 15–17 belum dijalankan | UI baru tidak berfungsi dengan DB lama | Jalankan 15, 16, lalu 17; **16 mengosongkan `perangkat`** |
+| B-13 | Uji lokal fitur baru belum dilakukan | Perilaku kepala ruangan, perangkat kedua, dan jendela waktu belum terbukti | Uji ubah jadwal hari ini, ajukan perangkat kedua, dan tombol absen sebelum jam buka |
+| B-14 | Perubahan migrasi 15–17 belum di-commit | Belum ada di GitHub Pages | Tunggu perintah user setelah uji lokal |
+| B-15 | Aturan jendela waktu (migrasi 17) belum dijalankan/diuji | Absen bisa ditolak atau tidak sesuai harapan | Jalankan 17 + `verifikasi_17.sql`, lalu uji absen 07.40 dan 16.31 |
 | B-4 | ~~`npm run build` belum dijalankan~~ | — | **Selesai:** lulus 2026-10-25 12:24 |
 | B-5 | ~~README menyebut Fase 1–7 saja~~ | — | **Selesai:** diperbarui ke Fase 1–8 + impor |
 | B-6 | ~~`verifikasi_10.sql` tidak ada di diagram README~~ | — | **Selesai:** ditambahkan ke struktur |
@@ -282,12 +365,14 @@ Fase 8 (impor jadwal) maupun pekerjaan UI 25 Okt. README juga belum mencantumkan
 | D-002 | Koordinat pusat ditulis di `src/config/constants.js` **dan** `supabase/schema.sql` | Validasi klien + server | Setiap perubahan titik pusat harus di dua tempat |
 | D-003 | Penulisan presensi hanya lewat RPC `SECURITY DEFINER` | Validasi ulang di server, tidak percaya klien | Semua aturan harus ada di SQL, bukan hanya UI |
 | D-004 | Device binding 1 pegawai = 1 perangkat aktif | Mengurangi titip absen | Perangkat baru harus disetujui; reset mencabut yang lama |
-| D-005 | Jadwal shift wajib; mode transisi dihapus permanen | Mencegah absen tanpa jadwal | Sel kosong sebelum final bukan berarti libur |
-| D-006 | Finalisasi jadwal per unit/bulan | Mengunci jadwal operasional | Hanya Super Admin yang dapat membuka finalisasi |
+| D-005 | Jadwal shift wajib; mode transisi dihapus permanen | Mencegah absen tanpa jadwal | Sel kosong berarti belum dijadwalkan |
+| D-006 | ~~Finalisasi jadwal per unit/bulan~~ **dicabut oleh D-011** | Mengunci jadwal operasional | Digantikan aturan tanpa finalisasi |
 | D-007 | Impor jadwal bersifat atomik dan divalidasi ulang di server | Mencegah data setengah jadi | Satu baris salah membatalkan seluruh impor |
 | D-008 | Bucket `dokumen-izin` privat, JPG/PNG maks. 1 MB | Melindungi dokumen medis/kepegawaian | Jangan diubah menjadi publik |
 | D-009 | Promosi/penurunan role Super Admin hanya lewat SQL Admin IT | Memisahkan kewenangan tertinggi dari UI | Tidak tersedia di Portal Super Admin |
 | D-010 | Semua pekerjaan dicatat di `progress.md`; semua instruksi user dicatat di `AGENTS.md` | Auditability dan kelanjutan sesi | Wajib diperbarui setiap selesai tugas |
+| D-011 | Finalisasi jadwal dihapus (migrasi 15) | Alur terlalu kaku; kepala ruangan perlu koreksi cepat | Sel kosong = belum dijadwalkan; kepala ruangan boleh mengubah mulai hari ini |
+| D-012 | Satu perangkat aktif per pegawai termasuk `pending` (migrasi 16) | Mencegah pengajuan ganda dan titip absen | Perangkat kedua ditolak sampai Admin IT reset perangkat lama |
 
 ---
 

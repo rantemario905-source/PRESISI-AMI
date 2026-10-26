@@ -8,9 +8,10 @@ dan pemisahan hak akses antara **Pegawai** dan **Super Admin**.
 
 > Status: **Fase 1–8 selesai di kode** — fondasi, database + RLS, login, geofencing,
 > device binding, halaman absensi pegawai, Portal Super Admin, administrasi
-> Dinas & Sakit / Cuti, **jadwal shift per grup, finalisasi jadwal,
+> Dinas & Sakit / Cuti, **jadwal shift per grup yang langsung tersimpan,
 > pengelolaan jadwal oleh kepala ruangan, hari libur, deteksi keterlambatan,
-> Alfa otomatis**, serta **impor jadwal CSV/XLSX**.
+> Alfa otomatis**, **impor jadwal CSV/XLSX**, serta **satu perangkat aktif
+> per pegawai**.
 
 > **Dokumentasi audit:** progres pekerjaan tercatat di [`progress.md`](progress.md)
 > dan aturan kerja agen serta log instruksi user di [`AGENTS.md`](AGENTS.md).
@@ -69,30 +70,39 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 | 10 | `supabase/migrations/10_kelola_role.sql` | RPC perubahan role (opsional; tidak dipakai UI) |
 | 11 | `supabase/migrations/11_kepala_ruangan.sql` | **Fase 5**: RPC pengaturan nama, unit kerja, dan kepala ruangan dari Data Pegawai |
 | 12 | `supabase/migrations/12_pola_kerja_jadwal_alfa.sql` | **Fase 6**: grup shift, pola kerja, jam reguler, hari libur, keterlambatan, dan Alfa otomatis |
-| 13 | `supabase/migrations/13_kepala_jadwal_final.sql` | **Fase 7**: hapus mode transisi, kepala ruangan kelola jadwal unit, audit jadwal, dan finalisasi bulanan |
+| 13 | `supabase/migrations/13_kepala_jadwal_final.sql` | **Fase 7**: hapus mode transisi, kepala ruangan kelola jadwal unit, audit jadwal, dan finalisasi bulanan (finalisasi dihapus oleh migrasi 15) |
 | 14 | `supabase/migrations/14_impor_jadwal_shift.sql` | Impor massal jadwal shift dari template CSV/XLSX dengan validasi ulang di server |
+| 15 | `supabase/migrations/15_hapus_finalisasi_jadwal.sql` | Hapus finalisasi bulanan; kepala ruangan dapat mengubah jadwal mulai hari ini |
+| 16 | `supabase/migrations/16_satu_perangkat.sql` | Satu perangkat aktif per pegawai; data perangkat uji dikosongkan |
+| 17 | `supabase/migrations/17_batas_waktu_absen.sql` | Batas waktu absen: masuk 20 menit sebelum jam masuk, pulang 1 menit setelah jam pulang |
 
 > Bila database sudah pernah dijalankan sampai file 08, jalankan **file 09** untuk
 > mengaktifkan alur Dinas & Sakit / Cuti, **file 11** untuk pengaturan kepala
 > ruangan, lalu **file 12** untuk jadwal shift/keterlambatan/Alfa, **file 13**
-> untuk kebijakan jadwal wajib + finalisasi, dan **file 14** untuk impor template.
+> untuk kebijakan jadwal wajib, **file 14** untuk impor template, **file 15**
+> untuk menghapus finalisasi, **file 16** untuk aturan satu perangkat, dan
+> **file 17** untuk batas waktu absen.
 > File 10 hanya berisi RPC perubahan role yang tidak dipakai UI, jadi boleh
-> dilewati. Jalankan migrasi secara bertahap — jangan mengulang file lama bila
+> dilewati. Jalankan migrasi secara bertahap - jangan mengulang file lama bila
 > tidak diperlukan.
 >
 > Migrasi 09 juga membuat bucket privat **`dokumen-izin`** (JPG/PNG, maks. 1 MB)
 > beserta policy-nya. Jangan mengubah bucket menjadi publik.
 >
 > Jalankan **`supabase/verifikasi_09.sql`**, **`supabase/verifikasi_11.sql`**,
-> **`supabase/verifikasi_12.sql`**, **`supabase/verifikasi_13.sql`**, dan
-> **`supabase/verifikasi_14.sql`** setelah migrasi terkait. Seluruh nilai
-> pemeriksaan harus `true`; bila ada yang `false`, jangan lanjutkan pemakaian.
-> Migrasi 12–14 wajib dijalankan sebelum membuka menu Grup Shift/Jadwal Shift.
+> **`supabase/verifikasi_12.sql`**, **`supabase/verifikasi_15.sql`**,
+> **`supabase/verifikasi_16.sql`**, dan **`supabase/verifikasi_17.sql`** setelah
+> migrasi terkait. Seluruh nilai pemeriksaan harus `true`; bila ada yang `false`,
+> jangan lanjutkan pemakaian.
+> `verifikasi_13.sql` dan `verifikasi_14.sql` hanya berlaku sebelum migrasi 15;
+> setelah migrasi 15, gunakan `verifikasi_15.sql`, `verifikasi_16.sql`, dan
+> `verifikasi_17.sql`.
+> Migrasi 12–17 wajib dijalankan sebelum membuka menu Grup Shift/Jadwal Shift.
 
 **B. Sekaligus**
 
 Salin seluruh isi `supabase/schema.sql`, tempel, lalu **Run**.
-Isinya identik dengan gabungan keempat belas file di atas (termasuk migrasi 14).
+Isinya identik dengan gabungan ketujuh belas file di atas (termasuk migrasi 15-17).
 
 **C. Membuat akun pegawai**
 
@@ -155,13 +165,16 @@ update public.pegawai
 ├── index.html
 ├── supabase/
 │   ├── schema.sql              # Skema DB + RLS + RPC (instalasi sekali jalan)
-│   ├── migrations/             # 01–14, dijalankan bertahap
+│   ├── migrations/             # 01–17, dijalankan bertahap
 │   ├── verifikasi_09.sql       # Pemeriksaan fitur Dinas & Sakit / Cuti
 │   ├── verifikasi_10.sql       # Pemeriksaan RPC perubahan role (opsional)
 │   ├── verifikasi_11.sql       # Pemeriksaan pengaturan kepala ruangan
 │   ├── verifikasi_12.sql       # Pemeriksaan jadwal, keterlambatan, Alfa
-│   ├── verifikasi_13.sql       # Pemeriksaan jadwal kepala, finalisasi, audit
-│   ├── verifikasi_14.sql       # Pemeriksaan RPC impor jadwal CSV/XLSX
+│   ├── verifikasi_13.sql       # Pemeriksaan jadwal kepala & audit (sebelum migrasi 15)
+│   ├── verifikasi_14.sql       # Pemeriksaan RPC impor (sebelum migrasi 15)
+│   ├── verifikasi_15.sql       # Pemeriksaan finalisasi terhapus & batas tanggal baru
+│   ├── verifikasi_16.sql       # Pemeriksaan satu perangkat aktif per pegawai
+│   ├── verifikasi_17.sql       # Pemeriksaan batas waktu absen masuk/pulang
 │   └── jadwal_alfa.sql         # Opsional: jadwal pg_cron untuk Alfa
 ├── scripts/
 │   ├── impor-akun.mjs          # Impor akun massal via Supabase Admin API
@@ -237,12 +250,13 @@ update public.pegawai
 |---|---|
 | **Geofencing** | Haversine ke titik pusat RSUD AMI; tolak jika jarak > 100 m (klien + server) |
 | **Fake GPS** | Tolak bila `coords.isMocked === true` atau `accuracy === 0`; akurasi > 50 m ditolak |
-| **Device binding** | `device_token` UUID di `localStorage`; hanya perangkat `approved` Admin IT yang bisa absen; 1 pegawai = 1 perangkat aktif (unique index DB) |
+| **Device binding** | `device_token` UUID di `localStorage`; hanya perangkat `approved` Admin IT yang bisa absen; 1 pegawai = 1 perangkat aktif (`pending`/`approved`) dijaga unique index dan RLS |
 | **Server-side** | Penulisan presensi hanya lewat RPC `submit_presensi` (`SECURITY DEFINER`) yang memvalidasi ulang semuanya |
 | **RLS** | RLS aktif di semua tabel; pegawai hanya bisa membaca data miliknya |
 | **Anti duplikasi** | `unique (user_id, tanggal)` + validasi absen masuk/pulang di server |
-| **Jadwal shift** | Super Admin mengelola semua unit/tanggal; kepala ruangan hanya unitnya, mulai besok, dan tidak setelah final. Pegawai shift tanpa jadwal **selalu** ditolak |
-| **Finalisasi jadwal** | Per unit/bulan; setelah final sel kosong berarti libur dan kepala ruangan tidak dapat mengubah. Hanya Super Admin yang dapat membuka finalisasi |
+| **Jendela waktu** | Absen masuk dibuka 20 menit sebelum jam masuk; absen pulang dibuka 1 menit setelah jam pulang (reguler, shift, dan shift malam lintas hari; klien + server) |
+| **Jadwal shift** | Super Admin mengelola semua unit/tanggal; kepala ruangan hanya unitnya, mulai hari ini (WITA), dan tanggal sebelum hari ini hanya untuk Super Admin. Perubahan sel langsung tersimpan. Pegawai shift tanpa jadwal **selalu** ditolak |
+| **Status jadwal** | Tidak ada finalisasi. Sel kosong berarti belum dijadwalkan, bukan libur. Impor mengikuti batas tanggal yang sama |
 | **Keterlambatan** | Dihitung server dari jam masuk terhadap jadwal; tanpa toleransi (08.00.01 = 1 menit) dan hanya pada hari yang dijadwalkan |
 | **Hari libur** | Diinput manual Super Admin; absensi reguler dikunci, sedangkan pegawai shift tetap boleh absen bila dijadwalkan |
 | **Alfa otomatis** | Hanya dibuat setelah jam kerja berakhir; idempoten, mendukung shift malam lintas hari, dan tunduk pada tanggal mulai penerapan |
@@ -280,7 +294,7 @@ Akses: login dengan akun ber-role `superadmin`, lalu buka `/superadmin-portal`.
 | **Verifikasi Perangkat** | Setujui/tolak pengajuan, reset perangkat (otomatis mencabut perangkat lama) |
 | **Grup Shift** | Master grup/unit dan seksi; rename otomatis memperbarui unit seluruh pegawai |
 | **Master Shift** | CRUD pola jam shift (Pagi/Siang/Malam) |
-| **Jadwal Shift** | Grid jadwal per grup, isi cepat, salin pola bulan lalu, template/impor CSV & XLSX, finalisasi bulanan, dan tampilan daftar di HP |
+| **Jadwal Shift** | Grid jadwal per grup, isi cepat, salin pola bulan lalu, template/impor CSV & XLSX, simpan otomatis per sel, dan tampilan daftar di HP |
 | **Hari Libur** | Input manual hari libur nasional/cuti bersama per tahun |
 | **Pengaturan Presensi** | Aktivasi Alfa otomatis dan proses Alfa manual. Mode transisi sudah dihapus |
 | **Koreksi Presensi** | Ubah jam/status dengan **alasan wajib** + audit trail permanen |
@@ -304,16 +318,22 @@ Akses: login dengan akun ber-role `superadmin`, lalu buka `/superadmin-portal`.
 - **Keterlambatan** dihitung dari jam masuk terhadap jam mulai jadwal, tanpa
   toleransi. Pukul **08.00.01** sudah dihitung **1 menit terlambat**. Sistem
   tidak menghitung pulang cepat; absen pulang tetap direkam.
+- **Jendela waktu absen.** Tombol **Absen Hadir** baru aktif **20 menit sebelum
+  jam masuk** (jadwal 08.00 → aktif 07.40). Tombol **Absen Pulang** baru aktif
+  **1 menit setelah jam pulang** (jadwal pulang 16.30 → aktif 16.31). Aturan ini
+  berlaku untuk Reguler dan Shift, termasuk shift malam lintas hari, serta
+  divalidasi ulang di server. Sebelum jendela dibuka, tombol menampilkan jam
+  buka dan alasan penguncian.
 - **Jadwal shift wajib, tanpa mode transisi.** Pegawai shift yang belum
   dijadwalkan selalu ditolak saat absen dan tidak dibuatkan Alfa. Kepala ruangan
-  dapat mengisi jadwal unitnya sendiri untuk tanggal **besok dan seterusnya**;
-  hari ini, tanggal lampau, dan unit lain hanya dapat diubah Super Admin.
-  Perubahan kepala ruangan langsung berlaku dan tercatat di audit jadwal — tanpa
-  alur persetujuan tambahan.
-- **Finalisasi bulanan.** Setelah jadwal satu unit untuk satu bulan selesai,
-  tekan **Finalisasi Jadwal** di menu Jadwal Shift. Setelah final, sel kosong
-  berarti libur dan kepala ruangan tidak dapat mengubah jadwal lagi. Super Admin
-  tetap dapat mengubah dan membuka finalisasi bila ada koreksi.
+  dapat mengisi jadwal unitnya sendiri untuk tanggal **hari ini dan seterusnya**;
+  tanggal sebelum hari ini dan unit lain hanya dapat diubah Super Admin.
+  Perubahan kepala ruangan langsung tersimpan per sel dan tercatat di audit
+  jadwal — tanpa alur persetujuan tambahan.
+- **Tanpa finalisasi.** Tidak ada tombol finalisasi bulanan. Sel kosong berarti
+  **belum dijadwalkan**, bukan libur. Perubahan dapat dilakukan kapan saja pada
+  tanggal hari ini dan setelahnya; jadwal bulan lampau hanya dapat dikoreksi
+  Super Admin.
 - **Template & Impor.** Tombol **Template & Impor** mengunduh grid jadwal
   `user_id; nama; unit_kerja; 1..31` dalam **CSV** atau **XLSX** (sheet Jadwal
   dan Petunjuk). File berisi jadwal yang sudah ada, hanya pegawai shift pada unit
@@ -322,16 +342,18 @@ Akses: login dengan akun ber-role `superadmin`, lalu buka `/superadmin-portal`.
   `LIBUR` berarti jadwal dihapus. Impor bersifat **atomik**: satu kesalahan
   membatalkan seluruh perubahan. File dibaca di browser (maks. 2 MB) dan tidak
   diunggah ke Storage; server tetap memvalidasi ulang unit, peran, pola kerja,
-  shift, tanggal, finalisasi, dan duplikat melalui RPC `impor_jadwal_shift`.
+  shift, tanggal, dan duplikat melalui RPC `impor_jadwal_shift`.
   Pustaka XLSX dimuat hanya saat diperlukan; CSV tetap tanpa dependensi tambahan.
-  Impor **tidak** mengubah status finalisasi. Pengeditan sel manual, **Isi
-  Cepat**, dan **Salin Bulan Lalu** tetap tersedia tanpa harus mengimpor file.
+  Impor mengikuti batas tanggal peran: kepala ruangan boleh mengimpor tanggal
+  hari ini dan setelahnya, tetapi bukan tanggal lampau. Pengeditan sel manual,
+  **Isi Cepat**, dan **Salin Bulan Lalu** tetap tersedia tanpa harus mengimpor
+  file.
 - **Alfa otomatis** awalnya **nonaktif**. Isi *Alfa berlaku mulai*, aktifkan,
   lalu simpan. Alfa hanya dibuat untuk pegawai reguler pada hari kerja atau
   pegawai shift yang dijadwalkan, setelah jam kerja berakhir — bukan pada pukul
   03.00 — dan shift Malam diproses setelah pukul 07.30 keesokan harinya.
   Proses bersifat idempoten sehingga aman diulang. Jangan aktifkan Alfa sebelum
-  jadwal bulan pertama lengkap, hari libur terisi, dan finalisasi diuji.
+  jadwal bulan pertama lengkap dan hari libur terisi.
 - Agar Alfa berjalan tanpa dibuka manual, aktifkan ekstensi **pg_cron** di
   Supabase lalu jalankan **`supabase/jadwal_alfa.sql`**. Cron memanggil
   `proses_alfa_otomatis()` setiap 15 menit. Tombol **Hari ini & kemarin** pada
@@ -341,8 +363,15 @@ Akses: login dengan akun ber-role `superadmin`, lalu buka `/superadmin-portal`.
 
 1. Pegawai klik **Ajukan Verifikasi Perangkat** di dashboard.
 2. Super Admin membuka **Verifikasi Perangkat → Menunggu**, lalu **Setujui**.
-3. Sistem otomatis mencabut perangkat lama yang masih aktif (kebijakan 1 perangkat).
-4. Tombol absen pegawai terbuka pada perangkat yang disetujui.
+3. Satu pegawai hanya boleh punya satu perangkat aktif (`pending`/`approved`).
+   Perangkat lain tidak dapat mengajukan verifikasi dan akan melihat pesan untuk
+   menghubungi Admin IT.
+4. Untuk mengganti perangkat, Super Admin menekan **Reset Perangkat** pada
+   perangkat lama, lalu pegawai mengajukan dari perangkat baru.
+5. Tombol absen pegawai terbuka pada perangkat yang disetujui.
+
+> Migrasi 16 mengosongkan seluruh data perangkat karena masih data uji. Setelah
+> migrasi dijalankan, semua pegawai harus mengajukan verifikasi ulang.
 
 **Efek persetujuan Dinas & Sakit / Cuti:** baris presensi seluruh anggota grup pada
 rentang tanggal tersebut dibuat atau ditandai sesuai jenis. Presensi yang sudah memiliki
@@ -361,7 +390,7 @@ ruangan tidak dapat menghapus dokumen yang masih tertaut ke pengajuan; file yati
 | Menu | Fungsi |
 |---|---|
 | **Absensi** (`/`) | Absen hadir/pulang dengan geofencing + device binding (akun kepala ruangan tetap absen seperti biasa) |
-| **Jadwal Shift** (`/kepala-ruangan/jadwal-shift`) | Atur jadwal shift unit sendiri mulai besok, unduh/impor template CSV/XLSX, dan finalisasi bulanan; tanpa akses unit lain atau tanggal lampau |
+| **Jadwal Shift** (`/kepala-ruangan/jadwal-shift`) | Atur jadwal shift unit sendiri mulai hari ini, unduh/impor template CSV/XLSX; tanpa akses unit lain atau tanggal lampau |
 | **Kepala Ruangan** (`/kepala-ruangan/dinas-sakit`, `/kepala-ruangan/cuti`) | Catat/ubah pengajuan unit sendiri; tanpa akses data pegawai di luar unit, rekap unit, atau persetujuan |
 | **Dinas & Cuti** (`/izin-saya`) | Riwayat **baca-saja** Dinas, Sakit & Cuti milik sendiri + lihat dokumen |
 | **Riwayat** (`/riwayat`) | Rekap & detail presensi bulanan milik sendiri |
@@ -386,10 +415,11 @@ Promosi/penurunan role Super Admin tetap hanya melalui SQL oleh Admin IT.
   (fungsi `submit_presensi`). Jika titik pusat berubah, ubah **keduanya**.
 - **Timezone** "hari ini" dan perhitungan jadwal memakai `Asia/Makassar` (WITA).
 - **Jangan mengaktifkan Alfa otomatis** sebelum jadwal shift bulan pertama
-  lengkap, hari libur terisi, dan finalisasi diuji. Mode transisi sudah dihapus;
-  jadwal kosong bukan alasan untuk membuka absen.
-- **Finalisasi jadwal** harus dilakukan per unit setiap bulan. Sel kosong setelah
-  final berarti libur; jadwal yang belum final belum bisa dianggap libur.
+  lengkap dan hari libur terisi. Mode transisi sudah dihapus; jadwal kosong bukan
+  alasan untuk membuka absen.
+- **Tidak ada finalisasi jadwal.** Sel kosong berarti belum dijadwalkan, bukan
+  libur. Perubahan jadwal hari ini dan setelahnya dapat dilakukan kapan saja;
+  tanggal lampau hanya dapat dikoreksi Super Admin.
 - **Rename grup** mengubah `unit_kerja` pegawai melalui `ON UPDATE CASCADE`; data
   jadwal, presensi, dan pengajuan tetap utuh.
 - `dist/` dan `.env` sudah masuk `.gitignore`.
@@ -442,6 +472,6 @@ dengan base path `/PRESISI-AMI/`.
 environment variable yang sama, lalu deploy.
 
 **Membersihkan data uji sebelum go-live:** jalankan `supabase/cleanup_data_uji.sql`
-di SQL Editor. Skrip ini menghapus presensi, izin, koreksi, jadwal beserta status
-finalisasinya, dan perangkat, tetapi mempertahankan akun, unit kerja, master shift,
+di SQL Editor. Skrip ini menghapus presensi, izin, koreksi, jadwal, dan perangkat,
+tetapi mempertahankan akun, unit kerja, master shift,
 hari libur, serta pengaturan presensi.
