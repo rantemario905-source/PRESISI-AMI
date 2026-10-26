@@ -61,7 +61,7 @@ migrasi 09–18 & skrip verifikasi, penyiapan data operasional
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 8 + UI navigasi + migrasi 15–18 | `src/`, `supabase/migrations/01–18` |
-| Commit Git | **HEAD** — `dbe0b2a` (sinkronisasi status dokumen) | `git log` |
+| Commit Git | **HEAD** — `c4fe733` (aksi per halaman dan subtitle topbar) | `git log` |
 | Perubahan lokal | **Tidak ada** — penempatan aksi per halaman, `KepalaHalaman` judul kiri/aksi kanan, subtitle topbar, dan aset `logo kutai kartanegara.png` sudah di-commit dan di-push 2026-10-27 00:03 | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Skrip `supabase/verifikasi_*.sql` | **Tidak diketahui** sudah dijalankan atau belum | perlu cek manual |
