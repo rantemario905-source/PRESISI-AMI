@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-26 11:52 WITA |
+| Terakhir diperbarui | 2026-10-26 12:01 WITA |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -50,8 +50,8 @@ persiapan go-live.
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 8 + UI navigasi + migrasi 15–17 | `src/`, `supabase/migrations/01–17` |
-| Commit Git | **Sinkron** — `2c8a775` (Fase 4–8 + UI) | `git log`, `origin/main` |
-| Perubahan belum di-commit | **Ada** — migrasi 15–17, frontend, dokumen (menunggu uji lokal) | `git status` |
+| Commit Git | **Sinkron** — `c21ecf9` (migrasi 15–17, jendela absen, satu perangkat) | `git log`, `origin/main` |
+| Perubahan lokal | **Bersih** — semua perubahan sudah di-commit dan di-push | `git status` |
 | Migrasi DB 01–17 | **Tidak diketahui** di proyek Supabase | perlu cek SQL Editor |
 | Skrip `supabase/verifikasi_*.sql` | **Tidak diketahui** sudah dijalankan atau belum | perlu cek manual |
 | Build produksi | **Lulus** — 267 modul, 6,76 dtk | `npm run build` (2026-10-26 11:52) |
@@ -62,8 +62,9 @@ persiapan go-live.
 | Uji login live | **Lulus** — Super Admin (desktop) + pegawai (mobile) | Laporan user 2026-10-25 13:37 |
 | Uji perangkat & absensi | **Lulus** — verifikasi perangkat, radius, akurasi, duplikasi | Laporan user 2026-10-25 14:04 |
 
-**Pekerjaan terakhir:** migrasi 15–17 + penyesuaian frontend/dokumen (2026-10-26;
-**belum di-commit**, menunggu uji lokal user).
+**Pekerjaan terakhir:** migrasi 15–17 + penyesuaian frontend/dokumen, sudah
+**di-commit `c21ecf9` dan di-push** (2026-10-26); menunggu uji lokal user dan
+migrasi DB.
 
 **Langkah berikutnya yang disarankan:**
 1. Jalankan migrasi **15**, **16**, lalu **17** berurutan di SQL Editor, kemudian
@@ -126,6 +127,8 @@ dan `verifikasi_14` kini **tidak valid** setelah migrasi 15 dan digantikan
 - **Catatan/risiko:** migrasi 17 belum dijalankan di database dan aturan belum
   diuji manual. Nilai 20 menit & 1 menit ditulis di server dan
   `src/config/constants.js`; ubah keduanya bila aturan berubah.
+- **Tindak lanjut:** seluruh perubahan di-commit `c21ecf9` dan di-push ke
+  `origin/main` (2026-10-26 12:01), memicu deploy GitHub Pages.
 
 ### 2026-10-26 11:04 WITA — Lanjutan migrasi 15–16: perbaikan & verifikasi build
 - **Perubahan:** melanjutkan pekerjaan yang terhenti karena limit. Memeriksa seluruh
@@ -344,7 +347,7 @@ dan `verifikasi_14` kini **tidak valid** setelah migrasi 15 dan digantikan
 | B-3 | Hasil `supabase/verifikasi_09..17.sql` belum diketahui | Jaminan integritas DB belum ada | Jalankan dan pastikan semua `true` |
 | B-12 | Migrasi 15–17 belum dijalankan | UI baru tidak berfungsi dengan DB lama | Jalankan 15, 16, lalu 17; **16 mengosongkan `perangkat`** |
 | B-13 | Uji lokal fitur baru belum dilakukan | Perilaku kepala ruangan, perangkat kedua, dan jendela waktu belum terbukti | Uji ubah jadwal hari ini, ajukan perangkat kedua, dan tombol absen sebelum jam buka |
-| B-14 | Perubahan migrasi 15–17 belum di-commit | Belum ada di GitHub Pages | Tunggu perintah user setelah uji lokal |
+| B-14 | ~~Perubahan migrasi 15–17 belum di-commit~~ | - | **Selesai:** commit `c21ecf9` + push 2026-10-26 12:01 |
 | B-15 | Aturan jendela waktu (migrasi 17) belum dijalankan/diuji | Absen bisa ditolak atau tidak sesuai harapan | Jalankan 17 + `verifikasi_17.sql`, lalu uji absen 07.40 dan 16.31 |
 | B-4 | ~~`npm run build` belum dijalankan~~ | — | **Selesai:** lulus 2026-10-25 12:24 |
 | B-5 | ~~README menyebut Fase 1–7 saja~~ | — | **Selesai:** diperbarui ke Fase 1–8 + impor |

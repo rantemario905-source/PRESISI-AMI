@@ -149,8 +149,9 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   `&&`. Gunakan `workdir`, jangan `cd`.
 - Repo: branch `main`; remote `origin` =
   `https://github.com/rantemario905-source/PRESISI-AMI.git`; commit fitur
-  `2c8a775` (Fase 4–8 + UI) dan commit dokumen audit `4739c4a`. Working tree
-  bersih pada 2026-10-25 12:49.
+  `2c8a775` (Fase 4-8 + UI), commit dokumen audit `4739c4a`, dan commit
+  `c21ecf9` (migrasi 15-17, jendela absen, satu perangkat) yang di-push
+  2026-10-26 12:01. Working tree bersih setelah commit `c21ecf9`.
 - **Deploy:** GitHub Pages lewat `.github/workflows/deploy.yml`; URL live
   `https://rantemario905-source.github.io/PRESISI-AMI/`; base path
   `/PRESISI-AMI/`; secrets `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`.
