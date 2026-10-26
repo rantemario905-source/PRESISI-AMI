@@ -153,9 +153,9 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   `https://github.com/rantemario905-source/PRESISI-AMI.git`; commit fitur
   `2c8a775` (Fase 4-8 + UI), commit dokumen audit `4739c4a`, commit
   `c21ecf9` (migrasi 15-17, jendela absen, satu perangkat), commit
-  `6343111` (hapus grup kosong, grup sistem), dan commit `7e32c0e`
-  (sinkronisasi dokumen audit) yang di-push 2026-10-26 13:19. Working tree
-  berisi perubahan bilah progres yang belum di-commit.
+  `6343111` (hapus grup kosong, grup sistem), commit `7e32c0e` (sinkronisasi
+  dokumen audit), dan commit `900e916` (bilah progres navigasi) yang di-push
+  2026-10-26 13:50. Working tree bersih setelah sinkronisasi dokumen.
 - **Deploy:** GitHub Pages lewat `.github/workflows/deploy.yml`; URL live
   `https://rantemario905-source.github.io/PRESISI-AMI/`; base path
   `/PRESISI-AMI/`; secrets `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`.

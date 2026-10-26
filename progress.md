@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-26 13:45 WITA |
+| Terakhir diperbarui | 2026-10-26 13:50 WITA |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -52,8 +52,8 @@ Yang belum: konfirmasi migrasi 09–18 & skrip verifikasi, penyiapan data operas
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 8 + UI navigasi + migrasi 15–18 | `src/`, `supabase/migrations/01–18` |
-| Commit Git | **HEAD** — `7e32c0e` (sinkronisasi dokumen audit) | `git log` |
-| Perubahan lokal | **Ada** — bilah progres navigasi (menunggu uji lokal, belum di-commit) | `git status` |
+| Commit Git | **Sinkron** — `900e916` (bilah progres navigasi) | `git log`, `origin/main` |
+| Perubahan lokal | **Bersih** — semua perubahan sudah di-commit dan di-push | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Skrip `supabase/verifikasi_*.sql` | **Tidak diketahui** sudah dijalankan atau belum | perlu cek manual |
 | Build produksi | **Lulus** — 270 modul, 6,80 dtk | `npm run build` (2026-10-26 13:45) |
@@ -67,8 +67,8 @@ Yang belum: konfirmasi migrasi 09–18 & skrip verifikasi, penyiapan data operas
 | Uji perangkat & absensi | **Lulus** — verifikasi perangkat, radius, akurasi, duplikasi | Laporan user 2026-10-25 14:04 |
 
 **Pekerjaan terakhir:** bilah progres biru muda untuk navigasi menu, login,
-logout, dan muat ulang profil (2026-10-26; **belum di-commit**, menunggu uji
-lokal). Sebelumnya migrasi 18 + UI Grup Shift sudah di-commit `6343111`.
+logout, dan muat ulang profil, sudah **di-commit `900e916` dan di-push**
+(2026-10-26); menunggu uji visual lokal.
 
 **Langkah berikutnya yang disarankan:**
 1. Jalankan migrasi **15**, **16**, **17**, lalu **18** berurutan di SQL Editor,
@@ -132,8 +132,10 @@ dan `verifikasi_18` untuk hapus grup kosong.
   `AGENTS.md`, `progress.md`.
 - **Verifikasi:** `npm run build` **lulus** — 270 modul, 6,80 dtk
   (2026-10-26 13:45).
-- **Catatan/risiko:** perubahan belum di-commit; animasi baru diuji lewat build,
-  belum uji visual manual di browser.
+- **Tindak lanjut:** di-commit `900e916` dan di-push ke `origin/main`
+  (2026-10-26 13:50).
+- **Catatan/risiko:** animasi baru diuji lewat build, belum uji visual manual di
+  browser.
 
 ### 2026-10-26 13:12 WITA — Selisih hitungan grup "Belum ditentukan"
 - **Diagnosis:** UI menghitung pegawai ber-role `pegawai` saja (0), sedangkan RPC
