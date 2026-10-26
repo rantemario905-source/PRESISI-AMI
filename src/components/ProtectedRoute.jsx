@@ -9,6 +9,7 @@
  */
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
+import { useProgres } from '../context/ProgressContext.jsx'
 import AksesDitolak from './AksesDitolak.jsx'
 import { Alert, Button, LayarMemuat } from './ui/index.js'
 
@@ -20,7 +21,17 @@ import { Alert, Button, LayarMemuat } from './ui/index.js'
  */
 export default function ProtectedRoute({ peran, kepalaRuangan = false, children }) {
   const { sesi, profil, memuat, galat, muatProfil, keluar } = useAuth()
+  const { mulai, selesai } = useProgres()
   const lokasi = useLocation()
+
+  async function cobaMuatProfil() {
+    mulai()
+    try {
+      await muatProfil()
+    } finally {
+      selesai()
+    }
+  }
 
   if (memuat) return <LayarMemuat />
 
@@ -43,7 +54,7 @@ export default function ProtectedRoute({ peran, kepalaRuangan = false, children 
             <Button variant="sekunder" onClick={() => keluar()}>
               Keluar
             </Button>
-            <Button onClick={muatProfil}>Coba lagi</Button>
+            <Button onClick={cobaMuatProfil}>Coba lagi</Button>
           </div>
         </section>
       </main>

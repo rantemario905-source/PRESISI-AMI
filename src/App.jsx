@@ -32,6 +32,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import PortalAdminLayout from './components/layout/PortalAdminLayout.jsx'
 import PortalKepalaLayout from './components/layout/PortalKepalaLayout.jsx'
+import PengamatRute from './components/PengamatRute.jsx'
+import BilahProgres from './components/ui/BilahProgres.jsx'
 import Login from './pages/Login.jsx'
 import NotFound from './pages/NotFound.jsx'
 import { LayarMemuat } from './components/ui/index.js'
@@ -54,6 +56,8 @@ const Rekapitulasi = lazy(() => import('./pages/admin/Rekapitulasi.jsx'))
 export default function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <BilahProgres />
+      <PengamatRute />
       <Suspense fallback={<LayarMemuat label="Memuat halaman…" />}>
         <Routes>
           <Route path="/login" element={<Login />} />

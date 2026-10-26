@@ -267,6 +267,7 @@ update public.pegawai
 | **Izin read-only** | Tidak ada policy insert/update/delete pada `izin_cuti`; pegawai hanya melihat barisnya sendiri dan tidak dapat mengajukan sendiri |
 | **Dokumen** | Bucket privat `dokumen-izin`; hanya JPG/PNG maks. 1 MB; path wajib diawali `grup_id` dan diverifikasi RPC |
 | **Audit trail** | Koreksi presensi wajib alasan (min. 5 karakter) dan mencatat admin, nilai lama/baru, serta waktu |
+| **Bilah progres** | Bilah tipis biru muda di atas layar saat navigasi menu, login, logout, dan muat ulang profil |
 | **Privasi** | Promosi/penurunan role Super Admin hanya lewat SQL Admin IT; status kepala ruangan diatur Super Admin dari Data Pegawai dan dibatasi satu kepala per unit |
 
 ## 6. Alur absensi

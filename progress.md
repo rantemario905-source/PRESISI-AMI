@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-26 13:19 WITA |
+| Terakhir diperbarui | 2026-10-26 13:45 WITA |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -52,22 +52,23 @@ Yang belum: konfirmasi migrasi 09–18 & skrip verifikasi, penyiapan data operas
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 8 + UI navigasi + migrasi 15–18 | `src/`, `supabase/migrations/01–18` |
-| Commit Git | **Sinkron** — `6343111` (hapus grup kosong & grup sistem) | `git log`, `origin/main` |
-| Perubahan lokal | **Bersih** — semua perubahan sudah di-commit dan di-push | `git status` |
+| Commit Git | **HEAD** — `7e32c0e` (sinkronisasi dokumen audit) | `git log` |
+| Perubahan lokal | **Ada** — bilah progres navigasi (menunggu uji lokal, belum di-commit) | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Skrip `supabase/verifikasi_*.sql` | **Tidak diketahui** sudah dijalankan atau belum | perlu cek manual |
-| Build produksi | **Lulus** — 267 modul, 7,54 dtk | `npm run build` (2026-10-26 13:18) |
+| Build produksi | **Lulus** — 270 modul, 6,80 dtk | `npm run build` (2026-10-26 13:45) |
 | Jendela waktu absen | **Ada di kode** — masuk 20 menit sebelum, pulang 1 menit setelah | migrasi 17, `PanelAbsen.jsx`, `jadwalAbsen.js` |
 | Hapus grup kosong | **Ada di kode** — semua grup 0 pegawai; "Belum ditentukan" (akun sistem) disembunyikan bila kosong | migrasi 18, `GrupShift.jsx` |
+| Bilah progres | **Ada di kode** — bilah biru muda di atas layar saat navigasi, login, logout, dan muat ulang profil | `ProgressContext.jsx`, `BilahProgres.jsx`, `PengamatRute.jsx` |
 | Lint/unit test | Tidak tersedia di `package.json` | `package.json` |
 | Alfa otomatis | Fitur ada, **default nonaktif** | migrasi 12, `PengaturanPresensi.jsx` |
 | Deploy GitHub Pages | **Aktif** — workflow run #1 sukses | https://rantemario905-source.github.io/PRESISI-AMI/ |
 | Uji login live | **Lulus** — Super Admin (desktop) + pegawai (mobile) | Laporan user 2026-10-25 13:37 |
 | Uji perangkat & absensi | **Lulus** — verifikasi perangkat, radius, akurasi, duplikasi | Laporan user 2026-10-25 14:04 |
 
-**Pekerjaan terakhir:** migrasi 18 (hapus grup kosong) + perbaikan hitungan grup
-sistem + UI Grup Shift + dokumen, sudah **di-commit `6343111` dan di-push**
-(2026-10-26); menunggu uji lokal user dan `verifikasi_18.sql`.
+**Pekerjaan terakhir:** bilah progres biru muda untuk navigasi menu, login,
+logout, dan muat ulang profil (2026-10-26; **belum di-commit**, menunggu uji
+lokal). Sebelumnya migrasi 18 + UI Grup Shift sudah di-commit `6343111`.
 
 **Langkah berikutnya yang disarankan:**
 1. Jalankan migrasi **15**, **16**, **17**, lalu **18** berurutan di SQL Editor,
@@ -107,6 +108,7 @@ sistem + UI Grup Shift + dokumen, sudah **di-commit `6343111` dan di-push**
 | 9 | Tanpa finalisasi jadwal; kepala ruangan boleh mengubah mulai hari ini; satu perangkat aktif per pegawai | `migrations/15_hapus_finalisasi_jadwal.sql`, `migrations/16_satu_perangkat.sql`, `src/services/deviceService.js`, `src/services/shiftService.js`, `JadwalShift.jsx`, `KartuStatusPerangkat.jsx`, `PanelAbsen.jsx`, `Dashboard.jsx` | selesai | tidak diketahui | `supabase/verifikasi_15.sql`, `verifikasi_16.sql` |
 | 10 | Jendela waktu absensi: masuk 20 menit sebelum jam masuk, pulang 1 menit setelah jam pulang (reguler & shift, termasuk lintas hari) | `migrations/17_batas_waktu_absen.sql`, `src/config/constants.js`, `src/utils/jadwalAbsen.js`, `src/components/PanelAbsen.jsx` | selesai | tidak diketahui | `supabase/verifikasi_17.sql` |
 | 11 | Hapus grup shift kosong; grup sistem "Belum ditentukan" disembunyikan bila tanpa pegawai | `migrations/18_hapus_grup_kosong.sql`, `src/pages/admin/GrupShift.jsx` | selesai | sudah dijalankan | `supabase/verifikasi_18.sql` |
+| 12 | Bilah progres biru muda saat navigasi, login, logout, dan muat ulang profil | `src/context/ProgressContext.jsx`, `src/components/ui/BilahProgres.jsx`, `src/components/PengamatRute.jsx`, `src/pages/Login.jsx`, `src/components/ProtectedRoute.jsx`, `src/App.jsx`, `src/main.jsx` | selesai | - | build lulus; uji manual belum tercatat |
 | UI | Penyempurnaan navigasi: tab bar, navigasi bawah mobile, menu kepala, layout portal | `src/components/ui/TabBar.jsx`, `src/components/NavigasiBawah.jsx`, `src/components/BarAtas.jsx`, `src/components/MenuKepala.jsx`, `src/components/layout/PortalKepalaLayout.jsx`, `src/index.css`, `src/pages/Dashboard.jsx` | selesai `(inferred)` | — | build lulus; uji manual belum tercatat |
 
 **Catatan:** README sudah diperbarui ke Fase 1–8 + migrasi 15–18. `verifikasi_13`
@@ -117,6 +119,21 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-26 13:45 WITA — Bilah progres navigasi
+- **Perubahan:** menambahkan bilah progres tipis berwarna biru muda di bagian
+  atas layar. Bilah aktif saat berpindah menu/rute, proses login, logout,
+  pemuatan sesi awal, dan tombol muat ulang profil. Progres bergerak bertahap
+  hingga 90%, lalu penuh dan memudar setelah rute selesai.
+- **File:** `src/context/ProgressContext.jsx` (baru),
+  `src/components/ui/BilahProgres.jsx` (baru),
+  `src/components/PengamatRute.jsx` (baru), `src/main.jsx`, `src/App.jsx`,
+  `src/pages/Login.jsx`, `src/components/ProtectedRoute.jsx`, `README.md`,
+  `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` **lulus** — 270 modul, 6,80 dtk
+  (2026-10-26 13:45).
+- **Catatan/risiko:** perubahan belum di-commit; animasi baru diuji lewat build,
+  belum uji visual manual di browser.
 
 ### 2026-10-26 13:12 WITA — Selisih hitungan grup "Belum ditentukan"
 - **Diagnosis:** UI menghitung pegawai ber-role `pegawai` saja (0), sedangkan RPC

@@ -10,6 +10,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
+import { useProgres } from '../context/ProgressContext.jsx'
 import { konfigurasiLengkap } from '../utils/supabaseClient.js'
 import { Alert, Button, LayarMemuat, Spinner } from '../components/ui/index.js'
 import LogoRSUD from '../components/LogoRSUD.jsx'
@@ -17,6 +18,7 @@ import { NAMA_APLIKASI, DESKRIPSI_APLIKASI, NAMA_RUMAH_SAKIT } from '../config/c
 
 export default function Login() {
   const { sesi, profil, memuat, masuk, galat } = useAuth()
+  const { mulai, selesai } = useProgres()
   const navigate = useNavigate()
   const lokasi = useLocation()
 
@@ -45,6 +47,8 @@ export default function Login() {
     }
 
     setProses(true)
+    mulai()
+    let berhasil = false
     try {
       const data = await masuk(email.trim(), kataSandi)
 
@@ -56,6 +60,7 @@ export default function Login() {
         dari &&
         (data?.role === 'superadmin' ? dari.startsWith('/superadmin-portal') : dari === '/')
 
+      berhasil = true
       navigate(dariSesuaiPeran ? dari : beranda, { replace: true })
     } catch (err) {
       // Pesan Supabase sengaja dibuat ramah & umum (tidak membocorkan detail akun)
@@ -68,6 +73,7 @@ export default function Login() {
             : pesan || 'Gagal masuk. Coba beberapa saat lagi.',
       )
     } finally {
+      if (!berhasil) selesai()
       setProses(false)
     }
   }
