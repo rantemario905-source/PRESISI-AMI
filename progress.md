@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-26 13:18 WITA |
+| Terakhir diperbarui | 2026-10-26 13:19 WITA |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -44,7 +44,7 @@ sudah berhasil diuji**. Pekerjaan terbaru: **migrasi 15 (hapus finalisasi jadwal
 absen: masuk dibuka 20 menit sebelum jam masuk, pulang dibuka 1 menit setelah jam
 pulang)**, dan **migrasi 18 (hapus grup kosong; grup sistem "Belum ditentukan"
 disembunyikan bila tanpa pegawai)** beserta penyesuaian frontend dan dokumen —
-migrasi 15–17 sudah di-commit, sedangkan **migrasi 18 belum di-commit** dan
+migrasi 15–18 sudah di-commit dan di-push (15–17 `c21ecf9`, 18 `6343111`), serta
 **migrasi 18 sudah dijalankan di Supabase** (terlihat dari pesan server baru).
 Yang belum: konfirmasi migrasi 09–18 & skrip verifikasi, penyiapan data operasional
 (grup shift, jadwal, hari libur), dan persiapan go-live.
@@ -52,8 +52,8 @@ Yang belum: konfirmasi migrasi 09–18 & skrip verifikasi, penyiapan data operas
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 8 + UI navigasi + migrasi 15–18 | `src/`, `supabase/migrations/01–18` |
-| Commit Git | **Sinkron** — `be23dba` (status dokumen audit) | `git log`, `origin/main` |
-| Perubahan lokal | **Ada** — migrasi 18, UI Grup Shift, dokumen (menunggu uji lokal) | `git status` |
+| Commit Git | **Sinkron** — `6343111` (hapus grup kosong & grup sistem) | `git log`, `origin/main` |
+| Perubahan lokal | **Bersih** — semua perubahan sudah di-commit dan di-push | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Skrip `supabase/verifikasi_*.sql` | **Tidak diketahui** sudah dijalankan atau belum | perlu cek manual |
 | Build produksi | **Lulus** — 267 modul, 7,54 dtk | `npm run build` (2026-10-26 13:18) |
@@ -66,8 +66,8 @@ Yang belum: konfirmasi migrasi 09–18 & skrip verifikasi, penyiapan data operas
 | Uji perangkat & absensi | **Lulus** — verifikasi perangkat, radius, akurasi, duplikasi | Laporan user 2026-10-25 14:04 |
 
 **Pekerjaan terakhir:** migrasi 18 (hapus grup kosong) + perbaikan hitungan grup
-sistem + UI Grup Shift + dokumen (2026-10-26; **belum di-commit**, menunggu uji
-lokal user). Migrasi 15–17 sudah di-commit `c21ecf9` dan di-push.
+sistem + UI Grup Shift + dokumen, sudah **di-commit `6343111` dan di-push**
+(2026-10-26); menunggu uji lokal user dan `verifikasi_18.sql`.
 
 **Langkah berikutnya yang disarankan:**
 1. Jalankan migrasi **15**, **16**, **17**, lalu **18** berurutan di SQL Editor,
@@ -130,6 +130,8 @@ dan `verifikasi_18` untuk hapus grup kosong.
   `progress.md`.
 - **Verifikasi:** `npm run build` **lulus** — 267 modul, 7,54 dtk
   (2026-10-26 13:18).
+- **Tindak lanjut:** di-commit `6343111` dan di-push ke `origin/main`
+  (2026-10-26 13:19).
 
 ### 2026-10-26 12:15 WITA — Hapus grup shift kosong (migrasi 18)
 - **Perubahan:** membuka akses hapus untuk **semua grup shift tanpa pegawai**,
@@ -386,7 +388,7 @@ dan `verifikasi_18` untuk hapus grup kosong.
 | B-13 | Uji lokal fitur baru belum dilakukan | Perilaku kepala ruangan, perangkat kedua, jendela waktu, dan hapus grup belum terbukti | Uji ubah jadwal hari ini, ajukan perangkat kedua, tombol absen sebelum jam buka, dan hapus grup kosong non-sistem |
 | B-14 | ~~Perubahan migrasi 15–17 belum di-commit~~ | - | **Selesai:** commit `c21ecf9` + push 2026-10-26 12:01 |
 | B-15 | Aturan jendela waktu (migrasi 17) belum dijalankan/diuji | Absen bisa ditolak atau tidak sesuai harapan | Jalankan 17 + `verifikasi_17.sql`, lalu uji absen 07.40 dan 16.31 |
-| B-16 | Migrasi 18 sudah dijalankan, tetapi UI grup sistem belum diuji/di-commit | Kebingungan hitungan "Belum ditentukan" | Jalankan `verifikasi_18.sql`, uji grup sistem tersembunyi, lalu tunggu perintah commit |
+| B-16 | ~~Migrasi 18 dan UI grup sistem belum diuji/di-commit~~ | - | **Selesai:** commit `6343111` + push 2026-10-26 13:19; sisa uji `verifikasi_18.sql` |
 | B-4 | ~~`npm run build` belum dijalankan~~ | — | **Selesai:** lulus 2026-10-25 12:24 |
 | B-5 | ~~README menyebut Fase 1–7 saja~~ | — | **Selesai:** diperbarui ke Fase 1–8 + impor |
 | B-6 | ~~`verifikasi_10.sql` tidak ada di diagram README~~ | — | **Selesai:** ditambahkan ke struktur |
