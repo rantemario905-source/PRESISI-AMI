@@ -1,6 +1,6 @@
 /**
  * ==========================================================================
- * Super Admin — Dashboard Utama
+ * Super Admin — Dashboard
  * --------------------------------------------------------------------------
  * Statistik ringkas + pemantauan presensi hari ini secara real-time
  * (Supabase Realtime pada tabel presensi, dengan tombol muat ulang manual).
@@ -23,6 +23,7 @@ export default function DashboardUtama() {
   const [daftar, setDaftar] = useState([])
   const [memuat, setMemuat] = useState(true)
   const [galat, setGalat] = useState(null)
+  const tanggalHariIni = formatTanggal(new Date(), { weekday: undefined })
 
   const muat = useCallback(async () => {
     try {
@@ -61,8 +62,8 @@ export default function DashboardUtama() {
   return (
     <>
       <KepalaHalaman
-        judul="Dashboard Utama"
-        deskripsi={`Pemantauan presensi ${formatTanggal(new Date(), { weekday: undefined })}`}
+        judul="Dashboard"
+        deskripsi={`Pemantauan presensi ${tanggalHariIni}`}
         aksi={
           <Button variant="sekunder" size="sm" onClick={muat} disabled={memuat}>
             {memuat ? 'Memuat…' : 'Muat ulang'}
@@ -78,30 +79,30 @@ export default function DashboardUtama() {
 
       <div className="mb-4 grid grid-cols-2 gap-2.5 sm:mb-5 sm:gap-4 xl:grid-cols-4">
         <KartuStatistik
-          label="Total Pegawai Non-ASN"
+          label="Total Pegawai"
           nilai={statistik?.totalPegawai ?? '—'}
-          keterangan="Pegawai dengan peran pegawai"
+          keterangan="Non ASN"
           ikon="👥"
           warna="sky"
         />
         <KartuStatistik
           label="Hadir Hari Ini"
           nilai={statistik?.hadirHariIni ?? '—'}
-          keterangan="Sudah absen masuk"
+          keterangan={tanggalHariIni}
           ikon="✅"
           warna="green"
         />
         <KartuStatistik
           label="Sudah Absen Pulang"
           nilai={statistik?.sudahPulang ?? '—'}
-          keterangan="Presensi hari ini lengkap"
+          keterangan={tanggalHariIni}
           ikon="🏁"
           warna="slate"
         />
         <KartuStatistik
           label="Perangkat Menunggu"
           nilai={statistik?.pendingPerangkat ?? '—'}
-          keterangan="Perlu verifikasi Admin IT"
+          keterangan="Perlu Verifikasi"
           ikon="📱"
           warna="amber"
         />

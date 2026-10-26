@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-26 13:50 WITA |
+| Terakhir diperbarui | 2026-10-26 15:31 WITA |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -46,29 +46,44 @@ pulang)**, dan **migrasi 18 (hapus grup kosong; grup sistem "Belum ditentukan"
 disembunyikan bila tanpa pegawai)** beserta penyesuaian frontend dan dokumen —
 migrasi 15–18 sudah di-commit dan di-push (15–17 `c21ecf9`, 18 `6343111`), serta
 **migrasi 18 sudah dijalankan di Supabase** (terlihat dari pesan server baru).
-Yang belum: konfirmasi migrasi 09–18 & skrip verifikasi, penyiapan data operasional
+Penyempurnaan terbaru: **favicon dan apple-touch-icon memakai logo resmi**, label
+**Super Admin** di header sidebar dihapus, **label dashboard disederhanakan**
+(“Dashboard”, “Total Pegawai”, “Non ASN”, tanggal aktual, dan “Perlu Verifikasi”),
+serta **tombol Keluar dipindahkan ke menu avatar** di kanan atas (responsif HP)
+dengan **animasi buka/tutup halus**, serta **animasi gulir submenu sidebar**
+Super Admin. Yang belum: konfirmasi migrasi 09–18 & skrip verifikasi, penyiapan data operasional
 (grup shift, jadwal, hari libur), dan persiapan go-live.
 
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 8 + UI navigasi + migrasi 15–18 | `src/`, `supabase/migrations/01–18` |
-| Commit Git | **Sinkron** — `900e916` (bilah progres navigasi) | `git log`, `origin/main` |
-| Perubahan lokal | **Bersih** — semua perubahan sudah di-commit dan di-push | `git status` |
+| Commit Git | **HEAD** — `4938341` (sinkronisasi dokumen audit) | `git log` |
+| Perubahan lokal | **Ada** — logo resmi, favicon, perapian sidebar, label dashboard, menu akun, animasi dropdown, dan animasi submenu sidebar (belum di-commit, menunggu uji lokal) | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Skrip `supabase/verifikasi_*.sql` | **Tidak diketahui** sudah dijalankan atau belum | perlu cek manual |
-| Build produksi | **Lulus** — 270 modul, 6,80 dtk | `npm run build` (2026-10-26 13:45) |
+| Build produksi | **Lulus** — 272 modul, 11,66 dtk; build base `/PRESISI-AMI/` 10,61 dtk | `npm run build` (2026-10-26 15:31) |
 | Jendela waktu absen | **Ada di kode** — masuk 20 menit sebelum, pulang 1 menit setelah | migrasi 17, `PanelAbsen.jsx`, `jadwalAbsen.js` |
 | Hapus grup kosong | **Ada di kode** — semua grup 0 pegawai; "Belum ditentukan" (akun sistem) disembunyikan bila kosong | migrasi 18, `GrupShift.jsx` |
 | Bilah progres | **Ada di kode** — bilah biru muda di atas layar saat navigasi, login, logout, dan muat ulang profil | `ProgressContext.jsx`, `BilahProgres.jsx`, `PengamatRute.jsx` |
+| Logo aplikasi | **Ada di kode** — logo resmi RSUD AMI dipakai di login, header pegawai, sidebar admin/kepala ruangan, favicon, dan apple-touch-icon | `src/assets/logo-rsud-ami.png`, `LogoRSUD.jsx`, `favicon-32x32.png`, `apple-touch-icon.png` |
+| Dashboard admin | **Ada di kode** — “Dashboard”, “Total Pegawai” (Non ASN), “Hadir Hari Ini” dan “Sudah Absen Pulang” dengan tanggal aktual, “Perlu Verifikasi” | `DashboardUtama.jsx`, `SidebarAdmin.jsx`, `PortalAdminLayout.jsx` |
+| Menu akun | **Ada di kode** — avatar kanan atas membuka menu **Keluar** dengan animasi buka/tutup di portal pegawai, Super Admin, dan kepala ruangan; tampil di desktop dan HP | `MenuAkun.jsx`, `BarAtas.jsx`, `PortalAdminLayout.jsx`, `PortalKepalaLayout.jsx`, `tailwind.config.js` |
+| Animasi sidebar | **Ada di kode** — submenu grup Super Admin dibuka/tutup dengan animasi gulir; grup aktif terbuka otomatis; submenu tertutup tidak dapat difokuskan | `SidebarAdmin.jsx` |
 | Lint/unit test | Tidak tersedia di `package.json` | `package.json` |
 | Alfa otomatis | Fitur ada, **default nonaktif** | migrasi 12, `PengaturanPresensi.jsx` |
 | Deploy GitHub Pages | **Aktif** — workflow run #1 sukses | https://rantemario905-source.github.io/PRESISI-AMI/ |
 | Uji login live | **Lulus** — Super Admin (desktop) + pegawai (mobile) | Laporan user 2026-10-25 13:37 |
 | Uji perangkat & absensi | **Lulus** — verifikasi perangkat, radius, akurasi, duplikasi | Laporan user 2026-10-25 14:04 |
 
-**Pekerjaan terakhir:** bilah progres biru muda untuk navigasi menu, login,
-logout, dan muat ulang profil, sudah **di-commit `900e916` dan di-push**
-(2026-10-26); menunggu uji visual lokal.
+**Pekerjaan terakhir:** mengganti logo aplikasi dengan logo resmi RSUD AMI
+(`src/assets/logo-rsud-ami.png`) di halaman login, header pegawai, sidebar portal
+Super Admin, dan kepala ruangan; mengganti favicon/tab dan apple-touch-icon dengan
+logo resmi; menghapus label **Super Admin** dari header sidebar; menyederhanakan
+label dashboard admin; menampilkan tanggal aktual pada kartu **Hadir Hari Ini** dan
+**Sudah Absen Pulang**; memindahkan tombol **Keluar** ke menu avatar kanan atas;
+serta menambahkan animasi buka/tutup halus pada menu tersebut dan animasi
+gulir pada submenu grup sidebar Super Admin (2026-10-26;
+**belum di-commit**, menunggu uji visual lokal).
 
 **Langkah berikutnya yang disarankan:**
 1. Jalankan migrasi **15**, **16**, **17**, lalu **18** berurutan di SQL Editor,
@@ -79,7 +94,10 @@ logout, dan muat ulang profil, sudah **di-commit `900e916` dan di-push**
    perangkat kedua (harus ditolak sampai Admin IT reset), tombol absen terkunci
    sebelum jam buka (masuk 20 menit sebelum, pulang 1 menit setelah), dan hapus
    salah satu grup kosong operasional dari menu Grup Shift. Grup sistem
-   **Belum ditentukan** kini tersembunyi selama tidak berisi pegawai.
+   **Belum ditentukan** kini tersembunyi selama tidak berisi pegawai. Periksa
+   juga favicon tab browser, header sidebar Super Admin tanpa label role, label
+   dashboard (“Dashboard”, “Total Pegawai”, tanggal aktual, “Perlu Verifikasi”),
+   dan menu **Keluar** di avatar kanan atas pada desktop serta HP.
 3. Lengkapi data operasional: seksi **Grup Shift**, pola kerja di **Data Pegawai**,
    **Jadwal Shift**, dan **Hari Libur**.
 4. Pastikan migrasi 09–14 sudah dijalankan berurutan dan seluruh
@@ -109,6 +127,10 @@ logout, dan muat ulang profil, sudah **di-commit `900e916` dan di-push**
 | 10 | Jendela waktu absensi: masuk 20 menit sebelum jam masuk, pulang 1 menit setelah jam pulang (reguler & shift, termasuk lintas hari) | `migrations/17_batas_waktu_absen.sql`, `src/config/constants.js`, `src/utils/jadwalAbsen.js`, `src/components/PanelAbsen.jsx` | selesai | tidak diketahui | `supabase/verifikasi_17.sql` |
 | 11 | Hapus grup shift kosong; grup sistem "Belum ditentukan" disembunyikan bila tanpa pegawai | `migrations/18_hapus_grup_kosong.sql`, `src/pages/admin/GrupShift.jsx` | selesai | sudah dijalankan | `supabase/verifikasi_18.sql` |
 | 12 | Bilah progres biru muda saat navigasi, login, logout, dan muat ulang profil | `src/context/ProgressContext.jsx`, `src/components/ui/BilahProgres.jsx`, `src/components/PengamatRute.jsx`, `src/pages/Login.jsx`, `src/components/ProtectedRoute.jsx`, `src/App.jsx`, `src/main.jsx` | selesai | - | build lulus; uji manual belum tercatat |
+| 13 | Logo resmi RSUD AMI di login, header pegawai, sidebar Super Admin, dan kepala ruangan | `src/assets/logo-rsud-ami.png`, `src/components/LogoRSUD.jsx`, `src/components/layout/SidebarAdmin.jsx`, `src/components/layout/SidebarKepala.jsx` | selesai | - | build lulus; uji visual belum tercatat |
+| 14 | Favicon/tab dan apple-touch-icon memakai logo resmi; label "Super Admin" dihapus dari header sidebar | `index.html`, `public/favicon-32x32.png`, `public/apple-touch-icon.png`, `src/components/layout/SidebarAdmin.jsx` | selesai | - | build lulus (base `/` dan `/PRESISI-AMI/`); uji visual belum tercatat |
+| 15 | Label dashboard disederhanakan: Dashboard, Total Pegawai, Non ASN, tanggal aktual pada Hadir dan Sudah Absen Pulang, Perlu Verifikasi | `src/pages/admin/DashboardUtama.jsx`, `src/components/layout/SidebarAdmin.jsx`, `src/components/layout/PortalAdminLayout.jsx` | selesai | - | build lulus (base `/` dan `/PRESISI-AMI/`); uji visual belum tercatat |
+| 16 | Menu akun avatar di kanan atas untuk **Keluar**; tombol Keluar mandiri dihapus dari header; responsif desktop/HP | `src/components/layout/MenuAkun.jsx`, `src/components/BarAtas.jsx`, `src/components/layout/PortalAdminLayout.jsx`, `src/components/layout/PortalKepalaLayout.jsx` | selesai | - | build lulus (base `/` dan `/PRESISI-AMI/`); uji visual belum tercatat |
 | UI | Penyempurnaan navigasi: tab bar, navigasi bawah mobile, menu kepala, layout portal | `src/components/ui/TabBar.jsx`, `src/components/NavigasiBawah.jsx`, `src/components/BarAtas.jsx`, `src/components/MenuKepala.jsx`, `src/components/layout/PortalKepalaLayout.jsx`, `src/index.css`, `src/pages/Dashboard.jsx` | selesai `(inferred)` | — | build lulus; uji manual belum tercatat |
 
 **Catatan:** README sudah diperbarui ke Fase 1–8 + migrasi 15–18. `verifikasi_13`
@@ -119,6 +141,102 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-26 15:31 WITA — Animasi submenu sidebar Super Admin
+- **Perubahan:** submenu grup sidebar Super Admin (**Data & Struktur**,
+  **Penjadwalan & Presensi**, **Layanan & Laporan**, **Keamanan**) kini dibuka
+  dan ditutup dengan animasi gulir ke bawah/halus memakai transisi
+  `grid-template-rows` 200 ms, ditambah opacity dan translate pada isinya.
+  Submenu tetap ter-mount agar transisi tutup berjalan; saat tertutup isinya
+  `aria-hidden`, tidak bisa diklik, dan tidak masuk urutan fokus keyboard.
+- **File:** `src/components/layout/SidebarAdmin.jsx`, `README.md`, `AGENTS.md`,
+  `progress.md`.
+- **Verifikasi:** `npm run build` **lulus** - 272 modul, 11,66 dtk (base `/`);
+  build `VITE_BASE_PATH=/PRESISI-AMI/` **lulus** - 10,61 dtk; kelas
+  `grid-rows-[0fr]`, `grid-rows-[1fr]`, dan `transition-[grid-template-rows]`
+  ada di CSS hasil build.
+- **Catatan/risiko:** animasi belum diuji visual manual di browser. Animasi
+  `grid-template-rows` memicu layout ringan selama 200 ms; hanya berjalan saat
+  grup dibuka/ditutup. Tidak ada perubahan database; perubahan belum di-commit.
+
+### 2026-10-26 15:17 WITA — Animasi buka/tutup menu akun
+- **Perubahan:** dropdown avatar kini muncul dengan animasi slide-down halus
+  160 ms dan menutup dengan animasi 140 ms; elemen ditahan sebentar saat menutup
+  agar transisi terlihat, lalu dilepas dari DOM. Animasi hanya memakai `opacity`
+  dan `transform`; pengguna dengan `prefers-reduced-motion` tetap mendapat
+  perubahan hampir instan. Fokus kembali ke tombol avatar saat menu ditutup
+  dengan Esc.
+- **File:** `tailwind.config.js`, `src/components/layout/MenuAkun.jsx`,
+  `README.md`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` **lulus** - 272 modul, 10,96 dtk (base `/`);
+  build `VITE_BASE_PATH=/PRESISI-AMI/` **lulus** - 15,46 dtk; keyframe
+  `dropdown-masuk`/`dropdown-keluar` dan kelas animasinya ada di CSS hasil build.
+- **Catatan/risiko:** animasi belum diuji visual manual di browser. Tidak ada
+  perubahan database; perubahan belum di-commit.
+
+### 2026-10-26 15:07 WITA — Tanggal kartu pulang & menu akun avatar
+- **Perubahan:** subtitle kartu **Sudah Absen Pulang** diganti menjadi tanggal
+  aktual, sama dengan kartu **Hadir Hari Ini**. Tombol **Keluar** mandiri dihapus
+  dari header portal pegawai, Super Admin, dan kepala ruangan; logout kini berada
+  di dropdown avatar kanan atas. Avatar selalu tampil di HP, dropdown menampilkan
+  nama/peran (di HP) dan tombol **Keluar**, serta menutup saat klik di luar atau
+  menekan Esc.
+- **File:** `src/components/layout/MenuAkun.jsx` (baru),
+  `src/components/BarAtas.jsx`,
+  `src/components/layout/PortalAdminLayout.jsx`,
+  `src/components/layout/PortalKepalaLayout.jsx`,
+  `src/pages/admin/DashboardUtama.jsx`, `README.md`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` **lulus** — 272 modul, 13,23 dtk (base `/`);
+  build `VITE_BASE_PATH=/PRESISI-AMI/` **lulus** — 12,47 dtk; `git diff --check`
+  tanpa kesalahan.
+- **Catatan/risiko:** perubahan belum di-commit; dropdown dan proses logout belum
+  diuji manual di browser. Tidak ada perubahan database.
+
+### 2026-10-26 14:56 WITA — Penyesuaian label dashboard Super Admin
+- **Perubahan:** “Dashboard Utama” menjadi **Dashboard** di sidebar, judul
+  halaman, dan topbar; “Total Pegawai Non-ASN” menjadi **Total Pegawai** dengan
+  keterangan **Non ASN**; keterangan kartu **Hadir Hari Ini** diganti menjadi
+  tanggal aktual (WITA); “Perlu verifikasi Admin IT” menjadi **Perlu Verifikasi**.
+  Kartu **Sudah Absen Pulang** tetap dipertahankan sesuai koreksi user; grid 4
+  kartu tidak berubah.
+- **File:** `src/pages/admin/DashboardUtama.jsx`,
+  `src/components/layout/SidebarAdmin.jsx`,
+  `src/components/layout/PortalAdminLayout.jsx`, `src/App.jsx`,
+  `src/services/adminDashboardService.js` (komentar), `README.md`, `AGENTS.md`,
+  `progress.md`.
+- **Verifikasi:** `npm run build` **lulus** — 271 modul, 13,63 dtk (base `/`);
+  build `VITE_BASE_PATH=/PRESISI-AMI/` **lulus** — 13,99 dtk; URL favicon pada
+  build base tetap `/PRESISI-AMI/...`.
+- **Catatan/risiko:** perubahan belum di-commit; tampilan kartu di browser belum
+  diuji manual. Tidak ada perubahan query statistik atau database.
+
+### 2026-10-26 14:35 WITA — Favicon logo resmi & rapikan sidebar
+- **Perubahan:** mengganti favicon tab browser dan apple-touch-icon dengan logo
+  resmi RSUD AMI; menghapus label **Super Admin** dari header sidebar agar
+  `PRESISI AMI` dan `RSUD Aji Muhammad Idris` tersusun lebih rapi.
+- **File:** `index.html`, `public/favicon-32x32.png` (baru),
+  `public/apple-touch-icon.png` (baru), `src/components/layout/SidebarAdmin.jsx`,
+  `README.md`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` **lulus** — 271 modul, 10,49 dtk (base `/`);
+  build dengan `VITE_BASE_PATH=/PRESISI-AMI/` **lulus** — 11,74 dtk. Favicon
+  terpasang pada `dist/favicon-32x32.png` dan
+  `dist/apple-touch-icon.png`, dengan URL build `/PRESISI-AMI/favicon-32x32.png`.
+- **Catatan/risiko:** perubahan belum di-commit; favicon 32×32 dan tampilan
+  sidebar belum diverifikasi visual di browser. Browser dapat menyimpan favicon
+  lama di cache; lakukan hard refresh saat menguji.
+
+### 2026-10-26 14:21 WITA — Logo resmi RSUD AMI
+- **Perubahan:** mengganti logo SVG sementara dengan berkas resmi
+  `src/assets/logo-rsud-ami.png`. Logo dipakai di halaman login, header aplikasi
+  pegawai, sidebar portal Super Admin, dan sidebar kepala ruangan.
+- **File:** `src/components/LogoRSUD.jsx`, `src/components/layout/SidebarAdmin.jsx`,
+  `src/components/layout/SidebarKepala.jsx`, `src/assets/logo-rsud-ami.png`
+  (baru), `README.md`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` **lulus** — 271 modul, 36,84 dtk
+  (2026-10-26 14:21); aset logo terhasilkan sebagai
+  `dist/assets/logo-rsud-ami-Bj5c6m9F.png`.
+- **Catatan/risiko:** perubahan belum di-commit; tampilan visual di layar kecil
+  belum diuji manual.
 
 ### 2026-10-26 13:45 WITA — Bilah progres navigasi
 - **Perubahan:** menambahkan bilah progres tipis berwarna biru muda di bagian

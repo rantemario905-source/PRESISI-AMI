@@ -10,12 +10,12 @@ import { Suspense, useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { NAMA_APLIKASI, NAMA_RUMAH_SAKIT } from '../../config/constants.js'
-import { inisialNama } from '../../utils/format.js'
 import { Spinner } from '../ui/index.js'
+import MenuAkun from './MenuAkun.jsx'
 import SidebarAdmin from './SidebarAdmin.jsx'
 
 const JUDUL_HALAMAN = {
-  '/superadmin-portal': 'Dashboard Utama',
+  '/superadmin-portal': 'Dashboard',
   '/superadmin-portal/pegawai': 'Data Pegawai',
   '/superadmin-portal/perangkat': 'Verifikasi & Reset Perangkat',
   '/superadmin-portal/grup-shift': 'Grup Shift & Seksi',
@@ -81,21 +81,8 @@ export default function PortalAdminLayout() {
               <p className="hidden truncate text-[11px] text-slate-400 sm:block">{NAMA_RUMAH_SAKIT}</p>
             </div>
 
-            <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-              <div className="hidden text-right md:block">
-                <p className="max-w-[180px] truncate text-sm font-bold text-slate-800">{profil?.nama}</p>
-                <p className="text-[11px] font-semibold text-sky-600">Super Admin</p>
-              </div>
-              <div className="hidden h-9 w-9 items-center justify-center rounded-full bg-sky-100 text-xs font-extrabold text-sky-700 sm:flex">
-                {inisialNama(profil?.nama ?? '')}
-              </div>
-              <button
-                type="button"
-                onClick={keluar}
-                className="flex min-h-[44px] items-center rounded-lg border border-slate-300 px-2.5 text-[11px] font-semibold text-slate-600 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:min-h-[38px] sm:px-3 sm:text-xs"
-              >
-                Keluar
-              </button>
+            <div className="flex shrink-0 items-center">
+              <MenuAkun nama={profil?.nama} peran="Super Admin" onKeluar={keluar} />
             </div>
           </div>
         </header>

@@ -182,7 +182,9 @@ update public.pegawai
 │   ├── impor-akun.mjs          # Impor akun massal via Supabase Admin API
 │   └── verifikasi-impor.mjs    # Verifikasi hasil impor + uji login
 ├── public/
-│   └── favicon.svg
+│   ├── favicon.svg            # Ikon lama (tidak dirujuk)
+│   ├── favicon-32x32.png      # Ikon tab dari logo resmi
+│   └── apple-touch-icon.png   # Ikon iOS dari logo resmi
 └── src/
     ├── main.jsx                # Entry point React
     ├── App.jsx                 # Router & pemisahan hak akses
@@ -268,6 +270,9 @@ update public.pegawai
 | **Dokumen** | Bucket privat `dokumen-izin`; hanya JPG/PNG maks. 1 MB; path wajib diawali `grup_id` dan diverifikasi RPC |
 | **Audit trail** | Koreksi presensi wajib alasan (min. 5 karakter) dan mencatat admin, nilai lama/baru, serta waktu |
 | **Bilah progres** | Bilah tipis biru muda di atas layar saat navigasi menu, login, logout, dan muat ulang profil |
+| **Logo aplikasi** | Logo resmi RSUD AMI (`src/assets/logo-rsud-ami.png`) di halaman login, header pegawai, sidebar Super Admin/kepala ruangan, favicon tab, dan apple-touch-icon |
+| **Menu akun** | Klik avatar di kanan atas untuk membuka menu **Keluar** dengan animasi buka/tutup halus; tersedia di portal pegawai, Super Admin, dan kepala ruangan, termasuk tampilan HP |
+| **Grup sidebar** | Grup **Data & Struktur**, **Penjadwalan & Presensi**, **Layanan & Laporan**, dan **Keamanan** dapat dibuka/tutup dengan animasi gulir ke bawah; grup aktif terbuka otomatis |
 | **Privasi** | Promosi/penurunan role Super Admin hanya lewat SQL Admin IT; status kepala ruangan diatur Super Admin dari Data Pegawai dan dibatasi satu kepala per unit |
 
 ## 6. Alur absensi
@@ -292,7 +297,7 @@ Akses: login dengan akun ber-role `superadmin`, lalu buka `/superadmin-portal`.
 
 | Menu | Fungsi |
 |---|---|
-| **Dashboard Utama** | Statistik pegawai/hadir/pending + pemantauan presensi hari ini secara real-time |
+| **Dashboard** | Statistik pegawai/hadir/pending + pemantauan presensi hari ini secara real-time |
 | **Data Pegawai** | Lihat pegawai non-ASN, ubah nama/unit kerja/status Kepala Ruangan, pantau status perangkat. Akun Super Admin tidak ditampilkan |
 | **Verifikasi Perangkat** | Setujui/tolak pengajuan, reset perangkat (otomatis mencabut perangkat lama) |
 | **Grup Shift** | Master grup/unit dan seksi; rename otomatis memperbarui unit seluruh pegawai |

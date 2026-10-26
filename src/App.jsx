@@ -11,7 +11,7 @@
  *     ├─ /dinas-sakit            → catat Dinas & Sakit unit
  *     └─ /cuti                   → catat Cuti unit
  *   /superadmin-portal           → portal Super Admin       (role: superadmin)
- *     ├─ /                       → Dashboard Utama
+ *     ├─ /                       → Dashboard
  *     ├─ /pegawai                → Data Pegawai
  *     ├─ /perangkat              → Verifikasi & Reset Perangkat
  *     ├─ /grup-shift             → Master grup/unit dan seksi

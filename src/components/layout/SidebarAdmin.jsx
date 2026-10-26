@@ -9,6 +9,7 @@
 import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { NAMA_APLIKASI, NAMA_RUMAH_SAKIT } from '../../config/constants.js'
+import LogoRSUD from '../LogoRSUD.jsx'
 
 const IKON = {
   dashboard: <path d="M3 12l9-9 9 9M5 10v10h5v-6h4v6h5V10" />,
@@ -180,18 +181,13 @@ export default function SidebarAdmin({ terbuka, onTutup }) {
         aria-label="Menu Super Admin"
       >
         <div className="flex min-h-16 items-center gap-3 border-b border-slate-200 px-4 sm:px-5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-600 text-sm font-extrabold text-white shadow-sm">
-            PA
-          </div>
+          <LogoRSUD className="h-10 w-10 shrink-0 drop-shadow-sm" />
           <div className="min-w-0">
             <p className="truncate text-sm font-extrabold tracking-tight text-slate-900">
               {NAMA_APLIKASI}
             </p>
             <p className="truncate text-[10px] text-slate-500 sm:text-[11px]">
               {NAMA_RUMAH_SAKIT}
-            </p>
-            <p className="mt-0.5 inline-flex rounded-full bg-sky-50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-sky-700">
-              Super Admin
             </p>
           </div>
           <button
@@ -218,7 +214,7 @@ export default function SidebarAdmin({ terbuka, onTutup }) {
             }
           >
             <Ikon nama="dashboard" />
-            <span className="truncate">Dashboard Utama</span>
+            <span className="truncate">Dashboard</span>
           </NavLink>
 
           <div className="my-3 border-t border-slate-100" />
@@ -251,13 +247,24 @@ export default function SidebarAdmin({ terbuka, onTutup }) {
                   </svg>
                 </button>
 
-                {dibuka && (
-                  <div id={`menu-${grup.id}`} className="space-y-1 pb-2">
+                <div
+                  id={`menu-${grup.id}`}
+                  aria-hidden={!dibuka}
+                  className={`grid overflow-hidden transition-[grid-template-rows] duration-200 ease-out ${
+                    dibuka ? 'pointer-events-auto grid-rows-[1fr]' : 'pointer-events-none grid-rows-[0fr]'
+                  }`}
+                >
+                  <div
+                    className={`min-h-0 space-y-1 overflow-hidden pb-2 transition-[opacity,transform] duration-200 ease-out ${
+                      dibuka ? 'translate-y-0 opacity-100' : '-translate-y-1 opacity-0'
+                    }`}
+                  >
                     {grup.items.map((item) => (
                       <NavLink
                         key={item.ke}
                         to={item.ke}
                         onClick={onTutup}
+                        tabIndex={dibuka ? undefined : -1}
                         className={({ isActive }) =>
                           `flex min-h-[42px] items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:text-sm ${
                             isActive
@@ -271,7 +278,7 @@ export default function SidebarAdmin({ terbuka, onTutup }) {
                       </NavLink>
                     ))}
                   </div>
-                )}
+                </div>
               </div>
             )
           })}

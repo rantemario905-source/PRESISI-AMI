@@ -1,11 +1,11 @@
 /**
- * Bar atas (header) aplikasi: logo, navigasi pegawai, dan tombol keluar.
+ * Bar atas (header) aplikasi: logo, navigasi pegawai, dan menu akun.
  * Di HP navigasi utama pindah ke bottom bar agar mudah dijangkau ibu jari.
  */
 import { Link, NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import LogoRSUD from './LogoRSUD.jsx'
-import Button from './ui/Button.jsx'
+import MenuAkun from './layout/MenuAkun.jsx'
 import NavigasiBawah from './NavigasiBawah.jsx'
 import { NAMA_APLIKASI } from '../config/constants.js'
 
@@ -61,21 +61,17 @@ export default function BarAtas({ onKeluar }) {
                 Kelola Unit
               </Link>
             )}
-            <div className="hidden text-right md:block">
-              <p className="max-w-[180px] truncate text-sm font-semibold text-slate-700">
-                {profil?.nama}
-              </p>
-              <p className="truncate text-xs text-slate-400">
-                {apakahKepalaRuangan
+            <MenuAkun
+              nama={profil?.nama}
+              peran={
+                apakahKepalaRuangan
                   ? 'Kepala Ruangan'
                   : profil?.role === 'superadmin'
                     ? 'Super Admin'
-                    : 'Pegawai'}
-              </p>
-            </div>
-            <Button variant="sekunder" size="sm" onClick={onKeluar}>
-              Keluar
-            </Button>
+                    : 'Pegawai'
+              }
+              onKeluar={onKeluar}
+            />
           </div>
         </div>
 
