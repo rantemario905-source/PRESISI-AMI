@@ -10,8 +10,8 @@ dan pemisahan hak akses antara **Pegawai** dan **Super Admin**.
 > device binding, halaman absensi pegawai, Portal Super Admin, administrasi
 > Dinas & Sakit / Cuti, **jadwal shift per grup yang langsung tersimpan,
 > pengelolaan jadwal oleh kepala ruangan, hari libur, deteksi keterlambatan,
-> Alfa otomatis**, **impor jadwal CSV/XLSX**, serta **satu perangkat aktif
-> per pegawai**.
+> Alfa otomatis**, **impor jadwal CSV/XLSX**, **satu perangkat aktif per
+> pegawai**, **jendela waktu absensi**, serta **hapus grup shift kosong**.
 
 > **Dokumentasi audit:** progres pekerjaan tercatat di [`progress.md`](progress.md)
 > dan aturan kerja agen serta log instruksi user di [`AGENTS.md`](AGENTS.md).
@@ -75,13 +75,14 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 | 15 | `supabase/migrations/15_hapus_finalisasi_jadwal.sql` | Hapus finalisasi bulanan; kepala ruangan dapat mengubah jadwal mulai hari ini |
 | 16 | `supabase/migrations/16_satu_perangkat.sql` | Satu perangkat aktif per pegawai; data perangkat uji dikosongkan |
 | 17 | `supabase/migrations/17_batas_waktu_absen.sql` | Batas waktu absen: masuk 20 menit sebelum jam masuk, pulang 1 menit setelah jam pulang |
+| 18 | `supabase/migrations/18_hapus_grup_kosong.sql` | Hapus grup kosong; grup sistem "Belum ditentukan" hanya tampil jika berisi pegawai |
 
 > Bila database sudah pernah dijalankan sampai file 08, jalankan **file 09** untuk
 > mengaktifkan alur Dinas & Sakit / Cuti, **file 11** untuk pengaturan kepala
 > ruangan, lalu **file 12** untuk jadwal shift/keterlambatan/Alfa, **file 13**
 > untuk kebijakan jadwal wajib, **file 14** untuk impor template, **file 15**
-> untuk menghapus finalisasi, **file 16** untuk aturan satu perangkat, dan
-> **file 17** untuk batas waktu absen.
+> untuk menghapus finalisasi, **file 16** untuk aturan satu perangkat, **file 17**
+> untuk batas waktu absen, dan **file 18** untuk hapus grup kosong.
 > File 10 hanya berisi RPC perubahan role yang tidak dipakai UI, jadi boleh
 > dilewati. Jalankan migrasi secara bertahap - jangan mengulang file lama bila
 > tidak diperlukan.
@@ -91,18 +92,18 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 >
 > Jalankan **`supabase/verifikasi_09.sql`**, **`supabase/verifikasi_11.sql`**,
 > **`supabase/verifikasi_12.sql`**, **`supabase/verifikasi_15.sql`**,
-> **`supabase/verifikasi_16.sql`**, dan **`supabase/verifikasi_17.sql`** setelah
-> migrasi terkait. Seluruh nilai pemeriksaan harus `true`; bila ada yang `false`,
-> jangan lanjutkan pemakaian.
+> **`supabase/verifikasi_16.sql`**, **`supabase/verifikasi_17.sql`**, dan
+> **`supabase/verifikasi_18.sql`** setelah migrasi terkait. Seluruh nilai
+> pemeriksaan harus `true`; bila ada yang `false`, jangan lanjutkan pemakaian.
 > `verifikasi_13.sql` dan `verifikasi_14.sql` hanya berlaku sebelum migrasi 15;
-> setelah migrasi 15, gunakan `verifikasi_15.sql`, `verifikasi_16.sql`, dan
-> `verifikasi_17.sql`.
-> Migrasi 12–17 wajib dijalankan sebelum membuka menu Grup Shift/Jadwal Shift.
+> setelah migrasi 15, gunakan `verifikasi_15.sql`, `verifikasi_16.sql`,
+> `verifikasi_17.sql`, dan `verifikasi_18.sql`.
+> Migrasi 12–18 wajib dijalankan sebelum membuka menu Grup Shift/Jadwal Shift.
 
 **B. Sekaligus**
 
 Salin seluruh isi `supabase/schema.sql`, tempel, lalu **Run**.
-Isinya identik dengan gabungan ketujuh belas file di atas (termasuk migrasi 15-17).
+Isinya identik dengan gabungan kedelapan belas file di atas (termasuk migrasi 15-18).
 
 **C. Membuat akun pegawai**
 
@@ -165,7 +166,7 @@ update public.pegawai
 ├── index.html
 ├── supabase/
 │   ├── schema.sql              # Skema DB + RLS + RPC (instalasi sekali jalan)
-│   ├── migrations/             # 01–17, dijalankan bertahap
+│   ├── migrations/             # 01–18, dijalankan bertahap
 │   ├── verifikasi_09.sql       # Pemeriksaan fitur Dinas & Sakit / Cuti
 │   ├── verifikasi_10.sql       # Pemeriksaan RPC perubahan role (opsional)
 │   ├── verifikasi_11.sql       # Pemeriksaan pengaturan kepala ruangan
@@ -175,6 +176,7 @@ update public.pegawai
 │   ├── verifikasi_15.sql       # Pemeriksaan finalisasi terhapus & batas tanggal baru
 │   ├── verifikasi_16.sql       # Pemeriksaan satu perangkat aktif per pegawai
 │   ├── verifikasi_17.sql       # Pemeriksaan batas waktu absen masuk/pulang
+│   ├── verifikasi_18.sql       # Pemeriksaan hapus grup kosong
 │   └── jadwal_alfa.sql         # Opsional: jadwal pg_cron untuk Alfa
 ├── scripts/
 │   ├── impor-akun.mjs          # Impor akun massal via Supabase Admin API
@@ -308,6 +310,10 @@ Akses: login dengan akun ber-role `superadmin`, lalu buka `/superadmin-portal`.
   grup memiliki **seksi** induk: *Seksi Pelayanan Medik dan Keperawatan*,
   *Seksi Penunjang*, atau *Sub Bagian Tata Usaha*. Grup baru diawali
   **Belum ditentukan** sampai Super Admin memilih seksinya.
+- **Hapus grup** hanya untuk grup tanpa pegawai. Grup yang masih berisi pegawai
+  harus dikosongkan lebih dulu. **Belum ditentukan** adalah grup bawaan akun
+  sistem (mis. Super Admin): grup ini hanya tampil bila berisi pegawai dan tidak
+  dapat dihapus selama masih dipakai akun sistem.
 - **Pola kerja** pegawai ada dua: **Reguler** dan **Shift**. Seluruh pegawai lama
   otomatis berstatus Shift saat migrasi 12. Ubah pegawai yang memakai jam kantor
   menjadi Reguler melalui **Data Pegawai → Ubah**.

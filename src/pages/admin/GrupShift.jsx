@@ -68,21 +68,35 @@ export default function GrupShift() {
     return peta
   }, [pegawai])
 
+  // "Belum ditentukan" adalah grup bawaan akun sistem (mis. Super Admin).
+  // Sembunyikan bila tidak ada pegawai agar tidak terlihat seperti grup kosong.
+  const daftarTampil = useMemo(
+    () =>
+      daftar.filter(
+        (g) =>
+          g.nama !== 'Belum ditentukan' ||
+          (jumlahPegawai.get(g.nama) ?? 0) > 0,
+      ),
+    [daftar, jumlahPegawai],
+  )
+
   const opsiSeksi = useMemo(
-    () => [...new Set([...SEKSI_SHIFT, ...daftar.map((g) => g.seksi)])],
-    [daftar],
+    () => [...new Set([...SEKSI_SHIFT, ...daftarTampil.map((g) => g.seksi)])],
+    [daftarTampil],
   )
 
   const tersaring = useMemo(() => {
     const kata = cari.trim().toLowerCase()
-    return daftar.filter((g) => {
+    return daftarTampil.filter((g) => {
       const cocokNama = !kata || g.nama.toLowerCase().includes(kata)
       const cocokSeksi = filterSeksi === 'semua' || g.seksi === filterSeksi
       return cocokNama && cocokSeksi
     })
-  }, [daftar, cari, filterSeksi])
+  }, [daftarTampil, cari, filterSeksi])
 
-  const belumSeksi = daftar.filter((g) => g.seksi === 'Belum ditentukan').length
+  const belumSeksi = daftarTampil.filter(
+    (g) => g.seksi === 'Belum ditentukan',
+  ).length
 
   function bukaTambah() {
     setForm(FORM_KOSONG)
@@ -161,7 +175,7 @@ export default function GrupShift() {
     <>
       <KepalaHalaman
         judul="Grup Shift"
-        deskripsi="Kelola grup/unit dan seksinya. Rename grup otomatis memperbarui unit pegawai tanpa memutus jadwal."
+        deskripsi="Kelola grup/unit dan seksinya. Rename grup otomatis memperbarui unit pegawai tanpa memutus jadwal. Grup sistem “Belum ditentukan” hanya tampil jika berisi pegawai."
         aksi={
           <Button size="sm" onClick={bukaTambah}>
             + Grup
@@ -224,7 +238,7 @@ export default function GrupShift() {
           <div>
             <h2 className="text-sm font-bold text-slate-800">Daftar Grup</h2>
             <p className="text-xs text-slate-500">
-              {tersaring.length} dari {daftar.length} grup
+              {tersaring.length} dari {daftarTampil.length} grup
             </p>
           </div>
         </div>
@@ -269,13 +283,11 @@ export default function GrupShift() {
                         size="sm"
                         variant="bahayaLembut"
                         onClick={() => hapus(grup)}
-                        disabled={jumlah > 0 || grup.nama === 'Belum ditentukan'}
+                        disabled={jumlah > 0}
                         title={
-                          grup.nama === 'Belum ditentukan'
-                            ? 'Grup bawaan tidak dapat dihapus'
-                            : jumlah > 0
-                              ? 'Pindahkan pegawai terlebih dahulu'
-                              : 'Hapus grup'
+                          jumlah > 0
+                            ? 'Pindahkan pegawai terlebih dahulu'
+                            : 'Hapus grup'
                         }
                       >
                         Hapus
@@ -329,15 +341,11 @@ export default function GrupShift() {
                               size="sm"
                               variant="bahayaLembut"
                               onClick={() => hapus(grup)}
-                              disabled={
-                                jumlah > 0 || grup.nama === 'Belum ditentukan'
-                              }
+                              disabled={jumlah > 0}
                               title={
-                                grup.nama === 'Belum ditentukan'
-                                  ? 'Grup bawaan tidak dapat dihapus'
-                                  : jumlah > 0
-                                    ? 'Pindahkan pegawai terlebih dahulu'
-                                    : 'Hapus grup'
+                                jumlah > 0
+                                  ? 'Pindahkan pegawai terlebih dahulu'
+                                  : 'Hapus grup'
                               }
                             >
                               Hapus

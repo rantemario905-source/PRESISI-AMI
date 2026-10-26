@@ -15,7 +15,7 @@ Aplikasi absensi pegawai non-ASN RSUD Aji Muhammad Idris.
   aktif per pegawai, presensi shift/reguler dengan jendela waktu (masuk 20 menit
   sebelum jam masuk, pulang 1 menit setelah jam pulang), jadwal shift, hari
   libur, keterlambatan, Alfa otomatis, Dinas/Sakit/Cuti, koreksi presensi,
-  rekapitulasi, impor jadwal CSV/XLSX.
+  rekapitulasi, impor jadwal CSV/XLSX, serta hapus grup shift kosong.
 - **Peran:** `pegawai`, `superadmin`, dan status `kepala_ruangan` (bukan role
   terpisah).
 - **Bahasa:** UI, dokumentasi, dan komentar ditulis dalam **Bahasa Indonesia**.
@@ -38,7 +38,7 @@ npm run preview      # pratinjau hasil build
 - Skrip bantu (butuh Secret key, jangan pernah di-commit):
   `node scripts/impor-akun.mjs ...`, `node scripts/verifikasi-impor.mjs ...`.
 
-**Urutan migrasi wajib:** `01 → 02 → ... → 17`, satu per satu. Jangan mengulang
+**Urutan migrasi wajib:** `01 → 02 → ... → 18`, satu per satu. Jangan mengulang
 migrasi lama bila tidak diperlukan. `supabase/schema.sql` adalah gabungan
 seluruh migrasi untuk instalasi sekali jalan.
 
@@ -58,7 +58,7 @@ seluruh migrasi untuk instalasi sekali jalan.
 | UI dasar | `src/components/ui/*` | Button, Badge, Alert, Modal, TabBar, dll. |
 | Layout | `src/components/layout/*` | Portal admin & kepala ruangan |
 | Halaman | `src/pages/**` | `admin/` untuk portal Super Admin/kepala |
-| Database | `supabase/migrations/01–17` | Skema, RLS, RPC, seed |
+| Database | `supabase/migrations/01–18` | Skema, RLS, RPC, seed |
 | Verifikasi DB | `supabase/verifikasi_*.sql` | Pemeriksaan pasca-migrasi |
 | Cron Alfa | `supabase/jadwal_alfa.sql` | Opsional, butuh `pg_cron` |
 
@@ -140,6 +140,7 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-008 | 2026-10-25 14:2x | Instruksi sesi yang terputus (teks verbatim tidak tersimpan): hapus finalisasi jadwal + terapkan satu perangkat aktif per pegawai `(rekonstruksi dari TODO panel & diff working tree)` | Membuat migrasi 15 & 16, verifikasi 15 & 16, menyesuaikan schema/cleanup/frontend/dokumen | berjalan → dilanjutkan pada I-009 | 2026-10-26 — Migrasi 15–16 |
 | I-009 | 2026-10-26 | "kemarin pekerjaan terhenti karna limit kamu lanjutkan pekerjaan yang belum selesai kemarin" | Melanjutkan pekerjaan I-008: cek diff, perbaiki mojibake, lengkapi dokumen, jalankan `npm run build` | selesai | 2026-10-26 — Migrasi 15–16 |
 | I-010 | 2026-10-26 | "sudah testing absen dan kita set akan jam absen masuk baru bisa di klik 15 menit sebelum jam terlambat semisal jam 8 pagi pegawai baru bisa absen 20 menit sebelum jam 8 dan mengisi jam pulang baru bisa di isi sebelum jam pulang lewat emisal jam pulnag 16:30 absen pulang baru bisa di isi di jam 16:31" | Menambahkan jendela waktu absensi (klarifikasi user: masuk dibuka 20 menit sebelum jam masuk; pulang dibuka 16.31 untuk jam pulang 16.30; berlaku reguler & shift termasuk lintas hari): validasi klien + server, pesan jam buka, migrasi 17 | selesai | 2026-10-26 — Jendela waktu absensi |
+| I-011 | 2026-10-26 12:07 | "buka akses hapus grub karna ada grub yang kosong yang harus di hapus atau hilangkan atau perbaikan grub kedepannya" | Mengaktifkan hapus grup kosong; grup sistem "Belum ditentukan" disembunyikan bila tanpa pegawai (UI), migrasi 18 dan verifikasi 18 | selesai | 2026-10-26 — Hapus grup kosong |
 
 ---
 
