@@ -168,11 +168,10 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   `6343111` (hapus grup kosong, grup sistem), commit `7e32c0e` (sinkronisasi
   dokumen audit), commit `900e916` (bilah progres navigasi), commit
   `4938341` (sinkronisasi dokumen audit), dan commit `cb80100` (logo resmi,
-  menu akun, animasi navigasi). Working tree berisi perapian jarak sidebar
-  Super Admin/kepala ruangan dan latar biru muda pada seluruh halaman portal
-  Super Admin/kepala ruangan yang belum di-commit, serta aset baru
-  `src/assets/logo kutai kartanegara.png` (untracked) untuk kop RSUD AMI yang
-  akan dikerjakan terpisah.
+  menu akun, animasi navigasi), dan commit `fd2d64a` (sidebar rapat dan latar
+  portal biru) yang di-push 2026-10-26 22:25. Working tree bersih selain aset
+  baru `src/assets/logo kutai kartanegara.png` (untracked) untuk kop RSUD AMI
+  yang akan dikerjakan terpisah.
 - **Deploy:** GitHub Pages lewat `.github/workflows/deploy.yml`; URL live
   `https://rantemario905-source.github.io/PRESISI-AMI/`; base path
   `/PRESISI-AMI/`; secrets `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`.

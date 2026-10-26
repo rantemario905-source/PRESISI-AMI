@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-26 22:20 WITA |
+| Terakhir diperbarui | 2026-10-26 22:25 WITA |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -58,8 +58,8 @@ seluruh halaman portal** Super Admin dan Kepala Ruangan. Yang belum: konfirmasi 
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 8 + UI navigasi + migrasi 15–18 | `src/`, `supabase/migrations/01–18` |
-| Commit Git | **HEAD** — `cb80100` (logo resmi, menu akun, animasi navigasi) | `git log` |
-| Perubahan lokal | **Ada** — perapian jarak sidebar Super Admin/kepala ruangan dan latar biru muda seluruh halaman portal (belum di-commit, menunggu uji lokal) | `git status` |
+| Commit Git | **HEAD** — `fd2d64a` (sidebar rapat dan latar portal biru) | `git log` |
+| Perubahan lokal | **Tidak ada** — sisa hanya aset belum terlacak `src/assets/logo kutai kartanegara.png` untuk kop RSUD AMI | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Skrip `supabase/verifikasi_*.sql` | **Tidak diketahui** sudah dijalankan atau belum | perlu cek manual |
 | Build produksi | **Lulus** — 272 modul, 8,12 dtk (base `/`); build base `/PRESISI-AMI/` 7,81 dtk dengan heap 4096 MB | `npm run build` (2026-10-26 22:20) |
@@ -81,7 +81,7 @@ seluruh halaman portal** Super Admin dan Kepala Ruangan. Yang belum: konfirmasi 
 **Pekerjaan terakhir:** merapatkan jarak vertikal menu sidebar Super Admin dan
 kepala ruangan (rapat sedang) dan menerapkan latar gradasi biru muda transparan
 ke seluruh halaman portal Super Admin dan Kepala Ruangan (2026-10-26;
-**belum di-commit**, menunggu uji visual lokal). Aset
+**sudah di-commit `fd2d64a` dan di-push ke `origin/main`**). Aset
 `src/assets/logo kutai kartanegara.png` disimpan untuk pekerjaan kop RSUD AMI
 berikutnya dan belum dipakai di UI.
 
@@ -160,8 +160,10 @@ dan `verifikasi_18` untuk hapus grup kosong.
   CSS hasil build.
 - **Catatan/risiko:** latar kini mengikuti tinggi konten; pada halaman yang
   sangat pendek sisa area bawah tetap slate. Belum diuji visual di browser.
-  Tidak ada perubahan database; perubahan belum di-commit. Aset
+  Tidak ada perubahan database. Aset
   `src/assets/logo kutai kartanegara.png` tetap belum dipakai.
+- **Tindak lanjut:** di-commit `fd2d64a` dan di-push ke `origin/main`
+  (2026-10-26 22:25), bersama perapian sidebar pada entri sebelumnya.
 
 ### 2026-10-26 22:05 WITA — Sidebar rapat & latar dashboard
 - **Perubahan:** merapatkan jarak vertikal menu sidebar Super Admin dan Kepala
@@ -182,9 +184,11 @@ dan `verifikasi_18` untuk hapus grup kosong.
 - **Catatan/risiko:** gradasi hanya aktif bila `pathname` tepat
   `/superadmin-portal`; sub-route Dashboard tidak ada. Jarak 38 px masih di atas
   batas minimum sentuh yang nyaman, tetapi perlu uji visual di HP. Tidak ada
-  perubahan database; perubahan belum di-commit. Aset
+  perubahan database. Aset
   `src/assets/logo kutai kartanegara.png` belum dipakai dan disisihkan untuk
   pekerjaan kop RSUD AMI berikutnya.
+- **Tindak lanjut:** di-commit `fd2d64a` dan di-push ke `origin/main`
+  (2026-10-26 22:25).
 
 ### 2026-10-26 15:31 WITA — Animasi submenu sidebar Super Admin
 - **Perubahan:** submenu grup sidebar Super Admin (**Data & Struktur**,
