@@ -154,6 +154,10 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-022 | 2026-10-26 15:31 | "maksud saya menu di portal super admin di sidebar kiri ada banyak menu data & struktur dan yang lainnya itu ketika di klik dan menampilkan menu buat animasi bergulis ke bawah" | Menambahkan animasi gulir buka/tutup pada submenu grup sidebar Super Admin memakai transisi `grid-template-rows` + opacity/translate; submenu tertutup tidak dapat difokuskan; verifikasi build base `/` dan `/PRESISI-AMI/` | selesai | 2026-10-26 15:31 — Animasi submenu sidebar Super Admin |
 | I-023 | 2026-10-26 22:05 | "itu adalah logo untuk kop rsudami itu nanti kita kerjakan, [Image 1] kemudian saya minta di menu sidebar kiri portal superadmin dan kepala ruangan agar lebih mepet dan rapih lagi karna saya liat jarak pilihan tiap menu itu terlalu berjarak [Image 2] dan buat agar background dashboard dibuat background agar sedikit rapih dengan warna biru muda transparan dan menu dibawahnya dibuat sedikit lebih rapat agar kelihatan rapih" + "lnjut" | Merapatkan jarak vertikal menu sidebar Super Admin dan Kepala Ruangan (rapat sedang, target sentuh 38–40 px); menambahkan latar gradasi biru muda transparan khusus halaman Dashboard Super Admin; aset `logo kutai kartanegara.png` disimpan untuk pekerjaan kop RSUD AMI berikutnya; verifikasi build base `/` dan `/PRESISI-AMI/` | selesai | 2026-10-26 22:05 — Sidebar rapat & latar dashboard |
 | I-024 | 2026-10-26 22:20 | "berikan background latar biru untuk semua menu seperti dashboard yang barusan kamu kerjakan" | Menerapkan latar gradasi biru muda transparan ke seluruh halaman portal Super Admin dan Kepala Ruangan, bukan hanya Dashboard; verifikasi build base `/` dan `/PRESISI-AMI/` | selesai | 2026-10-26 22:20 — Latar biru semua menu portal |
+| I-025 | 2026-10-26 22:40 | "karna warna backgroundnya diubah menjadi bitu banyak tombol yang seperti melayang di pojok kanan atas [Image 1] seperti ini, tombol grub di pojok kanan atas terlalu jauh di pojok kanan, [Image 2] muat ulang dll, [Image 3] tahun hari libur juga, kemudian tulisan rsud aji muhammad idris di bawah tulisan menu yang dipilih dihilangkan saja[Image 4]" | Memindahkan tombol aksi `KepalaHalaman` agar menempel dekat judul halaman (tidak lagi di pojok kanan), merapikan kontrol Tahun Hari Libur menjadi satu baris, menghapus subtitle rumah sakit di topbar Super Admin, dan menyisakan nama unit kerja di topbar Kepala Ruangan; verifikasi build base `/` dan `/PRESISI-AMI/` | selesai | 2026-10-26 22:40 — Aksi dekat judul & subtitle topbar |
+| I-026 | 2026-10-26 23:45 | "malah tambah aneh menurut saya, buat aja dia tetap di pojok kanan cuma posisinya paskan di luar kotak daftar, jadwal shift kembalikan posisinya ke kanan, data pegawai perbaiki ke kanan atas daftar, tambah grub shift masukkan ke dalam kotak daftar posisikan di kanan atas kotak ,master shift buka jadwal dan tombol shift masukkan kedalam kotak di pojok kanan atas daftar, hari libur masukkan kedalam kotak tambah hari libur di kanan atas sejajar dengan font, koreksi presesnsi tombol muat sejajarkan dengan audit trial, dinas & sakit pindahkan muat ulang dan catat dinas ke kanan atas kotak daftar , cuti juga samakan dengan dinas & sakit , rekapitulasi laporan pindahkan tombol ekspor dan  cetak ke kanan atas luar kota filter, verifikasi perangkat tombol muat pindahkan ke samping tombol semua" | Menggantikan pendekatan I-025: `KepalaHalaman` dikembalikan ke judul kiri/aksi kanan; aksi dipindah per halaman ke header kartu daftar (Data Pegawai, Grup Shift, Master Shift, Pengajuan Dinas & Sakit/Cuti), ke kartu Tambah Hari Libur (Tahun), ke baris tab setelah Audit Trail (Koreksi) dan setelah Semua (Verifikasi), dan ke atas kotak filter (Rekapitulasi); `TabBar` mendapat prop `aksi` | selesai | 2026-10-26 23:50 — Penempatan aksi per halaman |
+| I-027 | 2026-10-26 23:50 | "kerjakan" | Mengeksekusi I-026, memperbarui dokumen audit, dan menjalankan build base `/` serta `/PRESISI-AMI/` | selesai | 2026-10-26 23:50 — Penempatan aksi per halaman |
+| I-028 | 2026-10-27 00:03 | "commit dan push" | Memverifikasi `npm run build` (lulus 7,84 dtk), memperbarui dokumen audit, lalu commit penempatan aksi per halaman + subtitle topbar + aset logo kop, dan push ke `origin/main` | selesai | 2026-10-27 00:03 — Commit & push aksi per halaman |
 
 ---
 
@@ -169,9 +173,13 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   dokumen audit), commit `900e916` (bilah progres navigasi), commit
   `4938341` (sinkronisasi dokumen audit), dan commit `cb80100` (logo resmi,
   menu akun, animasi navigasi), dan commit `fd2d64a` (sidebar rapat dan latar
-  portal biru) yang di-push 2026-10-26 22:25. Working tree bersih selain aset
-  baru `src/assets/logo kutai kartanegara.png` (untracked) untuk kop RSUD AMI
-  yang akan dikerjakan terpisah.
+  portal biru) yang di-push 2026-10-26 22:25, serta commit `dbe0b2a`
+  (sinkronisasi status dokumen). Working tree berisi penempatan aksi per
+  halaman (kartu daftar, baris tab, kartu hari libur, dan atas kotak filter),
+  pengembalian `KepalaHalaman` ke judul kiri/aksi kanan, serta penghapusan
+  subtitle rumah sakit di topbar yang belum di-commit, plus aset baru
+  `src/assets/logo kutai kartanegara.png` (untracked) untuk kop RSUD AMI yang
+  akan dikerjakan terpisah.
 - **Deploy:** GitHub Pages lewat `.github/workflows/deploy.yml`; URL live
   `https://rantemario905-source.github.io/PRESISI-AMI/`; base path
   `/PRESISI-AMI/`; secrets `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`.

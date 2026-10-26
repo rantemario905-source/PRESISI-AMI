@@ -141,11 +141,6 @@ export default function VerifikasiPerangkat() {
       <KepalaHalaman
         judul="Verifikasi & Reset Perangkat"
         deskripsi="Setiap pegawai hanya boleh memiliki satu perangkat aktif. Untuk mengganti perangkat, reset perangkat lama terlebih dahulu, lalu pegawai mengajukan dari perangkat baru."
-        aksi={
-          <Button variant="sekunder" size="sm" onClick={() => muat(tab)} disabled={memuat}>
-            Muat ulang
-          </Button>
-        }
       />
 
       {pesan && (
@@ -159,7 +154,17 @@ export default function VerifikasiPerangkat() {
         </Alert>
       )}
 
-      <TabBar daftar={TAB} nilai={tab} onChange={setTab} label="Status perangkat" />
+      <TabBar
+        daftar={TAB}
+        nilai={tab}
+        onChange={setTab}
+        label="Status perangkat"
+        aksi={
+          <Button variant="sekunder" size="sm" onClick={() => muat(tab)} disabled={memuat}>
+            Muat ulang
+          </Button>
+        }
+      />
 
       <section className="rounded-2xl border border-slate-200 bg-white shadow-kartu">
         {memuat ? (

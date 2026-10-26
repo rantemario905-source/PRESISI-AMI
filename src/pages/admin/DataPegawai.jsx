@@ -144,11 +144,6 @@ export default function DataPegawai() {
       <KepalaHalaman
         judul="Data Pegawai"
         deskripsi="Kelola nama, grup/unit, pola kerja (Reguler/Shift), dan kepala ruangan pegawai non-ASN. Akun Super Admin tidak ditampilkan."
-        aksi={
-          <Button variant="sekunder" size="sm" onClick={muat} disabled={memuat}>
-            Muat ulang
-          </Button>
-        }
       />
 
       {pesan && (
@@ -220,6 +215,11 @@ export default function DataPegawai() {
             <p className="text-xs text-slate-500">
               {tersaring.length} dari {daftar.length} akun
             </p>
+          </div>
+          <div className="aksi-halaman">
+            <Button variant="sekunder" size="sm" onClick={muat} disabled={memuat}>
+              Muat ulang
+            </Button>
           </div>
         </div>
 

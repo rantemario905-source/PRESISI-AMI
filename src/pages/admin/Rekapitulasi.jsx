@@ -126,16 +126,6 @@ export default function Rekapitulasi() {
         <KepalaHalaman
           judul="Rekapitulasi & Cetak Laporan"
           deskripsi="Laporan absensi bulanan per unit kerja, termasuk rekap keterlambatan."
-          aksi={
-            <>
-              <Button variant="sekunder" size="sm" onClick={ekspor} disabled={memuat}>
-                Ekspor CSV
-              </Button>
-              <Button variant="utama" size="sm" onClick={() => window.print()} disabled={memuat}>
-                Cetak Laporan
-              </Button>
-            </>
-          }
         />
 
         {galat && (
@@ -143,6 +133,17 @@ export default function Rekapitulasi() {
             {galat}
           </Alert>
         )}
+
+        <div className="mb-2 flex justify-end">
+          <div className="aksi-halaman">
+            <Button variant="sekunder" size="sm" onClick={ekspor} disabled={memuat}>
+              Ekspor CSV
+            </Button>
+            <Button variant="utama" size="sm" onClick={() => window.print()} disabled={memuat}>
+              Cetak Laporan
+            </Button>
+          </div>
+        </div>
 
         <div className="mb-4 grid gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-kartu sm:grid-cols-2 sm:p-4 lg:grid-cols-4">
           <div>

@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-26 22:25 WITA |
+| Terakhir diperbarui | 2026-10-27 00:03 WITA |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -52,17 +52,20 @@ Penyempurnaan terbaru: **favicon dan apple-touch-icon memakai logo resmi**, labe
 serta **tombol Keluar dipindahkan ke menu avatar** di kanan atas (responsif HP)
 dengan **animasi buka/tutup halus**, serta **animasi gulir submenu sidebar** Super Admin, dan **perapian jarak menu
 sidebar** Super Admin/kepala ruangan plus **latar biru muda transparan pada
-seluruh halaman portal** Super Admin dan Kepala Ruangan. Yang belum: konfirmasi migrasi 09–18 & skrip verifikasi, penyiapan data operasional
+seluruh halaman portal** Super Admin dan Kepala Ruangan, serta **posisi tombol
+aksi per halaman** (kembali ke kanan dan ditempatkan pada kartu/baris yang
+relevan) dan **subtitle rumah sakit di topbar dihapus**. Yang belum: konfirmasi
+migrasi 09–18 & skrip verifikasi, penyiapan data operasional
 (grup shift, jadwal, hari libur), dan persiapan go-live.
 
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 8 + UI navigasi + migrasi 15–18 | `src/`, `supabase/migrations/01–18` |
-| Commit Git | **HEAD** — `fd2d64a` (sidebar rapat dan latar portal biru) | `git log` |
-| Perubahan lokal | **Tidak ada** — sisa hanya aset belum terlacak `src/assets/logo kutai kartanegara.png` untuk kop RSUD AMI | `git status` |
+| Commit Git | **HEAD** — `dbe0b2a` (sinkronisasi status dokumen) | `git log` |
+| Perubahan lokal | **Tidak ada** — penempatan aksi per halaman, `KepalaHalaman` judul kiri/aksi kanan, subtitle topbar, dan aset `logo kutai kartanegara.png` sudah di-commit dan di-push 2026-10-27 00:03 | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Skrip `supabase/verifikasi_*.sql` | **Tidak diketahui** sudah dijalankan atau belum | perlu cek manual |
-| Build produksi | **Lulus** — 272 modul, 8,12 dtk (base `/`); build base `/PRESISI-AMI/` 7,81 dtk dengan heap 4096 MB | `npm run build` (2026-10-26 22:20) |
+| Build produksi | **Lulus** — base `/` 6,73 dtk; build base `/PRESISI-AMI/` 8,07 dtk | `npm run build` (2026-10-26 23:50) |
 | Jendela waktu absen | **Ada di kode** — masuk 20 menit sebelum, pulang 1 menit setelah | migrasi 17, `PanelAbsen.jsx`, `jadwalAbsen.js` |
 | Hapus grup kosong | **Ada di kode** — semua grup 0 pegawai; "Belum ditentukan" (akun sistem) disembunyikan bila kosong | migrasi 18, `GrupShift.jsx` |
 | Bilah progres | **Ada di kode** — bilah biru muda di atas layar saat navigasi, login, logout, dan muat ulang profil | `ProgressContext.jsx`, `BilahProgres.jsx`, `PengamatRute.jsx` |
@@ -72,18 +75,22 @@ seluruh halaman portal** Super Admin dan Kepala Ruangan. Yang belum: konfirmasi 
 | Animasi sidebar | **Ada di kode** — submenu grup Super Admin dibuka/tutup dengan animasi gulir; grup aktif terbuka otomatis; submenu tertutup tidak dapat difokuskan | `SidebarAdmin.jsx` |
 | Kerapatan sidebar | **Ada di kode** — jarak menu Super Admin dan Kepala Ruangan dirapatkan (rapat sedang, target sentuh 38–40 px) | `SidebarAdmin.jsx`, `SidebarKepala.jsx` |
 | Latar Dashboard | **Ada di kode** — gradasi biru muda transparan pada seluruh halaman portal Super Admin dan Kepala Ruangan | `PortalAdminLayout.jsx`, `PortalKepalaLayout.jsx` |
+| Aksi halaman | **Ada di kode** — tombol aksi kembali di kanan; aksi spesifik dipindah ke header kartu daftar, kartu Tambah Hari Libur (Tahun), baris tab Koreksi/Verifikasi, dan atas kotak filter Rekapitulasi | `KepalaHalaman.jsx`, `TabBar.jsx`, `DataPegawai.jsx`, `GrupShift.jsx`, `MasterShift.jsx`, `HariLibur.jsx`, `KoreksiPresensi.jsx`, `VerifikasiPerangkat.jsx`, `PengajuanIzin.jsx`, `Rekapitulasi.jsx` |
+| Subtitle topbar | **Ada di kode** — portal Super Admin tanpa subtitle; portal Kepala Ruangan hanya nama unit kerja | `PortalAdminLayout.jsx`, `PortalKepalaLayout.jsx` |
 | Lint/unit test | Tidak tersedia di `package.json` | `package.json` |
 | Alfa otomatis | Fitur ada, **default nonaktif** | migrasi 12, `PengaturanPresensi.jsx` |
 | Deploy GitHub Pages | **Aktif** — workflow run #1 sukses | https://rantemario905-source.github.io/PRESISI-AMI/ |
 | Uji login live | **Lulus** — Super Admin (desktop) + pegawai (mobile) | Laporan user 2026-10-25 13:37 |
 | Uji perangkat & absensi | **Lulus** — verifikasi perangkat, radius, akurasi, duplikasi | Laporan user 2026-10-25 14:04 |
 
-**Pekerjaan terakhir:** merapatkan jarak vertikal menu sidebar Super Admin dan
-kepala ruangan (rapat sedang) dan menerapkan latar gradasi biru muda transparan
-ke seluruh halaman portal Super Admin dan Kepala Ruangan (2026-10-26;
-**sudah di-commit `fd2d64a` dan di-push ke `origin/main`**). Aset
-`src/assets/logo kutai kartanegara.png` disimpan untuk pekerjaan kop RSUD AMI
-berikutnya dan belum dipakai di UI.
+**Pekerjaan terakhir:** mengembalikan tata letak `KepalaHalaman` ke judul
+kiri/aksi kanan, lalu memindahkan tombol aksi per halaman ke header kartu daftar,
+kartu **Tambah Hari Libur** (Tahun), baris tab **Koreksi**/**Verifikasi**, dan
+atas kotak filter **Rekapitulasi**; subtitle **RSUD Aji Muhammad Idris** tetap
+dihapus dari topbar (2026-10-26; **sudah di-commit dan di-push** ke
+`origin/main` pada 2026-10-27 00:03). Aset
+`src/assets/logo kutai kartanegara.png` ikut di-commit untuk pekerjaan kop RSUD
+AMI berikutnya dan belum dipakai di UI.
 
 **Langkah berikutnya yang disarankan:**
 1. Jalankan migrasi **15**, **16**, **17**, lalu **18** berurutan di SQL Editor,
@@ -99,7 +106,10 @@ berikutnya dan belum dipakai di UI.
    dashboard (“Dashboard”, “Total Pegawai”, tanggal aktual, “Perlu Verifikasi”),
    dan menu **Keluar** di avatar kanan atas pada desktop serta HP. Periksa juga
    kerapatan menu sidebar Super Admin/kepala ruangan dan latar biru muda
-   transparan pada seluruh halaman portal Super Admin dan Kepala Ruangan.
+   transparan pada seluruh halaman portal Super Admin dan Kepala Ruangan;
+   periksa juga posisi tombol aksi per halaman (header kartu daftar, Tahun Hari
+   Libur, baris tab Koreksi/Verifikasi, dan atas kotak filter Rekapitulasi)
+   serta topbar tanpa subtitle rumah sakit.
 3. Lengkapi data operasional: seksi **Grup Shift**, pola kerja di **Data Pegawai**,
    **Jadwal Shift**, dan **Hari Libur**.
 4. Pastikan migrasi 09–14 sudah dijalankan berurutan dan seluruh
@@ -135,6 +145,8 @@ berikutnya dan belum dipakai di UI.
 | 16 | Menu akun avatar di kanan atas untuk **Keluar**; tombol Keluar mandiri dihapus dari header; responsif desktop/HP | `src/components/layout/MenuAkun.jsx`, `src/components/BarAtas.jsx`, `src/components/layout/PortalAdminLayout.jsx`, `src/components/layout/PortalKepalaLayout.jsx` | selesai | - | build lulus (base `/` dan `/PRESISI-AMI/`); uji visual belum tercatat |
 | 17 | Sidebar Super Admin/kepala ruangan lebih rapat; latar Dashboard biru muda transparan; aset logo kop RSUD AMI disimpan untuk pekerjaan berikutnya | `src/components/layout/SidebarAdmin.jsx`, `src/components/layout/SidebarKepala.jsx`, `src/components/layout/PortalAdminLayout.jsx`, `src/assets/logo kutai kartanegara.png` | selesai | - | build lulus (base `/` dan `/PRESISI-AMI/`); uji visual belum tercatat |
 | 18 | Latar biru muda transparan diterapkan ke seluruh halaman portal Super Admin dan Kepala Ruangan | `src/components/layout/PortalAdminLayout.jsx`, `src/components/layout/PortalKepalaLayout.jsx` | selesai | - | build lulus (base `/` dan `/PRESISI-AMI/`); uji visual belum tercatat |
+| 19 | Tombol aksi menempel dekat judul; kontrol Tahun Hari Libur satu baris; subtitle rumah sakit di topbar dihapus, kepala ruangan hanya nama unit | `src/components/admin/KepalaHalaman.jsx`, `src/pages/admin/HariLibur.jsx`, `src/components/layout/PortalAdminLayout.jsx`, `src/components/layout/PortalKepalaLayout.jsx` | selesai (digantikan fase 20) | - | build lulus (base `/` dan `/PRESISI-AMI/`); uji visual belum tercatat |
+| 20 | Aksi per halaman: kembali ke kanan; tombol daftar di header kartu, Tahun di kartu Hari Libur, Muat ulang di baris tab Koreksi/Verifikasi, Ekspor/Cetak di atas kotak filter Rekapitulasi | `KepalaHalaman.jsx`, `TabBar.jsx`, `DataPegawai.jsx`, `GrupShift.jsx`, `MasterShift.jsx`, `HariLibur.jsx`, `KoreksiPresensi.jsx`, `VerifikasiPerangkat.jsx`, `PengajuanIzin.jsx`, `Rekapitulasi.jsx` | selesai | - | build lulus (base `/` dan `/PRESISI-AMI/`); uji visual belum tercatat |
 | UI | Penyempurnaan navigasi: tab bar, navigasi bawah mobile, menu kepala, layout portal | `src/components/ui/TabBar.jsx`, `src/components/NavigasiBawah.jsx`, `src/components/BarAtas.jsx`, `src/components/MenuKepala.jsx`, `src/components/layout/PortalKepalaLayout.jsx`, `src/index.css`, `src/pages/Dashboard.jsx` | selesai `(inferred)` | — | build lulus; uji manual belum tercatat |
 
 **Catatan:** README sudah diperbarui ke Fase 1–8 + migrasi 15–18. `verifikasi_13`
@@ -145,6 +157,70 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-27 00:03 WITA — Commit & push aksi per halaman
+- **Perubahan:** atas perintah user (I-028), pekerjaan penempatan aksi per
+  halaman beserta pengembalian `KepalaHalaman` ke judul kiri/aksi kanan,
+  penghapusan subtitle rumah sakit di topbar, dan aset
+  `src/assets/logo kutai kartanegara.png` di-commit lalu di-push ke `origin/main`.
+  Dokumen audit (`AGENTS.md`, `progress.md`) ikut diperbarui.
+- **File:** `src/components/layout/PortalAdminLayout.jsx`,
+  `src/components/layout/PortalKepalaLayout.jsx`, `src/components/ui/TabBar.jsx`,
+  `src/pages/admin/{DataPegawai,GrupShift,MasterShift,HariLibur,KoreksiPresensi,VerifikasiPerangkat,PengajuanIzin,Rekapitulasi}.jsx`,
+  `src/assets/logo kutai kartanegara.png`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` **lulus** — 272 modul, 7,84 dtk (base `/`).
+  Build base `/PRESISI-AMI/` terakhir lulus 8,07 dtk (2026-10-26 23:50).
+- **Catatan/risiko:** uji visual desktop/HP untuk penempatan tombol aksi tetap
+  menjadi backlog **B-19**; deploy GitHub Pages berjalan otomatis setelah push
+  ke `main`.
+
+### 2026-10-26 23:50 WITA — Penempatan aksi per halaman
+- **Perubahan:** pendekatan I-025 (aksi menempel dekat judul) digantikan.
+  `KepalaHalaman` kembali ke judul kiri/aksi kanan. Tombol aksi dipindah sesuai
+  konteks: **Muat ulang** ke header **Daftar Pegawai**; **+ Grup** ke header
+  **Daftar Grup**; **Buka Jadwal Shift** dan **+ Shift** ke header **Daftar
+  Master Shift**; **Tahun** ke kanan atas kartu **Tambah Hari Libur**;
+  **Muat ulang** ke baris tab setelah **Audit Trail** (Koreksi) dan setelah
+  **Semua** (Verifikasi); **Muat ulang** dan **+ Catat** ke header daftar
+  pengajuan Dinas & Sakit/Cuti; **Ekspor CSV** dan **Cetak Laporan** ke baris
+  kanan atas di luar kotak filter Rekapitulasi. `TabBar` mendapat prop `aksi`.
+  Dashboard, Pengaturan Presensi, dan Jadwal Shift tetap memakai aksi kanan
+  `KepalaHalaman`; subtitle topbar tetap tanpa nama rumah sakit.
+- **File:** `src/components/admin/KepalaHalaman.jsx`,
+  `src/components/ui/TabBar.jsx`, `src/pages/admin/DataPegawai.jsx`,
+  `src/pages/admin/GrupShift.jsx`, `src/pages/admin/MasterShift.jsx`,
+  `src/pages/admin/HariLibur.jsx`, `src/pages/admin/KoreksiPresensi.jsx`,
+  `src/pages/admin/VerifikasiPerangkat.jsx`,
+  `src/pages/admin/PengajuanIzin.jsx`, `src/pages/admin/Rekapitulasi.jsx`,
+  `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` **lulus** — 6,73 dtk (base `/`); build
+  `VITE_BASE_PATH=/PRESISI-AMI/` **lulus** — 8,07 dtk
+  (`NODE_OPTIONS=--max-old-space-size=4096`). Pemeriksaan teks memastikan
+  `aksi=` hanya tersisa pada `TabBar` Koreksi dan Verifikasi.
+- **Catatan/risiko:** uji visual desktop/HP belum dilakukan; tombol di header
+  kartu dapat turun baris pada layar sempit (sudah memakai `flex-wrap`).
+  Tidak ada perubahan database; perubahan belum di-commit. Aset
+  `src/assets/logo kutai kartanegara.png` tetap belum dipakai.
+
+### 2026-10-26 22:40 WITA — Aksi dekat judul & subtitle topbar
+- **Perubahan:** `KepalaHalaman` tidak lagi memakai tata letak kiri-kanan
+  (`justify-between`); judul dan tombol aksi kini berada dalam satu baris
+  `flex-wrap`, sehingga aksi menempel dekat judul dan turun baris bila tidak
+  muat. Di HP aksi tetap selebar baris di bawah judul. Kontrol **Tahun** pada
+  Hari Libur diubah menjadi satu baris (label dan input sejajar). Subtitle
+  **RSUD Aji Muhammad Idris** dihapus dari topbar Super Admin; topbar Kepala
+  Ruangan kini hanya menampilkan nama unit kerja.
+- **File:** `src/components/admin/KepalaHalaman.jsx`,
+  `src/pages/admin/HariLibur.jsx`,
+  `src/components/layout/PortalAdminLayout.jsx`,
+  `src/components/layout/PortalKepalaLayout.jsx`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` **lulus** — 272 modul, 7,32 dtk (base `/`);
+  build `VITE_BASE_PATH=/PRESISI-AMI/` **lulus** — 7,92 dtk. Semua 11 halaman
+  pengguna `KepalaHalaman` ikut memakai tata letak baru.
+- **Catatan/risiko:** pada halaman dengan tiga tombol (mis. Jadwal Shift) aksi
+  dapat turun ke baris kedua di layar sempit; belum diuji visual di browser.
+  Tidak ada perubahan database; perubahan belum di-commit. Aset
+  `src/assets/logo kutai kartanegara.png` tetap belum dipakai.
 
 ### 2026-10-26 22:20 WITA — Latar biru semua menu portal
 - **Perubahan:** latar gradasi biru muda transparan
@@ -575,6 +651,8 @@ dan `verifikasi_18` untuk hapus grup kosong.
 | B-15 | Aturan jendela waktu (migrasi 17) belum dijalankan/diuji | Absen bisa ditolak atau tidak sesuai harapan | Jalankan 17 + `verifikasi_17.sql`, lalu uji absen 07.40 dan 16.31 |
 | B-16 | ~~Migrasi 18 dan UI grup sistem belum diuji/di-commit~~ | - | **Selesai:** commit `6343111` + push 2026-10-26 13:19; sisa uji `verifikasi_18.sql` |
 | B-17 | Kerapatan sidebar dan latar portal baru diuji lewat build | Tampilan di layar kecil/desktop belum terbukti | Uji visual `npm run dev` di desktop dan HP, lalu sesuaikan bila terlalu rapat/terlalu pucat |
+| B-18 | ~~Posisi aksi dekat judul dan penghapusan subtitle baru diuji lewat build~~ | - | **Digantikan I-026:** aksi tidak lagi menempel judul |
+| B-19 | Penempatan aksi per halaman baru diuji lewat build | Tombol bisa menumpuk atau salah posisi di layar sempit | Uji visual Data Pegawai, Grup Shift, Master Shift, Hari Libur, Koreksi, Dinas & Sakit, Cuti, Rekapitulasi, Verifikasi, dan Jadwal Shift di desktop serta HP |
 | B-4 | ~~`npm run build` belum dijalankan~~ | — | **Selesai:** lulus 2026-10-25 12:24 |
 | B-5 | ~~README menyebut Fase 1–7 saja~~ | — | **Selesai:** diperbarui ke Fase 1–8 + impor |
 | B-6 | ~~`verifikasi_10.sql` tidak ada di diagram README~~ | — | **Selesai:** ditambahkan ke struktur |

@@ -2,7 +2,7 @@
  * Tab pilihan yang membungkus ke baris berikutnya bila ruang di HP tidak cukup.
  * Dipakai pada halaman Verifikasi Perangkat, Koreksi, dan Izin.
  */
-export default function TabBar({ daftar, nilai, onChange, label = 'Pilih kategori' }) {
+export default function TabBar({ daftar, nilai, onChange, label = 'Pilih kategori', aksi }) {
   return (
     <div
       role="tablist"
@@ -28,6 +28,7 @@ export default function TabBar({ daftar, nilai, onChange, label = 'Pilih kategor
           </button>
         )
       })}
+      {aksi && <div className="flex items-center">{aksi}</div>}
     </div>
   )
 }

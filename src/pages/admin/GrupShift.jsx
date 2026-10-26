@@ -176,11 +176,6 @@ export default function GrupShift() {
       <KepalaHalaman
         judul="Grup Shift"
         deskripsi="Kelola grup/unit dan seksinya. Rename grup otomatis memperbarui unit pegawai tanpa memutus jadwal. Grup sistem “Belum ditentukan” hanya tampil jika berisi pegawai."
-        aksi={
-          <Button size="sm" onClick={bukaTambah}>
-            + Grup
-          </Button>
-        }
       />
 
       {pesan && (
@@ -240,6 +235,11 @@ export default function GrupShift() {
             <p className="text-xs text-slate-500">
               {tersaring.length} dari {daftarTampil.length} grup
             </p>
+          </div>
+          <div className="aksi-halaman">
+            <Button size="sm" onClick={bukaTambah}>
+              + Grup
+            </Button>
           </div>
         </div>
 

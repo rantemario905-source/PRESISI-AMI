@@ -139,11 +139,6 @@ export default function KoreksiPresensi() {
       <KepalaHalaman
         judul="Koreksi Presensi & Audit Trail"
         deskripsi="Perbaiki data presensi dengan alasan wajib — seluruh perubahan terekam."
-        aksi={
-          <Button variant="sekunder" size="sm" onClick={muat} disabled={memuat}>
-            Muat ulang
-          </Button>
-        }
       />
 
       {pesan && (
@@ -157,7 +152,17 @@ export default function KoreksiPresensi() {
         </Alert>
       )}
 
-      <TabBar daftar={TAB} nilai={tab} onChange={setTab} label="Jenis data koreksi" />
+      <TabBar
+        daftar={TAB}
+        nilai={tab}
+        onChange={setTab}
+        label="Jenis data koreksi"
+        aksi={
+          <Button variant="sekunder" size="sm" onClick={muat} disabled={memuat}>
+            Muat ulang
+          </Button>
+        }
+      />
 
       {tab === 'data' && (
         <>

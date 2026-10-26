@@ -9,7 +9,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
-import { NAMA_APLIKASI, NAMA_RUMAH_SAKIT } from '../../config/constants.js'
+import { NAMA_APLIKASI } from '../../config/constants.js'
 import { Spinner } from '../ui/index.js'
 import MenuAkun from './MenuAkun.jsx'
 import SidebarAdmin from './SidebarAdmin.jsx'
@@ -78,7 +78,6 @@ export default function PortalAdminLayout() {
 
             <div className="min-w-0 flex-1">
               <h1 className="truncate text-[13px] font-bold text-slate-800 sm:text-base">{judul}</h1>
-              <p className="hidden truncate text-[11px] text-slate-400 sm:block">{NAMA_RUMAH_SAKIT}</p>
             </div>
 
             <div className="flex shrink-0 items-center">

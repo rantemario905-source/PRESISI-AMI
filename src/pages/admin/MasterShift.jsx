@@ -109,19 +109,6 @@ export default function MasterShift() {
       <KepalaHalaman
         judul="Master Shift"
         deskripsi="Daftar pola jam shift yang dapat dipakai pada Jadwal Shift. Shift yang melewati tengah malam (contoh Malam 21.30–07.30) didukung absen pulang lintas hari."
-        aksi={
-          <>
-            <Link
-              to="/superadmin-portal/jadwal-shift"
-              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:min-h-[36px]"
-            >
-              Buka Jadwal Shift
-            </Link>
-            <Button size="sm" onClick={bukaTambah}>
-              + Shift
-            </Button>
-          </>
-        }
       />
 
       {pesan && (
@@ -136,12 +123,23 @@ export default function MasterShift() {
       )}
 
       <section className="rounded-2xl border border-slate-200 bg-white shadow-kartu">
-        <div className="flex items-center justify-between gap-2 border-b border-slate-200 px-4 py-3.5 sm:px-5 sm:py-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-3.5 sm:px-5 sm:py-4">
           <div>
             <h2 className="text-sm font-bold text-slate-800">Daftar Master Shift</h2>
             <p className="text-[11px] text-slate-500 sm:text-xs">
               {master.length} shift terdaftar
             </p>
+          </div>
+          <div className="aksi-halaman">
+            <Link
+              to="/superadmin-portal/jadwal-shift"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:min-h-[36px]"
+            >
+              Buka Jadwal Shift
+            </Link>
+            <Button size="sm" onClick={bukaTambah}>
+              + Shift
+            </Button>
           </div>
         </div>
 

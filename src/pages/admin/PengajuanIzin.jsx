@@ -388,16 +388,6 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
             ? `Catat dan kelola ${judulKategori.toLowerCase()} untuk pegawai di unit ${profil?.unit_kerja ?? 'Anda'}. Persetujuan dilakukan Super Admin.`
             : `Catat ${judulKategori.toLowerCase()} atas nama pegawai, periksa dokumen, lalu setujui atau tolak.`
         }
-        aksi={
-          <>
-            <Button variant="sekunder" size="sm" onClick={() => muat(tab)} disabled={memuat}>
-              Muat ulang
-            </Button>
-            <Button size="sm" onClick={bukaFormBaru} disabled={!pegawai.length}>
-              + Catat {judulKategori}
-            </Button>
-          </>
-        }
       />
 
       {pesan && (
@@ -437,6 +427,25 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
       />
 
       <section className="rounded-2xl border border-slate-200 bg-white shadow-kartu">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-3.5 sm:px-5 sm:py-4">
+          <div>
+            <h2 className="text-sm font-bold text-slate-800">
+              Daftar Pengajuan {judulKategori}
+            </h2>
+            <p className="text-[11px] text-slate-500 sm:text-xs">
+              {daftar.length} pengajuan
+            </p>
+          </div>
+          <div className="aksi-halaman">
+            <Button variant="sekunder" size="sm" onClick={() => muat(tab)} disabled={memuat}>
+              Muat ulang
+            </Button>
+            <Button size="sm" onClick={bukaFormBaru} disabled={!pegawai.length}>
+              + Catat {judulKategori}
+            </Button>
+          </div>
+        </div>
+
         {memuat ? (
           <div className="flex items-center justify-center gap-2 py-14 text-sm text-slate-500">
             <Spinner /> Memuat pengajuan…

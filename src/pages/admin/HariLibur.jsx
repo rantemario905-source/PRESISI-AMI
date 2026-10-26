@@ -98,24 +98,6 @@ export default function HariLibur() {
       <KepalaHalaman
         judul="Hari Libur"
         deskripsi="Input hari libur nasional/cuti bersama. Absensi pegawai reguler dikunci pada tanggal ini; pegawai shift tetap mengikuti jadwal."
-        aksi={
-          <div className="flex items-end gap-2">
-            <div>
-              <label className="label-input" htmlFor="tahun-libur">
-                Tahun
-              </label>
-              <input
-                id="tahun-libur"
-                type="number"
-                min="2020"
-                max="2100"
-                className="input-dasar w-[110px]"
-                value={tahun}
-                onChange={(e) => setTahun(e.target.value)}
-              />
-            </div>
-          </div>
-        }
       />
 
       {pesan && (
@@ -130,10 +112,31 @@ export default function HariLibur() {
       )}
 
       <section className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-kartu sm:p-5">
-        <h2 className="text-sm font-bold text-slate-800">Tambah Hari Libur</h2>
-        <p className="mb-3 mt-0.5 text-[11px] leading-relaxed text-slate-500 sm:text-xs">
-          Tanggal yang sudah ada akan diperbarui namanya.
-        </p>
+        <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+          <div>
+            <h2 className="text-sm font-bold text-slate-800">Tambah Hari Libur</h2>
+            <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500 sm:text-xs">
+              Tanggal yang sudah ada akan diperbarui namanya.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <label
+              className="text-[13px] font-semibold text-slate-700 sm:text-sm"
+              htmlFor="tahun-libur"
+            >
+              Tahun
+            </label>
+            <input
+              id="tahun-libur"
+              type="number"
+              min="2020"
+              max="2100"
+              className="input-dasar w-[110px]"
+              value={tahun}
+              onChange={(e) => setTahun(e.target.value)}
+            />
+          </div>
+        </div>
         <form onSubmit={tambah} className="grid gap-3 sm:grid-cols-[170px_1fr_auto]">
           <div>
             <label className="label-input" htmlFor="tanggal-libur">

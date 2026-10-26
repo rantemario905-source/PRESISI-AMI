@@ -75,11 +75,8 @@ export default function PortalKepalaLayout() {
               <h1 className="truncate text-[15px] font-bold leading-tight text-slate-800 sm:text-base">
                 {judul}
               </h1>
-              <p className="truncate text-[10px] leading-tight text-slate-400 sm:hidden">
+              <p className="truncate text-[10px] leading-tight text-slate-400 sm:text-[11px]">
                 {profil?.unit_kerja}
-              </p>
-              <p className="hidden truncate text-[11px] text-slate-400 sm:block">
-                {profil?.unit_kerja} · {NAMA_RUMAH_SAKIT}
               </p>
             </div>
 
