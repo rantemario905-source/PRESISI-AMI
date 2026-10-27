@@ -167,6 +167,7 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-033 | 2026-10-27 09:03 | "ubah titik kordinat  rumah sakit menjadi -0.23795851007230442, 117.41438417546158" | Mengubah koordinat pusat RSUD AMI di klien (`src/config/constants.js`) dan server (`schema.sql` + migrasi 20 yang mendefinisikan ulang `submit_presensi`), serta menambah `verifikasi_20.sql` | selesai | 2026-10-27 09:03 — Koordinat RSUD AMI diperbarui |
 | I-034 | 2026-10-27 09:20 | "-0.23781156083888882, 117.41437950820705 ubah lokasi titik gps rumah sakit" | Mengoreksi titik koordinat RSUD AMI di klien (`src/config/constants.js`), migrasi 20, seluruh definisi `submit_presensi` pada `schema.sql`, dan `verifikasi_20.sql`; verifikasi `npm run build` | selesai | 2026-10-27 09:20 — Koordinat RSUD AMI dikoreksi |
 | I-035 | 2026-10-27 09:39 | "sudah saya run dan succses" | Konfirmasi migrasi 20 dan `verifikasi_20.sql` berhasil dijalankan di Supabase; pembaruan status dokumen audit; tidak ada perubahan kode | selesai | 2026-10-27 09:39 — Migrasi 20 & verifikasi 20 berhasil |
+| I-036 | 2026-10-27 09:53 | "commit dan push" | Commit `fc772c1` (laporan presensi bulanan per pegawai, migrasi 19–20, verifikasi 19–20, koordinat RSUD AMI baru, dokumen audit) dan push ke `origin/main`; pembaruan status dokumen audit | selesai | 2026-10-27 09:53 — Commit & push laporan bulanan + koordinat |
 
 ---
 
@@ -186,9 +187,9 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   (sinkronisasi status dokumen), serta commit `c4fe733` (penempatan aksi per
   halaman, `KepalaHalaman` judul kiri/aksi kanan, subtitle topbar dihapus, dan
   aset `src/assets/logo kutai kartanegara.png`) yang di-commit/di-push
-  2026-10-27 00:03, serta commit `e542c6c` (sinkronisasi dokumen audit).
-  Pekerjaan laporan bulanan per pegawai + migrasi 19 masih di working tree dan
-  **belum di-commit**.
+  2026-10-27 00:03, serta commit `e542c6c` (sinkronisasi dokumen audit), dan
+  commit `fc772c1` (laporan presensi bulanan per pegawai + migrasi 19,
+  koordinat RSUD AMI baru + migrasi 20) yang di-push 2026-10-27 09:53.
 - **Deploy:** GitHub Pages lewat `.github/workflows/deploy.yml`; URL live
   `https://rantemario905-source.github.io/PRESISI-AMI/`; base path
   `/PRESISI-AMI/`; secrets `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`.

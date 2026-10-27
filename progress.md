@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-27 09:39 WITA |
+| Terakhir diperbarui | 2026-10-27 09:53 WITA |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -74,8 +74,8 @@ penyiapan data operasional
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 8 + UI navigasi + migrasi 15–20 | `src/`, `supabase/migrations/01–20` |
-| Commit Git | **HEAD** — `e542c6c` (sinkronisasi dokumen audit) | `git log` |
-| Perubahan lokal | **Ada** — laporan bulanan per pegawai (migrasi 19, halaman, menu, gaya cetak) menunggu uji lokal; **belum di-commit** | `git status` |
+| Commit Git | **HEAD** — `fc772c1` (laporan bulanan per pegawai + koordinat RSUD baru) | `git log` |
+| Perubahan lokal | **Tidak ada** — sudah di-commit `fc772c1` dan di-push 2026-10-27 09:53 | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server baru aktif | laporan user 2026-10-27 09:39 |
@@ -109,7 +109,7 @@ dihapus dari topbar (2026-10-26; **sudah di-commit dan di-push** ke
 `src/assets/logo kutai kartanegara.png` ikut di-commit untuk pekerjaan kop RSUD
 AMI berikutnya dan belum dipakai di UI.
 
-**Pekerjaan terakhir (2026-10-27, belum di-commit):** menambahkan halaman
+**Pekerjaan terakhir (2026-10-27, sudah di-commit `fc772c1`):** menambahkan halaman
 **Laporan Bulanan per Pegawai** untuk Super Admin (`/superadmin-portal/laporan`)
 dan Kepala Ruangan (`/kepala-ruangan/laporan`). Lembar A4 portrait memuat kop
 Pemerintah Kutai Kartanegara + RSUD AMI (dua logo, Times New Roman), identitas
@@ -192,6 +192,20 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-27 09:53 WITA — Commit & push laporan bulanan + koordinat
+- **Perubahan:** seluruh working tree (laporan presensi bulanan per pegawai,
+  migrasi 19–20, verifikasi 19–20, koordinat RSUD AMI baru, dan dokumen audit)
+  di-commit sebagai `fc772c1` lalu di-push ke `origin/main`.
+- **File:** `src/App.jsx`, `src/components/laporan/*`,
+  `src/pages/admin/LaporanBulanan.jsx`, `src/utils/laporan.js`,
+  `src/services/reportService.js`, `src/config/constants.js`,
+  `supabase/migrations/19–20`, `supabase/verifikasi_19–20`, `supabase/schema.sql`,
+  `README.md`, `AGENTS.md`, `progress.md`, dan aset logo kop.
+- **Verifikasi:** `npm run build` lulus (7,42 dtk) sebelum commit; push
+  `e542c6c..fc772c1 main -> main` berhasil.
+- **Catatan/risiko:** uji cetak PDF manual dan uji absensi dengan titik GPS baru
+  di perangkat belum tercatat; GitHub Pages akan build otomatis dari push ini.
 
 ### 2026-10-27 09:39 WITA — Migrasi 20 & verifikasi 20 berhasil
 - **Perubahan:** user menjalankan `supabase/migrations/20_koordinat_rsud.sql`
