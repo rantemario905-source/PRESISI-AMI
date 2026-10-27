@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-27 10:31 WITA |
+| Terakhir diperbarui | 2026-10-27 10:36 WITA |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -75,8 +75,8 @@ penyiapan data operasional
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 8 + UI navigasi + migrasi 15–21 | `src/`, `supabase/migrations/01–21` |
-| Commit Git | **HEAD** — `28a900f` (koordinat RSUD AMI diubah lagi + migrasi 21) | `git log` |
-| Perubahan lokal | **Ada** — custom domain `presisiami.my.id`: `VITE_BASE_PATH` → `/`, `public/CNAME`, README, dan dokumen audit; **belum di-commit** | `git status` |
+| Commit Git | **HEAD** — `11d35ab` (custom domain `presisiami.my.id`) | `git log` |
+| Perubahan lokal | **Tidak ada** — sudah di-commit `11d35ab` dan di-push 2026-10-27 10:36 | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
@@ -98,7 +98,7 @@ penyiapan data operasional
 | Laporan bulanan per pegawai | **Ada di kode** — Super Admin pilih unit, kepala ruangan terkunci unit sendiri; satu pegawai atau semua pegawai unit; kop dua logo + tabel harian + ringkasan + tanda tangan; cetak PDF A4 portrait | migrasi 19, `LaporanBulanan.jsx`, `reportService.js`, `utils/laporan.js`, `components/laporan/*`, `index.css` |
 | Lint/unit test | Tidak tersedia di `package.json` | `package.json` |
 | Alfa otomatis | Fitur ada, **default nonaktif** | migrasi 12, `PengaturanPresensi.jsx` |
-| Deploy GitHub Pages | **Aktif** — custom domain `https://presisiami.my.id/` (DNS Rumahweb, HTTPS menunggu sertifikat) | GitHub Pages + `.github/workflows/deploy.yml` |
+| Deploy GitHub Pages | **Aktif** — `https://presisiami.my.id/` live dengan base `/`; `www` redirect ke domain utama; **Enforce HTTPS belum dicentang** | workflow run `40439173719` sukses |
 | Uji login live | **Lulus** — Super Admin (desktop) + pegawai (mobile) | Laporan user 2026-10-25 13:37 |
 | Uji perangkat & absensi | **Lulus** — verifikasi perangkat, radius, akurasi, duplikasi | Laporan user 2026-10-25 14:04 |
 
@@ -194,6 +194,24 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-27 10:36 WITA — Commit & push custom domain + verifikasi live
+- **Perubahan:** perubahan custom domain (`VITE_BASE_PATH` → `/`, `public/CNAME`,
+  README, dokumen audit) di-commit sebagai `11d35ab` dan di-push ke
+  `origin/main`. Workflow deploy `40439173719` **sukses**.
+- **File:** `.github/workflows/deploy.yml`, `public/CNAME`, `README.md`,
+  `AGENTS.md`, `progress.md`.
+- **Verifikasi live:**
+  - `https://presisiami.my.id/` → **200**, aset `/assets/...` → **200**
+    (sebelumnya `/PRESISI-AMI/assets/...` 404).
+  - `https://www.presisiami.my.id/` → **200**, redirect ke
+    `https://presisiami.my.id/`.
+  - `/superadmin-portal` → HTTP 404 dengan body `index.html` (fallback SPA,
+    aplikasi tetap termuat); favicon → **200**.
+  - `http://presisiami.my.id/` belum redirect ke HTTPS → **Enforce HTTPS belum
+    dicentang**.
+- **Catatan/risiko:** Site URL/Redirect URLs Supabase belum diperbarui ke domain
+  baru. Uji login dan absensi lewat domain baru belum tercatat.
 
 ### 2026-10-27 10:31 WITA — Custom domain presisiami.my.id disiapkan
 - **Perubahan:** aplikasi disiapkan pindah dari

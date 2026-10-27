@@ -172,6 +172,7 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-038 | 2026-10-27 09:59 | "commit dan push" | Commit `28a900f` (koordinat RSUD AMI terbaru, migrasi 21, verifikasi 21, dokumen audit) dan push ke `origin/main`; pembaruan status dokumen audit | selesai | 2026-10-27 09:59 — Commit & push migrasi 21 |
 | I-039 | 2026-10-27 (WITA) | "saya beli domain di rumahweb.com bagaimana cara menggunakannya" | Meneliti panduan DNS Rumahweb dan GitHub Pages; menyusun rencana pemasangan domain `presisiami.my.id` (4 A record GitHub + CNAME `www`, custom domain, HTTPS, Supabase Auth); tidak ada perubahan kode | selesai | 2026-10-27 10:31 — Custom domain presisiami.my.id |
 | I-040 | 2026-10-27 10:31 | "kerjakan" | Mengubah `VITE_BASE_PATH` menjadi `/`, menambah `public/CNAME`, memperbarui README serta dokumen audit; verifikasi build base `/`; belum di-commit/di-push | selesai | 2026-10-27 10:31 — Custom domain presisiami.my.id |
+| I-041 | 2026-10-27 10:36 | "commit dan push" | Commit `11d35ab` (custom domain `presisiami.my.id`, `VITE_BASE_PATH` → `/`, `public/CNAME`, dokumen audit) dan push ke `origin/main`; verifikasi live domain, `www`, aset, dan fallback SPA; pembaruan status dokumen audit | selesai | 2026-10-27 10:36 — Commit & push custom domain + verifikasi live |
 
 ---
 
@@ -195,12 +196,15 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   commit `fc772c1` (laporan presensi bulanan per pegawai + migrasi 19,
   koordinat RSUD AMI baru + migrasi 20) yang di-push 2026-10-27 09:53, serta
   commit `f13301d` (sinkronisasi dokumen audit), dan commit `28a900f`
-  (koordinat RSUD AMI diubah lagi + migrasi 21) yang di-push 2026-10-27 09:59.
-  Koordinat terbaru `-0.23805651650343132, 117.41442516465149` sudah di-commit
+  (koordinat RSUD AMI diubah lagi + migrasi 21) yang di-push 2026-10-27 09:59,
+  serta commit `11d35ab` (custom domain `presisiami.my.id`) yang di-push
+  2026-10-27 10:36. Koordinat terbaru
+  `-0.23805651650343132, 117.41442516465149` sudah di-commit
   lewat migrasi 21, tetapi migrasi tersebut **belum dijalankan di Supabase**.
 - **Deploy:** GitHub Pages lewat `.github/workflows/deploy.yml`; URL live
   `https://presisiami.my.id/` (custom domain, DNS di Rumahweb); base path `/`;
-  `public/CNAME` berisi `presisiami.my.id`; secrets `VITE_SUPABASE_URL` +
+  `public/CNAME` berisi `presisiami.my.id`; `www` redirect ke domain utama;
+  **Enforce HTTPS belum dicentang**; secrets `VITE_SUPABASE_URL` +
   `VITE_SUPABASE_ANON_KEY`.
   Setiap push ke `main` otomatis build + deploy.
 - Timezone aplikasi: `Asia/Makassar` (WITA, UTC+8).
