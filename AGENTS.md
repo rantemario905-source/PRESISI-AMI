@@ -170,6 +170,8 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-036 | 2026-10-27 09:53 | "commit dan push" | Commit `fc772c1` (laporan presensi bulanan per pegawai, migrasi 19–20, verifikasi 19–20, koordinat RSUD AMI baru, dokumen audit) dan push ke `origin/main`; pembaruan status dokumen audit | selesai | 2026-10-27 09:53 — Commit & push laporan bulanan + koordinat |
 | I-037 | 2026-10-27 09:57 | "-0.23805651650343132, 117.41442516465149 kordinatnya ubah lagi" | Mengubah koordinat RSUD AMI di klien (`src/config/constants.js`), `schema.sql`, serta membuat migrasi 21 + `verifikasi_21.sql` (migrasi 20 tidak diubah karena sudah dijalankan); verifikasi `npm run build` | selesai | 2026-10-27 09:57 — Koordinat RSUD AMI diubah lagi |
 | I-038 | 2026-10-27 09:59 | "commit dan push" | Commit `28a900f` (koordinat RSUD AMI terbaru, migrasi 21, verifikasi 21, dokumen audit) dan push ke `origin/main`; pembaruan status dokumen audit | selesai | 2026-10-27 09:59 — Commit & push migrasi 21 |
+| I-039 | 2026-10-27 (WITA) | "saya beli domain di rumahweb.com bagaimana cara menggunakannya" | Meneliti panduan DNS Rumahweb dan GitHub Pages; menyusun rencana pemasangan domain `presisiami.my.id` (4 A record GitHub + CNAME `www`, custom domain, HTTPS, Supabase Auth); tidak ada perubahan kode | selesai | 2026-10-27 10:31 — Custom domain presisiami.my.id |
+| I-040 | 2026-10-27 10:31 | "kerjakan" | Mengubah `VITE_BASE_PATH` menjadi `/`, menambah `public/CNAME`, memperbarui README serta dokumen audit; verifikasi build base `/`; belum di-commit/di-push | selesai | 2026-10-27 10:31 — Custom domain presisiami.my.id |
 
 ---
 
@@ -197,8 +199,9 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   Koordinat terbaru `-0.23805651650343132, 117.41442516465149` sudah di-commit
   lewat migrasi 21, tetapi migrasi tersebut **belum dijalankan di Supabase**.
 - **Deploy:** GitHub Pages lewat `.github/workflows/deploy.yml`; URL live
-  `https://rantemario905-source.github.io/PRESISI-AMI/`; base path
-  `/PRESISI-AMI/`; secrets `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`.
+  `https://presisiami.my.id/` (custom domain, DNS di Rumahweb); base path `/`;
+  `public/CNAME` berisi `presisiami.my.id`; secrets `VITE_SUPABASE_URL` +
+  `VITE_SUPABASE_ANON_KEY`.
   Setiap push ke `main` otomatis build + deploy.
 - Timezone aplikasi: `Asia/Makassar` (WITA, UTC+8).
 - `dist/` dan `.env` sudah diabaikan Git.

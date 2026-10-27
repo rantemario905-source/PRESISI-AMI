@@ -463,7 +463,7 @@ Promosi/penurunan role Super Admin tetap hanya melalui SQL oleh Admin IT.
 ## 10. Deploy produksi (GitHub Pages)
 
 Aplikasi ini SPA Vite dan dipublikasikan lewat **GitHub Actions** ke GitHub Pages
-dengan base path `/PRESISI-AMI/`.
+dengan base path `/`.
 
 **A. Aktifkan GitHub Pages**
 
@@ -481,14 +481,15 @@ dengan base path `/PRESISI-AMI/`.
    **bukan** `service_role`.
 4. Push ke branch `main`. Workflow `.github/workflows/deploy.yml` akan
    menjalankan `npm ci`, build, lalu deploy otomatis.
-5. URL aplikasi: `https://rantemario905-source.github.io/PRESISI-AMI/`.
+5. URL aplikasi: `https://presisiami.my.id/` (URL lama
+   `https://rantemario905-source.github.io/PRESISI-AMI/` dialihkan ke domain ini).
 
 **B. Hubungkan Supabase Auth**
 
 - **Authentication → URL Configuration → Site URL:**
-  `https://rantemario905-source.github.io/PRESISI-AMI/`
+  `https://presisiami.my.id/`
 - **Redirect URLs:** tambahkan
-  `https://rantemario905-source.github.io/PRESISI-AMI/**` dan
+  `https://presisiami.my.id/**`, `https://www.presisiami.my.id/**`, dan
   `http://localhost:5173/**` untuk pengembangan.
 
 **C. Catatan GitHub Pages**
@@ -498,8 +499,9 @@ dengan base path `/PRESISI-AMI/`.
   terbuka saat di-refresh.
 - Base path diatur lewat `VITE_BASE_PATH` di workflow. Untuk local dev, base
   tetap `/`.
-- Bila kelak memakai **custom domain**, ubah `VITE_BASE_PATH` menjadi `/` agar
-  aset tidak mencari folder `/PRESISI-AMI/`.
+- Aplikasi memakai **custom domain** `presisiami.my.id`: `VITE_BASE_PATH` di
+  workflow diset `/` dan `public/CNAME` berisi nama domain tersebut. DNS diatur
+  di Rumahweb (4 A record GitHub Pages + CNAME `www`).
 - GPS hanya berjalan di **HTTPS**; GitHub Pages sudah menyediakannya.
 
 **D. Vercel (opsional)**
