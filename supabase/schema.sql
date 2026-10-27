@@ -345,7 +345,7 @@ begin
   end if;
 
   -- (e) Radius 100 meter — Haversine server-side
-  select public.haversine(-0.23781156083888882, 117.41437950820705, p_lat, p_lng)
+  select public.haversine(-0.23805651650343132, 117.41442516465149, p_lat, p_lng)
     into v_jarak;
 
   if v_jarak > 100 then
@@ -738,7 +738,7 @@ begin
     raise exception 'Akurasi GPS tidak wajar (% m). Coba lagi di ruang terbuka.', round(p_akurasi)::text;
   end if;
 
-  select public.haversine(-0.23781156083888882, 117.41437950820705, p_lat, p_lng)
+  select public.haversine(-0.23805651650343132, 117.41442516465149, p_lat, p_lng)
     into v_jarak;
 
   if v_jarak > 100 then
@@ -2877,7 +2877,7 @@ begin
     raise exception 'Akurasi GPS tidak wajar (% m). Coba lagi di ruang terbuka.', round(p_akurasi)::text;
   end if;
 
-  select public.haversine(-0.23781156083888882, 117.41437950820705, p_lat, p_lng)
+  select public.haversine(-0.23805651650343132, 117.41442516465149, p_lat, p_lng)
     into v_jarak;
   if v_jarak > 100 then
     raise exception 'Anda berada di luar radius 100 meter dari RSUD AMI. Jarak Anda saat ini % meter.',
@@ -4274,7 +4274,7 @@ begin
     raise exception 'Akurasi GPS tidak wajar (% m). Coba lagi di ruang terbuka.', round(p_akurasi)::text;
   end if;
 
-  select public.haversine(-0.23781156083888882, 117.41437950820705, p_lat, p_lng)
+  select public.haversine(-0.23805651650343132, 117.41442516465149, p_lat, p_lng)
     into v_jarak;
   if v_jarak > 100 then
     raise exception 'Anda berada di luar radius 100 meter dari RSUD AMI. Jarak Anda saat ini % meter.',

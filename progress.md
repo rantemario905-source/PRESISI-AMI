@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-27 09:53 WITA |
+| Terakhir diperbarui | 2026-10-27 09:57 WITA |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -62,10 +62,11 @@ ringkasan kehadiran, tanda tangan Kepala Ruangan kanan bawah, footer
 membaca presensi unitnya. **Migrasi 19 dan verifikasi 19 sudah berhasil
 dijalankan** (laporan user 2026-10-27 01:03). Pekerjaan terbaru
 (2026-10-27): **titik koordinat RSUD AMI diperbarui** menjadi
-`-0.23781156083888882, 117.41437950820705` di klien (`src/config/constants.js`)
-dan server (migrasi **20** yang mendefinisikan ulang `submit_presensi`, plus
-`schema.sql`), disertai `supabase/verifikasi_20.sql`. **Migrasi 20 dan
-verifikasi 20 sudah berhasil dijalankan** (laporan user 2026-10-27 09:39). Yang
+`-0.23805651650343132, 117.41442516465149` di klien (`src/config/constants.js`)
+dan server (migrasi **21** yang mendefinisikan ulang `submit_presensi`, plus
+`schema.sql`), disertai `supabase/verifikasi_21.sql`. **Migrasi 20 dan
+verifikasi 20 sudah berhasil dijalankan** (laporan user 2026-10-27 09:39);
+migrasi **21 menunggu dijalankan** di Supabase. Yang
 belum: konfirmasi migrasi
 09–18 & skrip verifikasi, uji cetak manual laporan (rapikan kop bila perlu),
 penyiapan data operasional
@@ -73,14 +74,15 @@ penyiapan data operasional
 
 | Aspek | Status | Bukti |
 |---|---|---|
-| Kode aplikasi | Selesai sampai Fase 8 + UI navigasi + migrasi 15–20 | `src/`, `supabase/migrations/01–20` |
-| Commit Git | **HEAD** — `fc772c1` (laporan bulanan per pegawai + koordinat RSUD baru) | `git log` |
-| Perubahan lokal | **Tidak ada** — sudah di-commit `fc772c1` dan di-push 2026-10-27 09:53 | `git status` |
+| Kode aplikasi | Selesai sampai Fase 8 + UI navigasi + migrasi 15–21 | `src/`, `supabase/migrations/01–21` |
+| Commit Git | **HEAD** — `f13301d` (sinkronisasi dokumen audit) | `git log` |
+| Perubahan lokal | **Ada** — koordinat RSUD AMI baru (migrasi 21) dan dokumen audit; **belum di-commit** | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
-| Migrasi DB 20 | **Sudah dijalankan** — koordinat server baru aktif | laporan user 2026-10-27 09:39 |
-| Koordinat RSUD AMI | **Aktif di klien & server** — `-0.23781156083888882, 117.41437950820705` | `src/config/constants.js`, `supabase/schema.sql`, migrasi 20 |
-| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 19 dan 20 lulus** (klaim user); verifikasi 09–18 tidak diketahui | laporan user 2026-10-27 09:39 |
+| Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
+| Migrasi DB 21 | **Belum dijalankan** — koordinat server baru aktif setelah migrasi 21 dieksekusi | `supabase/migrations/21_koordinat_rsud.sql` |
+| Koordinat RSUD AMI | **Ada di kode** — `-0.23805651650343132, 117.41442516465149` di klien dan schema | `src/config/constants.js`, `supabase/schema.sql`, migrasi 21 |
+| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 19 dan 20 lulus** (klaim user); verifikasi 21 menunggu eksekusi | laporan user 2026-10-27 09:39 |
 | Build produksi | **Lulus** — base `/` 13,48 dtk dan base `/PRESISI-AMI/` 12,16 dtk (2026-10-27 00:52) | `npm run build` |
 | Jendela waktu absen | **Ada di kode** — masuk 20 menit sebelum, pulang 1 menit setelah | migrasi 17, `PanelAbsen.jsx`, `jadwalAbsen.js` |
 | Hapus grup kosong | **Ada di kode** — semua grup 0 pegawai; "Belum ditentukan" (akun sistem) disembunyikan bila kosong | migrasi 18, `GrupShift.jsx` |
@@ -192,6 +194,22 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-27 09:57 WITA — Koordinat RSUD AMI diubah lagi
+- **Perubahan:** titik pusat geofencing RSUD AMI diganti menjadi
+  `-0.23805651650343132, 117.41442516465149` sesuai instruksi user (I-037).
+  Klien memakai nilai baru dari `src/config/constants.js`; server memakai nilai
+  baru lewat migrasi **21** (mendefinisikan ulang `submit_presensi`, radius tetap
+  100 m) karena migrasi 20 sudah dijalankan di produksi dan tidak diubah.
+  `schema.sql` disinkronkan pada seluruh definisi `submit_presensi`, dan
+  `verifikasi_20.sql` tetap sebagai riwayat.
+- **File:** `src/config/constants.js`, `supabase/schema.sql`,
+  `supabase/migrations/21_koordinat_rsud.sql` (baru),
+  `supabase/verifikasi_21.sql` (baru), `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` lulus (12,25 dtk). SQL belum dijalankan di
+  Supabase; `verifikasi_21.sql` menunggu eksekusi.
+- **Catatan/risiko:** koordinat server baru berlaku setelah migrasi 21
+  dijalankan. Perubahan masih di working tree dan belum di-commit.
 
 ### 2026-10-27 09:53 WITA — Commit & push laporan bulanan + koordinat
 - **Perubahan:** seluruh working tree (laporan presensi bulanan per pegawai,
