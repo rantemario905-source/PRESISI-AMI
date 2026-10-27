@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-27 09:57 WITA |
+| Terakhir diperbarui | 2026-10-27 09:59 WITA |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -75,8 +75,8 @@ penyiapan data operasional
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 8 + UI navigasi + migrasi 15–21 | `src/`, `supabase/migrations/01–21` |
-| Commit Git | **HEAD** — `f13301d` (sinkronisasi dokumen audit) | `git log` |
-| Perubahan lokal | **Ada** — koordinat RSUD AMI baru (migrasi 21) dan dokumen audit; **belum di-commit** | `git status` |
+| Commit Git | **HEAD** — `28a900f` (koordinat RSUD AMI diubah lagi + migrasi 21) | `git log` |
+| Perubahan lokal | **Tidak ada** — sudah di-commit `28a900f` dan di-push 2026-10-27 09:59 | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
@@ -194,6 +194,18 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-27 09:59 WITA — Commit & push migrasi 21
+- **Perubahan:** perubahan koordinat RSUD AMI terbaru (klien, `schema.sql`,
+  migrasi 21, `verifikasi_21.sql`, dan dokumen audit) di-commit sebagai
+  `28a900f` lalu di-push ke `origin/main`.
+- **File:** `src/config/constants.js`, `supabase/schema.sql`,
+  `supabase/migrations/21_koordinat_rsud.sql`,
+  `supabase/verifikasi_21.sql`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` lulus (12,25 dtk) sebelum commit; push
+  `f13301d..28a900f main -> main` berhasil.
+- **Catatan/risiko:** migrasi 21 belum dijalankan di Supabase; koordinat server
+  baru aktif setelah dieksekusi.
 
 ### 2026-10-27 09:57 WITA — Koordinat RSUD AMI diubah lagi
 - **Perubahan:** titik pusat geofencing RSUD AMI diganti menjadi

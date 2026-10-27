@@ -169,6 +169,7 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-035 | 2026-10-27 09:39 | "sudah saya run dan succses" | Konfirmasi migrasi 20 dan `verifikasi_20.sql` berhasil dijalankan di Supabase; pembaruan status dokumen audit; tidak ada perubahan kode | selesai | 2026-10-27 09:39 — Migrasi 20 & verifikasi 20 berhasil |
 | I-036 | 2026-10-27 09:53 | "commit dan push" | Commit `fc772c1` (laporan presensi bulanan per pegawai, migrasi 19–20, verifikasi 19–20, koordinat RSUD AMI baru, dokumen audit) dan push ke `origin/main`; pembaruan status dokumen audit | selesai | 2026-10-27 09:53 — Commit & push laporan bulanan + koordinat |
 | I-037 | 2026-10-27 09:57 | "-0.23805651650343132, 117.41442516465149 kordinatnya ubah lagi" | Mengubah koordinat RSUD AMI di klien (`src/config/constants.js`), `schema.sql`, serta membuat migrasi 21 + `verifikasi_21.sql` (migrasi 20 tidak diubah karena sudah dijalankan); verifikasi `npm run build` | selesai | 2026-10-27 09:57 — Koordinat RSUD AMI diubah lagi |
+| I-038 | 2026-10-27 09:59 | "commit dan push" | Commit `28a900f` (koordinat RSUD AMI terbaru, migrasi 21, verifikasi 21, dokumen audit) dan push ke `origin/main`; pembaruan status dokumen audit | selesai | 2026-10-27 09:59 — Commit & push migrasi 21 |
 
 ---
 
@@ -191,9 +192,10 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   2026-10-27 00:03, serta commit `e542c6c` (sinkronisasi dokumen audit), dan
   commit `fc772c1` (laporan presensi bulanan per pegawai + migrasi 19,
   koordinat RSUD AMI baru + migrasi 20) yang di-push 2026-10-27 09:53, serta
-  commit `f13301d` (sinkronisasi dokumen audit). Koordinat terbaru
-  `-0.23805651650343132, 117.41442516465149` ada di working tree lewat migrasi
-  21 (belum di-commit, belum dijalankan di Supabase).
+  commit `f13301d` (sinkronisasi dokumen audit), dan commit `28a900f`
+  (koordinat RSUD AMI diubah lagi + migrasi 21) yang di-push 2026-10-27 09:59.
+  Koordinat terbaru `-0.23805651650343132, 117.41442516465149` sudah di-commit
+  lewat migrasi 21, tetapi migrasi tersebut **belum dijalankan di Supabase**.
 - **Deploy:** GitHub Pages lewat `.github/workflows/deploy.yml`; URL live
   `https://rantemario905-source.github.io/PRESISI-AMI/`; base path
   `/PRESISI-AMI/`; secrets `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`.
