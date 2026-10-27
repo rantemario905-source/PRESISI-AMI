@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-27 00:03 WITA |
+| Terakhir diperbarui | 2026-10-27 09:39 WITA |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -54,18 +54,34 @@ dengan **animasi buka/tutup halus**, serta **animasi gulir submenu sidebar** Sup
 sidebar** Super Admin/kepala ruangan plus **latar biru muda transparan pada
 seluruh halaman portal** Super Admin dan Kepala Ruangan, serta **posisi tombol
 aksi per halaman** (kembali ke kanan dan ditempatkan pada kartu/baris yang
-relevan) dan **subtitle rumah sakit di topbar dihapus**. Yang belum: konfirmasi
-migrasi 09–18 & skrip verifikasi, penyiapan data operasional
+relevan) dan **subtitle rumah sakit di topbar dihapus**. Pekerjaan terbaru
+(2026-10-27): **laporan presensi bulanan per pegawai** untuk Super Admin dan
+Kepala Ruangan dengan kop dua logo (Kutai + RSUD, Times New Roman), tabel harian,
+ringkasan kehadiran, tanda tangan Kepala Ruangan kanan bawah, footer
+“Dicetak melalui PRESISI-AMI”, serta **migrasi 19** agar kepala ruangan dapat
+membaca presensi unitnya. **Migrasi 19 dan verifikasi 19 sudah berhasil
+dijalankan** (laporan user 2026-10-27 01:03). Pekerjaan terbaru
+(2026-10-27): **titik koordinat RSUD AMI diperbarui** menjadi
+`-0.23781156083888882, 117.41437950820705` di klien (`src/config/constants.js`)
+dan server (migrasi **20** yang mendefinisikan ulang `submit_presensi`, plus
+`schema.sql`), disertai `supabase/verifikasi_20.sql`. **Migrasi 20 dan
+verifikasi 20 sudah berhasil dijalankan** (laporan user 2026-10-27 09:39). Yang
+belum: konfirmasi migrasi
+09–18 & skrip verifikasi, uji cetak manual laporan (rapikan kop bila perlu),
+penyiapan data operasional
 (grup shift, jadwal, hari libur), dan persiapan go-live.
 
 | Aspek | Status | Bukti |
 |---|---|---|
-| Kode aplikasi | Selesai sampai Fase 8 + UI navigasi + migrasi 15–18 | `src/`, `supabase/migrations/01–18` |
-| Commit Git | **HEAD** — `c4fe733` (aksi per halaman dan subtitle topbar) | `git log` |
-| Perubahan lokal | **Tidak ada** — penempatan aksi per halaman, `KepalaHalaman` judul kiri/aksi kanan, subtitle topbar, dan aset `logo kutai kartanegara.png` sudah di-commit dan di-push 2026-10-27 00:03 | `git status` |
+| Kode aplikasi | Selesai sampai Fase 8 + UI navigasi + migrasi 15–20 | `src/`, `supabase/migrations/01–20` |
+| Commit Git | **HEAD** — `e542c6c` (sinkronisasi dokumen audit) | `git log` |
+| Perubahan lokal | **Ada** — laporan bulanan per pegawai (migrasi 19, halaman, menu, gaya cetak) menunggu uji lokal; **belum di-commit** | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
-| Skrip `supabase/verifikasi_*.sql` | **Tidak diketahui** sudah dijalankan atau belum | perlu cek manual |
-| Build produksi | **Lulus** — base `/` 6,73 dtk; build base `/PRESISI-AMI/` 8,07 dtk | `npm run build` (2026-10-26 23:50) |
+| Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
+| Migrasi DB 20 | **Sudah dijalankan** — koordinat server baru aktif | laporan user 2026-10-27 09:39 |
+| Koordinat RSUD AMI | **Aktif di klien & server** — `-0.23781156083888882, 117.41437950820705` | `src/config/constants.js`, `supabase/schema.sql`, migrasi 20 |
+| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 19 dan 20 lulus** (klaim user); verifikasi 09–18 tidak diketahui | laporan user 2026-10-27 09:39 |
+| Build produksi | **Lulus** — base `/` 13,48 dtk dan base `/PRESISI-AMI/` 12,16 dtk (2026-10-27 00:52) | `npm run build` |
 | Jendela waktu absen | **Ada di kode** — masuk 20 menit sebelum, pulang 1 menit setelah | migrasi 17, `PanelAbsen.jsx`, `jadwalAbsen.js` |
 | Hapus grup kosong | **Ada di kode** — semua grup 0 pegawai; "Belum ditentukan" (akun sistem) disembunyikan bila kosong | migrasi 18, `GrupShift.jsx` |
 | Bilah progres | **Ada di kode** — bilah biru muda di atas layar saat navigasi, login, logout, dan muat ulang profil | `ProgressContext.jsx`, `BilahProgres.jsx`, `PengamatRute.jsx` |
@@ -77,6 +93,7 @@ migrasi 09–18 & skrip verifikasi, penyiapan data operasional
 | Latar Dashboard | **Ada di kode** — gradasi biru muda transparan pada seluruh halaman portal Super Admin dan Kepala Ruangan | `PortalAdminLayout.jsx`, `PortalKepalaLayout.jsx` |
 | Aksi halaman | **Ada di kode** — tombol aksi kembali di kanan; aksi spesifik dipindah ke header kartu daftar, kartu Tambah Hari Libur (Tahun), baris tab Koreksi/Verifikasi, dan atas kotak filter Rekapitulasi | `KepalaHalaman.jsx`, `TabBar.jsx`, `DataPegawai.jsx`, `GrupShift.jsx`, `MasterShift.jsx`, `HariLibur.jsx`, `KoreksiPresensi.jsx`, `VerifikasiPerangkat.jsx`, `PengajuanIzin.jsx`, `Rekapitulasi.jsx` |
 | Subtitle topbar | **Ada di kode** — portal Super Admin tanpa subtitle; portal Kepala Ruangan hanya nama unit kerja | `PortalAdminLayout.jsx`, `PortalKepalaLayout.jsx` |
+| Laporan bulanan per pegawai | **Ada di kode** — Super Admin pilih unit, kepala ruangan terkunci unit sendiri; satu pegawai atau semua pegawai unit; kop dua logo + tabel harian + ringkasan + tanda tangan; cetak PDF A4 portrait | migrasi 19, `LaporanBulanan.jsx`, `reportService.js`, `utils/laporan.js`, `components/laporan/*`, `index.css` |
 | Lint/unit test | Tidak tersedia di `package.json` | `package.json` |
 | Alfa otomatis | Fitur ada, **default nonaktif** | migrasi 12, `PengaturanPresensi.jsx` |
 | Deploy GitHub Pages | **Aktif** — workflow run #1 sukses | https://rantemario905-source.github.io/PRESISI-AMI/ |
@@ -92,12 +109,30 @@ dihapus dari topbar (2026-10-26; **sudah di-commit dan di-push** ke
 `src/assets/logo kutai kartanegara.png` ikut di-commit untuk pekerjaan kop RSUD
 AMI berikutnya dan belum dipakai di UI.
 
+**Pekerjaan terakhir (2026-10-27, belum di-commit):** menambahkan halaman
+**Laporan Bulanan per Pegawai** untuk Super Admin (`/superadmin-portal/laporan`)
+dan Kepala Ruangan (`/kepala-ruangan/laporan`). Lembar A4 portrait memuat kop
+Pemerintah Kutai Kartanegara + RSUD AMI (dua logo, Times New Roman), identitas
+pegawai, tabel harian tanpa kolom jarak, ringkasan kehadiran, tanda tangan
+Kepala Ruangan kanan bawah, dan footer “Dicetak melalui PRESISI-AMI” + nomor
+halaman. Aset `logo kutai kartanegara.png` di-rename menjadi
+`logo-kutai-kartanegara.png` dan dipakai sebagai logo kop kiri. Migrasi **19**
+menambahkan `bisa_lihat_presensi(uuid)` + policy baca presensi unit untuk kepala
+ruangan.
+
 **Langkah berikutnya yang disarankan:**
-1. Jalankan migrasi **15**, **16**, **17**, lalu **18** berurutan di SQL Editor,
+1. Jalankan migrasi **20** di SQL Editor (koordinat RSUD AMI baru), lalu
+   `supabase/verifikasi_20.sql` sampai semua `true`. Migrasi 19 + verifikasi 19
+   sudah selesai; setelah itu uji menu Laporan Bulanan sebagai kepala ruangan
+   dan Super Admin.
+2. Jalankan migrasi **15**, **16**, **17**, lalu **18** berurutan di SQL Editor,
    kemudian `supabase/verifikasi_15.sql`, `verifikasi_16.sql`,
    `verifikasi_17.sql`, dan `verifikasi_18.sql` sampai semua `true`. Migrasi 16
    **mengosongkan tabel `perangkat`** (data uji).
-2. Uji lokal: kepala ruangan mengubah jadwal hari ini, pegawai mengajukan
+3. Uji lokal: cetak **Laporan Bulanan** (satu pegawai dan semua pegawai unit)
+   lewat dialog cetak → **Simpan sebagai PDF**; periksa kop, ukuran font,
+   pemenggalan halaman, dan posisi tanda tangan. Lalu kepala ruangan mengubah
+   jadwal hari ini, pegawai mengajukan
    perangkat kedua (harus ditolak sampai Admin IT reset), tombol absen terkunci
    sebelum jam buka (masuk 20 menit sebelum, pulang 1 menit setelah), dan hapus
    salah satu grup kosong operasional dari menu Grup Shift. Grup sistem
@@ -110,12 +145,12 @@ AMI berikutnya dan belum dipakai di UI.
    periksa juga posisi tombol aksi per halaman (header kartu daftar, Tahun Hari
    Libur, baris tab Koreksi/Verifikasi, dan atas kotak filter Rekapitulasi)
    serta topbar tanpa subtitle rumah sakit.
-3. Lengkapi data operasional: seksi **Grup Shift**, pola kerja di **Data Pegawai**,
+4. Lengkapi data operasional: seksi **Grup Shift**, pola kerja di **Data Pegawai**,
    **Jadwal Shift**, dan **Hari Libur**.
-4. Pastikan migrasi 09–14 sudah dijalankan berurutan dan seluruh
+5. Pastikan migrasi 09–14 sudah dijalankan berurutan dan seluruh
    `supabase/verifikasi_*.sql` bernilai `true`.
-5. Bersihkan data uji dengan `supabase/cleanup_data_uji.sql` sebelum go-live.
-6. Aktifkan Alfa otomatis + `pg_cron` **paling akhir**, setelah jadwal lengkap dan
+6. Bersihkan data uji dengan `supabase/cleanup_data_uji.sql` sebelum go-live.
+7. Aktifkan Alfa otomatis + `pg_cron` **paling akhir**, setelah jadwal lengkap dan
    hari libur terisi.
 
 ---
@@ -157,6 +192,117 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-27 09:39 WITA — Migrasi 20 & verifikasi 20 berhasil
+- **Perubahan:** user menjalankan `supabase/migrations/20_koordinat_rsud.sql`
+  dan `supabase/verifikasi_20.sql` di Supabase; keduanya **sukses**. Koordinat
+  server RSUD AMI kini `-0.23781156083888882, 117.41437950820705` dan sejalan
+  dengan klien.
+- **File:** tidak ada perubahan kode; hanya pembaruan dokumen audit.
+- **Verifikasi:** laporan user "sudah saya run dan succses" (2026-10-27 09:39).
+- **Catatan/risiko:** uji absensi radius dengan titik GPS baru di perangkat
+  belum tercatat; perubahan frontend masih di working tree dan belum di-commit.
+
+### 2026-10-27 09:20 WITA — Koordinat RSUD AMI dikoreksi
+- **Perubahan:** titik pusat geofencing RSUD AMI diganti lagi menjadi
+  `-0.23781156083888882, 117.41437950820705` sesuai instruksi user (I-034).
+  Nilai baru diterapkan di klien (`src/config/constants.js`), migrasi **20**,
+  seluruh definisi `submit_presensi` pada `schema.sql`, dan pemeriksaan
+  `verifikasi_20.sql`. Radius tetap 100 m.
+- **File:** `src/config/constants.js`, `supabase/schema.sql`,
+  `supabase/migrations/20_koordinat_rsud.sql`, `supabase/verifikasi_20.sql`,
+  `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` lulus (7,42 dtk). `verifikasi_20.sql` kini
+  menolak koordinat lama `-0.23795851007230442`.
+- **Catatan/risiko:** migrasi 20 belum dijalankan di Supabase, sehingga
+  koordinat server baru aktif setelah dieksekusi. Perubahan masih di working
+  tree dan belum di-commit.
+
+### 2026-10-27 09:03 WITA — Koordinat RSUD AMI diperbarui
+- **Perubahan:** titik pusat geofencing RSUD AMI diubah menjadi
+  `-0.23795851007230442, 117.41438417546158` sesuai instruksi user (I-033).
+  Klien memakai nilai baru dari `src/config/constants.js`; server memakai nilai
+  baru lewat migrasi **20** yang mendefinisikan ulang `submit_presensi` (radius
+  tetap 100 m). `schema.sql` disinkronkan pada seluruh definisi `submit_presensi`.
+- **File:** `src/config/constants.js`, `supabase/schema.sql`,
+  `supabase/migrations/20_koordinat_rsud.sql` (baru),
+  `supabase/verifikasi_20.sql` (baru), `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` (lihat hasil di sesi ini). SQL belum dijalankan
+  di Supabase; `verifikasi_20.sql` menunggu eksekusi.
+- **Catatan/risiko:** migrasi lama (05, 07, 12, 17) **tidak diubah** sesuai
+  aturan; koordinat server baru berlaku setelah migrasi 20 dijalankan. Perubahan
+  masih di working tree dan belum di-commit.
+
+### 2026-10-27 01:03 WITA — Migrasi 19 & verifikasi 19 berhasil
+- **Perubahan:** user menjalankan ulang migrasi 19 dan `verifikasi_19.sql` di
+  project Supabase yang benar; keduanya **sukses**. Akses baca presensi unit
+  untuk kepala ruangan kini aktif.
+- **File:** tidak ada perubahan kode/dokumen SQL; hanya pembaruan dokumen audit.
+- **Verifikasi:** laporan user "sudah succses run dua2nya" (2026-10-27 01:03).
+  Build frontend terakhir tetap lulus 13,48 dtk / 12,16 dtk.
+- **Catatan/risiko:** uji cetak PDF manual belum dilakukan; perubahan frontend
+  masih di working tree dan belum di-commit.
+
+### 2026-10-27 01:02 WITA — Klarifikasi project Supabase salah
+- **Perubahan:** user mengonfirmasi ERROR 42883 terjadi karena SQL Editor dibuka
+  pada **project Supabase yang salah**, bukan karena fungsi hilang di project
+  aplikasi. Pengecekan tabel pada migrasi 19 bekerja: eksekusi di project tanpa
+  `public.pegawai`/`public.presensi` dihentikan dengan pesan jelas.
+- **File:** `AGENTS.md`, `progress.md` (tanpa perubahan kode).
+- **Verifikasi:** belum ada; migrasi 19 tetap harus dijalankan di project yang
+  cocok dengan `VITE_SUPABASE_URL` pada `.env` aplikasi.
+- **Catatan/risiko:** blok kompatibilitas `is_superadmin()` tetap dipertahankan
+  sebagai pengaman instalasi lama; definisinya sama dengan migrasi 02.
+
+### 2026-10-27 00:58 WITA — Perbaikan migrasi 19 (is_superadmin hilang)
+- **Perubahan:** migrasi 19 gagal di Supabase dengan `ERROR 42883: function
+  public.is_superadmin() does not exist`. Versi perbaikan tidak lagi bergantung
+  pada fungsi tersebut: `bisa_lihat_presensi()` memeriksa `role = 'superadmin'`,
+  pemilik baris, dan kepala ruangan unit langsung dari tabel `pegawai`. Migrasi
+  juga membuat ulang `public.is_superadmin()` dengan definisi yang sama seperti
+  migrasi 02 agar policy lama yang membutuhkannya kembali berfungsi, serta
+  menolak jalan bila tabel `pegawai`/`presensi` tidak ada (indikasi project
+  salah).
+- **File:** `supabase/migrations/19_laporan_presensi_kepala.sql`,
+  `supabase/schema.sql`, `supabase/verifikasi_19.sql`, `README.md`, `AGENTS.md`,
+  `progress.md`.
+- **Verifikasi:** SQL belum dijalankan ulang; menunggu user menjalankan migrasi
+  19 dan `verifikasi_19.sql`. Build frontend tidak berubah (terakhir lulus
+  13,48 dtk / 12,16 dtk).
+- **Catatan/risiko:** bila `public.pegawai` juga tidak ditemukan, berarti project
+  Supabase yang dibuka di SQL Editor bukan project aplikasi; jalankan migrasi
+  01–18 lebih dulu di project yang benar.
+
+### 2026-10-27 00:52 WITA — Laporan presensi bulanan per pegawai
+- **Perubahan:** menambahkan fitur **Laporan Bulanan per Pegawai** untuk Super
+  Admin dan Kepala Ruangan sesuai permintaan I-029. Super Admin memilih unit;
+  kepala ruangan terkunci pada unit sendiri. Cakupan satu pegawai atau seluruh
+  pegawai unit (satu halaman per pegawai). Lembar A4 portrait berisi kop
+  Pemerintah Kutai Kartanegara + RSUD Aji Muhammad Idris (logo Kutai kiri,
+  logo RSUD kanan, teks Times New Roman), identitas pegawai, tabel harian
+  (hari/tanggal, jam masuk, jam pulang, status, terlambat, keterangan), ringkasan
+  kehadiran, tanda tangan Kepala Ruangan kanan bawah (Muara Badak, NIP kosong),
+  serta footer “Dicetak melalui PRESISI-AMI” + nomor halaman. Tabel tanpa kolom
+  jarak. Keterangan memuat alasan koreksi dan alasan izin. Cetak lewat dialog
+  browser → **Simpan sebagai PDF** (tanpa dependensi baru). Migrasi **19**
+  menambahkan `bisa_lihat_presensi(uuid)` dan policy baca presensi unit agar
+  kepala ruangan dapat mengambil data laporan.
+- **File:** `supabase/migrations/19_laporan_presensi_kepala.sql`,
+  `supabase/verifikasi_19.sql`, `supabase/schema.sql`,
+  `src/pages/admin/LaporanBulanan.jsx`,
+  `src/components/laporan/{KopLaporan,BlokTandaTangan,LembarLaporan}.jsx`,
+  `src/utils/laporan.js`, `src/utils/format.js`, `src/services/reportService.js`,
+  `src/index.css`, `src/App.jsx`,
+  `src/components/layout/{PortalAdminLayout,PortalKepalaLayout,SidebarAdmin,SidebarKepala}.jsx`,
+  `src/components/NavigasiBawah.jsx`, `src/pages/admin/Rekapitulasi.jsx`,
+  `src/assets/logo-kutai-kartanegara.png` (rename),
+  `README.md`, `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run build` **lulus** — base `/` 13,48 dtk; base
+  `/PRESISI-AMI/` 12,16 dtk (2026-10-27 00:52). Cetak manual PDF **belum
+  diuji**.
+- **Catatan/risiko:** migrasi 19 **belum dijalankan**; tanpa migrasi ini laporan
+  kepala ruangan akan kosong karena RLS. Ukuran/bold kop menunggu koreksi visual
+  user. Belum di-commit sesuai aturan alur Git.
 
 ### 2026-10-27 00:03 WITA — Commit & push aksi per halaman
 - **Perubahan:** atas perintah user (I-028), pekerjaan penempatan aksi per

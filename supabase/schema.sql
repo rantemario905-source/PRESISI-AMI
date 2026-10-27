@@ -1,10 +1,10 @@
--- ==========================================================================
+﻿-- ==========================================================================
 -- PRESISI AMI — Skema Database Supabase (RSUD Aji Muhammad Idris)
 -- --------------------------------------------------------------------------
 -- Dua cara pakai:
 --   A. Satu file: jalankan seluruh file ini di SQL Editor.
 --   B. Bertahap : jalankan supabase/migrations/01_tabel.sql s.d.
---      17_batas_waktu_absen.sql, satu per satu (disarankan bila ingin
+--      19_laporan_presensi_kepala.sql, satu per satu (disarankan bila ingin
 --      meminimalisir error).
 --
 -- Urutan PENTING: tabel dibuat lebih dulu, karena fungsi `is_superadmin`
@@ -345,7 +345,7 @@ begin
   end if;
 
   -- (e) Radius 100 meter — Haversine server-side
-  select public.haversine(-0.23861315731059254, 117.41485548535888, p_lat, p_lng)
+  select public.haversine(-0.23781156083888882, 117.41437950820705, p_lat, p_lng)
     into v_jarak;
 
   if v_jarak > 100 then
@@ -738,7 +738,7 @@ begin
     raise exception 'Akurasi GPS tidak wajar (% m). Coba lagi di ruang terbuka.', round(p_akurasi)::text;
   end if;
 
-  select public.haversine(-0.23861315731059254, 117.41485548535888, p_lat, p_lng)
+  select public.haversine(-0.23781156083888882, 117.41437950820705, p_lat, p_lng)
     into v_jarak;
 
   if v_jarak > 100 then
@@ -2877,7 +2877,7 @@ begin
     raise exception 'Akurasi GPS tidak wajar (% m). Coba lagi di ruang terbuka.', round(p_akurasi)::text;
   end if;
 
-  select public.haversine(-0.23861315731059254, 117.41485548535888, p_lat, p_lng)
+  select public.haversine(-0.23781156083888882, 117.41437950820705, p_lat, p_lng)
     into v_jarak;
   if v_jarak > 100 then
     raise exception 'Anda berada di luar radius 100 meter dari RSUD AMI. Jarak Anda saat ini % meter.',
@@ -4274,7 +4274,7 @@ begin
     raise exception 'Akurasi GPS tidak wajar (% m). Coba lagi di ruang terbuka.', round(p_akurasi)::text;
   end if;
 
-  select public.haversine(-0.23861315731059254, 117.41485548535888, p_lat, p_lng)
+  select public.haversine(-0.23781156083888882, 117.41437950820705, p_lat, p_lng)
     into v_jarak;
   if v_jarak > 100 then
     raise exception 'Anda berada di luar radius 100 meter dari RSUD AMI. Jarak Anda saat ini % meter.',
@@ -4497,5 +4497,71 @@ $$;
 
 revoke execute on function public.hapus_grup_shift(text) from public, anon;
 grant execute on function public.hapus_grup_shift(text) to authenticated;
+
+-- ==========================================================================
+-- MIGRASI 19 - LAPORAN PRESENSI BULANAN PER PEGAWAI
+-- Kepala ruangan boleh membaca presensi seluruh pegawai unitnya agar dapat
+-- mencetak laporan bulanan per pegawai. Super Admin dan pemilik baris tetap
+-- dapat membaca seperti sebelumnya.
+--
+-- Catatan kompatibilitas: sebagian instalasi lama kehilangan fungsi inti
+-- public.is_superadmin() sehingga policy lain ikut gagal. Fungsi tersebut
+-- dibuat ulang di sini dengan definisi yang sama seperti migrasi 02.
+-- ==========================================================================
+
+begin;
+
+do $$
+begin
+  if to_regclass('public.pegawai') is null
+     or to_regclass('public.presensi') is null then
+    raise exception 'Tabel public.pegawai/presensi tidak ditemukan. Jalankan migrasi 01-18 pada project Supabase yang benar.';
+  end if;
+end;
+$$;
+
+create or replace function public.is_superadmin()
+returns boolean
+language sql stable security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.pegawai
+    where id = auth.uid() and role = 'superadmin'
+  );
+$$;
+
+create or replace function public.bisa_lihat_presensi(p_user_id uuid)
+returns boolean
+language sql stable security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+      from public.pegawai saya
+     where saya.id = auth.uid()
+       and (
+         saya.role = 'superadmin'
+         or saya.id = p_user_id
+         or (
+           saya.kepala_ruangan = true
+           and exists (
+             select 1
+               from public.pegawai target
+              where target.id = p_user_id
+                and target.unit_kerja = saya.unit_kerja
+           )
+         )
+       )
+  );
+$$;
+
+revoke execute on function public.bisa_lihat_presensi(uuid) from public, anon;
+grant execute on function public.bisa_lihat_presensi(uuid) to authenticated;
+
+drop policy if exists "presensi_baca_kepala_unit" on public.presensi;
+create policy "presensi_baca_kepala_unit" on public.presensi
+  for select to authenticated
+  using (public.bisa_lihat_presensi(user_id));
 
 commit;

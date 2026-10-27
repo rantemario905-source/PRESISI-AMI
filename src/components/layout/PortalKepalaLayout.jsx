@@ -16,6 +16,7 @@ const JUDUL_HALAMAN = {
   '/kepala-ruangan/jadwal-shift': 'Jadwal Shift Unit',
   '/kepala-ruangan/dinas-sakit': 'Dinas & Sakit Unit',
   '/kepala-ruangan/cuti': 'Cuti Unit',
+  '/kepala-ruangan/laporan': 'Laporan Bulanan',
 }
 
 export default function PortalKepalaLayout() {
@@ -41,7 +42,7 @@ export default function PortalKepalaLayout() {
     <div className="min-h-[100dvh] bg-slate-50">
       <SidebarKepala terbuka={menuTerbuka} onTutup={() => setMenuTerbuka(false)} />
 
-      <div className="bg-gradient-to-b from-sky-50/90 via-sky-50/60 to-slate-50 lg:pl-64">
+      <div className="bg-gradient-to-b from-sky-50/90 via-sky-50/60 to-slate-50 print:bg-none print:bg-white print:!pl-0 lg:pl-64">
         <header className="tanpa-cetak safe-atas sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
           <a
             href="#konten"

@@ -9,7 +9,8 @@
  *   /kepala-ruangan              → portal kepala ruangan (flag kepala_ruangan)
  *     ├─ /jadwal-shift           → jadwal shift unit sendiri
  *     ├─ /dinas-sakit            → catat Dinas & Sakit unit
- *     └─ /cuti                   → catat Cuti unit
+ *     ├─ /cuti                   → catat Cuti unit
+ *     └─ /laporan                → laporan presensi bulanan per pegawai
  *   /superadmin-portal           → portal Super Admin       (role: superadmin)
  *     ├─ /                       → Dashboard
  *     ├─ /pegawai                → Data Pegawai
@@ -22,7 +23,8 @@
  *     ├─ /koreksi                → Koreksi Presensi & Audit Trail
  *     ├─ /dinas-sakit            → Pengajuan Dinas & Sakit
  *     ├─ /cuti                   → Pengajuan Cuti
- *     └─ /rekap                  → Rekapitulasi & Cetak Laporan
+ *     ├─ /rekap                  → Rekapitulasi & Cetak Laporan
+ *     └─ /laporan                → Laporan Bulanan per Pegawai
  *
  * Halaman dimuat dengan React.lazy (code-splitting) agar bundle awal kecil.
  * ==========================================================================
@@ -52,6 +54,7 @@ const PengaturanPresensi = lazy(() => import('./pages/admin/PengaturanPresensi.j
 const KoreksiPresensi = lazy(() => import('./pages/admin/KoreksiPresensi.jsx'))
 const PengajuanIzin = lazy(() => import('./pages/admin/PengajuanIzin.jsx'))
 const Rekapitulasi = lazy(() => import('./pages/admin/Rekapitulasi.jsx'))
+const LaporanBulanan = lazy(() => import('./pages/admin/LaporanBulanan.jsx'))
 
 export default function App() {
   return (
@@ -107,6 +110,7 @@ export default function App() {
               element={<PengajuanIzin mode="kepala" kategori="dinas-sakit" />}
             />
             <Route path="cuti" element={<PengajuanIzin mode="kepala" kategori="cuti" />} />
+            <Route path="laporan" element={<LaporanBulanan mode="kepala" />} />
           </Route>
 
           <Route
@@ -133,6 +137,7 @@ export default function App() {
             <Route path="cuti" element={<PengajuanIzin mode="superadmin" kategori="cuti" />} />
             <Route path="izin" element={<Navigate to="/superadmin-portal/dinas-sakit" replace />} />
             <Route path="rekap" element={<Rekapitulasi />} />
+            <Route path="laporan" element={<LaporanBulanan mode="superadmin" />} />
           </Route>
 
           <Route path="/beranda" element={<Navigate to="/" replace />} />

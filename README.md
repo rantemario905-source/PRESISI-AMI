@@ -76,13 +76,15 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 | 16 | `supabase/migrations/16_satu_perangkat.sql` | Satu perangkat aktif per pegawai; data perangkat uji dikosongkan |
 | 17 | `supabase/migrations/17_batas_waktu_absen.sql` | Batas waktu absen: masuk 20 menit sebelum jam masuk, pulang 1 menit setelah jam pulang |
 | 18 | `supabase/migrations/18_hapus_grup_kosong.sql` | Hapus grup kosong; grup sistem "Belum ditentukan" hanya tampil jika berisi pegawai |
+| 19 | `supabase/migrations/19_laporan_presensi_kepala.sql` | **Fase 9**: akses baca presensi unit sendiri bagi kepala ruangan untuk laporan bulanan per pegawai; membuat ulang `is_superadmin()` bila hilang pada instalasi lama |
 
 > Bila database sudah pernah dijalankan sampai file 08, jalankan **file 09** untuk
 > mengaktifkan alur Dinas & Sakit / Cuti, **file 11** untuk pengaturan kepala
 > ruangan, lalu **file 12** untuk jadwal shift/keterlambatan/Alfa, **file 13**
 > untuk kebijakan jadwal wajib, **file 14** untuk impor template, **file 15**
 > untuk menghapus finalisasi, **file 16** untuk aturan satu perangkat, **file 17**
-> untuk batas waktu absen, dan **file 18** untuk hapus grup kosong.
+> untuk batas waktu absen, **file 18** untuk hapus grup kosong, dan **file 19**
+> untuk akses laporan bulanan per pegawai bagi kepala ruangan.
 > File 10 hanya berisi RPC perubahan role yang tidak dipakai UI, jadi boleh
 > dilewati. Jalankan migrasi secara bertahap - jangan mengulang file lama bila
 > tidak diperlukan.
@@ -92,18 +94,23 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 >
 > Jalankan **`supabase/verifikasi_09.sql`**, **`supabase/verifikasi_11.sql`**,
 > **`supabase/verifikasi_12.sql`**, **`supabase/verifikasi_15.sql`**,
-> **`supabase/verifikasi_16.sql`**, **`supabase/verifikasi_17.sql`**, dan
-> **`supabase/verifikasi_18.sql`** setelah migrasi terkait. Seluruh nilai
-> pemeriksaan harus `true`; bila ada yang `false`, jangan lanjutkan pemakaian.
+> **`supabase/verifikasi_16.sql`**, **`supabase/verifikasi_17.sql`**,
+> **`supabase/verifikasi_18.sql`**, dan **`supabase/verifikasi_19.sql`** setelah
+> migrasi terkait. Seluruh nilai pemeriksaan harus `true`; bila ada yang `false`,
+> jangan lanjutkan pemakaian.
 > `verifikasi_13.sql` dan `verifikasi_14.sql` hanya berlaku sebelum migrasi 15;
 > setelah migrasi 15, gunakan `verifikasi_15.sql`, `verifikasi_16.sql`,
-> `verifikasi_17.sql`, dan `verifikasi_18.sql`.
+> `verifikasi_17.sql`, `verifikasi_18.sql`, dan `verifikasi_19.sql`.
 > Migrasi 12–18 wajib dijalankan sebelum membuka menu Grup Shift/Jadwal Shift.
+> Migrasi 19 wajib dijalankan sebelum kepala ruangan membuka menu Laporan Bulanan.
+> Bila muncul `function public.is_superadmin() does not exist`, jalankan versi
+> terbaru migrasi 19 — file ini membuat ulang fungsi inti tersebut sekaligus
+> memeriksa keberadaan tabel `pegawai`/`presensi`.
 
 **B. Sekaligus**
 
 Salin seluruh isi `supabase/schema.sql`, tempel, lalu **Run**.
-Isinya identik dengan gabungan kedelapan belas file di atas (termasuk migrasi 15-18).
+Isinya identik dengan gabungan kesembilan belas file di atas (termasuk migrasi 15-19).
 
 **C. Membuat akun pegawai**
 
@@ -166,7 +173,7 @@ update public.pegawai
 ├── index.html
 ├── supabase/
 │   ├── schema.sql              # Skema DB + RLS + RPC (instalasi sekali jalan)
-│   ├── migrations/             # 01–18, dijalankan bertahap
+│   ├── migrations/             # 01–19, dijalankan bertahap
 │   ├── verifikasi_09.sql       # Pemeriksaan fitur Dinas & Sakit / Cuti
 │   ├── verifikasi_10.sql       # Pemeriksaan RPC perubahan role (opsional)
 │   ├── verifikasi_11.sql       # Pemeriksaan pengaturan kepala ruangan
@@ -177,6 +184,7 @@ update public.pegawai
 │   ├── verifikasi_16.sql       # Pemeriksaan satu perangkat aktif per pegawai
 │   ├── verifikasi_17.sql       # Pemeriksaan batas waktu absen masuk/pulang
 │   ├── verifikasi_18.sql       # Pemeriksaan hapus grup kosong
+│   ├── verifikasi_19.sql       # Pemeriksaan akses laporan kepala ruangan
 │   └── jadwal_alfa.sql         # Opsional: jadwal pg_cron untuk Alfa
 ├── scripts/
 │   ├── impor-akun.mjs          # Impor akun massal via Supabase Admin API
@@ -227,6 +235,7 @@ update public.pegawai
     │   ├── ui/                 # Button, Badge, Alert, Spinner, Modal, dll.
     │   ├── kartu/              # Kartu profil, shift, perangkat, riwayat
     │   ├── layout/             # Layout Super Admin, kepala ruangan, sidebar
+    │   ├── laporan/            # Kop instansi, blok tanda tangan, lembar laporan
     │   └── admin/              # KepalaHalaman, KartuStatistik
     └── pages/
         ├── Login.jsx
@@ -245,7 +254,8 @@ update public.pegawai
             ├── PengaturanPresensi.jsx
             ├── KoreksiPresensi.jsx
             ├── PengajuanIzin.jsx   # Dipakai mode superadmin & kepala
-            └── Rekapitulasi.jsx
+            ├── Rekapitulasi.jsx
+            └── LaporanBulanan.jsx # Laporan presensi bulanan per pegawai
 ```
 
 ## 5. Aturan keamanan yang diterapkan
@@ -256,7 +266,7 @@ update public.pegawai
 | **Fake GPS** | Tolak bila `coords.isMocked === true` atau `accuracy === 0`; akurasi > 50 m ditolak |
 | **Device binding** | `device_token` UUID di `localStorage`; hanya perangkat `approved` Admin IT yang bisa absen; 1 pegawai = 1 perangkat aktif (`pending`/`approved`) dijaga unique index dan RLS |
 | **Server-side** | Penulisan presensi hanya lewat RPC `submit_presensi` (`SECURITY DEFINER`) yang memvalidasi ulang semuanya |
-| **RLS** | RLS aktif di semua tabel; pegawai hanya bisa membaca data miliknya |
+| **RLS** | RLS aktif di semua tabel; pegawai hanya bisa membaca data miliknya, kepala ruangan hanya presensi unitnya (migrasi 19), Super Admin semua data |
 | **Anti duplikasi** | `unique (user_id, tanggal)` + validasi absen masuk/pulang di server |
 | **Jendela waktu** | Absen masuk dibuka 20 menit sebelum jam masuk; absen pulang dibuka 1 menit setelah jam pulang (reguler, shift, dan shift malam lintas hari; klien + server) |
 | **Jadwal shift** | Super Admin mengelola semua unit/tanggal; kepala ruangan hanya unitnya, mulai hari ini (WITA), dan tanggal sebelum hari ini hanya untuk Super Admin. Perubahan sel langsung tersimpan. Pegawai shift tanpa jadwal **selalu** ditolak |
@@ -308,7 +318,8 @@ Akses: login dengan akun ber-role `superadmin`, lalu buka `/superadmin-portal`.
 | **Koreksi Presensi** | Ubah jam/status dengan **alasan wajib** + audit trail permanen |
 | **Dinas & Sakit** | Catat Sakit (1 pegawai) atau Dinas Luar (1–4 pegawai/grup), dokumen wajib, setujui/tolak per grup |
 | **Cuti** | Catat Cuti (1 pegawai), dokumen opsional, setujui/tolak |
-| **Rekapitulasi** | Rekap bulanan per unit (ringkasan/detail), ekspor CSV, dan cetak laporan A4 |
+| **Rekapitulasi** | Rekap bulanan per unit (ringkasan/detail), ekspor CSV, dan cetak PDF A4 |
+| **Laporan Bulanan** | Laporan presensi bulanan **per pegawai** (satu pegawai atau semua pegawai unit) siap dicetak PDF A4 portrait dengan kop instansi dan tanda tangan |
 
 ### Jadwal shift, hari libur, dan Alfa otomatis
 
@@ -404,8 +415,17 @@ ruangan tidak dapat menghapus dokumen yang masih tertaut ke pengajuan; file yati
 | **Absensi** (`/`) | Absen hadir/pulang dengan geofencing + device binding (akun kepala ruangan tetap absen seperti biasa) |
 | **Jadwal Shift** (`/kepala-ruangan/jadwal-shift`) | Atur jadwal shift unit sendiri mulai hari ini, unduh/impor template CSV/XLSX; tanpa akses unit lain atau tanggal lampau |
 | **Kepala Ruangan** (`/kepala-ruangan/dinas-sakit`, `/kepala-ruangan/cuti`) | Catat/ubah pengajuan unit sendiri; tanpa akses data pegawai di luar unit, rekap unit, atau persetujuan |
+| **Laporan Bulanan** (`/kepala-ruangan/laporan`) | Cetak laporan presensi bulanan per pegawai di unit sendiri (PDF A4 portrait) |
 | **Dinas & Cuti** (`/izin-saya`) | Riwayat **baca-saja** Dinas, Sakit & Cuti milik sendiri + lihat dokumen |
 | **Riwayat** (`/riwayat`) | Rekap & detail presensi bulanan milik sendiri |
+
+**Laporan bulanan per pegawai:** kepala ruangan mencetak laporan unitnya sendiri,
+sedangkan Super Admin memilih unit. Cakupan dapat berupa satu pegawai atau seluruh
+pegawai unit (satu halaman per pegawai). Lembar laporan berisi kop Pemerintah Kutai
+Kartanegara + RSUD Aji Muhammad Idris (dua logo, Times New Roman), identitas pegawai,
+tabel harian (hari/tanggal, jam masuk, jam pulang, status, terlambat, keterangan),
+ringkasan kehadiran, serta tanda tangan Kepala Ruangan di kanan bawah. Cetak melalui
+dialog browser → **Simpan sebagai PDF** pada ukuran A4 portrait.
 
 Pegawai biasa **tidak dapat mengajukan sendiri**. Pencatatan dilakukan kepala ruangan
 atau Super Admin; persetujuan hanya oleh Super Admin. Kepala ruangan dapat mencatat
@@ -434,6 +454,10 @@ Promosi/penurunan role Super Admin tetap hanya melalui SQL oleh Admin IT.
   tanggal lampau hanya dapat dikoreksi Super Admin.
 - **Rename grup** mengubah `unit_kerja` pegawai melalui `ON UPDATE CASCADE`; data
   jadwal, presensi, dan pengajuan tetap utuh.
+- **Laporan Bulanan per pegawai** memerlukan migrasi 19 agar kepala ruangan dapat
+  membaca presensi unitnya. Cetak memakai dialog browser → **Simpan sebagai PDF**
+  (A4 portrait, satu halaman per pegawai). Footer berisi "Dicetak melalui
+  PRESISI-AMI" dan nomor halaman.
 - `dist/` dan `.env` sudah masuk `.gitignore`.
 
 ## 10. Deploy produksi (GitHub Pages)

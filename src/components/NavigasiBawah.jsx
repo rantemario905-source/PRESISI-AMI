@@ -12,8 +12,9 @@ export const MENU_PEGAWAI = [
 
 export const MENU_PORTAL_KEPALA = [
   { ke: '/kepala-ruangan/jadwal-shift', label: 'Jadwal', ikon: 'jadwal' },
-  { ke: '/kepala-ruangan/dinas-sakit', label: 'Dinas & Sakit', ikon: 'izin' },
+  { ke: '/kepala-ruangan/dinas-sakit', label: 'Dinas', ikon: 'izin' },
   { ke: '/kepala-ruangan/cuti', label: 'Cuti', ikon: 'cuti' },
+  { ke: '/kepala-ruangan/laporan', label: 'Laporan', ikon: 'laporan' },
   { ke: '/', label: 'Absensi', akhir: true, ikon: 'absensi' },
 ]
 
@@ -90,6 +91,24 @@ function Ikon({ nama }) {
     )
   }
 
+  if (nama === 'laporan') {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-[21px] w-[21px]"
+        aria-hidden="true"
+      >
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+        <path d="M14 2v6h6M8 13h8M8 17h8M8 9h2" />
+      </svg>
+    )
+  }
+
   if (nama === 'unit') {
     return (
       <svg
@@ -135,7 +154,8 @@ export default function NavigasiBawah({
   const daftar = menu ?? (tampilkanUnit
     ? [...MENU_PEGAWAI, { ke: '/kepala-ruangan', label: 'Unit', ikon: 'unit' }]
     : MENU_PEGAWAI)
-  const kolom = daftar.length >= 4 ? 'grid-cols-4' : 'grid-cols-3'
+  const kolom =
+    daftar.length >= 5 ? 'grid-cols-5' : daftar.length >= 4 ? 'grid-cols-4' : 'grid-cols-3'
 
   return (
     <nav

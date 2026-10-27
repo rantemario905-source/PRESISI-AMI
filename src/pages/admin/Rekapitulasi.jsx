@@ -140,7 +140,7 @@ export default function Rekapitulasi() {
               Ekspor CSV
             </Button>
             <Button variant="utama" size="sm" onClick={() => window.print()} disabled={memuat}>
-              Cetak Laporan
+              Cetak PDF
             </Button>
           </div>
         </div>

@@ -4,7 +4,7 @@
  * ==========================================================================
  */
 import { supabase } from '../utils/supabaseClient.js'
-import { akhirBulan } from '../utils/format.js'
+import { akhirBulan, daftarTanggal } from '../utils/format.js'
 import { ambilSemuaPegawai } from './pegawaiService.js'
 
 /**
@@ -37,4 +37,65 @@ export async function ambilRekapBulanan({ periode, unit = 'semua' }) {
   if (error) throw error
 
   return { pegawai, presensi: data ?? [], mulai, selesai }
+}
+
+/**
+ * Data laporan presensi bulanan per pegawai.
+ * Kepala ruangan otomatis dibatasi RLS ke unitnya sendiri.
+ *
+ * @param {{ periode: string, unit: string }} params
+ * @returns {Promise<{ pegawai: object[], presensi: object[], alasanIzin: Record<string, string>, mulai: string, selesai: string }>}
+ */
+export async function ambilLaporanBulanan({ periode, unit }) {
+  const mulai = `${periode}-01`
+  const selesai = akhirBulan(periode)
+
+  const semuaPegawai = await ambilSemuaPegawai()
+  const pegawai =
+    !unit || unit === 'semua'
+      ? semuaPegawai
+      : semuaPegawai.filter((p) => p.unit_kerja === unit)
+
+  if (pegawai.length === 0) {
+    return { pegawai: [], presensi: [], alasanIzin: {}, mulai, selesai }
+  }
+
+  const idPegawai = pegawai.map((p) => p.id)
+  const { data, error } = await supabase
+    .from('presensi')
+    .select(
+      'id, user_id, tanggal, jam_masuk, jam_pulang, status_kehadiran, menit_terlambat, alasan_koreksi',
+    )
+    .in('user_id', idPegawai)
+    .gte('tanggal', mulai)
+    .lte('tanggal', selesai)
+    .order('tanggal', { ascending: true })
+
+  if (error) throw error
+
+  const alasanIzin = await ambilAlasanIzin(idPegawai, mulai, selesai)
+
+  return { pegawai, presensi: data ?? [], alasanIzin, mulai, selesai }
+}
+
+/** Peta "user_id|tanggal" → alasan izin yang disetujui (opsional, tidak fatal). */
+async function ambilAlasanIzin(idPegawai, mulai, selesai) {
+  const { data, error } = await supabase
+    .from('izin_cuti')
+    .select('user_id, jenis, tanggal_mulai, tanggal_selesai, alasan, status')
+    .in('user_id', idPegawai)
+    .eq('status', 'disetujui')
+    .lte('tanggal_mulai', selesai)
+    .gte('tanggal_selesai', mulai)
+
+  if (error) return {}
+
+  const peta = {}
+  for (const izin of data ?? []) {
+    for (const tanggal of daftarTanggal(izin.tanggal_mulai, izin.tanggal_selesai)) {
+      if (tanggal < mulai || tanggal > selesai) continue
+      peta[`${izin.user_id}|${tanggal}`] = izin.alasan
+    }
+  }
+  return peta
 }

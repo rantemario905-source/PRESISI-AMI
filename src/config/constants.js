@@ -14,8 +14,8 @@ export const NAMA_RUMAH_SAKIT = 'RSUD Aji Muhammad Idris'
 
 /** Titik pusat geofencing RSUD AMI (dari Google Maps) */
 export const RSUD_AMI = {
-  lat: -0.23861315731059254,
-  lng: 117.41485548535888,
+  lat: -0.23781156083888882,
+  lng: 117.41437950820705,
 }
 
 /** Batas maksimal radius absensi dalam meter */

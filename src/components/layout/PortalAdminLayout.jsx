@@ -27,6 +27,7 @@ const JUDUL_HALAMAN = {
   '/superadmin-portal/dinas-sakit': 'Pengajuan Dinas & Sakit',
   '/superadmin-portal/cuti': 'Pengajuan Cuti',
   '/superadmin-portal/rekap': 'Rekapitulasi & Cetak Laporan',
+  '/superadmin-portal/laporan': 'Laporan Bulanan Pegawai',
 }
 
 export default function PortalAdminLayout() {
@@ -53,7 +54,7 @@ export default function PortalAdminLayout() {
     <div className="min-h-[100dvh] bg-slate-50">
       <SidebarAdmin terbuka={menuTerbuka} onTutup={() => setMenuTerbuka(false)} />
 
-      <div className="bg-gradient-to-b from-sky-50/90 via-sky-50/60 to-slate-50 lg:pl-64">
+      <div className="bg-gradient-to-b from-sky-50/90 via-sky-50/60 to-slate-50 print:bg-none print:bg-white print:!pl-0 lg:pl-64">
         <header className="tanpa-cetak safe-atas sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
           <a
             href="#konten"

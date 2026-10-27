@@ -40,6 +40,30 @@ export function formatTanggalRingkas(iso) {
   }).format(new Date(`${String(iso).slice(0, 10)}T00:00:00+08:00`))
 }
 
+/** "Senin, 21 Okt 2026" — untuk tabel laporan bulanan */
+export function formatTanggalHari(iso) {
+  if (!iso) return '—'
+  return new Intl.DateTimeFormat('id-ID', {
+    timeZone: ZONA_WAKTU,
+    weekday: 'long',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(`${String(iso).slice(0, 10)}T00:00:00+08:00`))
+}
+
+/** "21 Oktober 2026" — untuk baris tempat/tanggal tanda tangan */
+export function formatTanggalPanjang(iso) {
+  if (!iso) return '—'
+  const tanggal = String(iso).length === 10 ? `${iso}T00:00:00+08:00` : iso
+  return new Intl.DateTimeFormat('id-ID', {
+    timeZone: ZONA_WAKTU,
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(tanggal))
+}
+
 /** "07:15 WITA" dari timestamp ISO */
 export function formatJam(iso) {
   if (!iso) return '—'

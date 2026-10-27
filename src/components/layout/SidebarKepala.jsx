@@ -37,6 +37,16 @@ const MENU = [
       </>
     ),
   },
+  {
+    label: 'Laporan Bulanan',
+    ke: '/kepala-ruangan/laporan',
+    ikon: (
+      <>
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+        <path d="M14 2v6h6M8 13h8M8 17h8M8 9h2" />
+      </>
+    ),
+  },
 ]
 
 export default function SidebarKepala({ terbuka, onTutup }) {

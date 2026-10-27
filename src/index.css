@@ -129,12 +129,229 @@
 }
 
 /* =========================================================================
+   Laporan presensi bulanan per pegawai (A4 portrait)
+   ========================================================================= */
+.area-laporan {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+@media (min-width: 900px) {
+  .area-laporan {
+    align-items: center;
+  }
+}
+
+.lembar-laporan {
+  flex: none;
+  box-sizing: border-box;
+  width: 210mm;
+  min-height: 297mm;
+  padding: 12mm 13mm;
+  background: #fff;
+  color: #000;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 10pt;
+  line-height: 1.3;
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.14);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.kop-laporan {
+  display: flex;
+  align-items: center;
+  gap: 3mm;
+}
+
+.kop-logo {
+  flex: none;
+  width: 15mm;
+  height: auto;
+}
+
+.kop-teks {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  line-height: 1.05;
+}
+
+.kop-baris-1 {
+  font-size: 14pt;
+  font-weight: 700;
+}
+
+.kop-baris-2 {
+  font-size: 15pt;
+  font-weight: 700;
+}
+
+.kop-baris-4 {
+  font-size: 16pt;
+  font-weight: 700;
+}
+
+.kop-alamat {
+  font-size: 8.5pt;
+  font-style: italic;
+  line-height: 1.2;
+}
+
+.kop-garis {
+  height: 1.5mm;
+  margin: 1.5mm 0 3mm;
+  border-top: 2.5pt solid #000;
+  border-bottom: 1pt solid #000;
+}
+
+.judul-laporan {
+  margin: 0 0 2.5mm;
+  text-align: center;
+  font-size: 12pt;
+  font-weight: 700;
+  letter-spacing: 0.2pt;
+  text-transform: uppercase;
+}
+
+.meta-laporan {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9.5pt;
+}
+
+.meta-laporan th,
+.meta-laporan td {
+  padding: 1.4mm 2mm;
+  border: 0.75pt solid #000;
+}
+
+.meta-laporan thead th {
+  font-weight: 700;
+  text-align: center;
+}
+
+.ringkasan-laporan {
+  margin: 0 0 2.5mm;
+  font-size: 9pt;
+}
+
+.ringkasan-laporan p {
+  margin: 0 0 0.8mm;
+}
+
+.tabel-laporan {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8.2pt;
+  line-height: 1.15;
+}
+
+.tabel-laporan th,
+.tabel-laporan td {
+  padding: 0.7mm 1.3mm;
+  border: 0.6pt solid #000;
+  vertical-align: top;
+  word-break: break-word;
+}
+
+.tabel-laporan thead th {
+  background: #f3f4f6;
+  font-weight: 700;
+  text-align: center;
+}
+
+.tabel-laporan .tengah {
+  text-align: center;
+}
+
+.tabel-laporan .kosong {
+  padding: 6mm 2mm;
+  text-align: center;
+  font-style: italic;
+}
+
+.ttd-laporan {
+  width: 70mm;
+  margin: 6mm 0 0 auto;
+  text-align: center;
+  font-size: 9.5pt;
+  line-height: 1.35;
+  break-inside: avoid;
+}
+
+.ttd-ruang {
+  height: 14mm;
+}
+
+.ttd-nama {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.ttd-nip {
+  margin-top: 0.5mm;
+}
+
+.footer-laporan {
+  display: flex;
+  justify-content: space-between;
+  gap: 4mm;
+  margin-top: 4mm;
+  padding-top: 1.5mm;
+  border-top: 0.5pt solid #9ca3af;
+  font-size: 8pt;
+  color: #374151;
+}
+
+/* =========================================================================
    Gaya cetak (Rekapitulasi & Cetak Laporan)
    ========================================================================= */
 @media print {
   @page {
     size: A4 landscape;
     margin: 12mm;
+  }
+
+  #konten {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  .area-laporan {
+    display: block;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .lembar-laporan {
+    width: auto;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  .lembar-laporan + .lembar-laporan {
+    break-before: page;
+  }
+
+  .kop-laporan,
+  .meta-laporan,
+  .ttd-laporan {
+    break-inside: avoid;
+  }
+
+  .tabel-laporan thead {
+    display: table-header-group;
+  }
+
+  .tabel-laporan tr {
+    break-inside: avoid;
   }
 
   body {
