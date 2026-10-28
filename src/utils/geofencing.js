@@ -4,7 +4,7 @@
  * --------------------------------------------------------------------------
  * 1. Haversine       → jarak akurat (meter) GPS pengguna vs RSUD AMI
  * 2. Mock Location   → tolak jika isMocked=true ATAU accuracy===0
- * 3. Radius 100 m    → tolak jika berada di luar radius rumah sakit
+ * 3. Radius 50 m     → tolak jika berada di luar radius rumah sakit
  *
  * Validasi ini adalah lapisan UX; validasi otoritatif (keamanan ketat)
  * dilakukan ulang di sisi server melalui RPC `submit_presensi`
@@ -93,7 +93,7 @@ export function periksaLokasi(position) {
     }
   }
 
-  // (b) Cek radius 100 meter
+  // (b) Cek radius 50 meter
   const jarak = haversineMeter(RSUD_AMI.lat, RSUD_AMI.lng, koordinat.lat, koordinat.lng)
 
   if (jarak > MAX_RADIUS_METERS) {

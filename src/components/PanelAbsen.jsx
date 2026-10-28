@@ -4,13 +4,17 @@
  * --------------------------------------------------------------------------
  * Alur saat tombol diklik:
  *   1. Minta izin lokasi browser (Geolocation API, enableHighAccuracy: true)
- *   2. Validasi mock location + radius 100 m (utils/geofencing.js)
+ *   2. Validasi mock location + radius 50 m (utils/geofencing.js)
  *   3. Kirim ke RPC server `submit_presensi` (validasi ulang di server)
  *   4. Notifikasi sukses / gagal + jarak aktual
  * ==========================================================================
  */
 import { useEffect, useState } from 'react'
-import { MENIT_AWAL_ABSEN_MASUK, MENIT_JEDA_ABSEN_PULANG } from '../config/constants.js'
+import {
+  MAX_RADIUS_METERS,
+  MENIT_AWAL_ABSEN_MASUK,
+  MENIT_JEDA_ABSEN_PULANG,
+} from '../config/constants.js'
 import { dapatkanLokasi, periksaLokasi } from '../utils/geofencing.js'
 import { kirimPresensi } from '../services/attendanceService.js'
 import { formatJam, formatJarak, formatTanggalRingkas, hariIni } from '../utils/format.js'
@@ -236,7 +240,7 @@ export default function PanelAbsen({
               <path d="M12 21s7-5.1 7-11a7 7 0 10-14 0c0 5.9 7 11 7 11z" />
               <circle cx="12" cy="10" r="2.5" />
             </svg>
-            Radius 100 m
+            Radius {MAX_RADIUS_METERS} m
           </span>
         </div>
 
@@ -276,9 +280,9 @@ export default function PanelAbsen({
         {perangkatTerkunci && (
           <Alert variant="peringatan" title="Tombol Absen Terkunci" className="mb-4">
             {statusPerangkat === 'terikat_perangkat_lain'
-              ? 'Akun ini sudah terikat pada perangkat lain. Absensi hanya dapat dilakukan dari perangkat yang disetujui. Hubungi Admin IT untuk reset perangkat.'
+              ? 'Akun ini terikat pada perangkat lain. Hubungi Admin IT untuk reset perangkat.'
               : statusPerangkat === 'pending_perangkat_lain'
-                ? 'Pengajuan perangkat lain sedang menunggu persetujuan Admin IT. Perangkat ini belum dapat digunakan untuk absensi.'
+                ? 'Pengajuan perangkat lain sedang menunggu persetujuan Admin IT.'
                 : 'Hanya perangkat yang sudah disetujui Admin IT yang dapat melakukan absensi.'}
           </Alert>
         )}

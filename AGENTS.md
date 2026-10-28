@@ -11,7 +11,7 @@ Aplikasi absensi pegawai non-ASN RSUD Aji Muhammad Idris.
 
 - **Frontend:** React 18 + Vite 5 + Tailwind CSS 3 + React Router 6.
 - **Backend:** Supabase (Postgres, Auth, Storage, RPC `SECURITY DEFINER`).
-- **Fitur inti:** geofencing 100 m, anti Fake GPS, device binding satu perangkat
+- **Fitur inti:** geofencing 50 m, anti Fake GPS, device binding satu perangkat
   aktif per pegawai, presensi shift/reguler dengan jendela waktu (masuk 20 menit
   sebelum jam masuk, pulang 1 menit setelah jam pulang), jadwal shift, hari
   libur, keterlambatan, Alfa otomatis, Dinas/Sakit/Cuti, koreksi presensi,
@@ -41,7 +41,7 @@ npm run preview      # pratinjau hasil build
 - Skrip bantu (butuh Secret key, jangan pernah di-commit):
   `node scripts/impor-akun.mjs ...`, `node scripts/verifikasi-impor.mjs ...`.
 
-**Urutan migrasi wajib:** `01 → 02 → ... → 22`, satu per satu. Jangan mengulang
+**Urutan migrasi wajib:** `01 → 02 → ... → 24`, satu per satu. Jangan mengulang
 migrasi lama bila tidak diperlukan. `supabase/schema.sql` adalah gabungan
 seluruh migrasi untuk instalasi sekali jalan.
 
@@ -62,7 +62,7 @@ seluruh migrasi untuk instalasi sekali jalan.
 | Layout | `src/components/layout/*` | Portal admin & kepala ruangan |
 | Laporan bulanan | `src/pages/admin/LaporanBulanan.jsx`, `src/components/laporan/*` | Kop instansi, tabel harian, tanda tangan; cetak A4 portrait |
 | Halaman | `src/pages/**` | `admin/` untuk portal Super Admin/kepala |
-| Database | `supabase/migrations/01–22` | Skema, RLS, RPC, seed |
+| Database | `supabase/migrations/01–24` | Skema, RLS, RPC, seed |
 | Verifikasi DB | `supabase/verifikasi_*.sql` | Pemeriksaan pasca-migrasi |
 | Cron Alfa | `supabase/jadwal_alfa.sql` | Opsional, butuh `pg_cron` |
 
@@ -191,6 +191,11 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-056 | 2026-10-28 (WITA) | "pekerjaan terakhir belum selesai karna forceclode identifikasi pekerjaan terakhir dan lanjutkan" | Mengidentifikasi pekerjaan terakhir sebagai I-055 (penanda tangan laporan Kasubbag Tata Usaha + menu Absensi kepala ASN); memeriksa diff, menghapus helper `namaKepalaUnit` yang tidak terpakai di `src/utils/laporan.js`, menjalankan `npm run build` (lulus 6,95 dtk), dan memperbarui dokumen audit | selesai | 2026-10-28 — Lanjutan penanda tangan laporan |
 | I-057 | 2026-10-28 (WITA) | "commit dan push" | Memverifikasi `npm run build` (lulus 6,95 dtk), lalu commit `69cc041` (penanda tangan laporan Kasubbag Tata Usaha + menu kepala ASN, helper `namaKepalaUnit` dihapus) beserta sinkronisasi dokumen audit, dan push ke `origin/main` | selesai | 2026-10-28 — Lanjutan penanda tangan laporan |
 | I-055 | 2026-10-28 11:42 | "migrasi sudah saya jalankan dan ada arahan dari direktur untuk semua pegawai penanda tangan laporannya itu Kasubbag Tata Usaha Suriami,SKM.,m.Kes dengan NIP.197312302007012011, dan juga tombol kembali ke absensi untuk kapala ruangan asn dihilangkan saja [Image 1]" + klarifikasi: menu Absensi dihilangkan **hanya untuk kepala ASN** dan nama ditulis **Suriami, SKM., M.Kes** | Menyeragamkan penanda tangan laporan menjadi Kasubbag Tata Usaha (Suriami, SKM., M.Kes; NIP. 197312302007012011) untuk semua pegawai; menyembunyikan “Kembali ke Absensi” (sidebar) dan tab Absensi (navigasi bawah HP) untuk `sumber_akun = kepala_asn`; menghapus `ambilNamaKepalaUnit` yang tidak terpakai; memperbarui README + dokumen audit; `npm run build` lulus 6,90 dtk | selesai | 2026-10-28 11:42 — Penanda tangan laporan & menu kepala ASN |
+| I-058 | 2026-10-28 (WITA) | "[Image 1] plan sebelumnya terhenti karna forceclose, bisa kamu lanjut?" + "resikonya seperti apa" + "otomatis dicabut" + "kerjakan" | Melanjutkan rencana Dinas Luar lintas unit: migrasi **23** (FK `dibuat_oleh`/`dibatalkan_oleh` ke `auth.users`, `daftar_pegawai_izin()`, `bisa_akses_grup()`, `bisa_kelola_izin_grup()`, policy baca grup, `bisa_baca_dokumen()` dengan pemilik file dibatasi, RPC catat/ubah/batal lintas unit), `verifikasi_23.sql`, sinkronisasi `schema.sql`, selector pegawai lintas unit di `PengajuanIzin.jsx`, policy baca profil anggota grup, dan tombol aksi berbasis RPC; `npm run build` lulus 5,24 dtk (percobaan awal 8,15 dtk) | selesai (kode); migrasi 23 belum dijalankan | 2026-10-28 — Dinas Luar lintas unit |
+| I-059 | 2026-10-28 (WITA) | "cek status pekerjaan terakhir kemudian lanjutkan" | Meninjau ulang pekerjaan terakhir (I-058: Dinas Luar lintas unit) — memeriksa migrasi 23, `verifikasi_23.sql`, sinkronisasi `schema.sql`, service klien, dan `PengajuanIzin.jsx`; tidak ditemukan sisa pekerjaan kode; menjalankan `npm run build` (lulus 21,92 dtk) dan memperbarui dokumen audit. Langkah tersisa hanya menjalankan migrasi 23 + verifikasi 23 di Supabase | selesai (tinjauan); migrasi 23 belum dijalankan | 2026-10-28 — Lanjutan Dinas Luar lintas unit |
+| I-060 | 2026-10-28 (WITA) | "[Image 1] [Image 2] perlu sedikit modifikasi ui agar lebih rapih di tampilan mobil, pada image pertama pilihan bulannya itu di tampilan mobile terlalu besar yang mmebuatnya melebar dari layar hp, kemudian di gambar kedua, tulisan jam kerja reguler senin-kamis 08.00-16.30, jumat 08.00-16.00 dihapus saja, tukar posisi status perangkat dengan riwayat presensi terakhir, dan text pada status perangkat dihilangkan saja, cukup status perangkat terverifikasi, dan tulisan text ketika login menggunakan device yang berbeda dipersingkat saja agar lebih profesioanl" | Membatasi lebar pemilih bulan di Riwayat ke 190 px agar tidak melebar di HP; menghapus keterangan jam kerja reguler dari kartu Jadwal Kerja; menukar urutan kartu di Dashboard pegawai menjadi Jadwal → Riwayat → Status Perangkat (desktop tetap dua kolom); menampilkan status perangkat terverifikasi ringkas tanpa teks; mempersingkat pesan perangkat berbeda di kartu status dan Panel Absen; `npm run build` lulus 6,50 dtk | selesai | 2026-10-28 — Perapian UI mobile dashboard & riwayat |
+| I-061 | 2026-10-28 (WITA) | "ubah radius menjadi 50 meter saja" | Mengubah radius geofencing dari 100 m menjadi 50 m di klien (`MAX_RADIUS_METERS`) dan server (`submit_presensi`); membuat migrasi **24** + `verifikasi_24.sql`; menyinkronkan seluruh definisi `submit_presensi` di `schema.sql`; memperbarui komentar teknis, label radius di Panel Absen, dan dokumentasi; `npm run build` lulus 7,10 dtk | selesai (kode); migrasi 24 belum dijalankan | 2026-10-28 — Radius absensi 50 meter |
+| I-062 | 2026-10-28 (WITA) | "commit dan push" | Memverifikasi `npm run build` (lulus 7,10 dtk) dan memperbarui dokumen audit, lalu commit pekerjaan Dinas Luar lintas unit (migrasi 23), radius 50 meter (migrasi 24), perapian UI mobile dashboard & riwayat, serta push ke `origin/main` | selesai | 2026-10-28 — Commit & push radius 50 meter + UI mobile |
 
 ---
 
@@ -235,6 +240,18 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   `PENANDA_TANGAN_LAPORAN` di `src/config/constants.js`). Nama kepala unit tidak
   lagi dipakai di laporan. Akun kepala ASN tidak menampilkan menu **Kembali ke
   Absensi** (sidebar) maupun tab **Absensi** (navigasi bawah HP).
+- **Dinas Luar lintas unit (2026-10-28, kode lokal):** migrasi **23**,
+  `verifikasi_23.sql`, dan sinkronisasi `schema.sql` sudah dibuat; migrasi 23
+  **belum dijalankan** di Supabase. Kepala unit dapat mencatat Dinas Luar untuk
+  pegawai lintas unit; Sakit/Cuti tetap per unit. Pembuat grup dapat membaca
+  seluruh grup dan dokumennya hanya selama masih menjabat kepala unit. FK
+  `izin_cuti.dibuat_oleh`/`dibatalkan_oleh` kini mengacu ke `auth.users` agar
+  kepala ASN dapat mencatat.
+- **Radius absensi (2026-10-28, kode lokal):** radius geofencing kini **50 meter**
+  di klien (`MAX_RADIUS_METERS`) dan server (migrasi **24** yang mendefinisikan
+  ulang `submit_presensi`, plus `schema.sql`). `verifikasi_24.sql` memeriksa
+  radius 50 m dipakai dan radius 100 m hilang. Migrasi 24 **belum dijalankan**
+  di Supabase, sehingga server masih memakai 100 m sampai migrasi dijalankan.
 - **Deploy:** GitHub Pages lewat `.github/workflows/deploy.yml`; URL live
   `https://presisiami.my.id/` (custom domain, DNS di Rumahweb); base path `/`;
   `public/CNAME` berisi `presisiami.my.id`; `www` redirect ke domain utama;

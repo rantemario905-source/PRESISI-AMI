@@ -172,18 +172,16 @@ export default function Dashboard() {
               onBerhasil={muatData}
             />
 
-            <div className="grid gap-4 lg:grid-cols-3 lg:gap-5">
-              <div className="order-2 lg:order-1 lg:col-span-2">
+            <div className="flex flex-col gap-4 lg:grid lg:grid-cols-3 lg:gap-5">
+              <div className="order-1 lg:col-start-3 lg:row-start-1">
+                <KartuShift jadwal={jadwal} />
+              </div>
+
+              <div className="order-2 lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-1">
                 <KartuRiwayat riwayat={riwayat} />
               </div>
 
-              <div className="order-1 space-y-4 lg:order-2">
-                <KartuShift jadwal={jadwal} />
-
-                <div className="hidden lg:block">
-                  <KartuProfil profil={profil} />
-                </div>
-
+              <div className="order-3 space-y-4 lg:col-start-3 lg:row-start-2">
                 {statusPerangkat === 'approved' && (
                   <KartuStatusPerangkat
                     status={statusPerangkat}
@@ -192,6 +190,10 @@ export default function Dashboard() {
                     onAjukan={tanganiAjukanPerangkat}
                   />
                 )}
+
+                <div className="hidden lg:block">
+                  <KartuProfil profil={profil} />
+                </div>
               </div>
             </div>
           </div>

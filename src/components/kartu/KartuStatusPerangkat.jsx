@@ -11,40 +11,37 @@ const STATUS = {
   belum_terdaftar: {
     varian: 'peringatan',
     label: 'Belum Terdaftar',
-    pesan:
-      'Perangkat ini belum dikenali sistem (perangkat baru atau cache browser terhapus). Ajukan verifikasi agar Admin IT dapat menyetujui perangkat Anda.',
+    pesan: 'Perangkat ini belum terdaftar. Ajukan verifikasi agar dapat disetujui Admin IT.',
     aksi: 'Ajukan Verifikasi Perangkat',
   },
   pending: {
     varian: 'peringatan',
     label: 'Menunggu Persetujuan',
-    pesan: 'Perangkat Anda sedang menunggu persetujuan Admin IT. Tombol absen terkunci sampai disetujui.',
+    pesan: 'Menunggu persetujuan Admin IT. Tombol absen aktif setelah disetujui.',
     aksi: null,
   },
   approved: {
     varian: 'sukses',
     label: 'Terverifikasi',
-    pesan: 'Perangkat ini sudah disetujui. Anda dapat melakukan absensi masuk dan pulang.',
+    pesan: null,
     aksi: null,
   },
   rejected: {
     varian: 'bahaya',
     label: 'Ditolak',
-    pesan: 'Pengajuan perangkat ditolak Admin IT. Ajukan ulang bila Anda merasa ini keliru.',
+    pesan: 'Pengajuan perangkat ditolak. Ajukan ulang bila perlu.',
     aksi: 'Ajukan Ulang Verifikasi',
   },
   terikat_perangkat_lain: {
     varian: 'bahaya',
     label: 'Perangkat Lain',
-    pesan:
-      'Akun ini sudah terikat pada perangkat lain. Absensi hanya dapat dilakukan dari perangkat yang sudah disetujui. Hubungi Admin IT untuk reset perangkat bila Anda mengganti perangkat.',
+    pesan: 'Akun ini terikat pada perangkat lain. Hubungi Admin IT untuk reset perangkat.',
     aksi: null,
   },
   pending_perangkat_lain: {
     varian: 'peringatan',
     label: 'Menunggu di Perangkat Lain',
-    pesan:
-      'Pengajuan perangkat lain untuk akun ini sedang menunggu persetujuan Admin IT. Perangkat ini tidak dapat mengajukan verifikasi baru.',
+    pesan: 'Pengajuan perangkat lain sedang menunggu persetujuan Admin IT.',
     aksi: null,
   },
 }
@@ -57,6 +54,19 @@ export default function KartuStatusPerangkat({
 }) {
   const info = STATUS[status] ?? STATUS.belum_terdaftar
   const infoAktif = perangkatAktif?.info_perangkat
+
+  if (status === 'approved') {
+    return (
+      <section className="kartu">
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-[11px] font-bold uppercase tracking-wide text-slate-500 sm:text-sm">
+            Status Perangkat
+          </h3>
+          <Badge variant="sukses">Terverifikasi</Badge>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="kartu">

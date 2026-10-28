@@ -3,7 +3,7 @@
 **P**resensi **S**istem **I**nformasi **S**taf **I**ntegrasi — RSUD Aji Muhammad Idris (RSUD AMI)
 
 Aplikasi web absensi pegawai non-ASN berbasis **React (Vite) + Tailwind CSS + Supabase**,
-dengan geofencing radius 100 m, proteksi Fake GPS, penguncian perangkat (device binding),
+dengan geofencing radius 50 m, proteksi Fake GPS, penguncian perangkat (device binding),
 dan pemisahan hak akses antara **Pegawai** dan **Super Admin**.
 
 > Status: **Fase 1–10 selesai di kode** — fondasi, database + RLS, login, geofencing,
@@ -81,6 +81,8 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 | 20 | `supabase/migrations/20_koordinat_rsud.sql` | Koordinat pusat RSUD AMI `-0.23795851007230442, 117.41438417546158` pada `submit_presensi` |
 | 21 | `supabase/migrations/21_koordinat_rsud.sql` | Koordinat pusat RSUD AMI dikoreksi menjadi `-0.23805651650343132, 117.41442516465149` |
 | 22 | `supabase/migrations/22_kepala_unit_multi_unit.sql` | **Fase 10**: tabel `kepala_unit`, kepala unit multi-unit, kepala ASN tanpa baris pegawai, `profil_saya()`, RPC penugasan, dan policy berbasis `unit_dikelola()` |
+| 23 | `supabase/migrations/23_dinas_luar_lintas_unit.sql` | Dinas Luar lintas unit; Sakit/Cuti tetap per unit; pembuat grup dapat membaca grup dan dokumennya selama masih menjabat kepala unit; FK pembuat/pembatal mengacu ke `auth.users` agar kepala ASN dapat mencatat |
+| 24 | `supabase/migrations/24_radius_50_meter.sql` | Radius geofencing absensi diubah dari 100 meter menjadi 50 meter pada `submit_presensi` (titik pusat tetap) |
 
 > Bila database sudah pernah dijalankan sampai file 08, jalankan **file 09** untuk
 > mengaktifkan alur Dinas & Sakit / Cuti, **file 11** untuk pengaturan kepala
@@ -89,7 +91,8 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > untuk menghapus finalisasi, **file 16** untuk aturan satu perangkat, **file 17**
 > untuk batas waktu absen, **file 18** untuk hapus grup kosong, **file 19**
 > untuk akses laporan bulanan per pegawai bagi kepala ruangan, **file 20-21**
-> untuk koordinat RSUD AMI, dan **file 22** untuk kepala unit multi-unit.
+> untuk koordinat RSUD AMI, **file 22** untuk kepala unit multi-unit, **file 23**
+> untuk Dinas Luar lintas unit, dan **file 24** untuk radius absensi 50 meter.
 > File 10 hanya berisi RPC perubahan role yang tidak dipakai UI, jadi boleh
 > dilewati. Jalankan migrasi secara bertahap - jangan mengulang file lama bila
 > tidak diperlukan.
@@ -101,8 +104,10 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > **`supabase/verifikasi_12.sql`**, **`supabase/verifikasi_15.sql`**,
 > **`supabase/verifikasi_16.sql`**, **`supabase/verifikasi_17.sql`**,
 > **`supabase/verifikasi_18.sql`**, **`supabase/verifikasi_19.sql`**,
-> **`supabase/verifikasi_20.sql`**, **`supabase/verifikasi_21.sql`**, dan
-> **`supabase/verifikasi_22.sql`** setelah migrasi terkait. Seluruh nilai
+> **`supabase/verifikasi_20.sql`**, **`supabase/verifikasi_21.sql`**,
+> **`supabase/verifikasi_22.sql`**, **`supabase/verifikasi_23.sql`**, dan
+> **`supabase/verifikasi_24.sql`** setelah
+> migrasi terkait. Seluruh nilai
 > pemeriksaan harus `true`; bila ada yang `false`, jangan lanjutkan pemakaian.
 > `verifikasi_13.sql` dan `verifikasi_14.sql` hanya berlaku sebelum migrasi 15;
 > setelah migrasi 15, gunakan `verifikasi_15.sql`, `verifikasi_16.sql`,
@@ -110,7 +115,9 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > Migrasi 12–18 wajib dijalankan sebelum membuka menu Grup Shift/Jadwal Shift.
 > Migrasi 19 wajib dijalankan sebelum kepala ruangan membuka menu Laporan Bulanan.
 > Migrasi 22 wajib dijalankan sebelum membuka menu **Kepala Unit** dan sebelum
-> akun kepala ASN dapat login.
+> akun kepala ASN dapat login. Migrasi 23 wajib dijalankan sebelum kepala unit
+> mencatat **Dinas Luar lintas unit**. Migrasi 24 wajib dijalankan agar server
+> memakai radius absensi 50 meter.
 > Bila muncul `function public.is_superadmin() does not exist`, jalankan versi
 > terbaru migrasi 19 — file ini membuat ulang fungsi inti tersebut sekaligus
 > memeriksa keberadaan tabel `pegawai`/`presensi`.
@@ -118,7 +125,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 **B. Sekaligus**
 
 Salin seluruh isi `supabase/schema.sql`, tempel, lalu **Run**.
-Isinya identik dengan gabungan kedua puluh dua file di atas (termasuk migrasi 15-22).
+Isinya identik dengan gabungan kedua puluh empat file di atas (termasuk migrasi 15-24).
 
 **C. Membuat akun pegawai**
 
@@ -193,7 +200,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 ├── index.html
 ├── supabase/
 │   ├── schema.sql              # Skema DB + RLS + RPC (instalasi sekali jalan)
-│   ├── migrations/             # 01–22, dijalankan bertahap
+│   ├── migrations/             # 01–24, dijalankan bertahap
 │   ├── verifikasi_09.sql       # Pemeriksaan fitur Dinas & Sakit / Cuti
 │   ├── verifikasi_10.sql       # Pemeriksaan RPC perubahan role (opsional)
 │   ├── verifikasi_11.sql       # Pemeriksaan pengaturan kepala ruangan
@@ -208,6 +215,8 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 │   ├── verifikasi_20.sql       # Pemeriksaan koordinat RSUD AMI (migrasi 20)
 │   ├── verifikasi_21.sql       # Pemeriksaan koordinat RSUD AMI terbaru (migrasi 21)
 │   ├── verifikasi_22.sql       # Pemeriksaan kepala unit multi-unit & kepala ASN
+│   ├── verifikasi_23.sql       # Pemeriksaan Dinas Luar lintas unit
+│   ├── verifikasi_24.sql       # Pemeriksaan radius absensi 50 meter
 │   └── jadwal_alfa.sql         # Opsional: jadwal pg_cron untuk Alfa
 ├── scripts/
 │   ├── impor-akun.mjs          # Impor akun massal via Supabase Admin API
@@ -221,7 +230,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
     ├── App.jsx                 # Router & pemisahan hak akses
     ├── index.css               # Tailwind + gaya dasar + gaya cetak (print)
     ├── config/
-    │   └── constants.js        # Koordinat RSUD AMI, radius 100 m, zona waktu
+    │   └── constants.js        # Koordinat RSUD AMI, radius 50 m, zona waktu
     ├── utils/
     │   ├── supabaseClient.js   # Klien Supabase dari .env
     │   ├── geofencing.js       # Haversine + anti Mock Location + radius
@@ -287,11 +296,11 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 
 | Lapisan | Implementasi |
 |---|---|
-| **Geofencing** | Haversine ke titik pusat RSUD AMI; tolak jika jarak > 100 m (klien + server) |
+| **Geofencing** | Haversine ke titik pusat RSUD AMI; tolak jika jarak > 50 m (klien + server) |
 | **Fake GPS** | Tolak bila `coords.isMocked === true` atau `accuracy === 0`; akurasi > 50 m ditolak |
 | **Device binding** | `device_token` UUID di `localStorage`; hanya perangkat `approved` Admin IT yang bisa absen; 1 pegawai = 1 perangkat aktif (`pending`/`approved`) dijaga unique index dan RLS |
 | **Server-side** | Penulisan presensi hanya lewat RPC `submit_presensi` (`SECURITY DEFINER`) yang memvalidasi ulang semuanya |
-| **RLS** | RLS aktif di semua tabel; pegawai hanya bisa membaca data miliknya, kepala unit hanya data unit yang dikelolanya (`unit_dikelola()`, migrasi 22), Super Admin semua data |
+| **RLS** | RLS aktif di semua tabel; pegawai hanya bisa membaca data miliknya, kepala unit hanya data unit yang dikelolanya (`unit_dikelola()`, migrasi 22) ditambah grup Dinas Luar yang ia buat selama masih menjabat (migrasi 23), Super Admin semua data |
 | **Anti duplikasi** | `unique (user_id, tanggal)` + validasi absen masuk/pulang di server |
 | **Jendela waktu** | Absen masuk dibuka 20 menit sebelum jam masuk; absen pulang dibuka 1 menit setelah jam pulang (reguler, shift, dan shift malam lintas hari; klien + server) |
 | **Jadwal shift** | Super Admin mengelola semua unit/tanggal; kepala unit hanya unit yang dikelolanya, mulai hari ini (WITA), dan tanggal sebelum hari ini hanya untuk Super Admin. Perubahan sel langsung tersimpan. Pegawai shift tanpa jadwal **selalu** ditolak |

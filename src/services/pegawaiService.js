@@ -23,6 +23,23 @@ export async function ambilSemuaPegawai({ hanyaPegawai = true, unitKerja = null 
   return data ?? []
 }
 
+/**
+ * Daftar pegawai untuk form Dinas & Sakit / Cuti.
+ * RPC lintas unit; bila migrasi 23 belum dijalankan, jatuh kembali ke
+ * pembacaan biasa yang dibatasi RLS (hanya unit sendiri).
+ */
+export async function ambilPegawaiIzin() {
+  const { data, error } = await supabase.rpc('daftar_pegawai_izin')
+  if (error) {
+    const pesan = String(error.message || '')
+    if (error.code === 'PGRST202' || /does not exist|Could not find/i.test(pesan)) {
+      return ambilSemuaPegawai()
+    }
+    throw error
+  }
+  return data ?? []
+}
+
 /** Daftar unit kerja dari master grup (termasuk grup kosong), terurut. */
 export async function ambilUnitKerja() {
   const { data, error } = await supabase

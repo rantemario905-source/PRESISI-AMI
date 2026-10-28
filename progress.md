@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-28 (penanda tangan laporan & menu kepala ASN) |
+| Terakhir diperbarui | 2026-10-28 (perapian UI mobile) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -76,25 +76,38 @@ RLS berbasis `unit_dikelola()`. **Migrasi 22 sudah dijalankan** di Supabase
 (laporan user 2026-10-28). Pekerjaan terbaru (2026-10-28): **penanda tangan
 laporan diseragamkan** menjadi Kasubbag Tata Usaha, Suriami, SKM., M.Kes
 (NIP. 197312302007012011) untuk seluruh pegawai, serta **menu “Kembali ke
-Absensi” disembunyikan bagi kepala ASN** (sidebar dan navigasi bawah HP). Yang
-belum: konfirmasi migrasi 09–18 & skrip verifikasi, uji cetak manual laporan
-setelah perapian kop dan penanda tangan baru, penyiapan data operasional
-(grup shift, jadwal, hari libur), dan persiapan go-live.
+Absensi” disembunyikan bagi kepala ASN** (sidebar dan navigasi bawah HP).
+Pekerjaan terbaru (2026-10-28): **Dinas Luar lintas unit** — kepala unit dapat
+mencatat Dinas Luar untuk pegawai lintas unit, sedangkan Sakit/Cuti tetap per
+unit. Pembuat grup dapat membaca seluruh grup dan dokumennya selama masih
+menjabat kepala unit; akses otomatis dicabut saat jabatan berakhir. FK
+`dibuat_oleh`/`dibatalkan_oleh` dipindah ke `auth.users` agar kepala ASN dapat
+mencatat. Migrasi **23** dan `verifikasi_23.sql` sudah dibuat tetapi **belum
+dijalankan**. Pekerjaan terbaru (2026-10-28): **radius absensi diubah menjadi
+50 meter** (klien `MAX_RADIUS_METERS`, migrasi **24**, `schema.sql`,
+`verifikasi_24.sql`), disertai perapian UI mobile dashboard dan riwayat. Yang
+belum: menjalankan migrasi 23–24 + verifikasi 23–24, konfirmasi migrasi 09–18 &
+skrip verifikasi, uji cetak manual laporan setelah perapian kop dan penanda
+tangan baru, penyiapan data operasional (grup shift, jadwal, hari libur), dan
+persiapan go-live.
 
 | Aspek | Status | Bukti |
 |---|---|---|
-| Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–22 | `src/`, `supabase/migrations/01–22` |
-| Commit Git | **HEAD** — `18a497d` (kepala unit multi-unit & kepala ASN) | `git log` |
-| Perubahan lokal | **Bersih** — penanda tangan laporan & menu kepala ASN sudah di-commit dan di-push | `git status` |
+| Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–24 | `src/`, `supabase/migrations/01–24` |
+| Commit Git | **HEAD** — `6e3e7c1` (sinkronisasi status commit penanda tangan laporan) | `git log` |
+| Perubahan lokal | **Ada perubahan lokal** — Dinas Luar lintas unit (migrasi 23), radius 50 meter (migrasi 24), perapian UI mobile, dan dokumen belum di-commit | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
 | Migrasi DB 21 | **Sudah dijalankan** (klaim user 2026-10-27 10:39) | `supabase/migrations/21_koordinat_rsud.sql` |
 | Migrasi DB 22 | **Sudah dijalankan** (laporan user 2026-10-28); verifikasi 22 belum dikonfirmasi | `supabase/migrations/22_kepala_unit_multi_unit.sql`, `verifikasi_22.sql` |
+| Migrasi DB 23 | **Belum dijalankan** — menunggu eksekusi user di Supabase | `supabase/migrations/23_dinas_luar_lintas_unit.sql`, `verifikasi_23.sql` |
+| Migrasi DB 24 | **Belum dijalankan** — radius 50 meter baru berlaku di server setelah migrasi ini | `supabase/migrations/24_radius_50_meter.sql`, `verifikasi_24.sql` |
 | Data uji | **Sudah dibersihkan** — transaksi dihapus, 92 pegawai/grup/master shift dipertahankan | `supabase/cleanup_data_uji.sql`, laporan user 2026-10-27 11:02 |
 | Koordinat RSUD AMI | **Ada di kode** — `-0.23805651650343132, 117.41442516465149` di klien dan schema | `src/config/constants.js`, `supabase/schema.sql`, migrasi 21 |
-| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 19 dan 20 lulus** (klaim user); verifikasi 21 dan 22 belum dikonfirmasi | laporan user 2026-10-27 09:39 |
-| Build produksi | **Lulus** — base `/` 6,95 dtk (2026-10-28, lanjutan I-055); `dist/index.html` memakai aset `/assets/...` | `npm run build` |
+| Radius absensi | **Ada di kode** — 50 meter di klien (`MAX_RADIUS_METERS`) dan server (migrasi 24; `schema.sql`) | `src/config/constants.js`, `supabase/migrations/24_radius_50_meter.sql` |
+| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 19 dan 20 lulus** (klaim user); verifikasi 21, 22, 23, dan 24 belum dikonfirmasi | laporan user 2026-10-27 09:39 |
+| Build produksi | **Lulus** — base `/` 7,10 dtk (2026-10-28, radius 50 meter; sebelumnya 6,50 dtk); `dist/index.html` memakai aset `/assets/...` | `npm run build` |
 | Kepala unit multi-unit | **Ada di kode** — tabel `kepala_unit` (satu unit satu kepala, boleh multi-unit), halaman **Kepala Unit**, pemilih unit aktif di portal kepala, kepala ASN tanpa baris `pegawai`, RPC `profil_saya()`/`simpan_kepala_unit()`, policy `unit_dikelola()` | migrasi 22, `KepalaUnit.jsx`, `kepalaUnitService.js`, `AuthContext.jsx`, `authService.js`, `PortalKepalaLayout.jsx` |
 | Jendela waktu absen | **Ada di kode** — masuk 20 menit sebelum, pulang 1 menit setelah | migrasi 17, `PanelAbsen.jsx`, `jadwalAbsen.js` |
 | Hapus grup kosong | **Ada di kode** — semua grup 0 pegawai; "Belum ditentukan" (akun sistem) disembunyikan bila kosong | migrasi 18, `GrupShift.jsx` |
@@ -110,6 +123,7 @@ setelah perapian kop dan penanda tangan baru, penyiapan data operasional
 | Laporan bulanan per pegawai | **Ada di kode** — Super Admin pilih unit, kepala unit memakai unit aktif (bisa berganti jika multi-unit); satu pegawai atau semua pegawai unit; kop dua logo satu baris (tinggi 20 mm), identitas grid 2x2 dengan nilai setelah titik dua, tabel harian, ringkasan tanpa `Izin`, Keterangan Sakit/Cuti/Dinas Luar/Alfa, penanda tangan tetap Kasubbag Tata Usaha (Suriami, SKM., M.Kes; NIP. 197312302007012011), footer bertanggal tanpa jam; cetak PDF A4 portrait | migrasi 19 & 22, `LaporanBulanan.jsx`, `reportService.js`, `utils/laporan.js`, `components/laporan/*`, `index.css` |
 | Penanda tangan laporan | **Ada di kode** — Kasubbag Tata Usaha, Suriami, SKM., M.Kes, NIP. 197312302007012011 untuk semua pegawai | `src/config/constants.js`, `BlokTandaTangan.jsx` |
 | Menu kepala ASN | **Ada di kode** — “Kembali ke Absensi” (sidebar) dan tab Absensi (navigasi bawah HP) disembunyikan bila `sumber_akun = kepala_asn` | `PortalKepalaLayout.jsx`, `SidebarKepala.jsx` |
+| Dinas Luar lintas unit | **Ada di kode** — kepala unit dapat memilih pegawai lintas unit untuk Dinas Luar; Sakit/Cuti tetap per unit; pembuat grup membaca grup + dokumennya selama menjabat; akses dicabut otomatis saat jabatan berakhir; kepala ASN dapat mencatat (FK ke `auth.users`) | migrasi 23, `PengajuanIzin.jsx`, `leaveService.js`, `pegawaiService.js`, `verifikasi_23.sql` |
 | Lint/unit test | Tidak tersedia di `package.json` | `package.json` |
 | Alfa otomatis | Fitur ada, **default nonaktif** | migrasi 12, `PengaturanPresensi.jsx` |
 | Deploy GitHub Pages | **Aktif** — `https://presisiami.my.id/` live dengan base `/`; `www` redirect ke domain utama; Enforce HTTPS diklaim user, tetapi **HTTP apex masih 200** saat dicek 10:39 | workflow run `40439173719` sukses |
@@ -260,6 +274,83 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-28 WITA — Radius absensi 50 meter
+- **Perubahan:** batas radius geofencing diubah dari 100 m menjadi **50 m** pada
+  klien (`MAX_RADIUS_METERS`) dan server (`submit_presensi`). Dibuat migrasi
+  **24** yang mendefinisikan ulang `submit_presensi` dengan radius 50 m beserta
+  pesan jarak baru, `verifikasi_24.sql`, dan sinkronisasi seluruh definisi
+  `submit_presensi` di `schema.sql`. Komentar teknis radius di
+  `geofencing.js`, `PanelAbsen.jsx`, dan `attendanceService.js` ikut diperbarui.
+- **File:** `supabase/migrations/24_radius_50_meter.sql`,
+  `supabase/verifikasi_24.sql`, `supabase/schema.sql`,
+  `src/config/constants.js`, `src/utils/geofencing.js`,
+  `src/components/PanelAbsen.jsx`, `src/services/attendanceService.js`,
+  `README.md`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` lulus **7,10 dtk** (280 modul; percobaan
+  pertama 6,24 dtk sebelum label radius di Panel Absen memakai konstanta).
+  Migrasi 24 dan `verifikasi_24.sql` **belum dijalankan** di Supabase.
+- **Catatan/risiko:** radius klien langsung berlaku, tetapi server baru menolak
+  jarak > 50 m setelah migrasi 24 dijalankan. Perubahan belum di-commit.
+
+### 2026-10-28 WITA — Perapian UI mobile dashboard & riwayat
+- **Perubahan:** pemilih bulan di halaman **Riwayat & Rekap Presensi**
+  dibatasi maksimal 190 px sehingga tidak melebar di HP; keterangan
+  “Jam kerja reguler Senin–Kamis 08.00–16.30, Jumat 08.00–16.00” dihapus dari
+  kartu **Jadwal Kerja Hari Ini** (keterangan shift malam/shift tetap); urutan
+  kartu Dashboard pegawai di HP menjadi **Jadwal → Riwayat Presensi Terakhir →
+  Status Perangkat** (desktop tetap dua kolom: riwayat di kiri, jadwal/status di
+  kanan); kartu **Status Perangkat** saat terverifikasi kini ringkas tanpa teks
+  penjelasan; pesan perangkat berbeda di kartu status dan Panel Absen
+  dipersingkat agar lebih profesional.
+- **File:** `src/pages/RiwayatSaya.jsx`, `src/pages/Dashboard.jsx`,
+  `src/components/kartu/KartuShift.jsx`,
+  `src/components/kartu/KartuStatusPerangkat.jsx`,
+  `src/components/PanelAbsen.jsx`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` lulus **6,50 dtk** (280 modul).
+- **Catatan/risiko:** perubahan tampilan belum diuji manual di perangkat
+  fisik; belum di-commit.
+
+### 2026-10-28 WITA — Lanjutan Dinas Luar lintas unit (tinjauan & build)
+- **Perubahan:** meninjau ulang pekerjaan terakhir (I-058). Migrasi 23,
+  `verifikasi_23.sql`, sinkronisasi `schema.sql`, `pegawaiService.js`,
+  `leaveService.js`, dan `PengajuanIzin.jsx` diperiksa ulang; tidak ditemukan
+  sisa pekerjaan kode. Kontrak RPC (`daftar_pegawai_izin`,
+  `bisa_akses_grup`, `bisa_kelola_izin_grup`), policy RLS `izin_cuti`/`pegawai`,
+  dan fallback klien saat migrasi 23 belum aktif sudah konsisten. Tidak ada
+  perubahan kode pada sesi ini selain dokumen audit.
+- **File:** `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` lulus **21,92 dtk** (280 modul).
+- **Catatan/risiko:** langkah tersisa adalah menjalankan
+  `supabase/migrations/23_dinas_luar_lintas_unit.sql` lalu
+  `supabase/verifikasi_23.sql` di Supabase. Karena `cleanup_data_uji.sql` sudah
+  mengosongkan `izin_cuti`, validasi FK baru ke `auth.users` tidak berisiko
+  gagal akibat data lama. Perubahan belum di-commit.
+
+### 2026-10-28 WITA — Dinas Luar lintas unit
+- **Perubahan:** kepala unit kini dapat mencatat **Dinas Luar** untuk pegawai
+  lintas unit (maksimal 4 pegawai per grup), sedangkan **Sakit/Cuti** tetap
+  terbatas pada unit yang dikelola. Pembuat grup dapat membaca seluruh grup
+  Dinas Luar beserta dokumennya **selama masih menjabat kepala unit**; akses
+  dicabut otomatis setelah jabatan berakhir (atau bagi Super Admin). FK
+  `izin_cuti.dibuat_oleh`/`dibatalkan_oleh` dipindah ke `auth.users` agar kepala
+  ASN tanpa baris `pegawai` dapat mencatat/membatalkan. Klien memakai RPC
+  `daftar_pegawai_izin()` untuk daftar pegawai lintas unit dan
+  `bisa_kelola_izin_grup()` untuk menampilkan tombol Ubah/Batalkan secara akurat,
+  dengan fallback konservatif bila migrasi 23 belum dijalankan. Policy baca
+  `pegawai` diperluas agar pembuat grup dapat melihat nama/unit anggota lintas
+  unit, dan RPC menolak akun non-`pegawai`.
+- **File:** `supabase/migrations/23_dinas_luar_lintas_unit.sql`,
+  `supabase/verifikasi_23.sql`, `supabase/schema.sql`,
+  `src/services/pegawaiService.js`, `src/services/leaveService.js`,
+  `src/pages/admin/PengajuanIzin.jsx`, `README.md`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` lulus **5,24 dtk** (percobaan awal 8,15 dtk;
+  280 modul). Migrasi 23 dan `verifikasi_23.sql` **belum dijalankan** di
+  Supabase.
+- **Catatan/risiko:** `bisa_baca_dokumen()` membatasi akses pemilik file hanya
+  untuk file yang belum terhubung ke baris `izin_cuti`, sehingga dokumen grup
+  ikut tertutup saat jabatan berakhir. Anggota grup tetap dapat membaca dokumen
+  grup miliknya sendiri. Perubahan belum di-commit.
 
 ### 2026-10-28 WITA — Lanjutan penanda tangan laporan setelah force close
 - **Perubahan:** mengidentifikasi pekerjaan terakhir sebagai I-055 (penanda tangan

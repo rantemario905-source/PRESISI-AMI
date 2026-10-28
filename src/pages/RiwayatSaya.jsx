@@ -89,7 +89,7 @@ export default function RiwayatSaya() {
             <input
               id="riwayat-periode"
               type="month"
-              className="input-dasar w-full sm:max-w-[190px]"
+              className="input-dasar w-full max-w-[190px] sm:w-[190px]"
               value={periode}
               onChange={(e) =>
                 setPeriode(e.target.value || periodeBulanIni())
@@ -109,7 +109,7 @@ export default function RiwayatSaya() {
           {STATUS.map((s) => (
             <div
               key={s.nama}
-              className={`rounded-xl border border-slate-200 px-1.5 py-2.5 text-center shadow-kartu sm:px-2 ${s.warna}`}
+              className={`min-w-0 rounded-xl border border-slate-200 px-1.5 py-2.5 text-center shadow-kartu sm:px-2 ${s.warna}`}
             >
               <p className="text-[9px] font-bold uppercase leading-tight tracking-wide text-slate-500 sm:text-[10px]">
                 {s.nama}

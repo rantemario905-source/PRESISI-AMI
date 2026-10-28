@@ -45,6 +45,30 @@ export async function ambilDaftarIzin({ kategori = 'semua', status = 'semua' } =
 }
 
 /**
+ * Peta grup_id -> boleh diubah/dibatalkan oleh pengguna.
+ * Server menghitung seluruh anggota grup, termasuk yang tidak terlihat karena
+ * RLS. Mengembalikan null bila migrasi 23 belum dijalankan.
+ *
+ * @param {string[]} grupIds
+ * @returns {Promise<Record<string, boolean>|null>}
+ */
+export async function ambilAksesKelolaGrup(grupIds = []) {
+  const ids = (grupIds ?? []).filter(Boolean)
+  if (!ids.length) return {}
+  const { data, error } = await supabase.rpc('bisa_kelola_izin_grup', {
+    p_grup_ids: ids,
+  })
+  if (error) {
+    const pesan = String(error.message || '')
+    if (error.code === 'PGRST202' || /does not exist|Could not find/i.test(pesan)) {
+      return null
+    }
+    throw error
+  }
+  return Object.fromEntries((data ?? []).map((b) => [b.grup_id, b.boleh === true]))
+}
+
+/**
  * Unggah dokumen ke bucket privat. Path selalu diawali grup_id agar RPC dapat
  * memverifikasi bahwa file memang milik grup tersebut.
  *

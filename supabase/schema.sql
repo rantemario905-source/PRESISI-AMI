@@ -4,7 +4,7 @@
 -- Dua cara pakai:
 --   A. Satu file: jalankan seluruh file ini di SQL Editor.
 --   B. Bertahap : jalankan supabase/migrations/01_tabel.sql s.d.
---      19_laporan_presensi_kepala.sql, satu per satu (disarankan bila ingin
+--      23_dinas_luar_lintas_unit.sql, satu per satu (disarankan bila ingin
 --      meminimalisir error).
 --
 -- Urutan PENTING: tabel dibuat lebih dulu, karena fungsi `is_superadmin`
@@ -14,7 +14,7 @@
 -- Anatomi keamanan:
 --   1. Row Level Security (RLS) di SEMUA tabel
 --   2. Fungsi RPC `submit_presensi` (SECURITY DEFINER) → satu-satunya jalan
---      menulis presensi; validasi perangkat, anti-Fake GPS, dan radius 100 m
+--      menulis presensi; validasi perangkat, anti-Fake GPS, dan radius 50 m
 --      dihitung ulang di server
 --   3. Partial unique index → menjamin 1 pegawai = 1 perangkat aktif
 -- ==========================================================================
@@ -344,12 +344,12 @@ begin
     raise exception 'Akurasi GPS tidak wajar (% m). Coba lagi di ruang terbuka.', round(p_akurasi)::text;
   end if;
 
-  -- (e) Radius 100 meter — Haversine server-side
+  -- (e) Radius 50 meter — Haversine server-side
   select public.haversine(-0.23805651650343132, 117.41442516465149, p_lat, p_lng)
     into v_jarak;
 
-  if v_jarak > 100 then
-    raise exception 'Anda berada di luar radius 100 meter dari RSUD AMI. Jarak Anda saat ini % meter.',
+  if v_jarak > 50 then
+    raise exception 'Anda berada di luar radius 50 meter dari RSUD AMI. Jarak Anda saat ini % meter.',
       round(v_jarak)::text;
   end if;
 
@@ -741,8 +741,8 @@ begin
   select public.haversine(-0.23805651650343132, 117.41442516465149, p_lat, p_lng)
     into v_jarak;
 
-  if v_jarak > 100 then
-    raise exception 'Anda berada di luar radius 100 meter dari RSUD AMI. Jarak Anda saat ini % meter.',
+  if v_jarak > 50 then
+    raise exception 'Anda berada di luar radius 50 meter dari RSUD AMI. Jarak Anda saat ini % meter.',
       round(v_jarak)::text;
   end if;
 
@@ -2879,8 +2879,8 @@ begin
 
   select public.haversine(-0.23805651650343132, 117.41442516465149, p_lat, p_lng)
     into v_jarak;
-  if v_jarak > 100 then
-    raise exception 'Anda berada di luar radius 100 meter dari RSUD AMI. Jarak Anda saat ini % meter.',
+  if v_jarak > 50 then
+    raise exception 'Anda berada di luar radius 50 meter dari RSUD AMI. Jarak Anda saat ini % meter.',
       round(v_jarak)::text;
   end if;
 
@@ -4276,8 +4276,8 @@ begin
 
   select public.haversine(-0.23805651650343132, 117.41442516465149, p_lat, p_lng)
     into v_jarak;
-  if v_jarak > 100 then
-    raise exception 'Anda berada di luar radius 100 meter dari RSUD AMI. Jarak Anda saat ini % meter.',
+  if v_jarak > 50 then
+    raise exception 'Anda berada di luar radius 50 meter dari RSUD AMI. Jarak Anda saat ini % meter.',
       round(v_jarak)::text;
   end if;
 
@@ -5870,6 +5870,927 @@ $$;
 revoke execute on function public.perbarui_pegawai_dan_jadwal(uuid, text, text, boolean, text)
   from public, anon;
 grant execute on function public.perbarui_pegawai_dan_jadwal(uuid, text, text, boolean, text)
+  to authenticated;
+
+commit;
+
+-- ==========================================================================
+-- MIGRASI 23 - DINAS LUAR LINTAS UNIT
+-- ==========================================================================
+-- ==========================================================================
+-- 23 - DINAS LUAR LINTAS UNIT
+-- Syarat: 01 s.d. 22 sudah dijalankan.
+--
+-- Ringkasan:
+--   1. Kepala unit dapat mencatat Dinas Luar untuk pegawai lintas unit.
+--      Sakit dan Cuti tetap terbatas pada unit yang dikelola.
+--   2. Pembuat grup dapat membaca seluruh anggota (termasuk profil pegawai)
+--      dan dokumen grup Dinas Luar lintas unit selama masih menjabat kepala
+--      unit. Akses otomatis dicabut ketika penugasan kepala unit berakhir.
+--   3. dibuat_oleh dan dibatalkan_oleh mengacu ke auth.users agar kepala ASN
+--      (tanpa baris public.pegawai) dapat mencatat dan membatalkan.
+-- ==========================================================================
+
+begin;
+
+do $$
+begin
+  if to_regclass('public.izin_cuti') is null
+     or to_regclass('public.pegawai') is null
+     or to_regclass('public.kepala_unit') is null then
+    raise exception 'Tabel inti tidak ditemukan. Jalankan migrasi 01-22 pada project Supabase yang benar.';
+  end if;
+  if to_regclass('auth.users') is null then
+    raise exception 'Skema auth.users tidak ditemukan. Pastikan project Supabase benar.';
+  end if;
+end;
+$$;
+
+-- --------------------------------------------------------------------------
+-- 1. Kepemilikan pengajuan oleh akun, bukan hanya baris pegawai
+-- --------------------------------------------------------------------------
+
+alter table public.izin_cuti
+  drop constraint if exists izin_cuti_dibuat_oleh_fkey,
+  drop constraint if exists izin_cuti_dibatalkan_oleh_fkey;
+
+alter table public.izin_cuti alter column dibuat_oleh drop not null;
+
+alter table public.izin_cuti
+  add constraint izin_cuti_dibuat_oleh_fkey
+  foreign key (dibuat_oleh) references auth.users (id)
+  on delete set null not valid;
+
+alter table public.izin_cuti
+  add constraint izin_cuti_dibatalkan_oleh_fkey
+  foreign key (dibatalkan_oleh) references auth.users (id)
+  on delete set null not valid;
+
+alter table public.izin_cuti validate constraint izin_cuti_dibuat_oleh_fkey;
+alter table public.izin_cuti validate constraint izin_cuti_dibatalkan_oleh_fkey;
+
+-- --------------------------------------------------------------------------
+-- 2. Daftar pegawai untuk form izin (lintas unit)
+-- --------------------------------------------------------------------------
+
+create or replace function public.daftar_pegawai_izin()
+returns table (id uuid, nama text, unit_kerja text)
+language sql stable security definer
+set search_path = public
+as $$
+  select p.id, p.nama, p.unit_kerja
+    from public.pegawai p
+   where p.role = 'pegawai'
+     and (public.is_superadmin() or public.is_kepala_ruangan())
+   order by p.nama;
+$$;
+
+revoke execute on function public.daftar_pegawai_izin() from public, anon;
+grant execute on function public.daftar_pegawai_izin() to authenticated;
+
+-- --------------------------------------------------------------------------
+-- 3. Akses grup & dokumen oleh pembuat grup yang masih menjabat
+-- --------------------------------------------------------------------------
+
+create or replace function public.bisa_akses_grup(p_grup_id uuid)
+returns boolean
+language sql stable security definer
+set search_path = public
+as $$
+  select public.is_superadmin()
+      or (
+        public.is_kepala_ruangan()
+        and exists (
+          select 1
+            from public.izin_cuti i
+           where i.grup_id = p_grup_id
+             and i.dibuat_oleh = auth.uid()
+        )
+      );
+$$;
+
+create or replace function public.bisa_kelola_izin_grup(p_grup_ids uuid[])
+returns table (grup_id uuid, boleh boolean)
+language sql stable security definer
+set search_path = public
+as $$
+  with diminta as (
+    select distinct x as grup_id
+      from unnest(coalesce(p_grup_ids, '{}'::uuid[])) as x
+     where x is not null
+  ), info as (
+    select i.grup_id,
+           min(i.jenis) as jenis,
+           (array_agg(i.dibuat_oleh))[1] as dibuat_oleh,
+           bool_and(public.bisa_kelola_unit(p.unit_kerja)) as semua_unit_dikelola
+      from public.izin_cuti i
+      join public.pegawai p on p.id = i.user_id
+     where i.grup_id in (select d.grup_id from diminta d)
+     group by i.grup_id
+  )
+  select d.grup_id,
+         (
+           public.is_superadmin()
+           or (
+             i.jenis = 'Dinas Luar'
+             and public.is_kepala_ruangan()
+             and i.dibuat_oleh = auth.uid()
+           )
+           or coalesce(i.semua_unit_dikelola, false)
+         ) as boleh
+    from diminta d
+    left join info i on i.grup_id = d.grup_id;
+$$;
+
+drop policy if exists "izin_baca_terkait" on public.izin_cuti;
+create policy "izin_baca_terkait" on public.izin_cuti
+  for select to authenticated
+  using (
+    public.bisa_akses_izin(user_id)
+    or public.bisa_akses_grup(grup_id)
+  );
+
+-- Pembuat grup perlu membaca profil pegawai lintas unit yang ia catat agar
+-- nama dan unit kerja anggota tampil di daftar pengajuan.
+drop policy if exists "pegawai_baca_profil_sendiri" on public.pegawai;
+create policy "pegawai_baca_profil_sendiri" on public.pegawai
+  for select to authenticated
+  using (
+    id = auth.uid()
+    or public.is_superadmin()
+    or (
+      public.is_kepala_ruangan()
+      and (
+        unit_kerja in (select public.unit_dikelola())
+        or exists (
+          select 1
+            from public.izin_cuti i
+           where i.user_id = pegawai.id
+             and i.dibuat_oleh = auth.uid()
+        )
+      )
+    )
+  );
+
+create or replace function public.bisa_baca_dokumen(p_path text)
+returns boolean
+language sql stable security definer
+set search_path = public, storage
+as $$
+  select exists (
+    select 1
+      from public.izin_cuti i
+     where i.dokumen_path = p_path
+       and (
+         public.bisa_akses_izin(i.user_id)
+         or public.bisa_akses_grup(i.grup_id)
+       )
+  )
+  or exists (
+    select 1
+      from storage.objects o
+     where o.bucket_id = 'dokumen-izin'
+       and o.name = p_path
+       and o.owner::text = auth.uid()::text
+       and not exists (
+         select 1 from public.izin_cuti i where i.dokumen_path = p_path
+       )
+  );
+$$;
+
+revoke execute on function public.bisa_akses_grup(uuid) from public, anon;
+revoke execute on function public.bisa_kelola_izin_grup(uuid[]) from public, anon;
+revoke execute on function public.bisa_baca_dokumen(text) from public, anon;
+grant execute on function public.bisa_akses_grup(uuid) to authenticated;
+grant execute on function public.bisa_kelola_izin_grup(uuid[]) to authenticated;
+grant execute on function public.bisa_baca_dokumen(text) to authenticated;
+
+-- --------------------------------------------------------------------------
+-- 4. RPC catat: Dinas Luar boleh lintas unit
+-- --------------------------------------------------------------------------
+
+create or replace function public.catat_izin_grup(
+  p_grup_id uuid,
+  p_jenis text,
+  p_user_ids uuid[],
+  p_tanggal_mulai date,
+  p_tanggal_selesai date,
+  p_keterangan text default null,
+  p_dokumen_path text default null,
+  p_dokumen_nama text default null,
+  p_dokumen_tipe text default null,
+  p_dokumen_ukuran bigint default null
+) returns jsonb
+language plpgsql security definer
+set search_path = public, storage
+as $$
+declare
+  v_jumlah integer;
+  v_uid uuid;
+  v_path text := nullif(trim(p_dokumen_path), '');
+  v_nama text;
+  v_tipe text := nullif(trim(p_dokumen_tipe), '');
+  v_ukuran bigint := p_dokumen_ukuran;
+begin
+  if auth.uid() is null then
+    raise exception 'Sesi Anda tidak valid. Silakan login kembali.';
+  end if;
+
+  if not (public.is_superadmin() or public.is_kepala_ruangan()) then
+    raise exception 'Hanya kepala ruangan atau Super Admin yang dapat mencatat ketidakhadiran.';
+  end if;
+
+  if p_grup_id is null then
+    raise exception 'ID grup pengajuan tidak valid.';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext('presisi-izin:' || p_grup_id::text));
+
+  if p_jenis not in ('Sakit', 'Cuti', 'Dinas Luar') then
+    raise exception 'Jenis ketidakhadiran tidak valid.';
+  end if;
+
+  if p_tanggal_mulai is null or p_tanggal_selesai is null
+     or p_tanggal_selesai < p_tanggal_mulai then
+    raise exception 'Rentang tanggal tidak valid.';
+  end if;
+
+  v_jumlah := coalesce(array_length(p_user_ids, 1), 0);
+  if v_jumlah = 0 then
+    raise exception 'Pilih minimal satu pegawai.';
+  end if;
+  if p_jenis in ('Sakit', 'Cuti') and v_jumlah <> 1 then
+    raise exception 'Sakit dan Cuti hanya untuk satu pegawai.';
+  end if;
+  if p_jenis = 'Dinas Luar' and v_jumlah > 4 then
+    raise exception 'Dinas Luar maksimal 4 pegawai per grup.';
+  end if;
+  if exists (select 1 from unnest(p_user_ids) as x where x is null) then
+    raise exception 'Pegawai yang dipilih tidak boleh kosong.';
+  end if;
+  if (select count(distinct x) from unnest(p_user_ids) as x) <> v_jumlah then
+    raise exception 'Pegawai yang dipilih tidak boleh duplikat.';
+  end if;
+
+  if exists (
+    select 1
+      from unnest(p_user_ids) as x
+      left join public.pegawai p on p.id = x
+     where p.id is null
+  ) then
+    raise exception 'Ada pegawai yang tidak ditemukan.';
+  end if;
+
+  if exists (
+    select 1
+      from unnest(p_user_ids) as x
+      join public.pegawai p on p.id = x
+     where p.role <> 'pegawai'
+  ) then
+    raise exception 'Hanya pegawai non-ASN yang dapat dicatat.';
+  end if;
+
+  if not public.is_superadmin()
+     and p_jenis in ('Sakit', 'Cuti')
+     and exists (
+       select 1
+         from unnest(p_user_ids) as x
+         join public.pegawai p on p.id = x
+        where not public.bisa_kelola_unit(p.unit_kerja)
+     ) then
+    raise exception 'Sakit dan Cuti hanya untuk pegawai dari unit yang Anda kelola.';
+  end if;
+
+  if exists (select 1 from public.izin_cuti where grup_id = p_grup_id) then
+    raise exception 'ID grup sudah dipakai. Muat ulang halaman lalu coba lagi.';
+  end if;
+
+  if p_jenis <> 'Cuti' and v_path is null then
+    raise exception 'Dokumen wajib diunggah untuk Sakit dan Dinas Luar.';
+  end if;
+
+  if v_path is not null then
+    perform public.validasi_dokumen_izin(v_path, p_grup_id, v_tipe, v_ukuran);
+
+    select coalesce(o.metadata ->> 'mimetype', v_tipe),
+           coalesce(nullif(o.metadata ->> 'size', '')::bigint, v_ukuran)
+      into v_tipe, v_ukuran
+      from storage.objects o
+     where o.bucket_id = 'dokumen-izin'
+       and o.name = v_path;
+
+    if v_tipe = 'image/jpg' then
+      v_tipe := 'image/jpeg';
+    end if;
+    v_nama := coalesce(
+      nullif(trim(p_dokumen_nama), ''),
+      regexp_replace(v_path, '^.*/', '')
+    );
+  end if;
+
+  foreach v_uid in array p_user_ids loop
+    insert into public.izin_cuti (
+      user_id,
+      grup_id,
+      jenis,
+      tanggal_mulai,
+      tanggal_selesai,
+      alasan,
+      status,
+      dibuat_oleh,
+      dokumen_path,
+      dokumen_nama,
+      dokumen_tipe,
+      dokumen_ukuran
+    ) values (
+      v_uid,
+      p_grup_id,
+      p_jenis,
+      p_tanggal_mulai,
+      p_tanggal_selesai,
+      nullif(trim(p_keterangan), ''),
+      'menunggu',
+      auth.uid(),
+      v_path,
+      case when v_path is null then null else v_nama end,
+      case when v_path is null then null else v_tipe end,
+      case when v_path is null then null else v_ukuran end
+    );
+  end loop;
+
+  return jsonb_build_object(
+    'status', 'ok',
+    'grup_id', p_grup_id,
+    'pesan', 'Ketidakhadiran berhasil dicatat dengan status menunggu.'
+  );
+end;
+$$;
+
+-- --------------------------------------------------------------------------
+-- 5. RPC ubah: pembuat grup Dinas Luar boleh mengubah
+-- --------------------------------------------------------------------------
+
+create or replace function public.ubah_izin_grup(
+  p_grup_id uuid,
+  p_jenis text,
+  p_user_ids uuid[],
+  p_tanggal_mulai date,
+  p_tanggal_selesai date,
+  p_keterangan text default null,
+  p_dokumen_path text default null,
+  p_dokumen_nama text default null,
+  p_dokumen_tipe text default null,
+  p_dokumen_ukuran bigint default null
+) returns jsonb
+language plpgsql security definer
+set search_path = public, storage
+as $$
+declare
+  v_lama public.izin_cuti%rowtype;
+  v_jumlah integer;
+  v_uid uuid;
+  v_path text;
+  v_nama text;
+  v_tipe text;
+  v_ukuran bigint;
+  v_dibuat_pada timestamptz;
+  v_dibuat_oleh uuid;
+begin
+  if auth.uid() is null then
+    raise exception 'Sesi Anda tidak valid. Silakan login kembali.';
+  end if;
+
+  if not (public.is_superadmin() or public.is_kepala_ruangan()) then
+    raise exception 'Hanya kepala ruangan atau Super Admin yang dapat mengubah pengajuan.';
+  end if;
+
+  if p_grup_id is null then
+    raise exception 'ID grup pengajuan tidak valid.';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext('presisi-izin:' || p_grup_id::text));
+
+  select * into v_lama
+    from public.izin_cuti
+   where grup_id = p_grup_id
+   limit 1;
+
+  if not found then
+    raise exception 'Pengajuan tidak ditemukan.';
+  end if;
+
+  if exists (
+    select 1 from public.izin_cuti
+     where grup_id = p_grup_id and status <> 'menunggu'
+  ) then
+    raise exception 'Hanya pengajuan berstatus menunggu yang dapat diubah.';
+  end if;
+
+  if not public.is_superadmin()
+     and not (
+       v_lama.jenis = 'Dinas Luar'
+       and public.is_kepala_ruangan()
+       and v_lama.dibuat_oleh = auth.uid()
+     )
+     and exists (
+       select 1
+         from public.izin_cuti i
+         join public.pegawai p on p.id = i.user_id
+        where i.grup_id = p_grup_id
+          and not public.bisa_kelola_unit(p.unit_kerja)
+     ) then
+    raise exception 'Anda hanya dapat mengubah pengajuan dari unit yang Anda kelola.';
+  end if;
+
+  if p_jenis not in ('Sakit', 'Cuti', 'Dinas Luar') then
+    raise exception 'Jenis ketidakhadiran tidak valid.';
+  end if;
+
+  if p_tanggal_mulai is null or p_tanggal_selesai is null
+     or p_tanggal_selesai < p_tanggal_mulai then
+    raise exception 'Rentang tanggal tidak valid.';
+  end if;
+
+  v_jumlah := coalesce(array_length(p_user_ids, 1), 0);
+  if v_jumlah = 0 then
+    raise exception 'Pilih minimal satu pegawai.';
+  end if;
+  if p_jenis in ('Sakit', 'Cuti') and v_jumlah <> 1 then
+    raise exception 'Sakit dan Cuti hanya untuk satu pegawai.';
+  end if;
+  if p_jenis = 'Dinas Luar' and v_jumlah > 4 then
+    raise exception 'Dinas Luar maksimal 4 pegawai per grup.';
+  end if;
+  if exists (select 1 from unnest(p_user_ids) as x where x is null) then
+    raise exception 'Pegawai yang dipilih tidak boleh kosong.';
+  end if;
+  if (select count(distinct x) from unnest(p_user_ids) as x) <> v_jumlah then
+    raise exception 'Pegawai yang dipilih tidak boleh duplikat.';
+  end if;
+
+  if exists (
+    select 1
+      from unnest(p_user_ids) as x
+      left join public.pegawai p on p.id = x
+     where p.id is null
+  ) then
+    raise exception 'Ada pegawai yang tidak ditemukan.';
+  end if;
+
+  if exists (
+    select 1
+      from unnest(p_user_ids) as x
+      join public.pegawai p on p.id = x
+     where p.role <> 'pegawai'
+  ) then
+    raise exception 'Hanya pegawai non-ASN yang dapat dicatat.';
+  end if;
+
+  if not public.is_superadmin()
+     and p_jenis in ('Sakit', 'Cuti')
+     and exists (
+       select 1
+         from unnest(p_user_ids) as x
+         join public.pegawai p on p.id = x
+        where not public.bisa_kelola_unit(p.unit_kerja)
+     ) then
+    raise exception 'Sakit dan Cuti hanya untuk pegawai dari unit yang Anda kelola.';
+  end if;
+
+  v_path := nullif(trim(p_dokumen_path), '');
+  if v_path is null then
+    v_path := v_lama.dokumen_path;
+    v_nama := v_lama.dokumen_nama;
+    v_tipe := v_lama.dokumen_tipe;
+    v_ukuran := v_lama.dokumen_ukuran;
+  else
+    v_tipe := nullif(trim(p_dokumen_tipe), '');
+    v_ukuran := p_dokumen_ukuran;
+    perform public.validasi_dokumen_izin(v_path, p_grup_id, v_tipe, v_ukuran);
+
+    select coalesce(o.metadata ->> 'mimetype', v_tipe),
+           coalesce(nullif(o.metadata ->> 'size', '')::bigint, v_ukuran)
+      into v_tipe, v_ukuran
+      from storage.objects o
+     where o.bucket_id = 'dokumen-izin'
+       and o.name = v_path;
+
+    if v_tipe = 'image/jpg' then
+      v_tipe := 'image/jpeg';
+    end if;
+    v_nama := coalesce(
+      nullif(trim(p_dokumen_nama), ''),
+      regexp_replace(v_path, '^.*/', '')
+    );
+  end if;
+
+  if p_jenis <> 'Cuti' and v_path is null then
+    raise exception 'Dokumen wajib ada untuk Sakit dan Dinas Luar.';
+  end if;
+
+  if p_jenis <> 'Cuti' and v_path is not null then
+    perform public.validasi_dokumen_izin(v_path, p_grup_id, v_tipe, v_ukuran);
+  end if;
+
+  v_dibuat_pada := v_lama.dibuat_pada;
+  v_dibuat_oleh := v_lama.dibuat_oleh;
+
+  delete from public.izin_cuti where grup_id = p_grup_id;
+
+  foreach v_uid in array p_user_ids loop
+    insert into public.izin_cuti (
+      user_id,
+      grup_id,
+      jenis,
+      tanggal_mulai,
+      tanggal_selesai,
+      alasan,
+      status,
+      dibuat_oleh,
+      dibuat_pada,
+      dokumen_path,
+      dokumen_nama,
+      dokumen_tipe,
+      dokumen_ukuran
+    ) values (
+      v_uid,
+      p_grup_id,
+      p_jenis,
+      p_tanggal_mulai,
+      p_tanggal_selesai,
+      nullif(trim(p_keterangan), ''),
+      'menunggu',
+      v_dibuat_oleh,
+      v_dibuat_pada,
+      v_path,
+      case when v_path is null then null else v_nama end,
+      case when v_path is null then null else v_tipe end,
+      case when v_path is null then null else v_ukuran end
+    );
+  end loop;
+
+  return jsonb_build_object(
+    'status', 'ok',
+    'grup_id', p_grup_id,
+    'pesan', 'Pengajuan berhasil diperbarui.'
+  );
+end;
+$$;
+
+-- --------------------------------------------------------------------------
+-- 6. RPC batalkan: pembuat grup Dinas Luar boleh membatalkan
+-- --------------------------------------------------------------------------
+
+create or replace function public.batalkan_izin_grup(
+  p_grup_id uuid,
+  p_alasan text default null
+) returns jsonb
+language plpgsql security definer
+set search_path = public, storage
+as $$
+declare
+  v_lama public.izin_cuti%rowtype;
+  v_baris public.izin_cuti%rowtype;
+begin
+  if auth.uid() is null then
+    raise exception 'Sesi Anda tidak valid. Silakan login kembali.';
+  end if;
+
+  if not (public.is_superadmin() or public.is_kepala_ruangan()) then
+    raise exception 'Anda tidak berhak membatalkan pengajuan.';
+  end if;
+
+  if p_grup_id is null then
+    raise exception 'ID grup pengajuan tidak valid.';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtext('presisi-izin:' || p_grup_id::text));
+
+  select * into v_lama
+    from public.izin_cuti
+   where grup_id = p_grup_id
+   limit 1;
+
+  if not found then
+    raise exception 'Pengajuan tidak ditemukan.';
+  end if;
+
+  if v_lama.status not in ('menunggu', 'disetujui') then
+    raise exception 'Pengajuan ini tidak dapat dibatalkan.';
+  end if;
+
+  if v_lama.status = 'disetujui' and not public.is_superadmin() then
+    raise exception 'Setelah disetujui, hanya Super Admin yang dapat membatalkan pengajuan.';
+  end if;
+
+  if not public.is_superadmin()
+     and not (
+       v_lama.jenis = 'Dinas Luar'
+       and v_lama.status = 'menunggu'
+       and public.is_kepala_ruangan()
+       and v_lama.dibuat_oleh = auth.uid()
+     )
+     and exists (
+       select 1
+         from public.izin_cuti i
+         join public.pegawai p on p.id = i.user_id
+        where i.grup_id = p_grup_id
+          and not public.bisa_kelola_unit(p.unit_kerja)
+     ) then
+    raise exception 'Anda hanya dapat membatalkan pengajuan dari unit yang Anda kelola.';
+  end if;
+
+  if v_lama.status = 'disetujui' then
+    for v_baris in
+      select * from public.izin_cuti where grup_id = p_grup_id
+    loop
+      delete from public.presensi
+       where user_id = v_baris.user_id
+         and tanggal between v_baris.tanggal_mulai and v_baris.tanggal_selesai
+         and jam_masuk is null
+         and dikoreksi_oleh is null
+         and status_kehadiran = v_baris.jenis;
+    end loop;
+  end if;
+
+  update public.izin_cuti
+     set status = 'dibatalkan',
+         dibatalkan_oleh = auth.uid(),
+         dibatalkan_pada = now(),
+         alasan_pembatalan = nullif(trim(p_alasan), '')
+   where grup_id = p_grup_id;
+
+  return jsonb_build_object(
+    'status', 'ok',
+    'grup_id', p_grup_id,
+    'pesan', 'Pengajuan dibatalkan.'
+  );
+end;
+$$;
+
+-- --------------------------------------------------------------------------
+-- 7. Hak eksekusi RPC
+-- --------------------------------------------------------------------------
+
+revoke execute on function public.catat_izin_grup(uuid, text, uuid[], date, date, text, text, text, text, bigint) from public, anon;
+revoke execute on function public.ubah_izin_grup(uuid, text, uuid[], date, date, text, text, text, text, bigint) from public, anon;
+revoke execute on function public.batalkan_izin_grup(uuid, text) from public, anon;
+
+grant execute on function public.catat_izin_grup(uuid, text, uuid[], date, date, text, text, text, text, bigint) to authenticated;
+grant execute on function public.ubah_izin_grup(uuid, text, uuid[], date, date, text, text, text, text, bigint) to authenticated;
+grant execute on function public.batalkan_izin_grup(uuid, text) to authenticated;
+
+commit;
+
+
+-- ==========================================================================
+-- 24 - RADIUS ABSENSI 50 METER
+-- Syarat: 01 s.d. 23 sudah dijalankan.
+--
+-- Ringkasan:
+--   Memperbarui radius geofencing pada RPC submit_presensi dari 100 meter
+--   menjadi 50 meter. Titik pusat RSUD AMI tetap
+--   -0.23805651650343132, 117.41442516465149.
+--   Nilai radius yang sama dipakai klien di src/config/constants.js.
+-- ==========================================================================
+
+begin;
+
+do $$
+begin
+  if to_regclass('public.presensi') is null
+     or to_regclass('public.perangkat') is null then
+    raise exception 'Tabel inti tidak ditemukan. Jalankan migrasi 01-23 pada project Supabase yang benar.';
+  end if;
+end;
+$$;
+
+create or replace function public.submit_presensi(
+  p_device_token text,
+  p_tipe text,
+  p_lat double precision,
+  p_lng double precision,
+  p_akurasi double precision,
+  p_is_mocked boolean default false
+) returns jsonb
+language plpgsql security definer
+set search_path = public
+as $$
+declare
+  v_user uuid := auth.uid();
+  v_hari date := (now() at time zone 'Asia/Makassar')::date;
+  v_waktu timestamptz := now();
+  v_status text;
+  v_jarak double precision;
+  v_row public.presensi%rowtype;
+  v_jadwal record;
+  v_jadwal_kemarin record;
+  v_tanggal_kerja date := v_hari;
+  v_mulai timestamptz;
+  v_selesai timestamptz;
+  v_menit integer := 0;
+begin
+  if v_user is null then
+    raise exception 'Sesi Anda tidak valid. Silakan login kembali.';
+  end if;
+  if p_tipe not in ('masuk', 'pulang') then
+    raise exception 'Jenis absensi tidak dikenal.';
+  end if;
+
+  -- Validasi perangkat
+  select status into v_status
+    from public.perangkat
+   where user_id = v_user and device_token = p_device_token;
+
+  if v_status is null then
+    raise exception 'Perangkat ini belum terdaftar. Ajukan verifikasi perangkat terlebih dahulu.';
+  end if;
+  if v_status <> 'approved' then
+    raise exception 'Perangkat Anda sedang menunggu persetujuan Admin IT. Tombol absen terkunci.';
+  end if;
+
+  -- Anti Fake GPS
+  if coalesce(p_is_mocked, false) or p_akurasi is null or p_akurasi <= 0 then
+    raise exception 'Terdeteksi menggunakan Fake GPS / Mock Location. Absensi dibatalkan.';
+  end if;
+  if p_akurasi > 50 then
+    raise exception 'Akurasi GPS tidak wajar (% m). Coba lagi di ruang terbuka.', round(p_akurasi)::text;
+  end if;
+
+  select public.haversine(-0.23805651650343132, 117.41442516465149, p_lat, p_lng)
+    into v_jarak;
+  if v_jarak > 50 then
+    raise exception 'Anda berada di luar radius 50 meter dari RSUD AMI. Jarak Anda saat ini % meter.',
+      round(v_jarak)::text;
+  end if;
+
+  if p_tipe = 'masuk' then
+    select * into v_jadwal from public.jadwal_kerja(v_user, v_hari);
+
+    -- Shift malam yang dimulai kemarin masih berlangsung setelah tengah malam.
+    if v_jadwal.pola_kerja = 'shift' and not v_jadwal.terjadwal then
+      select * into v_jadwal_kemarin from public.jadwal_kerja(v_user, v_hari - 1);
+      if v_jadwal_kemarin.pola_kerja = 'shift'
+         and v_jadwal_kemarin.terjadwal
+         and v_jadwal_kemarin.jam_mulai is not null
+         and v_jadwal_kemarin.jam_selesai is not null
+         and v_jadwal_kemarin.jam_selesai <= v_jadwal_kemarin.jam_mulai then
+        v_selesai := public.waktu_wita(v_hari - 1, v_jadwal_kemarin.jam_selesai) + interval '1 day';
+        if v_waktu <= v_selesai then
+          v_tanggal_kerja := v_hari - 1;
+          v_jadwal := v_jadwal_kemarin;
+        end if;
+      end if;
+    end if;
+
+    if not coalesce(v_jadwal.boleh_absen, false) then
+      raise exception '%', coalesce(v_jadwal.pesan_jadwal, 'Anda tidak dijadwalkan untuk absensi hari ini.');
+    end if;
+
+    if coalesce(v_jadwal.terjadwal, false)
+       and v_jadwal.jam_mulai is not null
+       and v_jadwal.jam_selesai is not null then
+      v_mulai := public.waktu_wita(v_tanggal_kerja, v_jadwal.jam_mulai);
+      v_selesai := public.waktu_wita(v_tanggal_kerja, v_jadwal.jam_selesai);
+      if v_jadwal.jam_selesai <= v_jadwal.jam_mulai then
+        v_selesai := v_selesai + interval '1 day';
+      end if;
+
+      -- Batas awal absen masuk: 20 menit sebelum jam masuk.
+      if v_waktu < v_mulai - interval '20 minutes' then
+        raise exception 'Absen masuk baru dapat dilakukan mulai pukul % WITA (20 menit sebelum jam masuk %).',
+          to_char((v_mulai - interval '20 minutes') at time zone 'Asia/Makassar', 'HH24:MI'),
+          to_char(v_mulai at time zone 'Asia/Makassar', 'HH24:MI');
+      end if;
+
+      if v_waktu > v_selesai then
+        raise exception 'Jam kerja Anda sudah berakhir. Absensi tidak dapat dilakukan.';
+      end if;
+
+      if v_waktu > v_mulai then
+        v_menit := ceil(extract(epoch from (v_waktu - v_mulai)) / 60.0)::int;
+      else
+        v_menit := 0;
+      end if;
+    end if;
+
+    select * into v_row
+      from public.presensi
+     where user_id = v_user and tanggal = v_tanggal_kerja
+     for update;
+
+    if found then
+      if v_row.jam_masuk is not null then
+        raise exception 'Anda sudah melakukan absen masuk pada hari kerja tersebut.';
+      end if;
+      if v_row.status_kehadiran in ('Sakit', 'Cuti', 'Dinas Luar') then
+        raise exception 'Anda tercatat % pada hari kerja tersebut. Absensi tidak dapat dilakukan.',
+          v_row.status_kehadiran;
+      end if;
+      if v_row.status_kehadiran = 'Koreksi' or v_row.dikoreksi_oleh is not null then
+        raise exception 'Presensi pada hari kerja tersebut sudah dikoreksi oleh Super Admin.';
+      end if;
+
+      update public.presensi
+         set jam_masuk = v_waktu,
+             lokasi_masuk = jsonb_build_object(
+               'lat', p_lat,
+               'lng', p_lng,
+               'akurasi', round(p_akurasi::numeric, 1)
+             ),
+             jarak_masuk = round(v_jarak::numeric, 1),
+             status_kehadiran = 'Hadir',
+             menit_terlambat = v_menit,
+             device_token = p_device_token
+       where id = v_row.id
+       returning * into v_row;
+    else
+      insert into public.presensi
+        (user_id, tanggal, jam_masuk, lokasi_masuk, jarak_masuk,
+         status_kehadiran, menit_terlambat, device_token)
+      values
+        (v_user, v_tanggal_kerja, v_waktu,
+         jsonb_build_object(
+           'lat', p_lat,
+           'lng', p_lng,
+           'akurasi', round(p_akurasi::numeric, 1)
+         ),
+         round(v_jarak::numeric, 1), 'Hadir', v_menit, p_device_token)
+      returning * into v_row;
+    end if;
+  else
+    -- Checkout: cari presensi terbuka hari ini atau shift malam kemarin.
+    select * into v_row
+      from public.presensi
+     where user_id = v_user
+       and jam_masuk is not null
+       and jam_pulang is null
+       and tanggal >= v_hari - 1
+     order by tanggal desc
+     limit 1
+     for update;
+
+    if not found then
+      if exists (
+        select 1 from public.presensi
+         where user_id = v_user and tanggal = v_hari and jam_masuk is null
+      ) then
+        raise exception 'Anda belum melakukan absen masuk. Silakan absen hadir terlebih dahulu.';
+      end if;
+      raise exception 'Anda sudah melakukan absen pulang hari ini.';
+    end if;
+
+    -- Batas absen pulang: 1 menit setelah jam pulang pada jadwal hari kerja
+    -- presensi tersebut (shift malam dihitung lintas hari).
+    select * into v_jadwal from public.jadwal_kerja(v_user, v_row.tanggal);
+    if coalesce(v_jadwal.terjadwal, false)
+       and v_jadwal.jam_mulai is not null
+       and v_jadwal.jam_selesai is not null then
+      v_mulai := public.waktu_wita(v_row.tanggal, v_jadwal.jam_mulai);
+      v_selesai := public.waktu_wita(v_row.tanggal, v_jadwal.jam_selesai);
+      if v_jadwal.jam_selesai <= v_jadwal.jam_mulai then
+        v_selesai := v_selesai + interval '1 day';
+      end if;
+
+      if v_waktu < v_selesai + interval '1 minute' then
+        raise exception 'Absen pulang baru dapat dilakukan mulai pukul % WITA (setelah jam pulang %).',
+          to_char((v_selesai + interval '1 minute') at time zone 'Asia/Makassar', 'HH24:MI'),
+          to_char(v_selesai at time zone 'Asia/Makassar', 'HH24:MI');
+      end if;
+    end if;
+
+    update public.presensi
+       set jam_pulang = v_waktu,
+           lokasi_pulang = jsonb_build_object(
+             'lat', p_lat,
+             'lng', p_lng,
+             'akurasi', round(p_akurasi::numeric, 1)
+           ),
+           jarak_pulang = round(v_jarak::numeric, 1)
+     where id = v_row.id
+     returning * into v_row;
+  end if;
+
+  return jsonb_build_object(
+    'status', 'ok',
+    'tipe', p_tipe,
+    'tanggal', v_row.tanggal,
+    'waktu', case when p_tipe = 'masuk' then v_row.jam_masuk else v_row.jam_pulang end,
+    'jarak', round(v_jarak::numeric, 1),
+    'menit_terlambat', coalesce(v_row.menit_terlambat, 0),
+    'pesan', case
+      when p_tipe = 'masuk' and coalesce(v_row.menit_terlambat, 0) > 0
+        then 'Absen hadir berhasil dicatat. Terlambat ' || v_row.menit_terlambat || ' menit.'
+      when p_tipe = 'masuk' then 'Absen hadir berhasil dicatat.'
+      else 'Absen pulang berhasil dicatat.'
+    end
+  );
+end;
+$$;
+
+revoke execute on function public.submit_presensi(text, text, double precision, double precision, double precision, boolean)
+  from public, anon;
+grant execute on function public.submit_presensi(text, text, double precision, double precision, double precision, boolean)
   to authenticated;
 
 commit;

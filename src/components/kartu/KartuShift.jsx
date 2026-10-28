@@ -81,13 +81,13 @@ export default function KartuShift({ jadwal }) {
               </p>
             </div>
           </div>
-          <p className="mt-2.5 text-[12px] leading-relaxed text-slate-500">
-            {pola === 'reguler'
-              ? 'Jam kerja reguler Senin–Kamis 08.00–16.30, Jumat 08.00–16.00.'
-              : jadwal?.jam_selesai <= jadwal?.jam_mulai
+          {pola !== 'reguler' && (
+            <p className="mt-2.5 text-[12px] leading-relaxed text-slate-500">
+              {jadwal?.jam_selesai <= jadwal?.jam_mulai
                 ? 'Shift malam berakhir pada pagi hari berikutnya.'
                 : 'Absensi mengikuti jadwal shift yang ditetapkan.'}
-          </p>
+            </p>
+          )}
           {namaLibur && (
             <p className="mt-1 text-[11px] font-semibold text-amber-700">
               Catatan: {namaLibur} — Anda tetap dijadwalkan shift.

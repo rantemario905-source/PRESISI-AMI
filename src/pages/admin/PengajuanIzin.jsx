@@ -15,6 +15,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import {
+  ambilAksesKelolaGrup,
   ambilDaftarIzin,
   ambilDokumenUrl,
   batalkanIzinGrup,
@@ -24,7 +25,7 @@ import {
   ubahIzinGrup,
   unggahDokumenIzin,
 } from '../../services/leaveService.js'
-import { ambilSemuaPegawai } from '../../services/pegawaiService.js'
+import { ambilPegawaiIzin, ambilSemuaPegawai } from '../../services/pegawaiService.js'
 import { buatIdGrup, siapkanDokumenIzin } from '../../utils/dokumenIzin.js'
 import { formatTanggalRingkas, hariIni } from '../../utils/format.js'
 import { labelJenis } from '../../utils/izin.js'
@@ -76,17 +77,19 @@ function dokumenWajib(jenis) {
 
 export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-sakit' }) {
   const adalahKepala = mode === 'kepala'
-  const { profil } = useAuth()
+  const { profil, unitDikelola } = useAuth()
   const konteksKepala = useOutletContext()
   const unitKepala = adalahKepala
     ? konteksKepala?.unitAktif || profil?.unit_kerja || ''
     : ''
+  const labelUnit = unitDikelola.length > 1 ? 'yang Anda kelola' : unitKepala || 'Anda'
   const jenisTersedia = kategori === 'cuti' ? ['Cuti'] : ['Sakit', 'Dinas Luar']
   const judulKategori = kategori === 'cuti' ? 'Cuti' : 'Dinas & Sakit'
 
   const [tab, setTab] = useState('semua')
   const [daftar, setDaftar] = useState([])
   const [pegawai, setPegawai] = useState([])
+  const [aksesKelola, setAksesKelola] = useState(null)
   const [memuat, setMemuat] = useState(true)
   const [galat, setGalat] = useState(null)
   const [pesan, setPesan] = useState(null)
@@ -104,6 +107,28 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
   const [alasanBatal, setAlasanBatal] = useState('')
   const [dokumenMembuka, setDokumenMembuka] = useState(null)
 
+  const pegawaiUnitSaya = adalahKepala
+    ? pegawai.filter((p) => unitDikelola.includes(p.unit_kerja))
+    : pegawai
+  const pegawaiTampil = form.jenis === 'Dinas Luar' ? pegawai : pegawaiUnitSaya
+
+  const bolehKelolaGrup = (grup) => {
+    if (!adalahKepala) return true
+    if (aksesKelola && Object.prototype.hasOwnProperty.call(aksesKelola, grup.grup_id)) {
+      return aksesKelola[grup.grup_id] === true
+    }
+    const anggota = grup.anggota ?? []
+    const semuaUnitSaya =
+      anggota.length > 0 &&
+      anggota.every((a) => unitDikelola.includes(a?.unit_kerja))
+    const pembuatDinasAktif =
+      grup.jenis === 'Dinas Luar' &&
+      profil?.kepala_ruangan === true &&
+      Boolean(grup.dibuat_oleh) &&
+      grup.dibuat_oleh === profil?.id
+    return grup.jenis === 'Dinas Luar' ? pembuatDinasAktif : semuaUnitSaya
+  }
+
   const muat = useCallback(
     async (status = tab) => {
       setMemuat(true)
@@ -111,13 +136,25 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
         const data = await ambilDaftarIzin({ kategori, status })
         setDaftar(data)
         setGalat(null)
+        if (adalahKepala) {
+          try {
+            const perluAkses = data
+              .filter((g) => g.status === 'menunggu')
+              .map((g) => g.grup_id)
+            setAksesKelola(await ambilAksesKelolaGrup(perluAkses))
+          } catch {
+            setAksesKelola(null)
+          }
+        } else {
+          setAksesKelola(null)
+        }
       } catch (err) {
         setGalat(err.message || 'Gagal memuat data pengajuan.')
       } finally {
         setMemuat(false)
       }
     },
-    [kategori, tab],
+    [adalahKepala, kategori, tab],
   )
 
   useEffect(() => {
@@ -125,18 +162,20 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
   }, [muat, tab])
 
   useEffect(() => {
-    ambilSemuaPegawai({
-      unitKerja: adalahKepala ? unitKepala : null,
-    })
+    const muatPegawai = adalahKepala ? ambilPegawaiIzin() : ambilSemuaPegawai()
+    muatPegawai
       .then((data) => {
         setPegawai(data)
+        const daftarUnit = adalahKepala
+          ? data.filter((p) => unitDikelola.includes(p.unit_kerja))
+          : data
         setForm((lama) => ({
           ...lama,
-          singleId: lama.singleId || data[0]?.id || '',
+          singleId: lama.singleId || daftarUnit[0]?.id || '',
         }))
       })
       .catch(() => setPegawai([]))
-  }, [adalahKepala, unitKepala])
+  }, [adalahKepala, unitDikelola])
 
   useEffect(
     () => () => {
@@ -150,7 +189,7 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
     setForm({
       ...FORM_KOSONG,
       jenis: jenisTersedia[0],
-      singleId: pegawai[0]?.id ?? '',
+      singleId: pegawaiUnitSaya[0]?.id ?? '',
       tanggalMulai: hari,
       tanggalSelesai: hari,
     })
@@ -238,6 +277,14 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
     }
     if (form.jenis === 'Dinas Luar' && userIds.length > 4) {
       setGalatForm('Dinas Luar maksimal 4 pegawai per grup.')
+      return
+    }
+    if (
+      adalahKepala &&
+      form.jenis !== 'Dinas Luar' &&
+      !pegawaiUnitSaya.some((p) => p.id === form.singleId)
+    ) {
+      setGalatForm('Sakit dan Cuti hanya untuk pegawai dari unit yang Anda kelola.')
       return
     }
     if (form.tanggalSelesai < form.tanggalMulai) {
@@ -375,11 +422,14 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
 
   const perluDokumen = form.jenis !== 'Cuti'
   const adaDokumen = Boolean(form.dokumenBaru || form.dokumenLama?.path)
+  const pegawaiSingleValid =
+    form.jenis === 'Dinas Luar' ||
+    pegawaiUnitSaya.some((p) => p.id === form.singleId)
   const bolehSimpan =
     !menyimpan &&
     !memprosesDokumen &&
     (!perluDokumen || adaDokumen) &&
-    (form.jenis === 'Dinas Luar' ? form.userIds.length > 0 : Boolean(form.singleId))
+    (form.jenis === 'Dinas Luar' ? form.userIds.length > 0 : pegawaiSingleValid)
 
   const totalGrup = daftar.length
   const totalPegawai = daftar.reduce((n, g) => n + (g.jumlah_anggota || 1), 0)
@@ -390,7 +440,9 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
         judul={adalahKepala ? `${judulKategori} Unit Saya` : `Pengajuan ${judulKategori}`}
         deskripsi={
           adalahKepala
-            ? `Catat dan kelola ${judulKategori.toLowerCase()} untuk pegawai di unit ${unitKepala || 'Anda'}. Persetujuan dilakukan Super Admin.`
+            ? kategori === 'dinas-sakit'
+              ? `Catat Sakit dan Dinas Luar untuk unit ${labelUnit}; Dinas Luar boleh melibatkan pegawai lintas unit. Persetujuan dilakukan Super Admin.`
+              : `Catat dan kelola cuti untuk pegawai di unit ${labelUnit}. Persetujuan dilakukan Super Admin.`
             : `Catat ${judulKategori.toLowerCase()} atas nama pegawai, periksa dokumen, lalu setujui atau tolak.`
         }
       />
@@ -410,6 +462,12 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
         <Alert variant="info" className="mb-4">
           Anda dapat mencatat dan mengubah pengajuan yang masih <strong>Menunggu</strong>. Tombol
           setujui/tolak hanya tersedia untuk Super Admin.
+          {kategori === 'dinas-sakit' && (
+            <span className="mt-1 block">
+              Dinas Luar boleh melibatkan pegawai lintas unit; Sakit hanya untuk pegawai unit yang
+              Anda kelola.
+            </span>
+          )}
         </Alert>
       )}
 
@@ -527,12 +585,16 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
                   <div className="mt-3 grid grid-cols-2 gap-2">
                     {grup.status === 'menunggu' && (
                       <>
-                        <Button size="sm" variant="sekunder" onClick={() => bukaFormUbah(grup)}>
-                          Ubah
-                        </Button>
-                        <Button size="sm" variant="bahayaLembut" onClick={() => bukaBatal(grup)}>
-                          Batalkan
-                        </Button>
+                        {bolehKelolaGrup(grup) && (
+                          <>
+                            <Button size="sm" variant="sekunder" onClick={() => bukaFormUbah(grup)}>
+                              Ubah
+                            </Button>
+                            <Button size="sm" variant="bahayaLembut" onClick={() => bukaBatal(grup)}>
+                              Batalkan
+                            </Button>
+                          </>
+                        )}
                         {!adalahKepala && (
                           <>
                             <Button size="sm" variant="sukses" onClick={() => bukaAksi(grup, 'disetujui')}>
@@ -626,12 +688,12 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
                       </td>
                       <td className="px-5 py-3">
                         <div className="flex flex-wrap justify-end gap-2">
-                          {grup.status === 'menunggu' && (
+                          {grup.status === 'menunggu' && bolehKelolaGrup(grup) && (
                             <Button size="sm" variant="sekunder" onClick={() => bukaFormUbah(grup)}>
                               Ubah
                             </Button>
                           )}
-                          {grup.status === 'menunggu' && (
+                          {grup.status === 'menunggu' && bolehKelolaGrup(grup) && (
                             <Button size="sm" variant="bahayaLembut" onClick={() => bukaBatal(grup)}>
                               Batalkan
                             </Button>
@@ -692,13 +754,21 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
                 id="izin-jenis"
                 className="input-dasar"
                 value={form.jenis}
-                onChange={(e) =>
-                  setForm((lama) => ({
-                    ...lama,
-                    jenis: e.target.value,
-                    userIds: e.target.value === 'Dinas Luar' ? lama.userIds : [],
-                  }))
-                }
+                onChange={(e) => {
+                  const jenisBaru = e.target.value
+                  setForm((lama) => {
+                    const singleMasihUnit = pegawaiUnitSaya.some((p) => p.id === lama.singleId)
+                    return {
+                      ...lama,
+                      jenis: jenisBaru,
+                      userIds: jenisBaru === 'Dinas Luar' ? lama.userIds : [],
+                      singleId:
+                        jenisBaru === 'Dinas Luar' || singleMasihUnit
+                          ? lama.singleId
+                          : (pegawaiUnitSaya[0]?.id ?? ''),
+                    }
+                  })
+                }}
               >
                 {jenisTersedia.map((jenis) => (
                   <option key={jenis} value={jenis}>
@@ -718,12 +788,12 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
                 </span>
               </div>
               <div className="max-h-56 overflow-y-auto rounded-xl border border-slate-300 bg-white p-2">
-                {pegawai.length === 0 ? (
+                {pegawaiTampil.length === 0 ? (
                   <p className="px-2 py-4 text-center text-xs text-slate-500">
-                    Tidak ada pegawai pada unit ini.
+                    Belum ada pegawai yang dapat dipilih.
                   </p>
                 ) : (
-                  pegawai.map((p) => {
+                  pegawaiTampil.map((p) => {
                     const dicentang = form.userIds.includes(p.id)
                     const penuh = form.userIds.length >= 4 && !dicentang
                     return (
@@ -763,7 +833,7 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
                 required
               >
                 <option value="">— pilih pegawai —</option>
-                {pegawai.map((p) => (
+                {pegawaiTampil.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.nama} — {p.unit_kerja}
                   </option>
