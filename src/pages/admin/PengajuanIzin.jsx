@@ -12,6 +12,7 @@
  * ==========================================================================
  */
 import { useCallback, useEffect, useState } from 'react'
+import { useOutletContext } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import {
   ambilDaftarIzin,
@@ -76,6 +77,10 @@ function dokumenWajib(jenis) {
 export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-sakit' }) {
   const adalahKepala = mode === 'kepala'
   const { profil } = useAuth()
+  const konteksKepala = useOutletContext()
+  const unitKepala = adalahKepala
+    ? konteksKepala?.unitAktif || profil?.unit_kerja || ''
+    : ''
   const jenisTersedia = kategori === 'cuti' ? ['Cuti'] : ['Sakit', 'Dinas Luar']
   const judulKategori = kategori === 'cuti' ? 'Cuti' : 'Dinas & Sakit'
 
@@ -121,7 +126,7 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
 
   useEffect(() => {
     ambilSemuaPegawai({
-      unitKerja: adalahKepala ? profil?.unit_kerja : null,
+      unitKerja: adalahKepala ? unitKepala : null,
     })
       .then((data) => {
         setPegawai(data)
@@ -131,7 +136,7 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
         }))
       })
       .catch(() => setPegawai([]))
-  }, [adalahKepala, profil?.unit_kerja])
+  }, [adalahKepala, unitKepala])
 
   useEffect(
     () => () => {
@@ -385,7 +390,7 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
         judul={adalahKepala ? `${judulKategori} Unit Saya` : `Pengajuan ${judulKategori}`}
         deskripsi={
           adalahKepala
-            ? `Catat dan kelola ${judulKategori.toLowerCase()} untuk pegawai di unit ${profil?.unit_kerja ?? 'Anda'}. Persetujuan dilakukan Super Admin.`
+            ? `Catat dan kelola ${judulKategori.toLowerCase()} untuk pegawai di unit ${unitKepala || 'Anda'}. Persetujuan dilakukan Super Admin.`
             : `Catat ${judulKategori.toLowerCase()} atas nama pegawai, periksa dokumen, lalu setujui atau tolak.`
         }
       />

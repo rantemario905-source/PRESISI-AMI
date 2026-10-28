@@ -73,23 +73,17 @@ export async function ambilDataPegawai() {
 }
 
 /**
- * Perbarui nama, unit kerja, status kepala ruangan, dan pola kerja lewat RPC
- * yang dilindungi. Jika unit tujuan sudah punya kepala, server memindahkan
- * status kepala lama secara otomatis. Role Super Admin tidak diubah dari sini.
- * @param {{ id: string, nama: string, unitKerja: string, kepalaRuangan: boolean, polaKerja: 'shift'|'reguler' }} params
+ * Perbarui nama, unit kerja, dan pola kerja lewat RPC yang dilindungi.
+ * Status kepala tidak lagi diubah dari sini; server menghitung ulang cache
+ * kepala_ruangan dari tabel kepala_unit. Role Super Admin tidak diubah.
+ * @param {{ id: string, nama: string, unitKerja: string, polaKerja: 'shift'|'reguler' }} params
  */
-export async function perbaruiPegawai({
-  id,
-  nama,
-  unitKerja,
-  kepalaRuangan,
-  polaKerja,
-}) {
+export async function perbaruiPegawai({ id, nama, unitKerja, polaKerja }) {
   const { data, error } = await supabase.rpc('perbarui_pegawai_dan_jadwal', {
     p_id: id,
     p_nama: nama,
     p_unit_kerja: unitKerja,
-    p_kepala_ruangan: Boolean(kepalaRuangan),
+    p_kepala_ruangan: false,
     p_pola_kerja: polaKerja,
   })
 

@@ -16,6 +16,12 @@ import { Alert, Button, LayarMemuat, Spinner } from '../components/ui/index.js'
 import LogoRSUD from '../components/LogoRSUD.jsx'
 import { NAMA_APLIKASI, DESKRIPSI_APLIKASI, NAMA_RUMAH_SAKIT } from '../config/constants.js'
 
+function tujuanBeranda(profil) {
+  if (profil?.role === 'superadmin') return '/superadmin-portal'
+  if (profil?.role === 'kepala') return '/kepala-ruangan'
+  return '/'
+}
+
 export default function Login() {
   const { sesi, profil, memuat, masuk, galat } = useAuth()
   const { mulai, selesai } = useProgres()
@@ -31,7 +37,7 @@ export default function Login() {
   // Sudah login → langsung ke halaman sesuai peran
   useEffect(() => {
     if (sesi && profil) {
-      navigate(profil.role === 'superadmin' ? '/superadmin-portal' : '/', { replace: true })
+      navigate(tujuanBeranda(profil), { replace: true })
     }
   }, [sesi, profil, navigate])
 
@@ -54,11 +60,15 @@ export default function Login() {
 
       // Tujuan awal hanya dipakai bila masih berada di area peran yang sama.
       // Ini mencegah Superadmin terlempar ke rute pegawai (dan sebaliknya).
-      const beranda = data?.role === 'superadmin' ? '/superadmin-portal' : '/'
+      const beranda = tujuanBeranda(data)
       const dari = lokasi.state?.dari
       const dariSesuaiPeran =
         dari &&
-        (data?.role === 'superadmin' ? dari.startsWith('/superadmin-portal') : dari === '/')
+        (data?.role === 'superadmin'
+          ? dari.startsWith('/superadmin-portal')
+          : data?.role === 'kepala'
+            ? dari.startsWith('/kepala-ruangan')
+            : ['/', '/izin-saya', '/riwayat'].some((rute) => dari.startsWith(rute)))
 
       berhasil = true
       navigate(dariSesuaiPeran ? dari : beranda, { replace: true })
@@ -139,7 +149,7 @@ export default function Login() {
                 spellCheck={false}
                 enterKeyHint="next"
                 className="input-dasar"
-                placeholder="nama@rsud-ami.go.id"
+                placeholder="nama@rsudami.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={proses}

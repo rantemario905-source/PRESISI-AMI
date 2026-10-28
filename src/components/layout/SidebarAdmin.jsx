@@ -20,6 +20,13 @@ const IKON = {
       <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
     </>
   ),
+  kepala: (
+    <>
+      <circle cx="9" cy="7" r="4" />
+      <path d="M2 21v-2a4 4 0 014-4h6a4 4 0 014 4v2" />
+      <path d="M17 11l2 2 4-4" />
+    </>
+  ),
   perangkat: (
     <>
       <rect x="7" y="2" width="10" height="20" rx="2" />
@@ -74,6 +81,12 @@ const IKON = {
       <path d="M8 2v4M16 2v4M3 10h18M8 14h3" />
     </>
   ),
+  laporan: (
+    <>
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+      <path d="M14 2v6h6M8 13h8M8 17h8M8 9h2" />
+    </>
+  ),
   rekap: (
     <>
       <path d="M3 3v18h18" />
@@ -88,6 +101,7 @@ const GRUP_MENU = [
     label: 'Data & Struktur',
     items: [
       { label: 'Data Pegawai', ke: '/superadmin-portal/pegawai', ikon: 'pegawai' },
+      { label: 'Kepala Unit', ke: '/superadmin-portal/kepala-unit', ikon: 'kepala' },
       { label: 'Grup Shift', ke: '/superadmin-portal/grup-shift', ikon: 'grup' },
       { label: 'Master Shift', ke: '/superadmin-portal/shift', ikon: 'shift' },
     ],
@@ -108,7 +122,7 @@ const GRUP_MENU = [
     items: [
       { label: 'Dinas & Sakit', ke: '/superadmin-portal/dinas-sakit', ikon: 'izin' },
       { label: 'Cuti', ke: '/superadmin-portal/cuti', ikon: 'cuti' },
-      { label: 'Laporan Bulanan', ke: '/superadmin-portal/laporan', ikon: 'rekap' },
+      { label: 'Laporan Bulanan', ke: '/superadmin-portal/laporan', ikon: 'laporan' },
       { label: 'Rekapitulasi Laporan', ke: '/superadmin-portal/rekap', ikon: 'rekap' },
     ],
   },

@@ -9,10 +9,11 @@ export const STATUS_KEHADIRAN = [
   'Sakit',
   'Cuti',
   'Dinas Luar',
-  'Izin',
   'Alfa',
   'Koreksi',
 ]
+
+export const STATUS_BERALASAN = ['Sakit', 'Cuti', 'Dinas Luar']
 
 /** Kelompokkan baris presensi berdasarkan user_id. */
 export function kelompokkanPresensi(daftar = []) {

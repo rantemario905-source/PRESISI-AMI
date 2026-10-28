@@ -2,9 +2,9 @@
  * ==========================================================================
  * Super Admin — Data Pegawai
  * --------------------------------------------------------------------------
- * Melihat pegawai non-ASN, memperbarui nama/unit kerja/status kepala ruangan,
- * serta memantau status perangkat. Akun Super Admin tidak ditampilkan karena
- * bukan pegawai. Satu unit hanya boleh memiliki satu kepala ruangan.
+ * Melihat pegawai non-ASN, memperbarui nama/unit kerja/pola kerja, serta
+ * memantau status perangkat. Akun Super Admin tidak ditampilkan karena bukan
+ * pegawai. Penugasan kepala unit diatur di halaman Kepala Unit.
  * ==========================================================================
  */
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -39,7 +39,6 @@ export default function DataPegawai() {
   const [form, setForm] = useState({
     nama: '',
     unitKerja: '',
-    kepalaRuangan: false,
     polaKerja: 'shift',
   })
 
@@ -71,26 +70,11 @@ export default function DataPegawai() {
     })
   }, [daftar, cari, filterUnit, filterPola])
 
-  const kepalaUnitLain = useMemo(() => {
-    if (!pilih || !form.kepalaRuangan) return null
-    const unit = form.unitKerja.trim().toLowerCase()
-    if (!unit) return null
-    return (
-      daftar.find(
-        (p) =>
-          p.id !== pilih.id &&
-          p.kepala_ruangan &&
-          (p.unit_kerja ?? '').trim().toLowerCase() === unit,
-      ) ?? null
-    )
-  }, [daftar, form.kepalaRuangan, form.unitKerja, pilih])
-
   const bukaUbah = (baris) => {
     setPilih(baris)
     setForm({
       nama: baris.nama,
       unitKerja: baris.unit_kerja,
-      kepalaRuangan: Boolean(baris.kepala_ruangan),
       polaKerja: baris.pola_kerja ?? 'shift',
     })
   }
@@ -105,25 +89,16 @@ export default function DataPegawai() {
       if (form.unitKerja.trim().length < 2) throw new Error('Unit kerja wajib diisi.')
 
       const namaBaru = form.nama.trim()
-      const unitBaru = form.unitKerja.trim()
-      const pindahUnit = (pilih.unit_kerja ?? '').trim() !== unitBaru
 
-      const hasil = await perbaruiPegawai({
+      await perbaruiPegawai({
         id: pilih.id,
         nama: form.nama,
         unitKerja: form.unitKerja,
-        kepalaRuangan: form.kepalaRuangan,
         polaKerja: form.polaKerja,
       })
 
       let pesanBaru = `Data ${namaBaru} berhasil diperbarui.`
-      if (form.kepalaRuangan && hasil?.kepala_sebelumnya) {
-        pesanBaru = `${namaBaru} sekarang menjadi Kepala Ruangan ${unitBaru}. Status kepala ${hasil.kepala_sebelumnya} dilepas otomatis.`
-      } else if (form.kepalaRuangan && (!pilih.kepala_ruangan || pindahUnit)) {
-        pesanBaru = `${namaBaru} sekarang menjadi Kepala Ruangan ${unitBaru}.`
-      } else if (!form.kepalaRuangan && pilih.kepala_ruangan) {
-        pesanBaru = `Status Kepala Ruangan ${namaBaru} dicabut.`
-      } else if (form.polaKerja !== (pilih.pola_kerja ?? 'shift')) {
+      if (form.polaKerja !== (pilih.pola_kerja ?? 'shift')) {
         pesanBaru = `Pola kerja ${namaBaru} diubah menjadi ${
           form.polaKerja === 'reguler' ? 'Reguler' : 'Shift'
         }.`
@@ -143,7 +118,7 @@ export default function DataPegawai() {
     <>
       <KepalaHalaman
         judul="Data Pegawai"
-        deskripsi="Kelola nama, grup/unit, pola kerja (Reguler/Shift), dan kepala ruangan pegawai non-ASN. Akun Super Admin tidak ditampilkan."
+        deskripsi="Kelola nama, grup/unit, dan pola kerja (Reguler/Shift) pegawai non-ASN. Penugasan kepala unit diatur di menu Kepala Unit. Akun Super Admin tidak ditampilkan."
       />
 
       {pesan && (
@@ -337,37 +312,6 @@ export default function DataPegawai() {
       <Modal terbuka={Boolean(pilih)} onTutup={() => setPilih(null)} judul="Ubah Data Pegawai">
         {pilih && (
           <form onSubmit={simpan} className="space-y-4">
-            <div>
-              <label className="label-input" htmlFor="ubah-peran">
-                Peran
-              </label>
-              <select
-                id="ubah-peran"
-                name="peran"
-                className="input-dasar"
-                value={form.kepalaRuangan ? 'kepala_ruangan' : 'pegawai'}
-                onChange={(e) =>
-                  setForm((l) => ({ ...l, kepalaRuangan: e.target.value === 'kepala_ruangan' }))
-                }
-                required
-              >
-                <option value="pegawai">Pegawai</option>
-                <option value="kepala_ruangan">Kepala Ruangan</option>
-              </select>
-              <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
-                Satu unit hanya boleh memiliki satu kepala ruangan. Jika unit sudah punya kepala,
-                statusnya akan dipindahkan otomatis setelah disimpan.
-              </p>
-            </div>
-
-            {form.kepalaRuangan && kepalaUnitLain && (
-              <Alert variant="peringatan" title="Kepala ruangan dipindahkan">
-                Unit {form.unitKerja.trim()} sudah memiliki kepala ruangan: {kepalaUnitLain.nama}.
-                Jika disimpan, status kepala dipindahkan ke {form.nama.trim() || pilih.nama} dan{' '}
-                {kepalaUnitLain.nama} kembali menjadi Pegawai.
-              </Alert>
-            )}
-
             <div>
               <label className="label-input" htmlFor="ubah-nama">
                 Nama Lengkap

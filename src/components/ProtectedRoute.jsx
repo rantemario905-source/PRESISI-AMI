@@ -15,10 +15,17 @@ import { Alert, Button, LayarMemuat } from './ui/index.js'
 
 /**
  * @param {object} props
- * @param {'pegawai'|'superadmin'} [props.peran] - peran wajib untuk membuka rute
- * @param {boolean} [props.kepalaRuangan] - wajib memiliki flag kepala ruangan
+ * @param {'pegawai'|'superadmin'|'kepala'|Array<'pegawai'|'superadmin'|'kepala'>} [props.peran]
+ * @param {boolean} [props.kepalaRuangan] - wajib memiliki penugasan kepala unit
  * @param {import('react').ReactNode} props.children
  */
+
+function berandaProfil(profil) {
+  if (profil?.role === 'superadmin') return '/superadmin-portal'
+  if (profil?.role === 'kepala') return '/kepala-ruangan'
+  return '/'
+}
+
 export default function ProtectedRoute({ peran, kepalaRuangan = false, children }) {
   const { sesi, profil, memuat, galat, muatProfil, keluar } = useAuth()
   const { mulai, selesai } = useProgres()
@@ -64,15 +71,16 @@ export default function ProtectedRoute({ peran, kepalaRuangan = false, children 
   // Peran tidak sesuai → arahkan otomatis ke beranda sesuai peran.
   // (AksesDitolak hanya dipakai bila pengguna sudah berada di berandanya
   //  sendiri namun peran tetap tidak cocok — kasus yang tidak normal.)
-  if (peran && profil.role !== peran) {
-    const beranda = profil.role === 'superadmin' ? '/superadmin-portal' : '/'
+  const daftarPeran = Array.isArray(peran) ? peran : peran ? [peran] : []
+  if (daftarPeran.length > 0 && !daftarPeran.includes(profil.role)) {
+    const beranda = berandaProfil(profil)
     if (lokasi.pathname !== beranda) return <Navigate to={beranda} replace />
-    return <AksesDitolak peranDiharapkan={peran} />
+    return <AksesDitolak peranDiharapkan={daftarPeran.join(' / ') || '-'} />
   }
 
-  // Rute khusus kepala ruangan. Flag tidak dapat diubah dari UI.
+  // Rute khusus kepala unit. Penugasan hanya dapat diubah Super Admin.
   if (kepalaRuangan && !profil.kepala_ruangan) {
-    return <Navigate to="/" replace />
+    return <Navigate to={berandaProfil(profil)} replace />
   }
 
   return children

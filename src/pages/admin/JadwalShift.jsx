@@ -11,6 +11,7 @@
  * ==========================================================================
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useOutletContext } from 'react-router-dom'
 import {
   ambilJadwalRentang,
   ambilMasterShift,
@@ -96,8 +97,11 @@ function jamPendek(jam) {
 
 export default function JadwalShift({ mode = 'admin' }) {
   const { profil } = useAuth()
+  const konteksKepala = useOutletContext()
   const modeKepala = mode === 'kepala'
-  const unitKepala = profil?.unit_kerja ?? ''
+  const unitKepala = modeKepala
+    ? konteksKepala?.unitAktif || profil?.unit_kerja || ''
+    : ''
 
   const [master, setMaster] = useState([])
   const [grup, setGrup] = useState([])

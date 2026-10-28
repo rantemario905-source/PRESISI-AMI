@@ -170,30 +170,33 @@
 
 .kop-logo {
   flex: none;
-  width: 15mm;
-  height: auto;
+  width: auto;
+  height: 20mm;
 }
 
 .kop-teks {
   flex: 1;
   min-width: 0;
   text-align: center;
-  line-height: 1.05;
+  line-height: 1.12;
 }
 
 .kop-baris-1 {
-  font-size: 14pt;
+  font-size: 12pt;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .kop-baris-2 {
-  font-size: 15pt;
+  font-size: 13pt;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .kop-baris-4 {
-  font-size: 16pt;
+  font-size: 14pt;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .kop-alamat {
@@ -219,20 +222,32 @@
 }
 
 .meta-laporan {
-  width: 100%;
-  border-collapse: collapse;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2mm 6mm;
+  margin: 0 0 2.5mm;
   font-size: 9.5pt;
 }
 
-.meta-laporan th,
-.meta-laporan td {
-  padding: 1.4mm 2mm;
-  border: 0.75pt solid #000;
+.meta-item {
+  display: flex;
+  gap: 1mm;
+  min-width: 0;
 }
 
-.meta-laporan thead th {
+.meta-item dt {
+  flex: none;
   font-weight: 700;
-  text-align: center;
+}
+
+.meta-item dt::after {
+  content: ':';
+}
+
+.meta-item dd {
+  min-width: 0;
+  margin: 0;
+  word-break: break-word;
 }
 
 .ringkasan-laporan {
@@ -241,7 +256,23 @@
 }
 
 .ringkasan-laporan p {
-  margin: 0 0 0.8mm;
+  margin: 0;
+}
+
+.ringkasan-status {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 2mm;
+  row-gap: 0.4mm;
+}
+
+.ringkasan-status span {
+  white-space: nowrap;
+}
+
+.ringkasan-status span:not(:last-child)::after {
+  content: '·';
+  margin-left: 2mm;
 }
 
 .tabel-laporan {

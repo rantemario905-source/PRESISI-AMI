@@ -16,9 +16,11 @@ Aplikasi absensi pegawai non-ASN RSUD Aji Muhammad Idris.
   sebelum jam masuk, pulang 1 menit setelah jam pulang), jadwal shift, hari
   libur, keterlambatan, Alfa otomatis, Dinas/Sakit/Cuti, koreksi presensi,
   rekapitulasi, laporan presensi bulanan per pegawai (PDF A4), impor jadwal
-  CSV/XLSX, serta hapus grup shift kosong.
-- **Peran:** `pegawai`, `superadmin`, dan status `kepala_ruangan` (bukan role
-  terpisah).
+  CSV/XLSX, hapus grup shift kosong, serta kepala unit multi-unit dan kepala ASN
+  tanpa baris pegawai.
+- **Peran:** `pegawai`, `superadmin`, dan penugasan `kepala_unit` (satu unit satu
+  kepala, satu kepala boleh banyak unit). Kepala ASN memakai metadata
+  `jenis_akun = kepala_asn` dan tidak dicatat di `public.pegawai`.
 - **Bahasa:** UI, dokumentasi, dan komentar ditulis dalam **Bahasa Indonesia**.
 
 ---
@@ -39,7 +41,7 @@ npm run preview      # pratinjau hasil build
 - Skrip bantu (butuh Secret key, jangan pernah di-commit):
   `node scripts/impor-akun.mjs ...`, `node scripts/verifikasi-impor.mjs ...`.
 
-**Urutan migrasi wajib:** `01 → 02 → ... → 19`, satu per satu. Jangan mengulang
+**Urutan migrasi wajib:** `01 → 02 → ... → 22`, satu per satu. Jangan mengulang
 migrasi lama bila tidak diperlukan. `supabase/schema.sql` adalah gabungan
 seluruh migrasi untuk instalasi sekali jalan.
 
@@ -60,7 +62,7 @@ seluruh migrasi untuk instalasi sekali jalan.
 | Layout | `src/components/layout/*` | Portal admin & kepala ruangan |
 | Laporan bulanan | `src/pages/admin/LaporanBulanan.jsx`, `src/components/laporan/*` | Kop instansi, tabel harian, tanda tangan; cetak A4 portrait |
 | Halaman | `src/pages/**` | `admin/` untuk portal Super Admin/kepala |
-| Database | `supabase/migrations/01–19` | Skema, RLS, RPC, seed |
+| Database | `supabase/migrations/01–22` | Skema, RLS, RPC, seed |
 | Verifikasi DB | `supabase/verifikasi_*.sql` | Pemeriksaan pasca-migrasi |
 | Cron Alfa | `supabase/jadwal_alfa.sql` | Opsional, butuh `pg_cron` |
 
@@ -173,6 +175,19 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-039 | 2026-10-27 (WITA) | "saya beli domain di rumahweb.com bagaimana cara menggunakannya" | Meneliti panduan DNS Rumahweb dan GitHub Pages; menyusun rencana pemasangan domain `presisiami.my.id` (4 A record GitHub + CNAME `www`, custom domain, HTTPS, Supabase Auth); tidak ada perubahan kode | selesai | 2026-10-27 10:31 — Custom domain presisiami.my.id |
 | I-040 | 2026-10-27 10:31 | "kerjakan" | Mengubah `VITE_BASE_PATH` menjadi `/`, menambah `public/CNAME`, memperbarui README serta dokumen audit; verifikasi build base `/`; belum di-commit/di-push | selesai | 2026-10-27 10:31 — Custom domain presisiami.my.id |
 | I-041 | 2026-10-27 10:36 | "commit dan push" | Commit `11d35ab` (custom domain `presisiami.my.id`, `VITE_BASE_PATH` → `/`, `public/CNAME`, dokumen audit) dan push ke `origin/main`; verifikasi live domain, `www`, aset, dan fallback SPA; pembaruan status dokumen audit | selesai | 2026-10-27 10:36 — Commit & push custom domain + verifikasi live |
+| I-042 | 2026-10-27 10:39 | "sudah semuanya dan migrasi 21" | Konfirmasi migrasi 21 dijalankan, Supabase Auth diperbarui, dan Enforce HTTPS diaktifkan; pembaruan dokumen audit. Pengecekan mandiri: HTTPS live, tetapi HTTP apex masih 200 tanpa redirect | selesai | 2026-10-27 10:39 — Migrasi 21, Supabase Auth, dan HTTPS |
+| I-043 | 2026-10-27 (WITA) | "oke saya mau mememulai golive testing untuk beberapa pegawai, bagaimana caranya menghapus semua data testing" | Meninjau `supabase/cleanup_data_uji.sql` dan mendata tabel transaksi vs master; menyiapkan rencana pembersihan sebelum go-live | selesai | 2026-10-27 10:54 — Pembersihan data uji |
+| I-044 | 2026-10-27 10:54 | "maksud saya menghapus data testing pegawai yang sudah ada 92 pegawia jangan di hapus yang di hapus itu data presensi shift dan yang lainnya kecuali data pegawia grub dan yang lainnya" | Memperbarui `supabase/cleanup_data_uji.sql`: hanya menghapus data transaksi (presensi, koreksi, izin, jadwal, jadwal final, perangkat), mempertahankan 92 pegawai/grup/master shift, dan menambah pembatalan otomatis bila jumlah data master berubah | selesai | 2026-10-27 10:54 — Pembersihan data uji |
+| I-045 | 2026-10-27 11:02 | "sql sudah jalan" | Konfirmasi `supabase/cleanup_data_uji.sql` dijalankan; data transaksi terhapus dan data pegawai/grup/master dipertahankan; pembaruan dokumen audit; tidak ada perubahan kode | selesai | 2026-10-27 11:02 — Data uji dibersihkan |
+| I-046 | 2026-10-27 (WITA) | "oke sekarang kita perbaiki kop [Image 1] , RUMAH SAKIT UMUM DAERAH AJI MUHAMMAD IDRIS buat menjadi 1 baris, dan perkecil sedikit font kop yang di bold, rapikahkan lagi isi kita diskusikan, izin dihapus saja dari laporan" | Kop dibuat satu baris dengan `white-space: nowrap` dan ukuran bold 12/13/14pt; identitas pegawai menjadi grid 2x2; ringkasan dirapikan; `Izin` dihapus dari ringkasan; lebar kolom tabel disesuaikan | selesai | 2026-10-27 11:41 — Kop & isi laporan dirapikan |
+| I-047 | 2026-10-27 (WITA) | "dan buat keterangan koreksi tidak perlu di masukkan di laporan, cukup keterangan sakit,cuti,dinasluar,alfa" | `alasan_koreksi` dihapus dari query laporan; Keterangan hanya diisi alasan Sakit/Cuti/Dinas Luar, label `Alfa`, dan `—` untuk Hadir/Koreksi | selesai | 2026-10-27 11:41 — Kop & isi laporan dirapikan |
+| I-048 | 2026-10-27 (WITA) | "pada footer jam tidak perlu dicantumkan" | Footer laporan hanya menampilkan tanggal cetak, jam dihilangkan | selesai | 2026-10-27 11:41 — Kop & isi laporan dirapikan |
+| I-049 | 2026-10-27 (WITA) | "kerjakan" | Menjalankan perubahan I-046–I-048 dan `npm run build` (lulus 7,49 dtk); memperbarui dokumen audit | selesai | 2026-10-27 11:41 — Kop & isi laporan dirapikan |
+| I-050 | 2026-10-27 12:04 | "ukuran logo rsud diperbesar lagi, pakan ukurannya dengan logo kutai, [Image 1] , kemudian identitas pegawai buat agar data mereka keluar setelah titik dua : Nama Pegawai: M Maulid , atau titik duanya disejajarkan di tngah antara keduanya" | Tinggi kedua logo kop disamakan 20 mm; label identitas dibuat selebar isinya dan nilai langsung mengikuti titik dua; `npm run build` lulus 8,95 dtk | selesai | 2026-10-27 12:04 — Logo & identitas laporan dirapikan |
+| I-051 | 2026-10-27 12:10 | "logo rekapitulasi dan laporan bedakan" | Ikon menu **Laporan Bulanan** dibedakan menjadi dokumen, sedangkan **Rekapitulasi Laporan** tetap grafik; `npm run build` lulus 6,78 dtk | selesai | 2026-10-27 12:10 — Ikon menu laporan dibedakan |
+| I-052 | 2026-10-28 (WITA) | Instruksi awal sesi yang terputus (teks verbatim tidak tersimpan): kepala unit multi-unit dan kepala ASN tanpa baris pegawai `(rekonstruksi dari TODO panel sesi 2026-10-28)` | Membuat migrasi 22 + `verifikasi_22.sql` (tabel `kepala_unit`, `profil_saya()`, RPC penugasan, policy `unit_dikelola()`), menyinkronkan `schema.sql` dan `cleanup_data_uji.sql`, menambah halaman **Kepala Unit** + service, serta menyesuaikan auth, routing, portal kepala (unit aktif), Data Pegawai, jadwal, pengajuan izin, dan laporan/tanda tangan | selesai (kode); migrasi 22 belum dijalankan | 2026-10-28 09:11 — Kepala unit multi-unit & kepala ASN |
+| I-053 | 2026-10-28 09:11 | "[Image 1] lanjutkan pekerjaan yang sempat terhenti" | Melanjutkan I-052: memeriksa diff, melengkapi README/AGENTS/progress, lalu menjalankan `npm run build` (lulus 8,72 dtk) | selesai | 2026-10-28 09:11 — Kepala unit multi-unit & kepala ASN |
+| I-054 | 2026-10-28 (WITA) | "COMMIT DAN PUSH" | Memverifikasi `npm run build` (lulus 6,77 dtk), memperbarui dokumen audit, lalu commit + push pekerjaan kepala unit multi-unit & kepala ASN (migrasi 22, halaman Kepala Unit, auth/RPC/RLS, laporan) | selesai | 2026-10-28 — Commit & push kepala unit |
 
 ---
 
@@ -199,12 +214,19 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   (koordinat RSUD AMI diubah lagi + migrasi 21) yang di-push 2026-10-27 09:59,
   serta commit `11d35ab` (custom domain `presisiami.my.id`) yang di-push
   2026-10-27 10:36. Koordinat terbaru
-  `-0.23805651650343132, 117.41442516465149` sudah di-commit
-  lewat migrasi 21, tetapi migrasi tersebut **belum dijalankan di Supabase**.
+  `-0.23805651650343132, 117.41442516465149` sudah di-commit dan migrasi 21
+  **sudah dijalankan di Supabase** (klaim user 2026-10-27 10:39).
+- **Kepala unit (2026-10-28, sudah di-commit & di-push):** tabel `kepala_unit`
+  menjadi sumber kebenaran penugasan (satu unit satu kepala, satu kepala boleh
+  banyak unit). Kode, migrasi **22**, `verifikasi_22.sql`, `schema.sql`, dan
+  `cleanup_data_uji.sql` sudah masuk repo; **migrasi 22 belum dijalankan di
+  Supabase**. Kepala ASN memakai metadata
+  `jenis_akun = kepala_asn` dan tidak dicatat di `public.pegawai`.
 - **Deploy:** GitHub Pages lewat `.github/workflows/deploy.yml`; URL live
   `https://presisiami.my.id/` (custom domain, DNS di Rumahweb); base path `/`;
   `public/CNAME` berisi `presisiami.my.id`; `www` redirect ke domain utama;
-  **Enforce HTTPS belum dicentang**; secrets `VITE_SUPABASE_URL` +
+  **Enforce HTTPS diklaim aktif 2026-10-27 10:39**, tetapi HTTP apex masih 200
+  saat dicek; secrets `VITE_SUPABASE_URL` +
   `VITE_SUPABASE_ANON_KEY`.
   Setiap push ke `main` otomatis build + deploy.
 - Timezone aplikasi: `Asia/Makassar` (WITA, UTC+8).

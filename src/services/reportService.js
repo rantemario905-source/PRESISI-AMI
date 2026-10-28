@@ -64,7 +64,7 @@ export async function ambilLaporanBulanan({ periode, unit }) {
   const { data, error } = await supabase
     .from('presensi')
     .select(
-      'id, user_id, tanggal, jam_masuk, jam_pulang, status_kehadiran, menit_terlambat, alasan_koreksi',
+      'id, user_id, tanggal, jam_masuk, jam_pulang, status_kehadiran, menit_terlambat',
     )
     .in('user_id', idPegawai)
     .gte('tanggal', mulai)

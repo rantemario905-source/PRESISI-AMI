@@ -97,7 +97,8 @@ export function AuthProvider({ children }) {
       muatProfil,
       keluar,
       apakahSuperadmin: profil?.role === 'superadmin',
-      apakahKepalaRuangan: profil?.role === 'pegawai' && profil?.kepala_ruangan === true,
+      apakahKepalaRuangan: profil?.kepala_ruangan === true,
+      unitDikelola: profil?.unit_dikelola ?? [],
     }),
     [sesi, profil, memuat, galat, masuk, muatProfil, keluar],
   )

@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-27 10:36 WITA |
+| Terakhir diperbarui | 2026-10-28 (commit & push kepala unit) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -66,24 +66,34 @@ dijalankan** (laporan user 2026-10-27 01:03). Pekerjaan terbaru
 dan server (migrasi **21** yang mendefinisikan ulang `submit_presensi`, plus
 `schema.sql`), disertai `supabase/verifikasi_21.sql`. **Migrasi 20 dan
 verifikasi 20 sudah berhasil dijalankan** (laporan user 2026-10-27 09:39);
-migrasi **21 menunggu dijalankan** di Supabase. Yang
+migrasi **21 sudah dijalankan** di Supabase (klaim user 2026-10-27 10:39).
+Pekerjaan terbaru (2026-10-28): **kepala unit multi-unit & kepala ASN** — tabel
+`kepala_unit` menjadi sumber kebenaran penugasan (satu unit satu kepala, satu
+kepala boleh banyak unit), kepala ASN memakai metadata `jenis_akun = kepala_asn`
+tanpa baris `pegawai`, RPC `profil_saya()`/penugasan kepala, halaman **Kepala
+Unit** di portal Super Admin, pemilih unit aktif di portal kepala, serta policy
+RLS berbasis `unit_dikelola()`. Kode dan migrasi **22** sudah disiapkan, tetapi
+**migrasi 22 belum dijalankan di Supabase**. Yang
 belum: konfirmasi migrasi
-09–18 & skrip verifikasi, uji cetak manual laporan (rapikan kop bila perlu),
-penyiapan data operasional
+09–18 & skrip verifikasi, menjalankan migrasi 22 + `verifikasi_22.sql`, uji
+cetak manual laporan setelah perapian kop, penyiapan data operasional
 (grup shift, jadwal, hari libur), dan persiapan go-live.
 
 | Aspek | Status | Bukti |
 |---|---|---|
-| Kode aplikasi | Selesai sampai Fase 8 + UI navigasi + migrasi 15–21 | `src/`, `supabase/migrations/01–21` |
+| Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–22 | `src/`, `supabase/migrations/01–22` |
 | Commit Git | **HEAD** — `11d35ab` (custom domain `presisiami.my.id`) | `git log` |
-| Perubahan lokal | **Tidak ada** — sudah di-commit `11d35ab` dan di-push 2026-10-27 10:36 | `git status` |
+| Perubahan lokal | **Ada** — kepala unit multi-unit & kepala ASN (migrasi 22, halaman Kepala Unit, auth/RPC/RLS), perapian kop/isi laporan, dan dokumen audit; **belum di-commit** | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
-| Migrasi DB 21 | **Belum dijalankan** — koordinat server baru aktif setelah migrasi 21 dieksekusi | `supabase/migrations/21_koordinat_rsud.sql` |
+| Migrasi DB 21 | **Sudah dijalankan** (klaim user 2026-10-27 10:39) | `supabase/migrations/21_koordinat_rsud.sql` |
+| Migrasi DB 22 | **Belum dijalankan** — wajib sebelum menu Kepala Unit/kepala ASN dipakai | `supabase/migrations/22_kepala_unit_multi_unit.sql`, `verifikasi_22.sql` |
+| Data uji | **Sudah dibersihkan** — transaksi dihapus, 92 pegawai/grup/master shift dipertahankan | `supabase/cleanup_data_uji.sql`, laporan user 2026-10-27 11:02 |
 | Koordinat RSUD AMI | **Ada di kode** — `-0.23805651650343132, 117.41442516465149` di klien dan schema | `src/config/constants.js`, `supabase/schema.sql`, migrasi 21 |
-| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 19 dan 20 lulus** (klaim user); verifikasi 21 menunggu eksekusi | laporan user 2026-10-27 09:39 |
-| Build produksi | **Lulus** — base `/` 8,23 dtk (2026-10-27 10:31); `dist/index.html` memakai aset `/assets/...` | `npm run build` |
+| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 19 dan 20 lulus** (klaim user); verifikasi 21 dan 22 belum dikonfirmasi | laporan user 2026-10-27 09:39 |
+| Build produksi | **Lulus** — base `/` 6,44 dtk (2026-10-28 09:20); `dist/index.html` memakai aset `/assets/...` | `npm run build` |
+| Kepala unit multi-unit | **Ada di kode** — tabel `kepala_unit` (satu unit satu kepala, boleh multi-unit), halaman **Kepala Unit**, pemilih unit aktif di portal kepala, kepala ASN tanpa baris `pegawai`, RPC `profil_saya()`/`simpan_kepala_unit()`, policy `unit_dikelola()` | migrasi 22, `KepalaUnit.jsx`, `kepalaUnitService.js`, `AuthContext.jsx`, `authService.js`, `PortalKepalaLayout.jsx` |
 | Jendela waktu absen | **Ada di kode** — masuk 20 menit sebelum, pulang 1 menit setelah | migrasi 17, `PanelAbsen.jsx`, `jadwalAbsen.js` |
 | Hapus grup kosong | **Ada di kode** — semua grup 0 pegawai; "Belum ditentukan" (akun sistem) disembunyikan bila kosong | migrasi 18, `GrupShift.jsx` |
 | Bilah progres | **Ada di kode** — bilah biru muda di atas layar saat navigasi, login, logout, dan muat ulang profil | `ProgressContext.jsx`, `BilahProgres.jsx`, `PengamatRute.jsx` |
@@ -95,10 +105,11 @@ penyiapan data operasional
 | Latar Dashboard | **Ada di kode** — gradasi biru muda transparan pada seluruh halaman portal Super Admin dan Kepala Ruangan | `PortalAdminLayout.jsx`, `PortalKepalaLayout.jsx` |
 | Aksi halaman | **Ada di kode** — tombol aksi kembali di kanan; aksi spesifik dipindah ke header kartu daftar, kartu Tambah Hari Libur (Tahun), baris tab Koreksi/Verifikasi, dan atas kotak filter Rekapitulasi | `KepalaHalaman.jsx`, `TabBar.jsx`, `DataPegawai.jsx`, `GrupShift.jsx`, `MasterShift.jsx`, `HariLibur.jsx`, `KoreksiPresensi.jsx`, `VerifikasiPerangkat.jsx`, `PengajuanIzin.jsx`, `Rekapitulasi.jsx` |
 | Subtitle topbar | **Ada di kode** — portal Super Admin tanpa subtitle; portal Kepala Ruangan hanya nama unit kerja | `PortalAdminLayout.jsx`, `PortalKepalaLayout.jsx` |
-| Laporan bulanan per pegawai | **Ada di kode** — Super Admin pilih unit, kepala ruangan terkunci unit sendiri; satu pegawai atau semua pegawai unit; kop dua logo + tabel harian + ringkasan + tanda tangan; cetak PDF A4 portrait | migrasi 19, `LaporanBulanan.jsx`, `reportService.js`, `utils/laporan.js`, `components/laporan/*`, `index.css` |
+| Laporan bulanan per pegawai | **Ada di kode** — Super Admin pilih unit, kepala unit memakai unit aktif (bisa berganti jika multi-unit); satu pegawai atau semua pegawai unit; kop dua logo satu baris (tinggi 20 mm), identitas grid 2x2 dengan nilai setelah titik dua, tabel harian, ringkasan tanpa `Izin`, Keterangan Sakit/Cuti/Dinas Luar/Alfa, nama kepala unit dari tabel `kepala_unit`, footer bertanggal tanpa jam; cetak PDF A4 portrait | migrasi 19 & 22, `LaporanBulanan.jsx`, `reportService.js`, `kepalaUnitService.js`, `utils/laporan.js`, `components/laporan/*`, `index.css` |
 | Lint/unit test | Tidak tersedia di `package.json` | `package.json` |
 | Alfa otomatis | Fitur ada, **default nonaktif** | migrasi 12, `PengaturanPresensi.jsx` |
-| Deploy GitHub Pages | **Aktif** — `https://presisiami.my.id/` live dengan base `/`; `www` redirect ke domain utama; **Enforce HTTPS belum dicentang** | workflow run `40439173719` sukses |
+| Deploy GitHub Pages | **Aktif** — `https://presisiami.my.id/` live dengan base `/`; `www` redirect ke domain utama; Enforce HTTPS diklaim user, tetapi **HTTP apex masih 200** saat dicek 10:39 | workflow run `40439173719` sukses |
+| Supabase Auth | **Diklaim sudah diperbarui** ke domain baru (Site URL + Redirect URLs) | laporan user 2026-10-27 10:39 |
 | Uji login live | **Lulus** — Super Admin (desktop) + pegawai (mobile) | Laporan user 2026-10-25 13:37 |
 | Uji perangkat & absensi | **Lulus** — verifikasi perangkat, radius, akurasi, duplikasi | Laporan user 2026-10-25 14:04 |
 
@@ -122,11 +133,45 @@ halaman. Aset `logo kutai kartanegara.png` di-rename menjadi
 menambahkan `bisa_lihat_presensi(uuid)` + policy baca presensi unit untuk kepala
 ruangan.
 
+**Pekerjaan terakhir (2026-10-27 11:41 WITA, belum di-commit):** merapikan
+laporan presensi bulanan. Kop RSUD dibuat satu baris dengan `white-space: nowrap`
+dan font bold 12/13/14pt; identitas pegawai menjadi grid 2x2; ringkasan tanpa
+`Izin`; kolom Keterangan hanya diisi alasan Sakit/Cuti/Dinas Luar, label `Alfa`,
+dan `—` untuk Hadir/Koreksi (alasan koreksi tidak dicetak); footer hanya
+menampilkan tanggal cetak tanpa jam. `npm run build` lulus 7,49 dtk.
+
+**Pekerjaan terakhir (2026-10-27 12:04 WITA, belum di-commit):** tinggi kedua
+logo kop disamakan menjadi 20 mm sehingga logo RSUD tampil sebanding dengan logo
+Kutai. Label identitas pegawai tidak lagi memakai lebar tetap; nilai langsung
+mengikuti titik dua (`Nama Pegawai: ...`). `npm run build` lulus 8,95 dtk.
+
+**Pekerjaan terakhir (2026-10-27 12:10 WITA, belum di-commit):** ikon menu
+**Laporan Bulanan** di sidebar Super Admin dibedakan dari **Rekapitulasi
+Laporan**. Laporan Bulanan memakai ikon dokumen, sedangkan Rekapitulasi tetap
+memakai ikon grafik. `npm run build` lulus 6,78 dtk.
+
+**Pekerjaan terakhir (2026-10-28 09:11 WITA, belum di-commit):** **kepala unit
+multi-unit & kepala ASN**. Tabel `kepala_unit` menjadi sumber kebenaran (satu
+unit satu kepala, satu kepala boleh banyak unit); kepala ASN memakai metadata
+`jenis_akun = kepala_asn` tanpa baris `public.pegawai`; `profil_saya()` menjadi
+sumber profil (termasuk `unit_dikelola`); Super Admin mendapat halaman **Kepala
+Unit**; portal kepala menampilkan pemilih unit aktif; seluruh policy/RPC
+memakai `unit_dikelola()`/`bisa_kelola_unit()`; Data Pegawai tidak lagi mengubah
+status kepala; laporan bulanan memakai nama kepala unit dari RPC. Migrasi **22**
+dan `verifikasi_22.sql` disiapkan tetapi **belum dijalankan** di Supabase.
+`npm run build` lulus 8,72 dtk.
+
+**Pekerjaan terakhir (2026-10-28, sudah di-commit & di-push):** seluruh
+perubahan kepala unit multi-unit & kepala ASN di-commit dan di-push atas perintah
+user. `npm run build` lulus 6,77 dtk. Migrasi **22** tetap **belum dijalankan**
+di Supabase.
+
 **Langkah berikutnya yang disarankan:**
-1. Jalankan migrasi **20** di SQL Editor (koordinat RSUD AMI baru), lalu
-   `supabase/verifikasi_20.sql` sampai semua `true`. Migrasi 19 + verifikasi 19
-   sudah selesai; setelah itu uji menu Laporan Bulanan sebagai kepala ruangan
-   dan Super Admin.
+1. Jalankan **migrasi 22** (`supabase/migrations/22_kepala_unit_multi_unit.sql`)
+   di SQL Editor, lalu `supabase/verifikasi_22.sql` sampai semua `true`. Setelah
+   itu uji menu **Kepala Unit**, login kepala ASN, pemilih unit aktif, dan
+   laporan/tanda tangan kepala unit. Migrasi **19-21** sudah dijalankan;
+   `verifikasi_21.sql` belum dikonfirmasi.
 2. Jalankan migrasi **15**, **16**, **17**, lalu **18** berurutan di SQL Editor,
    kemudian `supabase/verifikasi_15.sql`, `verifikasi_16.sql`,
    `verifikasi_17.sql`, dan `verifikasi_18.sql` sampai semua `true`. Migrasi 16
@@ -194,6 +239,139 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-28 WITA — Commit & push kepala unit multi-unit
+- **Perubahan:** meng-commit dan mem-push seluruh pekerjaan kepala unit
+  multi-unit & kepala ASN (migrasi 22, halaman Kepala Unit, service, auth/RPC,
+  RLS, portal kepala, laporan/tanda tangan, sinkronisasi `schema.sql` dan
+  `cleanup_data_uji.sql`) beserta pembaruan dokumen audit.
+- **File:** seluruh perubahan working tree per `git status` (21 file diubah +
+  4 file baru).
+- **Verifikasi:** `npm run build` lulus 6,77 dtk (280 modul) memakai
+  `NODE_OPTIONS=--max-old-space-size=4096`; percobaan pertama gagal karena
+  `vite:reporter` kehabisan memori lalu diulang dengan heap lebih besar.
+- **Catatan/risiko:** migrasi **22** dan `verifikasi_22.sql` **belum dijalankan**
+  di Supabase, sehingga menu Kepala Unit dan login kepala ASN belum berfungsi
+  sampai migrasi dijalankan.
+
+### 2026-10-28 09:11 WITA — Kepala unit multi-unit & kepala ASN
+- **Perubahan:** penugasan kepala dipindah ke tabel `kepala_unit` (satu unit satu
+  kepala, satu kepala boleh banyak unit). Kepala ASN memakai metadata
+  `jenis_akun = kepala_asn`, tidak membuat baris `public.pegawai`, dan tetap
+  dapat login/mengelola unit. `pegawai.kepala_ruangan` dipertahankan sebagai
+  cache yang disinkronkan server. Menambahkan `profil_saya()`, `unit_dikelola()`,
+  `is_kepala_ruangan()`, `bisa_kelola_unit()`, `daftar_kepala_unit()`,
+  `daftar_akun_kepala_asn()`, `simpan_kepala_unit()`, dan `nama_kepala_unit()`;
+  seluruh RPC izin/jadwal/impor/hapus grup serta policy RLS memakai
+  `unit_dikelola()`/`bisa_kelola_unit()`. Frontend: halaman **Kepala Unit** di
+  portal Super Admin, service `kepalaUnitService.js`, profil auth via RPC dengan
+  fallback lama, routing peran `kepala`, pemilih unit aktif di portal kepala,
+  Data Pegawai tanpa pengaturan kepala, dan laporan bulanan memakai nama kepala
+  unit. `schema.sql` dan `cleanup_data_uji.sql` disinkronkan (tabel
+  `kepala_unit` dipertahankan saat pembersihan data uji).
+- **File:** `supabase/migrations/22_kepala_unit_multi_unit.sql`,
+  `supabase/verifikasi_22.sql`, `supabase/schema.sql`,
+  `supabase/cleanup_data_uji.sql`, `src/App.jsx`,
+  `src/components/ProtectedRoute.jsx`, `src/context/AuthContext.jsx`,
+  `src/services/authService.js`, `src/services/pegawaiService.js`,
+  `src/services/reportService.js`, `src/services/kepalaUnitService.js`,
+  `src/pages/admin/KepalaUnit.jsx`, `src/pages/admin/DataPegawai.jsx`,
+  `src/pages/admin/JadwalShift.jsx`, `src/pages/admin/PengajuanIzin.jsx`,
+  `src/pages/admin/LaporanBulanan.jsx`, `src/pages/Login.jsx`,
+  `src/components/layout/PortalKepalaLayout.jsx`,
+  `src/components/layout/SidebarAdmin.jsx`,
+  `src/components/laporan/LembarLaporan.jsx`, `src/utils/laporan.js`,
+  `src/index.css`, `README.md`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` lulus 8,72 dtk (280 modul, 2026-10-28 09:11);
+  verifikasi ulang 09:17 lulus 6,39 dtk dan 09:20 lulus 6,44 dtk setelah
+  penyempurnaan daftar kandidat kepala. Migrasi 22 dan `verifikasi_22.sql`
+  **belum dijalankan** di Supabase.
+- **Catatan/risiko:** sebelum migrasi 22 dijalankan, menu Kepala Unit dan akun
+  kepala ASN belum berfungsi (RPC `profil_saya`/`simpan_kepala_unit` belum ada);
+  klien memiliki fallback profil lama sehingga pegawai tetap dapat login. Setelah
+  migrasi, `pegawai.kepala_ruangan` hanya cache — ubah penugasan lewat halaman
+  Kepala Unit. Perubahan belum di-commit.
+
+### 2026-10-27 12:10 WITA — Ikon menu laporan dibedakan
+- **Perubahan:** menu **Laporan Bulanan** dan **Rekapitulasi Laporan** di sidebar
+  Super Admin sebelumnya memakai ikon yang sama (`rekap`). Laporan Bulanan kini
+  memakai ikon dokumen (`laporan`), sedangkan Rekapitulasi Laporan tetap memakai
+  ikon grafik (`rekap`).
+- **File:** `src/components/layout/SidebarAdmin.jsx`, `AGENTS.md`,
+  `progress.md`.
+- **Verifikasi:** `npm run build` lulus 6,78 dtk (278 modul).
+- **Catatan/risiko:** hanya ikon menu yang berubah; rute dan halaman tidak
+  berubah. Perubahan belum di-commit.
+
+### 2026-10-27 12:04 WITA — Logo & identitas laporan dirapikan
+- **Perubahan:** tinggi logo Kutai dan RSUD pada kop disamakan menjadi 20 mm
+  (sebelumnya hanya lebar 15 mm sehingga logo RSUD tampak lebih kecil). Label
+  identitas pegawai dibuat selebar isinya dan nilai langsung mengikuti titik dua,
+  sehingga tidak ada jarak kosong besar setelah `Nama Pegawai:`.
+- **File:** `src/index.css`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` lulus 8,95 dtk (278 modul). Uji cetak manual
+  A4 **belum dilakukan**.
+- **Catatan/risiko:** kop menjadi sedikit lebih lebar karena logo RSUD 20 mm;
+  nama RSUD tetap satu baris dan masih muat di area teks. Perubahan belum
+  di-commit; menunggu uji lokal user.
+
+### 2026-10-27 11:41 WITA — Kop & isi laporan presensi dirapikan
+- **Perubahan:** kop RSUD dibuat satu baris dengan `white-space: nowrap` dan
+  ukuran bold diturunkan menjadi 12/13/14pt; identitas pegawai diubah dari tabel
+  menjadi grid 2x2 (Nama, Unit/Instalasi, Periode, Pola Kerja); ringkasan
+  kehadiran dirapikan dan `Izin` dihapus; kolom Keterangan hanya diisi alasan
+  Sakit/Cuti/Dinas Luar, label `Alfa`, dan `—` untuk Hadir/Koreksi;
+  `alasan_koreksi` tidak lagi dipakai/di-query; footer hanya menampilkan tanggal
+  cetak tanpa jam; lebar kolom tabel disesuaikan.
+- **File:** `src/index.css`, `src/components/laporan/LembarLaporan.jsx`,
+  `src/utils/laporan.js`, `src/services/reportService.js`, `AGENTS.md`,
+  `progress.md`.
+- **Verifikasi:** `npm run build` lulus 7,49 dtk (278 modul). Uji cetak manual
+  A4 satu pegawai/semua pegawai **belum dilakukan**.
+- **Catatan/risiko:** status `Izin` memang sudah tidak ada di database sejak
+  migrasi 09, jadi tidak perlu migrasi baru. Baris Koreksi tetap tampil tanpa
+  alasan koreksi. Perubahan belum di-commit; menunggu uji lokal user.
+
+### 2026-10-27 11:02 WITA — Data uji dibersihkan
+- **Perubahan:** user menjalankan `supabase/cleanup_data_uji.sql`; data transaksi
+  (presensi, koreksi, izin, jadwal, jadwal final, perangkat) dihapus, sedangkan
+  92 pegawai, grup shift, master shift, dan data master lain dipertahankan.
+- **File:** tidak ada perubahan kode baru; hanya pembaruan dokumen audit.
+- **Verifikasi:** laporan user "sql sudah jalan" (11:02); hasil NOTICE/query
+  verifikasi belum dilampirkan.
+- **Catatan/risiko:** semua pegawai harus verifikasi perangkat ulang; jadwal
+  go-live harus diisi ulang dan Alfa otomatis tetap nonaktif sampai lengkap.
+  Perubahan skrip/dokumen masih di working tree, belum di-commit.
+
+### 2026-10-27 10:54 WITA — Pembersihan data uji sebelum go-live
+- **Perubahan:** `supabase/cleanup_data_uji.sql` diperbarui agar hanya menghapus
+  data transaksi/uji: `presensi`, `koreksi_presensi`, `izin_cuti`,
+  `jadwal_shift`, `jadwal_shift_final` (bila ada), dan `perangkat`.
+  **Pegawai (92), grup shift, master shift, jam kerja reguler, hari libur, dan
+  pengaturan presensi dipertahankan.** Skrip mencatat baseline jumlah
+  pegawai/grup/master shift lalu membatalkan seluruh transaksi bila jumlahnya
+  berubah.
+- **File:** `supabase/cleanup_data_uji.sql`, `README.md`, `AGENTS.md`,
+  `progress.md`.
+- **Verifikasi:** belum dijalankan di Supabase (menunggu user). SQL tidak
+  memengaruhi `npm run build`.
+- **Catatan/risiko:** setelah skrip dijalankan, seluruh pegawai harus
+  mengajukan verifikasi perangkat ulang. Jadwal shift harus diisi ulang untuk
+  periode go-live. Alfa otomatis tetap nonaktif sampai jadwal dan hari libur
+  lengkap. Perubahan belum di-commit.
+
+### 2026-10-27 10:39 WITA — Migrasi 21, Supabase Auth, dan HTTPS
+- **Perubahan:** user mengonfirmasi seluruh sisa pekerjaan selesai: migrasi **21**
+  dijalankan di Supabase, Site URL/Redirect URLs Supabase diperbarui ke domain
+  baru, dan Enforce HTTPS diaktifkan.
+- **File:** tidak ada perubahan kode; hanya pembaruan dokumen audit.
+- **Verifikasi:** klaim user "sudah semuanya dan migrasi 21" (10:39). Pengecekan
+  mandiri: `https://presisiami.my.id/` → **200**; `http://presisiami.my.id/`
+  masih **200 tanpa redirect** ke HTTPS; `www` → 301 ke `http://presisiami.my.id/`
+  (belum ke HTTPS).
+- **Catatan/risiko:** `verifikasi_21.sql` belum dikonfirmasi. Jika setelah
+  1×24 jam HTTP apex masih tidak redirect, buka Settings → Pages dan pastikan
+  **Enforce HTTPS** benar-benar tersimpan/tersedia.
 
 ### 2026-10-27 10:36 WITA — Commit & push custom domain + verifikasi live
 - **Perubahan:** perubahan custom domain (`VITE_BASE_PATH` → `/`, `public/CNAME`,

@@ -45,6 +45,7 @@ const IzinSaya = lazy(() => import('./pages/IzinSaya.jsx'))
 const RiwayatSaya = lazy(() => import('./pages/RiwayatSaya.jsx'))
 const DashboardUtama = lazy(() => import('./pages/admin/DashboardUtama.jsx'))
 const DataPegawai = lazy(() => import('./pages/admin/DataPegawai.jsx'))
+const KepalaUnit = lazy(() => import('./pages/admin/KepalaUnit.jsx'))
 const VerifikasiPerangkat = lazy(() => import('./pages/admin/VerifikasiPerangkat.jsx'))
 const MasterShift = lazy(() => import('./pages/admin/MasterShift.jsx'))
 const JadwalShift = lazy(() => import('./pages/admin/JadwalShift.jsx'))
@@ -95,7 +96,7 @@ export default function App() {
           <Route
             path="/kepala-ruangan"
             element={
-              <ProtectedRoute peran="pegawai" kepalaRuangan>
+              <ProtectedRoute peran={['pegawai', 'kepala']} kepalaRuangan>
                 <PortalKepalaLayout />
               </ProtectedRoute>
             }
@@ -123,6 +124,7 @@ export default function App() {
           >
             <Route index element={<DashboardUtama />} />
             <Route path="pegawai" element={<DataPegawai />} />
+            <Route path="kepala-unit" element={<KepalaUnit />} />
             <Route path="perangkat" element={<VerifikasiPerangkat />} />
             <Route path="grup-shift" element={<GrupShift />} />
             <Route path="shift" element={<MasterShift />} />

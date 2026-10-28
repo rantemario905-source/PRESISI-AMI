@@ -8,11 +8,13 @@
  * ==========================================================================
  */
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useOutletContext } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { ambilLaporanBulanan } from '../../services/reportService.js'
 import { ambilUnitKerja } from '../../services/pegawaiService.js'
+import { ambilNamaKepalaUnit } from '../../services/kepalaUnitService.js'
 import { namaBulan, periodeBulanIni } from '../../utils/format.js'
-import { kelompokkanPresensi, namaKepalaUnit } from '../../utils/laporan.js'
+import { kelompokkanPresensi } from '../../utils/laporan.js'
 import { Alert, Button, Spinner } from '../../components/ui/index.js'
 import KepalaHalaman from '../../components/admin/KepalaHalaman.jsx'
 import LembarLaporan from '../../components/laporan/LembarLaporan.jsx'
@@ -21,32 +23,63 @@ const DATA_KOSONG = { pegawai: [], presensi: [], alasanIzin: {} }
 
 export default function LaporanBulanan({ mode = 'superadmin' }) {
   const { profil } = useAuth()
+  const konteksKepala = useOutletContext()
   const modeKepala = mode === 'kepala'
+  const unitAktifKepala = konteksKepala?.unitAktif || profil?.unit_kerja || ''
 
   const [periode, setPeriode] = useState(periodeBulanIni())
-  const [unit, setUnit] = useState(modeKepala ? profil?.unit_kerja ?? '' : '')
+  const [unit, setUnit] = useState(modeKepala ? unitAktifKepala : '')
   const [units, setUnits] = useState([])
   const [pegawaiId, setPegawaiId] = useState('')
   const [cakupan, setCakupan] = useState('satu')
   const [data, setData] = useState(DATA_KOSONG)
   const [memuat, setMemuat] = useState(!modeKepala)
   const [galat, setGalat] = useState(null)
+  const [namaKepalaUnitAktif, setNamaKepalaUnitAktif] = useState('')
   const [waktuCetak, setWaktuCetak] = useState(() => new Date().toISOString())
 
   useEffect(() => {
-    if (modeKepala) return
+    if (modeKepala) {
+      const daftar = Array.isArray(profil?.unit_dikelola) ? profil.unit_dikelola : []
+      setUnits(daftar)
+      setUnit((lama) => (daftar.includes(lama) ? lama : unitAktifKepala || daftar[0] || ''))
+      return
+    }
     ambilUnitKerja()
       .then((daftar) => {
         setUnits(daftar)
         setUnit((lama) => lama || daftar[0] || '')
       })
       .catch(() => setUnits([]))
-  }, [modeKepala])
+  }, [modeKepala, profil, unitAktifKepala])
 
   useEffect(() => {
     if (!modeKepala) return
-    setUnit(profil?.unit_kerja ?? '')
-  }, [modeKepala, profil])
+    if (unitAktifKepala) setUnit(unitAktifKepala)
+  }, [modeKepala, unitAktifKepala])
+
+  useEffect(() => {
+    let abaikan = false
+    if (!unit) {
+      setNamaKepalaUnitAktif('')
+      return undefined
+    }
+    ambilNamaKepalaUnit(unit)
+      .then((nama) => {
+        if (!abaikan) setNamaKepalaUnitAktif(nama ?? '')
+      })
+      .catch(() => {
+        if (!abaikan) setNamaKepalaUnitAktif('')
+      })
+    return () => {
+      abaikan = true
+    }
+  }, [unit])
+
+  const ubahUnit = (nilai) => {
+    setUnit(nilai)
+    if (modeKepala) konteksKepala?.pilihUnit?.(nilai)
+  }
 
   const muat = useCallback(async () => {
     if (!unit) {
@@ -112,9 +145,9 @@ export default function LaporanBulanan({ mode = 'superadmin' }) {
           </Alert>
         )}
 
-        {modeKepala && !profil?.unit_kerja && (
-          <Alert variant="info" title="Unit kerja belum diatur" className="mb-4">
-            Hubungi Admin IT untuk mengisi unit kerja akun Anda.
+        {modeKepala && units.length === 0 && (
+          <Alert variant="info" title="Belum ada unit yang dikelola" className="mb-4">
+            Hubungi Super Admin untuk menetapkan unit yang Anda kelola.
           </Alert>
         )}
 
@@ -137,28 +170,20 @@ export default function LaporanBulanan({ mode = 'superadmin' }) {
               <label className="label-input" htmlFor="laporan-unit">
                 Unit Kerja
               </label>
-              {modeKepala ? (
-                <input
-                  id="laporan-unit"
-                  className="input-dasar"
-                  value={profil?.unit_kerja ?? '—'}
-                  disabled
-                />
-              ) : (
-                <select
-                  id="laporan-unit"
-                  className="input-dasar"
-                  value={unit}
-                  onChange={(e) => setUnit(e.target.value)}
-                >
-                  {units.length === 0 && <option value="">Belum ada unit</option>}
-                  {units.map((u) => (
-                    <option key={u} value={u}>
-                      {u}
-                    </option>
-                  ))}
-                </select>
-              )}
+              <select
+                id="laporan-unit"
+                className="input-dasar"
+                value={unit}
+                onChange={(e) => ubahUnit(e.target.value)}
+                disabled={modeKepala && units.length <= 1}
+              >
+                {units.length === 0 && <option value="">Belum ada unit</option>}
+                {units.map((u) => (
+                  <option key={u} value={u}>
+                    {u}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -237,7 +262,7 @@ export default function LaporanBulanan({ mode = 'superadmin' }) {
               alasanIzin={data.alasanIzin}
               periode={periode}
               namaKepala={
-                namaKepalaUnit(data.pegawai, p.unit_kerja) ||
+                namaKepalaUnitAktif ||
                 (modeKepala ? profil?.nama ?? '' : '')
               }
               halaman={indeks + 1}
