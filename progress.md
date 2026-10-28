@@ -82,8 +82,8 @@ cetak manual laporan setelah perapian kop, penyiapan data operasional
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–22 | `src/`, `supabase/migrations/01–22` |
-| Commit Git | **HEAD** — `11d35ab` (custom domain `presisiami.my.id`) | `git log` |
-| Perubahan lokal | **Ada** — kepala unit multi-unit & kepala ASN (migrasi 22, halaman Kepala Unit, auth/RPC/RLS), perapian kop/isi laporan, dan dokumen audit; **belum di-commit** | `git status` |
+| Commit Git | **HEAD** — `18a497d` (kepala unit multi-unit & kepala ASN) | `git log` |
+| Perubahan lokal | **Bersih** — seluruh pekerjaan sudah di-commit dan di-push; migrasi 22 belum dijalankan | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
@@ -241,7 +241,7 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ## 3. Log Kronologis Pekerjaan
 
 ### 2026-10-28 WITA — Commit & push kepala unit multi-unit
-- **Perubahan:** meng-commit dan mem-push seluruh pekerjaan kepala unit
+- **Perubahan:** commit `18a497d` — meng-commit dan mem-push seluruh pekerjaan kepala unit
   multi-unit & kepala ASN (migrasi 22, halaman Kepala Unit, service, auth/RPC,
   RLS, portal kepala, laporan/tanda tangan, sinkronisasi `schema.sql` dan
   `cleanup_data_uji.sql`) beserta pembaruan dokumen audit.
