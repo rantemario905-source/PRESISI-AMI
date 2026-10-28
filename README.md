@@ -237,7 +237,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
     │   ├── deviceService.js
     │   ├── attendanceService.js
     │   ├── pegawaiService.js
-    │   ├── kepalaUnitService.js # Penugasan kepala unit & nama tanda tangan
+    │   ├── kepalaUnitService.js # Penugasan kepala unit
     │   ├── adminDashboardService.js
     │   ├── adminDeviceService.js
     │   ├── shiftService.js
@@ -457,8 +457,9 @@ sedangkan Super Admin memilih unit. Cakupan dapat berupa satu pegawai atau selur
 pegawai unit (satu halaman per pegawai). Lembar laporan berisi kop Pemerintah Kutai
 Kartanegara + RSUD Aji Muhammad Idris (dua logo, Times New Roman), identitas pegawai,
 tabel harian (hari/tanggal, jam masuk, jam pulang, status, terlambat, keterangan),
-ringkasan kehadiran, serta tanda tangan kepala unit di kanan bawah. Nama penanda
-tangan diambil dari penugasan `kepala_unit`. Cetak melalui dialog browser →
+ringkasan kehadiran, serta tanda tangan **Kasubbag Tata Usaha** (Suriami, SKM.,
+M.Kes; NIP. 197312302007012011) di kanan bawah untuk seluruh pegawai. Cetak
+melalui dialog browser →
 **Simpan sebagai PDF** pada ukuran A4 portrait.
 
 Pegawai biasa **tidak dapat mengajukan sendiri**. Pencatatan dilakukan kepala unit

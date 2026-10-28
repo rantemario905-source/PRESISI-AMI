@@ -54,11 +54,3 @@ export function ringkasKehadiran(daftar = []) {
 export function labelPolaKerja(polaKerja) {
   return polaKerja === 'reguler' ? 'Reguler' : 'Shift'
 }
-
-/** Nama kepala ruangan untuk sebuah unit kerja. */
-export function namaKepalaUnit(pegawaiUnit = [], unitKerja) {
-  const kepala = pegawaiUnit.find(
-    (p) => p.kepala_ruangan === true && p.unit_kerja === unitKerja,
-  )
-  return kepala?.nama ?? ''
-}

@@ -49,7 +49,7 @@ const MENU = [
   },
 ]
 
-export default function SidebarKepala({ terbuka, onTutup }) {
+export default function SidebarKepala({ terbuka, onTutup, tampilkanAbsensi = true }) {
   return (
     <>
       {terbuka && (
@@ -119,28 +119,30 @@ export default function SidebarKepala({ terbuka, onTutup }) {
             </NavLink>
           ))}
 
-          <div className="pt-2">
-            <NavLink
-              to="/"
-              end
-              onClick={onTutup}
-              className="flex min-h-[40px] items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:text-sm"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-[18px] w-[18px] shrink-0"
-                aria-hidden="true"
+          {tampilkanAbsensi && (
+            <div className="pt-2">
+              <NavLink
+                to="/"
+                end
+                onClick={onTutup}
+                className="flex min-h-[40px] items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:text-sm"
               >
-                <path d="M3 12l9-9 9 9M5 10v10h5v-6h4v6h5V10" />
-              </svg>
-              <span className="truncate">Kembali ke Absensi</span>
-            </NavLink>
-          </div>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-[18px] w-[18px] shrink-0"
+                  aria-hidden="true"
+                >
+                  <path d="M3 12l9-9 9 9M5 10v10h5v-6h4v6h5V10" />
+                </svg>
+                <span className="truncate">Kembali ke Absensi</span>
+              </NavLink>
+            </div>
+          )}
         </nav>
 
         <div className="border-t border-slate-200 px-5 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">

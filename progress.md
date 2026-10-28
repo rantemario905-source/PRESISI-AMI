@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-28 (commit & push kepala unit) |
+| Terakhir diperbarui | 2026-10-28 (penanda tangan laporan & menu kepala ASN) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -72,27 +72,29 @@ Pekerjaan terbaru (2026-10-28): **kepala unit multi-unit & kepala ASN** — tabe
 kepala boleh banyak unit), kepala ASN memakai metadata `jenis_akun = kepala_asn`
 tanpa baris `pegawai`, RPC `profil_saya()`/penugasan kepala, halaman **Kepala
 Unit** di portal Super Admin, pemilih unit aktif di portal kepala, serta policy
-RLS berbasis `unit_dikelola()`. Kode dan migrasi **22** sudah disiapkan, tetapi
-**migrasi 22 belum dijalankan di Supabase**. Yang
-belum: konfirmasi migrasi
-09–18 & skrip verifikasi, menjalankan migrasi 22 + `verifikasi_22.sql`, uji
-cetak manual laporan setelah perapian kop, penyiapan data operasional
+RLS berbasis `unit_dikelola()`. **Migrasi 22 sudah dijalankan** di Supabase
+(laporan user 2026-10-28). Pekerjaan terbaru (2026-10-28): **penanda tangan
+laporan diseragamkan** menjadi Kasubbag Tata Usaha, Suriami, SKM., M.Kes
+(NIP. 197312302007012011) untuk seluruh pegawai, serta **menu “Kembali ke
+Absensi” disembunyikan bagi kepala ASN** (sidebar dan navigasi bawah HP). Yang
+belum: konfirmasi migrasi 09–18 & skrip verifikasi, uji cetak manual laporan
+setelah perapian kop dan penanda tangan baru, penyiapan data operasional
 (grup shift, jadwal, hari libur), dan persiapan go-live.
 
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–22 | `src/`, `supabase/migrations/01–22` |
 | Commit Git | **HEAD** — `18a497d` (kepala unit multi-unit & kepala ASN) | `git log` |
-| Perubahan lokal | **Bersih** — seluruh pekerjaan sudah di-commit dan di-push; migrasi 22 belum dijalankan | `git status` |
+| Perubahan lokal | **Ada perubahan belum di-commit** — penanda tangan laporan & menu kepala ASN | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
 | Migrasi DB 21 | **Sudah dijalankan** (klaim user 2026-10-27 10:39) | `supabase/migrations/21_koordinat_rsud.sql` |
-| Migrasi DB 22 | **Belum dijalankan** — wajib sebelum menu Kepala Unit/kepala ASN dipakai | `supabase/migrations/22_kepala_unit_multi_unit.sql`, `verifikasi_22.sql` |
+| Migrasi DB 22 | **Sudah dijalankan** (laporan user 2026-10-28); verifikasi 22 belum dikonfirmasi | `supabase/migrations/22_kepala_unit_multi_unit.sql`, `verifikasi_22.sql` |
 | Data uji | **Sudah dibersihkan** — transaksi dihapus, 92 pegawai/grup/master shift dipertahankan | `supabase/cleanup_data_uji.sql`, laporan user 2026-10-27 11:02 |
 | Koordinat RSUD AMI | **Ada di kode** — `-0.23805651650343132, 117.41442516465149` di klien dan schema | `src/config/constants.js`, `supabase/schema.sql`, migrasi 21 |
 | Skrip `supabase/verifikasi_*.sql` | **Verifikasi 19 dan 20 lulus** (klaim user); verifikasi 21 dan 22 belum dikonfirmasi | laporan user 2026-10-27 09:39 |
-| Build produksi | **Lulus** — base `/` 6,44 dtk (2026-10-28 09:20); `dist/index.html` memakai aset `/assets/...` | `npm run build` |
+| Build produksi | **Lulus** — base `/` 6,95 dtk (2026-10-28, lanjutan I-055); `dist/index.html` memakai aset `/assets/...` | `npm run build` |
 | Kepala unit multi-unit | **Ada di kode** — tabel `kepala_unit` (satu unit satu kepala, boleh multi-unit), halaman **Kepala Unit**, pemilih unit aktif di portal kepala, kepala ASN tanpa baris `pegawai`, RPC `profil_saya()`/`simpan_kepala_unit()`, policy `unit_dikelola()` | migrasi 22, `KepalaUnit.jsx`, `kepalaUnitService.js`, `AuthContext.jsx`, `authService.js`, `PortalKepalaLayout.jsx` |
 | Jendela waktu absen | **Ada di kode** — masuk 20 menit sebelum, pulang 1 menit setelah | migrasi 17, `PanelAbsen.jsx`, `jadwalAbsen.js` |
 | Hapus grup kosong | **Ada di kode** — semua grup 0 pegawai; "Belum ditentukan" (akun sistem) disembunyikan bila kosong | migrasi 18, `GrupShift.jsx` |
@@ -105,7 +107,9 @@ cetak manual laporan setelah perapian kop, penyiapan data operasional
 | Latar Dashboard | **Ada di kode** — gradasi biru muda transparan pada seluruh halaman portal Super Admin dan Kepala Ruangan | `PortalAdminLayout.jsx`, `PortalKepalaLayout.jsx` |
 | Aksi halaman | **Ada di kode** — tombol aksi kembali di kanan; aksi spesifik dipindah ke header kartu daftar, kartu Tambah Hari Libur (Tahun), baris tab Koreksi/Verifikasi, dan atas kotak filter Rekapitulasi | `KepalaHalaman.jsx`, `TabBar.jsx`, `DataPegawai.jsx`, `GrupShift.jsx`, `MasterShift.jsx`, `HariLibur.jsx`, `KoreksiPresensi.jsx`, `VerifikasiPerangkat.jsx`, `PengajuanIzin.jsx`, `Rekapitulasi.jsx` |
 | Subtitle topbar | **Ada di kode** — portal Super Admin tanpa subtitle; portal Kepala Ruangan hanya nama unit kerja | `PortalAdminLayout.jsx`, `PortalKepalaLayout.jsx` |
-| Laporan bulanan per pegawai | **Ada di kode** — Super Admin pilih unit, kepala unit memakai unit aktif (bisa berganti jika multi-unit); satu pegawai atau semua pegawai unit; kop dua logo satu baris (tinggi 20 mm), identitas grid 2x2 dengan nilai setelah titik dua, tabel harian, ringkasan tanpa `Izin`, Keterangan Sakit/Cuti/Dinas Luar/Alfa, nama kepala unit dari tabel `kepala_unit`, footer bertanggal tanpa jam; cetak PDF A4 portrait | migrasi 19 & 22, `LaporanBulanan.jsx`, `reportService.js`, `kepalaUnitService.js`, `utils/laporan.js`, `components/laporan/*`, `index.css` |
+| Laporan bulanan per pegawai | **Ada di kode** — Super Admin pilih unit, kepala unit memakai unit aktif (bisa berganti jika multi-unit); satu pegawai atau semua pegawai unit; kop dua logo satu baris (tinggi 20 mm), identitas grid 2x2 dengan nilai setelah titik dua, tabel harian, ringkasan tanpa `Izin`, Keterangan Sakit/Cuti/Dinas Luar/Alfa, penanda tangan tetap Kasubbag Tata Usaha (Suriami, SKM., M.Kes; NIP. 197312302007012011), footer bertanggal tanpa jam; cetak PDF A4 portrait | migrasi 19 & 22, `LaporanBulanan.jsx`, `reportService.js`, `utils/laporan.js`, `components/laporan/*`, `index.css` |
+| Penanda tangan laporan | **Ada di kode** — Kasubbag Tata Usaha, Suriami, SKM., M.Kes, NIP. 197312302007012011 untuk semua pegawai | `src/config/constants.js`, `BlokTandaTangan.jsx` |
+| Menu kepala ASN | **Ada di kode** — “Kembali ke Absensi” (sidebar) dan tab Absensi (navigasi bawah HP) disembunyikan bila `sumber_akun = kepala_asn` | `PortalKepalaLayout.jsx`, `SidebarKepala.jsx` |
 | Lint/unit test | Tidak tersedia di `package.json` | `package.json` |
 | Alfa otomatis | Fitur ada, **default nonaktif** | migrasi 12, `PengaturanPresensi.jsx` |
 | Deploy GitHub Pages | **Aktif** — `https://presisiami.my.id/` live dengan base `/`; `www` redirect ke domain utama; Enforce HTTPS diklaim user, tetapi **HTTP apex masih 200** saat dicek 10:39 | workflow run `40439173719` sukses |
@@ -163,22 +167,38 @@ dan `verifikasi_22.sql` disiapkan tetapi **belum dijalankan** di Supabase.
 
 **Pekerjaan terakhir (2026-10-28, sudah di-commit & di-push):** seluruh
 perubahan kepala unit multi-unit & kepala ASN di-commit dan di-push atas perintah
-user. `npm run build` lulus 6,77 dtk. Migrasi **22** tetap **belum dijalankan**
-di Supabase.
+user. `npm run build` lulus 6,77 dtk. User melaporkan migrasi **22 sudah
+dijalankan** pada 2026-10-28.
+
+**Pekerjaan terakhir (2026-10-28 11:42 WITA, belum di-commit):** atas arahan
+direktur, **semua laporan presensi pegawai ditandatangani Kasubbag Tata Usaha,
+Suriami, SKM., M.Kes (NIP. 197312302007012011)**, menggantikan nama kepala unit.
+Selain itu, tombol **Kembali ke Absensi** di sidebar dan tab **Absensi** di
+navigasi bawah HP **disembunyikan untuk akun kepala ASN** (`sumber_akun =
+kepala_asn`); kepala non-ASN dan pegawai biasa tidak berubah. `npm run build`
+lulus (lihat log entri terbaru).
+
+**Pekerjaan terakhir (2026-10-28, lanjutan setelah force close, belum di-commit):**
+pekerjaan I-055 dipastikan sudah lengkap di working tree, lalu dirapikan dengan
+menghapus helper `namaKepalaUnit` di `src/utils/laporan.js` yang tidak lagi
+dipakai setelah penanda tangan laporan diseragamkan. `npm run build` lulus
+**6,95 dtk**. Perubahan tetap ditahan lokal menunggu perintah commit/push.
 
 **Langkah berikutnya yang disarankan:**
-1. Jalankan **migrasi 22** (`supabase/migrations/22_kepala_unit_multi_unit.sql`)
-   di SQL Editor, lalu `supabase/verifikasi_22.sql` sampai semua `true`. Setelah
-   itu uji menu **Kepala Unit**, login kepala ASN, pemilih unit aktif, dan
-   laporan/tanda tangan kepala unit. Migrasi **19-21** sudah dijalankan;
-   `verifikasi_21.sql` belum dikonfirmasi.
+1. Migrasi **22** sudah dijalankan; konfirmasi `supabase/verifikasi_22.sql`
+   sampai semua `true`, lalu uji menu **Kepala Unit**, login kepala ASN, pemilih
+   unit aktif, dan penyembunyian menu Absensi pada akun kepala ASN. Migrasi
+   **19-21** sudah dijalankan; `verifikasi_21.sql` belum dikonfirmasi.
 2. Jalankan migrasi **15**, **16**, **17**, lalu **18** berurutan di SQL Editor,
    kemudian `supabase/verifikasi_15.sql`, `verifikasi_16.sql`,
    `verifikasi_17.sql`, dan `verifikasi_18.sql` sampai semua `true`. Migrasi 16
    **mengosongkan tabel `perangkat`** (data uji).
 3. Uji lokal: cetak **Laporan Bulanan** (satu pegawai dan semua pegawai unit)
    lewat dialog cetak → **Simpan sebagai PDF**; periksa kop, ukuran font,
-   pemenggalan halaman, dan posisi tanda tangan. Lalu kepala ruangan mengubah
+   pemenggalan halaman, dan posisi tanda tangan Kasubbag Tata Usaha (Suriami,
+   SKM., M.Kes; NIP. 197312302007012011). Login sebagai kepala ASN dan pastikan
+   menu **Kembali ke Absensi** serta tab **Absensi** tidak tampil. Lalu kepala
+   ruangan mengubah
    jadwal hari ini, pegawai mengajukan
    perangkat kedua (harus ditolak sampai Admin IT reset), tombol absen terkunci
    sebelum jam buka (masuk 20 menit sebelum, pulang 1 menit setelah), dan hapus
@@ -239,6 +259,37 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-28 WITA — Lanjutan penanda tangan laporan setelah force close
+- **Perubahan:** mengidentifikasi pekerjaan terakhir sebagai I-055 (penanda tangan
+  laporan Kasubbag Tata Usaha + penyembunyian menu Absensi bagi kepala ASN).
+  Seluruh perubahan inti sudah ada di working tree; dilengkapi dengan menghapus
+  helper `namaKepalaUnit` di `src/utils/laporan.js` yang tidak lagi dipakai
+  setelah nama kepala unit tidak menjadi penanda tangan laporan.
+- **File:** `src/utils/laporan.js`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` lulus **6,95 dtk** (280 modul).
+- **Catatan/risiko:** belum ada uji cetak manual dan belum di-commit; menunggu
+  perintah user. `verifikasi_22.sql` juga belum dikonfirmasi.
+
+### 2026-10-28 11:42 WITA — Penanda tangan laporan & menu kepala ASN
+- **Perubahan:** seluruh laporan presensi bulanan per pegawai kini ditandatangani
+  **Kasubbag Tata Usaha, Suriami, SKM., M.Kes (NIP. 197312302007012011)** sesuai
+  arahan direktur, bukan lagi nama kepala unit per unit kerja. Tombol **Kembali ke
+  Absensi** di sidebar dan tab **Absensi** pada navigasi bawah HP disembunyikan
+  untuk akun **kepala ASN** (`sumber_akun = kepala_asn`); kepala non-ASN dan
+  pegawai biasa tetap dapat kembali ke Absensi. User juga melaporkan **migrasi 22
+  sudah dijalankan**.
+- **File:** `src/config/constants.js`, `src/components/laporan/BlokTandaTangan.jsx`,
+  `src/components/laporan/LembarLaporan.jsx`,
+  `src/pages/admin/LaporanBulanan.jsx`, `src/services/kepalaUnitService.js`,
+  `src/components/layout/PortalKepalaLayout.jsx`,
+  `src/components/layout/SidebarKepala.jsx`, `README.md`, `AGENTS.md`,
+  `progress.md`.
+- **Verifikasi:** `npm run build` (lihat hasil di laporan akhir); belum ada uji
+  cetak manual.
+- **Catatan/risiko:** RPC `nama_kepala_unit` tetap ada di database meski klien
+  tidak lagi memakainya (kompatibilitas). Penanda tangan kini sama untuk semua
+  unit dan kedua portal; tidak perlu migrasi baru. Perubahan belum di-commit.
 
 ### 2026-10-28 WITA — Commit & push kepala unit multi-unit
 - **Perubahan:** commit `18a497d` — meng-commit dan mem-push seluruh pekerjaan kepala unit

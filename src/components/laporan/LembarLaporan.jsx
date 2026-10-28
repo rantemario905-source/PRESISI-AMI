@@ -20,7 +20,6 @@ export default function LembarLaporan({
   presensi = [],
   alasanIzin = {},
   periode,
-  namaKepala,
   halaman,
   totalHalaman,
   waktuCetak,
@@ -120,7 +119,7 @@ export default function LembarLaporan({
         </tbody>
       </table>
 
-      <BlokTandaTangan waktuCetak={waktuCetak} namaKepala={namaKepala} />
+      <BlokTandaTangan waktuCetak={waktuCetak} />
 
       <div className="footer-laporan">
         <span>Dicetak melalui PRESISI-AMI, {formatTanggalPanjang(waktuCetak)}</span>

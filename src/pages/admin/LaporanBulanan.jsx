@@ -12,7 +12,6 @@ import { useOutletContext } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { ambilLaporanBulanan } from '../../services/reportService.js'
 import { ambilUnitKerja } from '../../services/pegawaiService.js'
-import { ambilNamaKepalaUnit } from '../../services/kepalaUnitService.js'
 import { namaBulan, periodeBulanIni } from '../../utils/format.js'
 import { kelompokkanPresensi } from '../../utils/laporan.js'
 import { Alert, Button, Spinner } from '../../components/ui/index.js'
@@ -35,7 +34,6 @@ export default function LaporanBulanan({ mode = 'superadmin' }) {
   const [data, setData] = useState(DATA_KOSONG)
   const [memuat, setMemuat] = useState(!modeKepala)
   const [galat, setGalat] = useState(null)
-  const [namaKepalaUnitAktif, setNamaKepalaUnitAktif] = useState('')
   const [waktuCetak, setWaktuCetak] = useState(() => new Date().toISOString())
 
   useEffect(() => {
@@ -57,24 +55,6 @@ export default function LaporanBulanan({ mode = 'superadmin' }) {
     if (!modeKepala) return
     if (unitAktifKepala) setUnit(unitAktifKepala)
   }, [modeKepala, unitAktifKepala])
-
-  useEffect(() => {
-    let abaikan = false
-    if (!unit) {
-      setNamaKepalaUnitAktif('')
-      return undefined
-    }
-    ambilNamaKepalaUnit(unit)
-      .then((nama) => {
-        if (!abaikan) setNamaKepalaUnitAktif(nama ?? '')
-      })
-      .catch(() => {
-        if (!abaikan) setNamaKepalaUnitAktif('')
-      })
-    return () => {
-      abaikan = true
-    }
-  }, [unit])
 
   const ubahUnit = (nilai) => {
     setUnit(nilai)
@@ -261,10 +241,6 @@ export default function LaporanBulanan({ mode = 'superadmin' }) {
               presensi={petaPresensi.get(p.id) ?? []}
               alasanIzin={data.alasanIzin}
               periode={periode}
-              namaKepala={
-                namaKepalaUnitAktif ||
-                (modeKepala ? profil?.nama ?? '' : '')
-              }
               halaman={indeks + 1}
               totalHalaman={daftarCetak.length}
               waktuCetak={waktuCetak}

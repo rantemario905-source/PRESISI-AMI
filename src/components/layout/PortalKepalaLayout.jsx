@@ -27,6 +27,14 @@ export default function PortalKepalaLayout() {
   const { profil, keluar } = useAuth()
   const { pathname } = useLocation()
   const judul = JUDUL_HALAMAN[pathname] ?? 'Portal Kepala Ruangan'
+  const kepalaAsn = profil?.sumber_akun === 'kepala_asn'
+  const menuBawah = useMemo(
+    () =>
+      kepalaAsn
+        ? MENU_PORTAL_KEPALA.filter((item) => item.ke !== '/')
+        : MENU_PORTAL_KEPALA,
+    [kepalaAsn],
+  )
 
   const daftarUnit = useMemo(() => {
     const dariProfil = Array.isArray(profil?.unit_dikelola) ? profil.unit_dikelola : []
@@ -73,7 +81,11 @@ export default function PortalKepalaLayout() {
 
   return (
     <div className="min-h-[100dvh] bg-slate-50">
-      <SidebarKepala terbuka={menuTerbuka} onTutup={() => setMenuTerbuka(false)} />
+      <SidebarKepala
+        terbuka={menuTerbuka}
+        onTutup={() => setMenuTerbuka(false)}
+        tampilkanAbsensi={!kepalaAsn}
+      />
 
       <div className="bg-gradient-to-b from-sky-50/90 via-sky-50/60 to-slate-50 print:bg-none print:bg-white print:!pl-0 lg:pl-64">
         <header className="tanpa-cetak safe-atas sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
@@ -167,10 +179,7 @@ export default function PortalKepalaLayout() {
         </footer>
       </div>
 
-      <NavigasiBawah
-        menu={MENU_PORTAL_KEPALA}
-        label="Navigasi portal kepala ruangan"
-      />
+      <NavigasiBawah menu={menuBawah} label="Navigasi portal kepala ruangan" />
     </div>
   )
 }

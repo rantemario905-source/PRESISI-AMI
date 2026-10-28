@@ -40,3 +40,10 @@ export const ZONA_WAKTU = 'Asia/Makassar'
  */
 export const MENIT_AWAL_ABSEN_MASUK = 20
 export const MENIT_JEDA_ABSEN_PULANG = 1
+
+/** Penanda tangan tetap pada laporan presensi bulanan pegawai. */
+export const PENANDA_TANGAN_LAPORAN = {
+  jabatan: 'Kasubbag Tata Usaha',
+  nama: 'Suriami, SKM., M.Kes',
+  nip: '197312302007012011',
+}

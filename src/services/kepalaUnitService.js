@@ -36,11 +36,3 @@ export async function simpanKepalaUnit({ userId, units, nama = null }) {
   if (error) throw error
   return data
 }
-
-/** Nama kepala unit untuk kop/tanda tangan laporan. */
-export async function ambilNamaKepalaUnit(unit) {
-  if (!unit) return ''
-  const { data, error } = await supabase.rpc('nama_kepala_unit', { p_unit: unit })
-  if (error) throw error
-  return data ?? ''
-}
