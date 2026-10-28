@@ -94,8 +94,8 @@ persiapan go-live.
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–24 | `src/`, `supabase/migrations/01–24` |
-| Commit Git | **HEAD** — `6e3e7c1` (sinkronisasi status commit penanda tangan laporan) | `git log` |
-| Perubahan lokal | **Ada perubahan lokal** — Dinas Luar lintas unit (migrasi 23), radius 50 meter (migrasi 24), perapian UI mobile, dan dokumen belum di-commit | `git status` |
+| Commit Git | **HEAD** — `a9a59ac` (Dinas Luar lintas unit, radius 50 meter, perapian UI mobile) | `git log` |
+| Perubahan lokal | **Bersih** setelah commit & push 2026-10-28 | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
@@ -274,6 +274,19 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-28 WITA — Commit & push radius 50 meter + UI mobile
+- **Perubahan:** seluruh pekerjaan lokal di-commit: Dinas Luar lintas unit
+  (migrasi 23), radius absensi 50 meter (migrasi 24), perapian UI mobile
+  dashboard & riwayat, serta pembaruan dokumen audit. Commit fitur `a9a59ac`
+  (`PRESISI AMI: dinas luar lintas unit, radius 50 meter, dan perapian UI
+  mobile`), lalu commit sinkronisasi status dokumen.
+- **File:** 19 file pada commit fitur + `AGENTS.md` dan `progress.md` pada
+  commit sinkronisasi.
+- **Verifikasi:** `npm run build` lulus **7,10 dtk** (280 modul) sebelum commit;
+  push ke `origin/main` berhasil.
+- **Catatan/risiko:** migrasi 23 dan 24 **belum dijalankan** di Supabase; radius
+  server masih 100 m sampai migrasi 24 dieksekusi.
 
 ### 2026-10-28 WITA — Radius absensi 50 meter
 - **Perubahan:** batas radius geofencing diubah dari 100 m menjadi **50 m** pada

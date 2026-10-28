@@ -224,8 +224,8 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   2026-10-27 10:36. Koordinat terbaru
   `-0.23805651650343132, 117.41442516465149` sudah di-commit dan migrasi 21
   **sudah dijalankan di Supabase** (klaim user 2026-10-27 10:39). Commit terbaru
-  `69cc041` (penanda tangan laporan Kasubbag Tata Usaha & menu kepala ASN)
-  di-commit dan di-push 2026-10-28.
+  `a9a59ac` (Dinas Luar lintas unit + migrasi 23, radius 50 meter + migrasi 24,
+  perapian UI mobile dashboard & riwayat) di-commit dan di-push 2026-10-28.
 - **Kepala unit (2026-10-28, sudah di-commit & di-push):** tabel `kepala_unit`
   menjadi sumber kebenaran penugasan (satu unit satu kepala, satu kepala boleh
   banyak unit). Kode, migrasi **22**, `verifikasi_22.sql`, `schema.sql`, dan
@@ -240,14 +240,15 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   `PENANDA_TANGAN_LAPORAN` di `src/config/constants.js`). Nama kepala unit tidak
   lagi dipakai di laporan. Akun kepala ASN tidak menampilkan menu **Kembali ke
   Absensi** (sidebar) maupun tab **Absensi** (navigasi bawah HP).
-- **Dinas Luar lintas unit (2026-10-28, kode lokal):** migrasi **23**,
-  `verifikasi_23.sql`, dan sinkronisasi `schema.sql` sudah dibuat; migrasi 23
-  **belum dijalankan** di Supabase. Kepala unit dapat mencatat Dinas Luar untuk
+- **Dinas Luar lintas unit (2026-10-28, sudah di-commit & di-push):** migrasi
+  **23**, `verifikasi_23.sql`, dan sinkronisasi `schema.sql` sudah dibuat; migrasi
+  23 **belum dijalankan** di Supabase. Kepala unit dapat mencatat Dinas Luar untuk
   pegawai lintas unit; Sakit/Cuti tetap per unit. Pembuat grup dapat membaca
   seluruh grup dan dokumennya hanya selama masih menjabat kepala unit. FK
   `izin_cuti.dibuat_oleh`/`dibatalkan_oleh` kini mengacu ke `auth.users` agar
   kepala ASN dapat mencatat.
-- **Radius absensi (2026-10-28, kode lokal):** radius geofencing kini **50 meter**
+- **Radius absensi (2026-10-28, sudah di-commit & di-push):** radius geofencing
+  kini **50 meter**
   di klien (`MAX_RADIUS_METERS`) dan server (migrasi **24** yang mendefinisikan
   ulang `submit_presensi`, plus `schema.sql`). `verifikasi_24.sql` memeriksa
   radius 50 m dipakai dan radius 100 m hilang. Migrasi 24 **belum dijalankan**
