@@ -85,7 +85,7 @@ setelah perapian kop dan penanda tangan baru, penyiapan data operasional
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–22 | `src/`, `supabase/migrations/01–22` |
 | Commit Git | **HEAD** — `18a497d` (kepala unit multi-unit & kepala ASN) | `git log` |
-| Perubahan lokal | **Ada perubahan belum di-commit** — penanda tangan laporan & menu kepala ASN | `git status` |
+| Perubahan lokal | **Bersih** — penanda tangan laporan & menu kepala ASN sudah di-commit dan di-push | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
@@ -182,7 +182,8 @@ lulus (lihat log entri terbaru).
 pekerjaan I-055 dipastikan sudah lengkap di working tree, lalu dirapikan dengan
 menghapus helper `namaKepalaUnit` di `src/utils/laporan.js` yang tidak lagi
 dipakai setelah penanda tangan laporan diseragamkan. `npm run build` lulus
-**6,95 dtk**. Perubahan tetap ditahan lokal menunggu perintah commit/push.
+**6,95 dtk**. Seluruh perubahan sudah di-commit `69cc041` dan di-push ke
+`origin/main` atas perintah user.
 
 **Langkah berikutnya yang disarankan:**
 1. Migrasi **22** sudah dijalankan; konfirmasi `supabase/verifikasi_22.sql`
@@ -268,8 +269,8 @@ dan `verifikasi_18` untuk hapus grup kosong.
   setelah nama kepala unit tidak menjadi penanda tangan laporan.
 - **File:** `src/utils/laporan.js`, `AGENTS.md`, `progress.md`.
 - **Verifikasi:** `npm run build` lulus **6,95 dtk** (280 modul).
-- **Catatan/risiko:** belum ada uji cetak manual dan belum di-commit; menunggu
-  perintah user. `verifikasi_22.sql` juga belum dikonfirmasi.
+- **Catatan/risiko:** belum ada uji cetak manual. Sudah di-commit `69cc041` dan
+  di-push ke `origin/main`. `verifikasi_22.sql` juga belum dikonfirmasi.
 
 ### 2026-10-28 11:42 WITA — Penanda tangan laporan & menu kepala ASN
 - **Perubahan:** seluruh laporan presensi bulanan per pegawai kini ditandatangani

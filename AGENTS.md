@@ -189,6 +189,7 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-053 | 2026-10-28 09:11 | "[Image 1] lanjutkan pekerjaan yang sempat terhenti" | Melanjutkan I-052: memeriksa diff, melengkapi README/AGENTS/progress, lalu menjalankan `npm run build` (lulus 8,72 dtk) | selesai | 2026-10-28 09:11 — Kepala unit multi-unit & kepala ASN |
 | I-054 | 2026-10-28 (WITA) | "COMMIT DAN PUSH" | Memverifikasi `npm run build` (lulus 6,77 dtk), memperbarui dokumen audit, lalu commit `18a497d` + push pekerjaan kepala unit multi-unit & kepala ASN (migrasi 22, halaman Kepala Unit, auth/RPC/RLS, laporan) | selesai | 2026-10-28 — Commit & push kepala unit |
 | I-056 | 2026-10-28 (WITA) | "pekerjaan terakhir belum selesai karna forceclode identifikasi pekerjaan terakhir dan lanjutkan" | Mengidentifikasi pekerjaan terakhir sebagai I-055 (penanda tangan laporan Kasubbag Tata Usaha + menu Absensi kepala ASN); memeriksa diff, menghapus helper `namaKepalaUnit` yang tidak terpakai di `src/utils/laporan.js`, menjalankan `npm run build` (lulus 6,95 dtk), dan memperbarui dokumen audit | selesai | 2026-10-28 — Lanjutan penanda tangan laporan |
+| I-057 | 2026-10-28 (WITA) | "commit dan push" | Memverifikasi `npm run build` (lulus 6,95 dtk), lalu commit `69cc041` (penanda tangan laporan Kasubbag Tata Usaha + menu kepala ASN, helper `namaKepalaUnit` dihapus) beserta sinkronisasi dokumen audit, dan push ke `origin/main` | selesai | 2026-10-28 — Lanjutan penanda tangan laporan |
 | I-055 | 2026-10-28 11:42 | "migrasi sudah saya jalankan dan ada arahan dari direktur untuk semua pegawai penanda tangan laporannya itu Kasubbag Tata Usaha Suriami,SKM.,m.Kes dengan NIP.197312302007012011, dan juga tombol kembali ke absensi untuk kapala ruangan asn dihilangkan saja [Image 1]" + klarifikasi: menu Absensi dihilangkan **hanya untuk kepala ASN** dan nama ditulis **Suriami, SKM., M.Kes** | Menyeragamkan penanda tangan laporan menjadi Kasubbag Tata Usaha (Suriami, SKM., M.Kes; NIP. 197312302007012011) untuk semua pegawai; menyembunyikan “Kembali ke Absensi” (sidebar) dan tab Absensi (navigasi bawah HP) untuk `sumber_akun = kepala_asn`; menghapus `ambilNamaKepalaUnit` yang tidak terpakai; memperbarui README + dokumen audit; `npm run build` lulus 6,90 dtk | selesai | 2026-10-28 11:42 — Penanda tangan laporan & menu kepala ASN |
 
 ---
@@ -217,7 +218,9 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   serta commit `11d35ab` (custom domain `presisiami.my.id`) yang di-push
   2026-10-27 10:36. Koordinat terbaru
   `-0.23805651650343132, 117.41442516465149` sudah di-commit dan migrasi 21
-  **sudah dijalankan di Supabase** (klaim user 2026-10-27 10:39).
+  **sudah dijalankan di Supabase** (klaim user 2026-10-27 10:39). Commit terbaru
+  `69cc041` (penanda tangan laporan Kasubbag Tata Usaha & menu kepala ASN)
+  di-commit dan di-push 2026-10-28.
 - **Kepala unit (2026-10-28, sudah di-commit & di-push):** tabel `kepala_unit`
   menjadi sumber kebenaran penugasan (satu unit satu kepala, satu kepala boleh
   banyak unit). Kode, migrasi **22**, `verifikasi_22.sql`, `schema.sql`, dan
@@ -225,7 +228,8 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   Supabase** (laporan user 2026-10-28); `verifikasi_22.sql` belum dikonfirmasi.
   Kepala ASN memakai metadata `jenis_akun = kepala_asn` dan tidak dicatat di
   `public.pegawai`.
-- **Penanda tangan laporan (2026-10-28, belum di-commit):** seluruh laporan
+- **Penanda tangan laporan (2026-10-28, sudah di-commit & di-push):** seluruh
+  laporan
   presensi bulanan per pegawai ditandatangani **Kasubbag Tata Usaha, Suriami,
   SKM., M.Kes, NIP. 197312302007012011** (konstanta
   `PENANDA_TANGAN_LAPORAN` di `src/config/constants.js`). Nama kepala unit tidak
