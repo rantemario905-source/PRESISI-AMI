@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-29 (jam kerja reguler per unit: ADMISI RAWAT JALAN 07.00–15.00) |
+| Terakhir diperbarui | 2026-10-29 20:41 WITA (commit jendela absen baru, jam kerja unit, migrasi 25–27) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -109,8 +109,8 @@ libur), dan persiapan go-live.
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–27 | `src/`, `supabase/migrations/01–27` |
-| Commit Git | **HEAD** — `bfbee59` (sinkronisasi status commit radius 50 meter); fitur `a9a59ac` | `git log` |
-| Perubahan lokal | **Sudah di-commit** — jendela absen baru, jam kerja unit, dan migrasi 25–27 | `git status` |
+| Commit Git | **Fitur terakhir** — `6a7430e` (jendela absen baru, jam kerja unit, migrasi 25–27); sebelumnya `bfbee59` | `git log` |
+| Perubahan lokal | **Bersih** setelah commit fitur dan sinkronisasi dokumen audit | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
@@ -293,6 +293,30 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-29 20:41 WITA — Commit & push jendela absen baru, jam kerja unit, migrasi 25–27
+
+- **Perubahan:** menyimpan seluruh pekerjaan yang masih tertahan di working tree:
+  jendela absen baru (masuk 1 jam sebelum, pulang ditutup 2 jam setelah),
+  pemisahan presensi hari ini/kemarin, halaman **Jam Kerja Unit**, migrasi
+  **25–27**, verifikasi 25–27, sinkronisasi `schema.sql`, dan dokumen audit.
+  Status migrasi 26–27 diperbarui berdasarkan laporan user bahwa keduanya sudah
+  dijalankan di Supabase.
+- **File:** `src/App.jsx`, `src/components/PanelAbsen.jsx`,
+  `src/components/layout/SidebarAdmin.jsx`, `src/config/constants.js`,
+  `src/pages/Dashboard.jsx`, `src/pages/admin/JamKerjaUnit.jsx`,
+  `src/services/attendanceService.js`, `src/services/jamKerjaService.js`,
+  `src/utils/jadwalAbsen.js`, `supabase/schema.sql`,
+  `supabase/migrations/25–27`, `supabase/verifikasi_25–27`, `README.md`,
+  `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run build` lulus **6,89 dtk** (282 modul, chunk
+  `JamKerjaUnit` 7,04 kB); `git diff --check` hanya memberi peringatan
+  LF/CRLF. Migrasi 25–27 dilaporkan user sudah dijalankan; hasil
+  `verifikasi_25–27` dan uji absensi nyata belum dikonfirmasi.
+- **Catatan/risiko:** migrasi 27 mengubah seluruh pegawai `ADMISI RAWAT JALAN`
+  menjadi pola Reguler; pegawai yang seharusnya tetap Shift harus diubah kembali
+  lewat **Data Pegawai**. Verifikasi statis dan build tidak menggantikan uji
+  absen, jam Admisi, serta cetak laporan di perangkat nyata.
 
 ### 2026-10-29 19:29 WITA — Jam kerja reguler per unit (migrasi 27)
 - **Perubahan:** menambahkan override jam kerja reguler per unit agar unit
