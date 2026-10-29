@@ -16,7 +16,7 @@ import {
 import {
   ambilJadwalHariIni,
   ambilJadwalKemarin,
-  ambilPresensiHariIni,
+  ambilPresensiRingkas,
   ambilRiwayatPresensi,
 } from '../services/attendanceService.js'
 import { formatTanggal, inisialNama } from '../utils/format.js'
@@ -37,6 +37,7 @@ export default function Dashboard() {
   const [statusPerangkat, setStatusPerangkat] = useState('belum_terdaftar')
   const [perangkatAktif, setPerangkatAktif] = useState(null)
   const [presensi, setPresensi] = useState(null)
+  const [presensiKemarin, setPresensiKemarin] = useState(null)
   const [jadwal, setJadwal] = useState(null)
   const [jadwalKemarin, setJadwalKemarin] = useState(null)
   const [riwayat, setRiwayat] = useState([])
@@ -53,14 +54,15 @@ export default function Dashboard() {
       const [status, dataPresensi, dataJadwal, dataJadwalKemarin, dataRiwayat] =
         await Promise.all([
           ambilStatusPerangkat(profil.id, deviceToken),
-          ambilPresensiHariIni(profil.id),
+          ambilPresensiRingkas(profil.id),
           ambilJadwalHariIni(profil.id),
           ambilJadwalKemarin(profil.id),
           ambilRiwayatPresensi(profil.id, 7),
         ])
       setStatusPerangkat(status.status)
       setPerangkatAktif(status.data)
-      setPresensi(dataPresensi)
+      setPresensi(dataPresensi.hariIni)
+      setPresensiKemarin(dataPresensi.kemarinTerbuka)
       setJadwal(dataJadwal)
       setJadwalKemarin(dataJadwalKemarin)
       setRiwayat(dataRiwayat)
@@ -166,6 +168,7 @@ export default function Dashboard() {
             <PanelAbsen
               statusPerangkat={statusPerangkat}
               presensi={presensi}
+              presensiKemarin={presensiKemarin}
               jadwal={jadwal}
               jadwalKemarin={jadwalKemarin}
               deviceToken={deviceToken}

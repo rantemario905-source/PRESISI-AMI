@@ -48,6 +48,7 @@ const DataPegawai = lazy(() => import('./pages/admin/DataPegawai.jsx'))
 const KepalaUnit = lazy(() => import('./pages/admin/KepalaUnit.jsx'))
 const VerifikasiPerangkat = lazy(() => import('./pages/admin/VerifikasiPerangkat.jsx'))
 const MasterShift = lazy(() => import('./pages/admin/MasterShift.jsx'))
+const JamKerjaUnit = lazy(() => import('./pages/admin/JamKerjaUnit.jsx'))
 const JadwalShift = lazy(() => import('./pages/admin/JadwalShift.jsx'))
 const GrupShift = lazy(() => import('./pages/admin/GrupShift.jsx'))
 const HariLibur = lazy(() => import('./pages/admin/HariLibur.jsx'))
@@ -128,6 +129,7 @@ export default function App() {
             <Route path="perangkat" element={<VerifikasiPerangkat />} />
             <Route path="grup-shift" element={<GrupShift />} />
             <Route path="shift" element={<MasterShift />} />
+            <Route path="jam-kerja" element={<JamKerjaUnit />} />
             <Route path="jadwal-shift" element={<JadwalShift />} />
             <Route path="hari-libur" element={<HariLibur />} />
             <Route path="pengaturan" element={<PengaturanPresensi />} />

@@ -12,8 +12,9 @@ Aplikasi absensi pegawai non-ASN RSUD Aji Muhammad Idris.
 - **Frontend:** React 18 + Vite 5 + Tailwind CSS 3 + React Router 6.
 - **Backend:** Supabase (Postgres, Auth, Storage, RPC `SECURITY DEFINER`).
 - **Fitur inti:** geofencing 50 m, anti Fake GPS, device binding satu perangkat
-  aktif per pegawai, presensi shift/reguler dengan jendela waktu (masuk 20 menit
-  sebelum jam masuk, pulang 1 menit setelah jam pulang), jadwal shift, hari
+  aktif per pegawai, presensi shift/reguler dengan jendela waktu (masuk dibuka
+  1 jam sebelum jam masuk, pulang dibuka 1 menit setelah dan ditutup 2 jam
+  setelah jam pulang), jam kerja reguler khusus per unit, jadwal shift, hari
   libur, keterlambatan, Alfa otomatis, Dinas/Sakit/Cuti, koreksi presensi,
   rekapitulasi, laporan presensi bulanan per pegawai (PDF A4), impor jadwal
   CSV/XLSX, hapus grup shift kosong, serta kepala unit multi-unit dan kepala ASN
@@ -41,7 +42,7 @@ npm run preview      # pratinjau hasil build
 - Skrip bantu (butuh Secret key, jangan pernah di-commit):
   `node scripts/impor-akun.mjs ...`, `node scripts/verifikasi-impor.mjs ...`.
 
-**Urutan migrasi wajib:** `01 → 02 → ... → 24`, satu per satu. Jangan mengulang
+**Urutan migrasi wajib:** `01 → 02 → ... → 27`, satu per satu. Jangan mengulang
 migrasi lama bila tidak diperlukan. `supabase/schema.sql` adalah gabungan
 seluruh migrasi untuk instalasi sekali jalan.
 
@@ -196,6 +197,11 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-060 | 2026-10-28 (WITA) | "[Image 1] [Image 2] perlu sedikit modifikasi ui agar lebih rapih di tampilan mobil, pada image pertama pilihan bulannya itu di tampilan mobile terlalu besar yang mmebuatnya melebar dari layar hp, kemudian di gambar kedua, tulisan jam kerja reguler senin-kamis 08.00-16.30, jumat 08.00-16.00 dihapus saja, tukar posisi status perangkat dengan riwayat presensi terakhir, dan text pada status perangkat dihilangkan saja, cukup status perangkat terverifikasi, dan tulisan text ketika login menggunakan device yang berbeda dipersingkat saja agar lebih profesioanl" | Membatasi lebar pemilih bulan di Riwayat ke 190 px agar tidak melebar di HP; menghapus keterangan jam kerja reguler dari kartu Jadwal Kerja; menukar urutan kartu di Dashboard pegawai menjadi Jadwal → Riwayat → Status Perangkat (desktop tetap dua kolom); menampilkan status perangkat terverifikasi ringkas tanpa teks; mempersingkat pesan perangkat berbeda di kartu status dan Panel Absen; `npm run build` lulus 6,50 dtk | selesai | 2026-10-28 — Perapian UI mobile dashboard & riwayat |
 | I-061 | 2026-10-28 (WITA) | "ubah radius menjadi 50 meter saja" | Mengubah radius geofencing dari 100 m menjadi 50 m di klien (`MAX_RADIUS_METERS`) dan server (`submit_presensi`); membuat migrasi **24** + `verifikasi_24.sql`; menyinkronkan seluruh definisi `submit_presensi` di `schema.sql`; memperbarui komentar teknis, label radius di Panel Absen, dan dokumentasi; `npm run build` lulus 7,10 dtk | selesai (kode); migrasi 24 belum dijalankan | 2026-10-28 — Radius absensi 50 meter |
 | I-062 | 2026-10-28 (WITA) | "commit dan push" | Memverifikasi `npm run build` (lulus 7,10 dtk) dan memperbarui dokumen audit, lalu commit pekerjaan Dinas Luar lintas unit (migrasi 23), radius 50 meter (migrasi 24), perapian UI mobile dashboard & riwayat, serta push ke `origin/main` | selesai | 2026-10-28 — Commit & push radius 50 meter + UI mobile |
+| I-063 | 2026-10-28 (WITA) | "sudah dijalankan" | Konfirmasi migrasi **23** dan **24** sudah dijalankan di Supabase; radius server kini 50 m; memperbarui dokumen audit; tidak ada perubahan kode | selesai (verifikasi 23–24 belum dikonfirmasi) | 2026-10-28 — Migrasi 23 & 24 dijalankan |
+| I-064 | 2026-10-29 (WITA) | "kerjakan" (setelah keputusan: batas pulang akhir hari kerja, shift malam sampai 12.00 siang, tetap dua tombol, baris kemarin diabaikan setelah batas) | Menerapkan batas akhir absen pulang: klien (`tutupAbsenPulang`, pemisahan presensi hari ini/kemarin, tombol pulang mati otomatis + info koreksi) dan server (migrasi **25**, `verifikasi_25.sql`, sinkron `schema.sql`); `npm run build` lulus 6,82 dtk (percobaan pertama 23,39 dtk) | selesai (kode); migrasi 25 sudah dijalankan, digantikan migrasi 26 | 2026-10-29 11:46 — Batas akhir absen pulang |
+| I-065 | 2026-10-29 15:03 | "ya setuju" + "kerjakan" (menyetujui rencana: masuk dibuka 1 jam sebelum, pulang ditutup 2 jam setelah jam pulang) | Menerapkan jendela absen baru: klien (`MENIT_AWAL_ABSEN_MASUK = 60`, `MENIT_TUTUP_ABSEN_PULANG = 120`, `tutupAbsenPulang`, teks `PanelAbsen`) dan server (migrasi **26**, `verifikasi_26.sql`, sinkron `schema.sql`); `npm run build` lulus 8,90 dtk; uji Node helper reguler 07.00/16.31/18.30 dan shift malam 19.00/08.01/10.00 (H+1) | selesai (kode); migrasi 26 sudah dijalankan (laporan user 2026-10-29) | 2026-10-29 15:03 — Jendela absen baru |
+| I-066 | 2026-10-29 (WITA) | "hari kerja admisi rawat jalan itu reguler tanpa shift, cuma jam kerjanya yang sedikit lebih cepat, Jam masuk 7.00-15.00 senin-jumat jam kerja sama" + "1. ya satu unit yang sama yaitu unit Admisi Rawat Jalan, 2. ADMISI RAWAT JALAN 3.superadmin saja" + "kerjakan" | Menambahkan jam kerja reguler per unit: tabel `jam_kerja_unit`, seed ADMISI RAWAT JALAN Senin–Jumat 07.00–15.00, konversi pegawai unit tersebut menjadi Reguler, override `jadwal_kerja`/`proses_alfa_otomatis` (fallback global), RLS Super Admin, migrasi **27**, `verifikasi_27.sql`, halaman/menu **Jam Kerja Unit**, service, route; `npm run build` lulus 16,74 dtk (ulang 7,58 dtk) | selesai (kode); migrasi 27 sudah dijalankan (laporan user 2026-10-29) | 2026-10-29 19:29 — Jam kerja reguler per unit |
+| I-067 | 2026-10-29 20:41 | "sebelum kita lanjut  commit dan push dulu sisa pekerjaan sebelumn rencana keamanan kita rencanakan" | Memverifikasi build, mencatat laporan migrasi 26–27 sudah dijalankan, lalu commit dan push sisa pekerjaan jendela absen baru, jam kerja unit, migrasi 25–27, dan dokumen audit | dikerjakan | 2026-10-29 20:41 — Commit & push sisa pekerjaan |
 
 ---
 
@@ -242,17 +248,45 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   Absensi** (sidebar) maupun tab **Absensi** (navigasi bawah HP).
 - **Dinas Luar lintas unit (2026-10-28, sudah di-commit & di-push):** migrasi
   **23**, `verifikasi_23.sql`, dan sinkronisasi `schema.sql` sudah dibuat; migrasi
-  23 **belum dijalankan** di Supabase. Kepala unit dapat mencatat Dinas Luar untuk
+  23 **sudah dijalankan** di Supabase (laporan user 2026-10-28), `verifikasi_23.sql`
+  belum dikonfirmasi. Kepala unit dapat mencatat Dinas Luar untuk
   pegawai lintas unit; Sakit/Cuti tetap per unit. Pembuat grup dapat membaca
   seluruh grup dan dokumennya hanya selama masih menjabat kepala unit. FK
   `izin_cuti.dibuat_oleh`/`dibatalkan_oleh` kini mengacu ke `auth.users` agar
   kepala ASN dapat mencatat.
+- **Jendela absen (2026-10-29, sudah dijalankan):** absen masuk dibuka **1 jam (60 menit)**
+  sebelum jam masuk; absen pulang dibuka 1 menit setelah jam pulang dan ditutup
+  **2 jam (120 menit)** setelah jam pulang untuk semua pola kerja, termasuk
+  shift malam lintas hari (dihitung pada tanggal selesai). Tombol mati otomatis
+  setelah batas; panel memakai baris hari ini sehingga absen masuk tetap bisa,
+  dan presensi yang terlewat diselesaikan lewat koreksi Super Admin. Kode ada di
+  `src/config/constants.js` (`MENIT_AWAL_ABSEN_MASUK = 60`,
+  `MENIT_TUTUP_ABSEN_PULANG = 120`), `src/utils/jadwalAbsen.js`
+  (`tutupAbsenPulang`), `src/components/PanelAbsen.jsx`,
+  `src/services/attendanceService.js`, serta migrasi **26** +
+  `verifikasi_26.sql`. Migrasi **25** sudah dijalankan tetapi aturannya
+  digantikan migrasi 26; **migrasi 26 sudah dijalankan** di Supabase (laporan
+  user 2026-10-29), `verifikasi_26.sql` belum dikonfirmasi.
+  `verifikasi_17.sql` dan `verifikasi_25.sql` kini historis.
+- **Jam kerja reguler per unit (2026-10-29, sudah dijalankan):** tabel `jam_kerja_unit`
+  menyimpan override per unit per hari dengan fallback ke `jam_kerja_reguler`
+  global. Seed `ADMISI RAWAT JALAN`: Senin–Jumat **07.00–15.00**, Sabtu–Minggu
+  libur; pegawai unit ini yang masih Shift diubah menjadi **Reguler** oleh
+  migrasi. `jadwal_kerja` dan `proses_alfa_otomatis` memakai override; hanya
+  pegawai pola **Reguler** yang terpengaruh, pegawai Shift tetap memakai
+  `shift_master`/`jadwal_shift`. Menu **Jam Kerja Unit** hanya ada di portal
+  Super Admin, dengan RLS baca untuk semua pegawai login dan tulis hanya
+  `is_superadmin()`. Kode ada di migrasi **27** + `verifikasi_27.sql`,
+  `src/pages/admin/JamKerjaUnit.jsx`, dan `src/services/jamKerjaService.js`.
+  **Migrasi 27 sudah dijalankan** di Supabase (laporan user 2026-10-29);
+  `verifikasi_27.sql` belum dikonfirmasi.
 - **Radius absensi (2026-10-28, sudah di-commit & di-push):** radius geofencing
   kini **50 meter**
   di klien (`MAX_RADIUS_METERS`) dan server (migrasi **24** yang mendefinisikan
   ulang `submit_presensi`, plus `schema.sql`). `verifikasi_24.sql` memeriksa
-  radius 50 m dipakai dan radius 100 m hilang. Migrasi 24 **belum dijalankan**
-  di Supabase, sehingga server masih memakai 100 m sampai migrasi dijalankan.
+  radius 50 m dipakai dan radius 100 m hilang. Migrasi 24 **sudah dijalankan**
+  di Supabase (laporan user 2026-10-28), sehingga server memakai radius 50 m;
+  `verifikasi_24.sql` belum dikonfirmasi.
 - **Deploy:** GitHub Pages lewat `.github/workflows/deploy.yml`; URL live
   `https://presisiami.my.id/` (custom domain, DNS di Rumahweb); base path `/`;
   `public/CNAME` berisi `presisiami.my.id`; `www` redirect ke domain utama;

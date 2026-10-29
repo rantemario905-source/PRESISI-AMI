@@ -35,39 +35,41 @@ export async function kirimPresensi({ deviceToken, tipe, lat, lng, akurasi, isMo
 }
 
 /**
- * Presensi hari ini milik user. Bila hari ini belum ada, cari presensi
- * terbuka dari shift malam kemarin agar tombol absen pulang tetap aktif.
+ * Presensi hari ini dan presensi kemarin yang masih terbuka, dimuat
+ * terpisah. Panel absen memilih baris kemarin hanya selama jendela absen
+ * pulangnya belum lewat; setelah itu baris hari inilah yang dipakai agar
+ * absen masuk tetap dapat dilakukan.
  */
-export async function ambilPresensiHariIni(userId) {
+export async function ambilPresensiRingkas(userId) {
   const hari = hariIni()
   const kemarin = new Date(Date.parse(`${hari}T00:00:00Z`) - 86_400_000)
     .toISOString()
     .slice(0, 10)
 
-  // Prioritaskan presensi kemarin yang masih terbuka agar shift malam
-  // (atau presensi yang lupa absen pulang) tidak tertutup oleh baris Alfa
-  // hari ini dan tombol absen pulang tetap tersedia.
-  const { data: terbuka, error: galatTerbuka } = await supabase
-    .from('presensi')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('tanggal', kemarin)
-    .not('jam_masuk', 'is', null)
-    .is('jam_pulang', null)
-    .maybeSingle()
+  const [hasilHariIni, hasilKemarin] = await Promise.all([
+    supabase
+      .from('presensi')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('tanggal', hari)
+      .maybeSingle(),
+    supabase
+      .from('presensi')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('tanggal', kemarin)
+      .not('jam_masuk', 'is', null)
+      .is('jam_pulang', null)
+      .maybeSingle(),
+  ])
 
-  if (galatTerbuka) throw galatTerbuka
-  if (terbuka) return terbuka
+  if (hasilHariIni.error) throw hasilHariIni.error
+  if (hasilKemarin.error) throw hasilKemarin.error
 
-  const { data, error } = await supabase
-    .from('presensi')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('tanggal', hari)
-    .maybeSingle()
-
-  if (error) throw error
-  return data ?? null
+  return {
+    hariIni: hasilHariIni.data ?? null,
+    kemarinTerbuka: hasilKemarin.data ?? null,
+  }
 }
 
 /** Riwayat presensi terbaru milik user (untuk tabel riwayat) */

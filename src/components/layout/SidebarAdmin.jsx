@@ -45,6 +45,12 @@ const IKON = {
       <path d="M8 2v4M16 2v4M3 10h18M8 15h3" />
     </>
   ),
+  jam: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </>
+  ),
   jadwal: (
     <>
       <rect x="3" y="4" width="18" height="17" rx="2" />
@@ -104,6 +110,7 @@ const GRUP_MENU = [
       { label: 'Kepala Unit', ke: '/superadmin-portal/kepala-unit', ikon: 'kepala' },
       { label: 'Grup Shift', ke: '/superadmin-portal/grup-shift', ikon: 'grup' },
       { label: 'Master Shift', ke: '/superadmin-portal/shift', ikon: 'shift' },
+      { label: 'Jam Kerja Unit', ke: '/superadmin-portal/jam-kerja', ikon: 'jam' },
     ],
   },
   {

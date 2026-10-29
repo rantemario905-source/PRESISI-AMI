@@ -5,12 +5,14 @@
  * Aturan (sama dengan validasi server di submit_presensi):
  *   - Absen masuk dibuka MENIT_AWAL_ABSEN_MASUK menit sebelum jam masuk.
  *   - Absen pulang dibuka MENIT_JEDA_ABSEN_PULANG menit setelah jam pulang.
+ *   - Absen pulang ditutup MENIT_TUTUP_ABSEN_PULANG menit setelah jam pulang.
  * Berlaku untuk pola Reguler maupun Shift, termasuk shift malam lintas hari.
  * ==========================================================================
  */
 import {
   MENIT_AWAL_ABSEN_MASUK,
   MENIT_JEDA_ABSEN_PULANG,
+  MENIT_TUTUP_ABSEN_PULANG,
   ZONA_WAKTU,
 } from '../config/constants.js'
 
@@ -55,6 +57,24 @@ export function bukaAbsenPulang(jadwal) {
   )
   if (!selesai) return null
   return new Date(selesai.getTime() + MENIT_JEDA_ABSEN_PULANG * 60_000)
+}
+
+/**
+ * Batas akhir tombol Absen Pulang: jam selesai jadwal ditambah
+ * MENIT_TUTUP_ABSEN_PULANG menit. Shift lintas hari dihitung pada tanggal
+ * selesainya (mis. shift 20.00–08.00 ditutup pukul 10.00 besoknya).
+ */
+export function tutupAbsenPulang(jadwal) {
+  if (!jadwal?.terjadwal || jadwal.boleh_absen === false) return null
+
+  const selesai = keWaktu(
+    jadwal.tanggal,
+    jadwal.jam_selesai,
+    jadwalLintasHari(jadwal) ? 1 : 0,
+  )
+  if (!selesai) return null
+
+  return new Date(selesai.getTime() + MENIT_TUTUP_ABSEN_PULANG * 60_000)
 }
 
 /** "07.40" atau "16.31" menurut WITA. */

@@ -35,11 +35,14 @@ export const ZONA_WAKTU = 'Asia/Makassar'
  * Jendela waktu absensi. Nilai yang sama juga dipakai server pada fungsi
  * submit_presensi (supabase/schema.sql) — ubah keduanya bila berubah.
  *
- * - Absen masuk dibuka 20 menit sebelum jam masuk jadwal.
+ * - Absen masuk dibuka 60 menit (1 jam) sebelum jam masuk jadwal.
  * - Absen pulang dibuka 1 menit setelah jam pulang jadwal.
+ * - Absen pulang ditutup 2 jam (120 menit) setelah jam pulang, berlaku untuk
+ *   semua pola kerja termasuk shift malam lintas hari.
  */
-export const MENIT_AWAL_ABSEN_MASUK = 20
+export const MENIT_AWAL_ABSEN_MASUK = 60
 export const MENIT_JEDA_ABSEN_PULANG = 1
+export const MENIT_TUTUP_ABSEN_PULANG = 120
 
 /** Penanda tangan tetap pada laporan presensi bulanan pegawai. */
 export const PENANDA_TANGAN_LAPORAN = {

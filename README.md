@@ -11,8 +11,9 @@ dan pemisahan hak akses antara **Pegawai** dan **Super Admin**.
 > Dinas & Sakit / Cuti, **jadwal shift per grup yang langsung tersimpan,
 > pengelolaan jadwal oleh kepala unit, hari libur, deteksi keterlambatan,
 > Alfa otomatis**, **impor jadwal CSV/XLSX**, **satu perangkat aktif per
-> pegawai**, **jendela waktu absensi**, **hapus grup shift kosong**, serta
-> **kepala unit multi-unit dan kepala ASN tanpa baris pegawai**.
+> pegawai**, **jendela waktu absensi**, **hapus grup shift kosong**, **kepala
+> unit multi-unit dan kepala ASN tanpa baris pegawai**, serta **jam kerja
+> reguler khusus per unit**.
 
 > **Dokumentasi audit:** progres pekerjaan tercatat di [`progress.md`](progress.md)
 > dan aturan kerja agen serta log instruksi user di [`AGENTS.md`](AGENTS.md).
@@ -75,7 +76,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 | 14 | `supabase/migrations/14_impor_jadwal_shift.sql` | Impor massal jadwal shift dari template CSV/XLSX dengan validasi ulang di server |
 | 15 | `supabase/migrations/15_hapus_finalisasi_jadwal.sql` | Hapus finalisasi bulanan; kepala ruangan dapat mengubah jadwal mulai hari ini |
 | 16 | `supabase/migrations/16_satu_perangkat.sql` | Satu perangkat aktif per pegawai; data perangkat uji dikosongkan |
-| 17 | `supabase/migrations/17_batas_waktu_absen.sql` | Batas waktu absen: masuk 20 menit sebelum jam masuk, pulang 1 menit setelah jam pulang |
+| 17 | `supabase/migrations/17_batas_waktu_absen.sql` | Batas waktu absen: masuk 20 menit sebelum jam masuk, pulang 1 menit setelah jam pulang (digantikan migrasi 25 dan 26) |
 | 18 | `supabase/migrations/18_hapus_grup_kosong.sql` | Hapus grup kosong; grup sistem "Belum ditentukan" hanya tampil jika berisi pegawai |
 | 19 | `supabase/migrations/19_laporan_presensi_kepala.sql` | **Fase 9**: akses baca presensi unit sendiri bagi kepala ruangan untuk laporan bulanan per pegawai; membuat ulang `is_superadmin()` bila hilang pada instalasi lama |
 | 20 | `supabase/migrations/20_koordinat_rsud.sql` | Koordinat pusat RSUD AMI `-0.23795851007230442, 117.41438417546158` pada `submit_presensi` |
@@ -83,6 +84,9 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 | 22 | `supabase/migrations/22_kepala_unit_multi_unit.sql` | **Fase 10**: tabel `kepala_unit`, kepala unit multi-unit, kepala ASN tanpa baris pegawai, `profil_saya()`, RPC penugasan, dan policy berbasis `unit_dikelola()` |
 | 23 | `supabase/migrations/23_dinas_luar_lintas_unit.sql` | Dinas Luar lintas unit; Sakit/Cuti tetap per unit; pembuat grup dapat membaca grup dan dokumennya selama masih menjabat kepala unit; FK pembuat/pembatal mengacu ke `auth.users` agar kepala ASN dapat mencatat |
 | 24 | `supabase/migrations/24_radius_50_meter.sql` | Radius geofencing absensi diubah dari 100 meter menjadi 50 meter pada `submit_presensi` (titik pusat tetap) |
+| 25 | `supabase/migrations/25_batas_absen_pulang.sql` | Batas akhir absen pulang: 23.59 WITA pada tanggal kerja (reguler/shift tidak lintas hari) dan 12.00 WITA pada tanggal selesai untuk shift malam (digantikan migrasi 26) |
+| 26 | `supabase/migrations/26_batas_absen_baru.sql` | Jendela absen baru: masuk dibuka 1 jam sebelum jam masuk; pulang ditutup 2 jam setelah jam pulang untuk semua pola kerja |
+| 27 | `supabase/migrations/27_jam_kerja_unit.sql` | Jam kerja reguler per unit: tabel `jam_kerja_unit`, override `jadwal_kerja`/Alfa, seed ADMISI RAWAT JALAN Senin–Jumat 07.00–15.00, dan pegawai unit tersebut dijadikan berpola Reguler |
 
 > Bila database sudah pernah dijalankan sampai file 08, jalankan **file 09** untuk
 > mengaktifkan alur Dinas & Sakit / Cuti, **file 11** untuk pengaturan kepala
@@ -92,7 +96,10 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > untuk batas waktu absen, **file 18** untuk hapus grup kosong, **file 19**
 > untuk akses laporan bulanan per pegawai bagi kepala ruangan, **file 20-21**
 > untuk koordinat RSUD AMI, **file 22** untuk kepala unit multi-unit, **file 23**
-> untuk Dinas Luar lintas unit, dan **file 24** untuk radius absensi 50 meter.
+> untuk Dinas Luar lintas unit, **file 24** untuk radius absensi 50 meter,
+> **file 25** untuk batas akhir absen pulang versi pertama, **file 26** untuk
+> jendela absen baru (masuk 1 jam sebelum, pulang ditutup 2 jam setelah), dan
+> **file 27** untuk jam kerja reguler khusus per unit.
 > File 10 hanya berisi RPC perubahan role yang tidak dipakai UI, jadi boleh
 > dilewati. Jalankan migrasi secara bertahap - jangan mengulang file lama bila
 > tidak diperlukan.
@@ -105,8 +112,9 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > **`supabase/verifikasi_16.sql`**, **`supabase/verifikasi_17.sql`**,
 > **`supabase/verifikasi_18.sql`**, **`supabase/verifikasi_19.sql`**,
 > **`supabase/verifikasi_20.sql`**, **`supabase/verifikasi_21.sql`**,
-> **`supabase/verifikasi_22.sql`**, **`supabase/verifikasi_23.sql`**, dan
-> **`supabase/verifikasi_24.sql`** setelah
+> **`supabase/verifikasi_22.sql`**, **`supabase/verifikasi_23.sql`**,
+> **`supabase/verifikasi_24.sql`**, **`supabase/verifikasi_25.sql`**,
+> **`supabase/verifikasi_26.sql`**, dan **`supabase/verifikasi_27.sql`** setelah
 > migrasi terkait. Seluruh nilai
 > pemeriksaan harus `true`; bila ada yang `false`, jangan lanjutkan pemakaian.
 > `verifikasi_13.sql` dan `verifikasi_14.sql` hanya berlaku sebelum migrasi 15;
@@ -117,7 +125,12 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > Migrasi 22 wajib dijalankan sebelum membuka menu **Kepala Unit** dan sebelum
 > akun kepala ASN dapat login. Migrasi 23 wajib dijalankan sebelum kepala unit
 > mencatat **Dinas Luar lintas unit**. Migrasi 24 wajib dijalankan agar server
-> memakai radius absensi 50 meter.
+> memakai radius absensi 50 meter. Migrasi 25 wajib dijalankan lebih dulu, lalu
+> migrasi 26 agar server memakai jendela absen baru (masuk 1 jam sebelum, pulang
+> ditutup 2 jam setelah). Setelah migrasi 26, `verifikasi_17.sql` dan
+> `verifikasi_25.sql` bersifat historis; verifikasi aktif adalah
+> `verifikasi_26.sql`. Migrasi 27 wajib dijalankan agar menu **Jam Kerja Unit**
+> berfungsi dan unit dengan jam khusus memakai jadwalnya sendiri.
 > Bila muncul `function public.is_superadmin() does not exist`, jalankan versi
 > terbaru migrasi 19 — file ini membuat ulang fungsi inti tersebut sekaligus
 > memeriksa keberadaan tabel `pegawai`/`presensi`.
@@ -125,7 +138,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 **B. Sekaligus**
 
 Salin seluruh isi `supabase/schema.sql`, tempel, lalu **Run**.
-Isinya identik dengan gabungan kedua puluh empat file di atas (termasuk migrasi 15-24).
+Isinya identik dengan gabungan kedua puluh tujuh file di atas (termasuk migrasi 15-27).
 
 **C. Membuat akun pegawai**
 
@@ -200,7 +213,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 ├── index.html
 ├── supabase/
 │   ├── schema.sql              # Skema DB + RLS + RPC (instalasi sekali jalan)
-│   ├── migrations/             # 01–24, dijalankan bertahap
+│   ├── migrations/             # 01–27, dijalankan bertahap
 │   ├── verifikasi_09.sql       # Pemeriksaan fitur Dinas & Sakit / Cuti
 │   ├── verifikasi_10.sql       # Pemeriksaan RPC perubahan role (opsional)
 │   ├── verifikasi_11.sql       # Pemeriksaan pengaturan kepala ruangan
@@ -217,6 +230,9 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 │   ├── verifikasi_22.sql       # Pemeriksaan kepala unit multi-unit & kepala ASN
 │   ├── verifikasi_23.sql       # Pemeriksaan Dinas Luar lintas unit
 │   ├── verifikasi_24.sql       # Pemeriksaan radius absensi 50 meter
+│   ├── verifikasi_25.sql       # Pemeriksaan batas akhir absen pulang (versi pertama)
+│   ├── verifikasi_26.sql       # Pemeriksaan jendela absen baru (1 jam / 2 jam)
+│   ├── verifikasi_27.sql       # Pemeriksaan jam kerja reguler per unit
 │   └── jadwal_alfa.sql         # Opsional: jadwal pg_cron untuk Alfa
 ├── scripts/
 │   ├── impor-akun.mjs          # Impor akun massal via Supabase Admin API
@@ -302,7 +318,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 | **Server-side** | Penulisan presensi hanya lewat RPC `submit_presensi` (`SECURITY DEFINER`) yang memvalidasi ulang semuanya |
 | **RLS** | RLS aktif di semua tabel; pegawai hanya bisa membaca data miliknya, kepala unit hanya data unit yang dikelolanya (`unit_dikelola()`, migrasi 22) ditambah grup Dinas Luar yang ia buat selama masih menjabat (migrasi 23), Super Admin semua data |
 | **Anti duplikasi** | `unique (user_id, tanggal)` + validasi absen masuk/pulang di server |
-| **Jendela waktu** | Absen masuk dibuka 20 menit sebelum jam masuk; absen pulang dibuka 1 menit setelah jam pulang (reguler, shift, dan shift malam lintas hari; klien + server) |
+| **Jendela waktu** | Absen masuk dibuka 1 jam sebelum jam masuk; absen pulang dibuka 1 menit setelah dan ditutup 2 jam setelah jam pulang (semua pola, termasuk shift malam); klien + server |
 | **Jadwal shift** | Super Admin mengelola semua unit/tanggal; kepala unit hanya unit yang dikelolanya, mulai hari ini (WITA), dan tanggal sebelum hari ini hanya untuk Super Admin. Perubahan sel langsung tersimpan. Pegawai shift tanpa jadwal **selalu** ditolak |
 | **Status jadwal** | Tidak ada finalisasi. Sel kosong berarti belum dijadwalkan, bukan libur. Impor mengikuti batas tanggal yang sama |
 | **Keterlambatan** | Dihitung server dari jam masuk terhadap jadwal; tanpa toleransi (08.00.01 = 1 menit) dan hanya pada hari yang dijadwalkan |
@@ -331,8 +347,10 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
    pada kartu hari ini, riwayat, koreksi, dan rekap. Absen pulang tetap dicatat
    meskipun pegawai datang terlambat.
 6. Shift **Malam 21.30–07.30** dapat absen masuk pada tanggal jadwal dan absen
-   pulang pada dini hari berikutnya; sistem mencari baris presensi yang masih
-   terbuka dari hari sebelumnya.
+   pulang pada dini hari berikutnya **sampai 2 jam setelah shift berakhir**
+   (mis. selesai 07.30 → maksimal 09.30); sistem mencari
+   baris presensi yang masih terbuka dari hari sebelumnya. Bila batas terlewat,
+   presensi yang belum ditutup diselesaikan lewat **Koreksi Presensi**.
 7. Koordinat, jarak, akurasi, dan `device_token` tercatat untuk audit.
 
 ## 7. Portal Super Admin (Fase 2–10)
@@ -347,6 +365,7 @@ Akses: login dengan akun ber-role `superadmin`, lalu buka `/superadmin-portal`.
 | **Verifikasi Perangkat** | Setujui/tolak pengajuan, reset perangkat (otomatis mencabut perangkat lama) |
 | **Grup Shift** | Master grup/unit dan seksi; rename otomatis memperbarui unit seluruh pegawai |
 | **Master Shift** | CRUD pola jam shift (Pagi/Siang/Malam) |
+| **Jam Kerja Unit** | Atur jam kerja reguler khusus per unit (7 hari + libur); unit tanpa pengaturan memakai jam global |
 | **Jadwal Shift** | Grid jadwal per grup, isi cepat, salin pola bulan lalu, template/impor CSV & XLSX, simpan otomatis per sel, dan tampilan daftar di HP |
 | **Hari Libur** | Input manual hari libur nasional/cuti bersama per tahun |
 | **Pengaturan Presensi** | Aktivasi Alfa otomatis dan proses Alfa manual. Mode transisi sudah dihapus |
@@ -369,19 +388,29 @@ Akses: login dengan akun ber-role `superadmin`, lalu buka `/superadmin-portal`.
 - **Pola kerja** pegawai ada dua: **Reguler** dan **Shift**. Seluruh pegawai lama
   otomatis berstatus Shift saat migrasi 12. Ubah pegawai yang memakai jam kantor
   menjadi Reguler melalui **Data Pegawai → Ubah**.
-- **Jam reguler** Senin–Kamis **08.00–16.30**, Jumat **08.00–16.00**,
-  Sabtu–Minggu **libur**. Hari libur nasional/cuti bersama diinput manual dan
-  mengunci absensi reguler; pegawai shift tetap dapat absen hanya bila
-  dijadwalkan, termasuk pada hari libur.
+- **Jam reguler** bawaan Senin–Kamis **08.00–16.30**, Jumat **08.00–16.00**,
+  Sabtu–Minggu **libur**. Unit yang jamnya berbeda dapat diatur di menu
+  **Jam Kerja Unit** (contoh ADMISI RAWAT JALAN Senin–Jumat 07.00–15.00).
+  Migrasi 27 sekaligus mengubah pegawai ADMISI RAWAT JALAN menjadi pola
+  **Reguler** agar jam khususnya berlaku. Unit tanpa pengaturan khusus tetap
+  memakai jam bawaan. Hari libur
+  nasional/cuti bersama diinput manual dan mengunci absensi reguler; pegawai
+  shift tetap dapat absen hanya bila dijadwalkan, termasuk pada hari libur.
+  Pengaturan jam unit hanya berlaku untuk pegawai berpola **Reguler**; pegawai
+  **Shift** tetap memakai `shift_master` dan `jadwal_shift`.
 - **Keterlambatan** dihitung dari jam masuk terhadap jam mulai jadwal, tanpa
   toleransi. Pukul **08.00.01** sudah dihitung **1 menit terlambat**. Sistem
   tidak menghitung pulang cepat; absen pulang tetap direkam.
-- **Jendela waktu absen.** Tombol **Absen Hadir** baru aktif **20 menit sebelum
-  jam masuk** (jadwal 08.00 → aktif 07.40). Tombol **Absen Pulang** baru aktif
-  **1 menit setelah jam pulang** (jadwal pulang 16.30 → aktif 16.31). Aturan ini
-  berlaku untuk Reguler dan Shift, termasuk shift malam lintas hari, serta
-  divalidasi ulang di server. Sebelum jendela dibuka, tombol menampilkan jam
-  buka dan alasan penguncian.
+- **Jendela waktu absen.** Tombol **Absen Hadir** baru aktif **1 jam sebelum
+  jam masuk** (jadwal 08.00 → aktif 07.00). Tombol **Absen Pulang** baru aktif
+  **1 menit setelah jam pulang** (jadwal pulang 16.30 → aktif 16.31) dan
+  **ditutup 2 jam setelah jam pulang** (16.30 → maksimal 18.30). Aturan ini
+  berlaku untuk **Reguler dan Shift**, termasuk shift malam lintas hari yang
+  dihitung pada tanggal selesainya (shift 20.00–08.00 → pulang maksimal 10.00),
+  serta divalidasi ulang di server. Setelah batas lewat, tombol pulang mati,
+  sistem memakai baris hari berjalan agar absen masuk tetap bisa, dan presensi
+  yang terlewat diselesaikan lewat koreksi Super Admin. Sebelum jendela dibuka,
+  tombol menampilkan jam buka dan alasan penguncian.
 - **Jadwal shift wajib, tanpa mode transisi.** Pegawai shift yang belum
   dijadwalkan selalu ditolak saat absen dan tidak dibuatkan Alfa. Kepala unit
   dapat mengisi jadwal unit yang dikelolanya untuk tanggal **hari ini dan seterusnya**;

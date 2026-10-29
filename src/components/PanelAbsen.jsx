@@ -23,6 +23,7 @@ import {
   bukaAbsenPulang,
   formatJamBuka,
   formatJamJadwal,
+  tutupAbsenPulang,
 } from '../utils/jadwalAbsen.js'
 import Alert from './ui/Alert.jsx'
 import Button from './ui/Button.jsx'
@@ -108,6 +109,7 @@ function IkonCentang() {
 export default function PanelAbsen({
   statusPerangkat,
   presensi,
+  presensiKemarin,
   jadwal,
   jadwalKemarin,
   deviceToken,
@@ -125,10 +127,23 @@ export default function PanelAbsen({
 
   const perangkatTerkunci = statusPerangkat !== 'approved'
   const jadwalTerkunci = jadwal?.boleh_absen === false
-  const sudahMasuk = Boolean(presensi?.jam_masuk)
-  const sudahPulang = Boolean(presensi?.jam_pulang)
+
+  const kemarinTerbuka =
+    Boolean(presensiKemarin?.jam_masuk) && !presensiKemarin?.jam_pulang
+  const batasPulangKemarin = tutupAbsenPulang(jadwalKemarin)
+  const kemarinTerlewat =
+    kemarinTerbuka &&
+    Boolean(batasPulangKemarin) &&
+    sekarang >= batasPulangKemarin.getTime()
+  const kemarinMasihBisaPulang = kemarinTerbuka && !kemarinTerlewat
+
+  const presensiAktif = kemarinMasihBisaPulang ? presensiKemarin : presensi
+  const sudahMasuk = Boolean(presensiAktif?.jam_masuk)
+  const sudahPulang = Boolean(presensiAktif?.jam_pulang)
   const shiftMalamTerbuka =
-    Boolean(presensi?.tanggal) && presensi.tanggal !== hariIni() && !sudahPulang
+    Boolean(presensiAktif?.tanggal) &&
+    presensiAktif.tanggal !== hariIni() &&
+    !sudahPulang
   const malamKemarinAktif =
     !sudahMasuk && !sudahPulang && malamKemarinBerlangsung(jadwalKemarin)
 
@@ -138,16 +153,22 @@ export default function PanelAbsen({
     !sudahMasuk && Boolean(bukaMasuk) && sekarang < bukaMasuk.getTime()
 
   const jadwalPulang =
-    presensi?.tanggal && presensi.tanggal === jadwalKemarin?.tanggal
+    presensiAktif?.tanggal && presensiAktif.tanggal === jadwalKemarin?.tanggal
       ? jadwalKemarin
       : jadwal
   const bukaPulang = bukaAbsenPulang(jadwalPulang)
+  const batasPulang = tutupAbsenPulang(jadwalPulang)
   const pulangBelumDibuka =
     sudahMasuk && !sudahPulang && Boolean(bukaPulang) && sekarang < bukaPulang.getTime()
+  const pulangTerlewat =
+    sudahMasuk &&
+    !sudahPulang &&
+    Boolean(batasPulang) &&
+    sekarang >= batasPulang.getTime()
 
   const terkunciMasuk =
     perangkatTerkunci || (jadwalTerkunci && !malamKemarinAktif) || masukBelumDibuka
-  const terkunciPulang = perangkatTerkunci || pulangBelumDibuka
+  const terkunciPulang = perangkatTerkunci || pulangBelumDibuka || pulangTerlewat
 
   /** "20:02" tanpa akhiran WITA, agar pas di kartu jam */
   const jamSingkat = (iso) => (iso ? formatJam(iso).replace(' WITA', '') : '--:--')
@@ -222,9 +243,9 @@ export default function PanelAbsen({
             <h3 className="mt-0.5 text-base font-extrabold leading-tight sm:text-lg">
               {judulStatus}
             </h3>
-            {Number(presensi?.menit_terlambat) > 0 && (
+            {Number(presensiAktif?.menit_terlambat) > 0 && (
               <p className="mt-1 inline-flex rounded-full bg-amber-400/25 px-2 py-0.5 text-[10px] font-bold text-white ring-1 ring-inset ring-amber-200/40">
-                Terlambat {presensi.menit_terlambat} menit
+                Terlambat {presensiAktif.menit_terlambat} menit
               </p>
             )}
           </div>
@@ -248,13 +269,13 @@ export default function PanelAbsen({
           <div className="rounded-xl bg-white/10 px-3 py-2.5 ring-1 ring-inset ring-white/10">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-white/70">Masuk</p>
             <p className="mt-0.5 text-2xl font-extrabold tabular-nums leading-none">
-              {jamSingkat(presensi?.jam_masuk)}
+              {jamSingkat(presensiAktif?.jam_masuk)}
             </p>
           </div>
           <div className="rounded-xl bg-white/10 px-3 py-2.5 ring-1 ring-inset ring-white/10">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-white/70">Pulang</p>
             <p className="mt-0.5 text-2xl font-extrabold tabular-nums leading-none">
-              {jamSingkat(presensi?.jam_pulang)}
+              {jamSingkat(presensiAktif?.jam_pulang)}
             </p>
           </div>
         </div>
@@ -267,7 +288,7 @@ export default function PanelAbsen({
               ? 'Absensi hari ini sudah lengkap. Terima kasih.'
               : shiftMalamTerbuka
                 ? `Anda masih memiliki presensi terbuka dari ${formatTanggalRingkas(
-                    presensi.tanggal,
+                    presensiAktif.tanggal,
                   )}. Silakan absen pulang setelah shift selesai.`
                 : 'Jangan lupa absen pulang sebelum meninggalkan area rumah sakit.'
             : malamKemarinAktif
@@ -297,6 +318,24 @@ export default function PanelAbsen({
           <Alert variant="info" title="Shift Malam Kemarin" className="mb-4">
             Jadwal shift malam kemarin masih berlangsung. Absen masuk akan dicatat
             pada tanggal {formatTanggalRingkas(jadwalKemarin.tanggal)}.
+          </Alert>
+        )}
+
+        {kemarinTerlewat && (
+          <Alert variant="peringatan" title="Presensi Kemarin Belum Ditutup" className="mb-4">
+            Presensi tanggal {formatTanggalRingkas(presensiKemarin.tanggal)} belum memiliki
+            jam pulang. Batas absen pulang (2 jam setelah jam pulang) sudah terlewat
+            {batasPulangKemarin ? `, yaitu pukul ${formatJamBuka(batasPulangKemarin)} WITA` : ''}.
+            Ajukan koreksi presensi kepada Super Admin.
+          </Alert>
+        )}
+
+        {pulangTerlewat && (
+          <Alert variant="peringatan" title="Batas Absen Pulang Terlewat" className="mb-4">
+            Batas absen pulang untuk presensi tanggal{' '}
+            {formatTanggalRingkas(presensiAktif.tanggal)} sudah terlewat
+            {batasPulang ? `, yaitu pukul ${formatJamBuka(batasPulang)} WITA` : ''}.
+            Ajukan koreksi presensi kepada Super Admin.
           </Alert>
         )}
 
@@ -366,6 +405,10 @@ export default function PanelAbsen({
             ) : sudahPulang ? (
               <>
                 <IkonCentang /> Sudah Absen Pulang
+              </>
+            ) : pulangTerlewat ? (
+              <>
+                <IkonPulang /> Batas Pulang Terlewat
               </>
             ) : pulangBelumDibuka ? (
               <>
