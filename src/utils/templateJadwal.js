@@ -44,7 +44,7 @@ function amankanSel(nilai) {
   if (!isi) return ''
   // Cegah teks dari data pengguna dieksekusi sebagai formula saat dibuka
   // di Excel. UUID, angka, dan nama shift normal tidak terpengaruh.
-  return /^[=+\-@]/.test(isi) ? `'${isi}` : isi
+  return /^[=+\-@\t\r\n]/.test(isi) ? `'${isi}` : isi
 }
 
 function csvBaris(nilai) {

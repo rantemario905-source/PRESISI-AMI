@@ -4,6 +4,15 @@
  * ==========================================================================
  */
 
+const POLA_FORMULA = /^[=+\-@\t\r\n]/
+
+export function amankanSelCsv(nilai) {
+  const teks = nilai === null || nilai === undefined ? '' : String(nilai)
+  const isi =
+    typeof nilai === 'string' && POLA_FORMULA.test(teks) ? `'${teks}` : teks
+  return /[";\n\r]/.test(isi) ? `"${isi.replace(/"/g, '""')}"` : isi
+}
+
 /**
  * @param {string} namaFile - nama file unduhan, mis. "rekap-2026-10.csv"
  * @param {Array<object>} baris - data baris
@@ -11,15 +20,10 @@
  *        `nilai` boleh berupa nama properti atau fungsi (baris) => nilai
  */
 export function unduhCsv(namaFile, baris, kolom) {
-  const aman = (nilai) => {
-    const teks = nilai === null || nilai === undefined ? '' : String(nilai)
-    return /[";\n\r]/.test(teks) ? `"${teks.replace(/"/g, '""')}"` : teks
-  }
-
-  const kepala = kolom.map((k) => aman(k.label)).join(';')
+  const kepala = kolom.map((k) => amankanSelCsv(k.label)).join(';')
   const isiBaris = baris.map((barisData) =>
     kolom
-      .map((k) => aman(typeof k.nilai === 'function' ? k.nilai(barisData) : barisData[k.nilai]))
+      .map((k) => amankanSelCsv(typeof k.nilai === 'function' ? k.nilai(barisData) : barisData[k.nilai]))
       .join(';'),
   )
 

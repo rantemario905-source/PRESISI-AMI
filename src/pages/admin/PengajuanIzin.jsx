@@ -356,11 +356,12 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
   const lihatDokumen = async (path) => {
     if (!path) return
     const jendela = window.open('about:blank', '_blank')
+    if (jendela) jendela.opener = null
     setDokumenMembuka(path)
     try {
       const url = await ambilDokumenUrl(path)
       if (!url) throw new Error('Dokumen tidak tersedia.')
-      if (jendela) jendela.location.href = url
+      if (jendela) jendela.location.replace(url)
       else window.open(url, '_blank', 'noopener,noreferrer')
     } catch (err) {
       if (jendela) jendela.close()

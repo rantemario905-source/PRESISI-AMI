@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-29 20:41 WITA (commit jendela absen baru, jam kerja unit, migrasi 25–27) |
+| Terakhir diperbarui | 2026-10-30 (Step 4 CSP meta & referrer; Step 2–4 belum di-commit) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -100,17 +100,28 @@ diselesaikan lewat koreksi Super Admin. Aturan diterapkan di klien
 **27**, sudah dijalankan; laporan user 2026-10-29). Unit `ADMISI RAWAT JALAN` memakai Senin–Jumat
 07.00–15.00 dan libur Sabtu–Minggu tanpa mengubah jam global unit lain; pegawai
 unit tersebut yang masih Shift dikonversi menjadi Reguler oleh migrasi, dan
-tersedia menu **Jam Kerja Unit** khusus Super Admin. Yang belum: konfirmasi
-`verifikasi_22.sql` sampai `verifikasi_27.sql` dan migrasi 09–18, uji manual alur
-lupa absen pulang dan jam Admisi, uji cetak manual laporan setelah perapian kop
+tersedia menu **Jam Kerja Unit** khusus Super Admin; **tampilan jam Admisi di
+akun pegawai sudah diuji dan berubah** (laporan user 2026-10-29). Yang belum:
+konfirmasi `verifikasi_22.sql` sampai `verifikasi_27.sql` dan migrasi 09–18, uji
+manual alur lupa absen pulang, uji cetak manual laporan setelah perapian kop
 dan penanda tangan baru, penyiapan data operasional (grup shift, jadwal, hari
-libur), dan persiapan go-live.
+libur), dan persiapan go-live. **Step 2 keamanan** (pengaman formula CSV dan
+pemisahan `window.opener` dokumen) sudah diuji user tanpa error, lalu **Step 3
+keamanan** menaikkan dependensi ke **Vite 7.3.7**, **`@vitejs/plugin-react`
+5.2.0**, dan **React Router 7.18.5** dengan Node CI **22**; build produksi dan
+pratinjau SPA lulus serta `npm audit` bersih. **Step 4 keamanan** menambahkan
+**CSP produksi** lewat `<meta>` (disisipkan plugin Vite saat build), **meta
+`Referrer-Policy`**, dan catatan **Enforce HTTPS**; uji headless memastikan
+script inline diblokir dan aplikasi tetap render. **Enforce HTTPS GitHub Pages
+sudah aktif dan terverifikasi** (HTTP apex/`www` 301 ke HTTPS). Step 2–4 masih
+di working tree, **belum di-commit**. Cloudflare (header HTTP penuh) belum
+dipakai.
 
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–27 | `src/`, `supabase/migrations/01–27` |
 | Commit Git | **Fitur terakhir** — `6a7430e` (jendela absen baru, jam kerja unit, migrasi 25–27); sebelumnya `bfbee59` | `git log` |
-| Perubahan lokal | **Bersih** setelah commit fitur dan sinkronisasi dokumen audit | `git status` |
+| Perubahan lokal | **Ada perubahan belum di-commit** — Step 2 (pengaman CSV, `window.opener`), Step 3 (Vite 7, React Router 7, plugin React 5, Node CI 22), dan Step 4 (CSP meta, referrer) | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
@@ -125,10 +136,15 @@ libur), dan persiapan go-live.
 | Koordinat RSUD AMI | **Ada di kode** — `-0.23805651650343132, 117.41442516465149` di klien dan schema | `src/config/constants.js`, `supabase/schema.sql`, migrasi 21 |
 | Radius absensi | **Aktif 50 meter** — klien (`MAX_RADIUS_METERS`) dan server (migrasi 24 sudah dijalankan) | `src/config/constants.js`, `supabase/migrations/24_radius_50_meter.sql` |
 | Skrip `supabase/verifikasi_*.sql` | **Verifikasi 19 dan 20 lulus** (klaim user); verifikasi 21–27 belum dikonfirmasi | laporan user 2026-10-27 09:39 |
-| Build produksi | **Lulus** — base `/` 6,89 dtk (2026-10-29 20:41 WITA; 282 modul); `dist/index.html` memakai aset `/assets/...` | `npm run build` |
+| Build produksi | **Lulus** — base `/` 7,38 dtk (ulang 6,94 dtk, 2026-10-30 Step 4; 287 modul; `dist/index.html` 1,29 kB); pratinjau SPA root dan deep link `/admin/dashboard` 200 | `npm run build`, `npm run preview` |
+| Dependensi frontend | **Diperbarui (belum di-commit)** — Vite 7.3.7, `@vitejs/plugin-react` 5.2.0, React Router 7.18.5; Node CI 22; lockfile sinkron; `npm audit` 0 kerentanan | `package.json`, `package-lock.json`, `.github/workflows/deploy.yml` |
+| Header keamanan (CSP) | **Ada di kode (belum di-commit)** — CSP produksi via `<meta>`: `script-src 'self'`, `connect-src` self + `*.supabase.co`, `frame-src 'none'`, `form-action 'self'`, `object-src 'none'`, `base-uri 'self'`; meta referrer; hanya saat build. Uji headless: script inline diblokir, halaman render | `vite.config.js`, `index.html` |
+| Batas GitHub Pages | **Enforce HTTPS aktif & terverifikasi** (2026-10-30 10:06 WITA): HTTP apex dan `www` **301** ke HTTPS/apex. Namun HSTS, `X-Frame-Options`/`frame-ancestors`, `X-Content-Type-Options`, dan `Permissions-Policy` tetap belum aktif karena memerlukan header HTTP; Cloudflare/proxy opsional | `curl -I` HTTP/HTTPS apex & `www`, 2026-10-30 |
 | Kepala unit multi-unit | **Ada di kode** — tabel `kepala_unit` (satu unit satu kepala, boleh multi-unit), halaman **Kepala Unit**, pemilih unit aktif di portal kepala, kepala ASN tanpa baris `pegawai`, RPC `profil_saya()`/`simpan_kepala_unit()`, policy `unit_dikelola()` | migrasi 22, `KepalaUnit.jsx`, `kepalaUnitService.js`, `AuthContext.jsx`, `authService.js`, `PortalKepalaLayout.jsx` |
 | Jendela waktu absen | **Ada di kode** — masuk dibuka 1 jam sebelum; pulang 1 menit setelah hingga 2 jam setelah jam pulang (semua pola, termasuk shift malam) | migrasi 26, `PanelAbsen.jsx`, `jadwalAbsen.js` |
-| Jam kerja per unit | **Ada di kode** — override jam reguler per unit dengan fallback global; ADMISI RAWAT JALAN 07.00–15.00 Senin–Jumat; menu Super Admin | migrasi 27, `JamKerjaUnit.jsx`, `jamKerjaService.js`, `jadwal_kerja`, `proses_alfa_otomatis` |
+| Jam kerja per unit | **Ada di kode** — override jam reguler per unit dengan fallback global; ADMISI RAWAT JALAN 07.00–15.00 Senin–Jumat; menu Super Admin; tampilan jam di akun pegawai sudah diuji dan berubah | migrasi 27, `JamKerjaUnit.jsx`, `jamKerjaService.js`, `jadwal_kerja`, `proses_alfa_otomatis` |
+| Keamanan ekspor CSV | **Ada di kode (belum di-commit)** — sel string berawalan `=`, `+`, `-`, `@`, tab, CR, atau LF diberi apostrof sebelum escaping; template jadwal memakai aturan yang sama | `src/utils/csv.js`, `src/utils/templateJadwal.js` |
+| Buka dokumen izin | **Ada di kode (belum di-commit)** — tab dokumen memutus `window.opener` dan memakai `location.replace` agar tidak membuka halaman Supabase dengan konteks pembuka | `src/pages/IzinSaya.jsx`, `src/pages/admin/PengajuanIzin.jsx` |
 | Hapus grup kosong | **Ada di kode** — semua grup 0 pegawai; "Belum ditentukan" (akun sistem) disembunyikan bila kosong | migrasi 18, `GrupShift.jsx` |
 | Bilah progres | **Ada di kode** — bilah biru muda di atas layar saat navigasi, login, logout, dan muat ulang profil | `ProgressContext.jsx`, `BilahProgres.jsx`, `PengamatRute.jsx` |
 | Logo aplikasi | **Ada di kode** — logo resmi RSUD AMI dipakai di login, header pegawai, sidebar admin/kepala ruangan, favicon, dan apple-touch-icon | `src/assets/logo-rsud-ami.png`, `LogoRSUD.jsx`, `favicon-32x32.png`, `apple-touch-icon.png` |
@@ -293,6 +309,77 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-30 10:00 WITA — Step 4: CSP meta & referrer
+
+- **Perubahan:** menambahkan plugin kecil di `vite.config.js` (`apply: 'build'`)
+  yang menyisipkan `<meta http-equiv="Content-Security-Policy">` di awal `<head>`
+  hanya pada hasil build, serta `<meta name="referrer"
+  content="strict-origin-when-cross-origin">` di `index.html`. Kebijakan:
+  `default-src 'self'`; `base-uri 'self'`; `object-src 'none'`;
+  `script-src 'self'`; `style-src 'self' 'unsafe-inline'` (inline style cetak
+  dan lebar kolom masih dipakai); `img-src 'self' data: blob:`;
+  `font-src 'self'`; `connect-src 'self' https://*.supabase.co
+  wss://*.supabase.co`; `frame-src 'none'`; `form-action 'self'`;
+  `upgrade-insecure-requests`. Dev/HMR tidak terkena CSP.
+- **File:** `vite.config.js`, `index.html`, `README.md`, `AGENTS.md`,
+  `progress.md`.
+- **Verifikasi:** `npm run build` lulus **7,38 dtk** (ulang 6,94 dtk, 287 modul); `dist/index.html`
+  memuat meta CSP dan meta referrer; `dist/404.html` (salinan setelah build) ikut
+  memuat CSP; pratinjau SPA root `/login` dan `/superadmin-portal` 200; uji
+  headless Chrome membuktikan halaman tetap render dan **script inline yang
+  sengaja disisipkan tidak dieksekusi** (atribut uji tidak muncul di `<html>`),
+  lalu `dist/index.html` dipulihkan.
+- **Catatan/risiko:** perubahan **belum di-commit**. Uji browser manual tetap
+  perlu (login, navigasi, absensi, dokumen, cetak). HSTS/anti-clickjacking/
+  `Permissions-Policy` belum bisa dipasang di GitHub Pages; opsi Cloudflare
+  ditunda. **Enforce HTTPS sudah aktif dan terverifikasi 2026-10-30 10:06
+  WITA**: `http://presisiami.my.id` → **301** `https://`, `www` (HTTP/HTTPS)
+  → **301** ke apex HTTPS. UI GitHub sempat menampilkan "DNS Check in
+  Progress" meski DNS sudah benar.
+
+### 2026-10-30 09:35 WITA — Step 3: upgrade dependensi
+
+- **Perubahan:** melanjutkan rencana keamanan setelah Step 2 dinyatakan lulus
+  uji user. Dependensi dinaikkan ke **Vite 7.3.7**, **`@vitejs/plugin-react`
+  5.2.0**, dan **React Router 7.18.5**; workflow GitHub Actions memakai Node
+  **22**. README menyebut syarat Node 20.19+/22.12+, AGENTS memperbarui stack
+  frontend. Tidak ada perubahan kode aplikasi karena seluruh API router yang
+  dipakai (`BrowserRouter` + `basename`, `Routes`, `Route`, `NavLink`,
+  `useLocation`, `useOutletContext`, `Navigate`, `Link`) masih tersedia di
+  React Router 7.
+- **File:** `package.json`, `package-lock.json`, `.github/workflows/deploy.yml`,
+  `README.md`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm ls --depth=0` menampilkan Vite 7.3.7, plugin React 5.2.0,
+  React Router 7.18.5; `npm ci --dry-run` → `up to date` (lockfile sinkron);
+  `npm audit` dan `npm audit --omit=dev` → **0 kerentanan**; smoke test impor
+  React Router 7 lulus; `npm run build` lulus **20,65 dtk** lalu diulang **7,16
+  dtk** (287 modul, base `/`); `npm run preview` → root `200` dan deep link `/admin/dashboard` `200`
+  dengan `#root` (fallback SPA aktif). Lingkungan lokal Node 24.14.1/npm 11.11.0.
+- **Catatan/risiko:** perubahan **belum di-commit**. Uji browser manual
+  (login/logout, navigasi semua menu, absensi, ekspor CSV, dokumen izin) dan uji
+  HP masih perlu dilakukan sebelum go-live. GitHub Pages tidak mendukung header
+  HTTP kustom, sehingga langkah keamanan berikutnya (CSP/header) perlu memakai
+  tag `<meta>` di `index.html` atau lapisan host lain.
+
+### 2026-10-29 20:54 WITA — Step 2: pengaman formula CSV & dokumen
+
+- **Perubahan:** menambahkan `amankanSelCsv()` di helper CSV. Nilai string yang
+  diawali `=`, `+`, `-`, `@`, tab, CR, atau LF diberi apostrof lebih dulu agar
+  tidak dieksekusi sebagai formula saat file dibuka di Excel/LibreOffice; nilai
+  angka negatif tidak diubah. Regex pengaman template jadwal disamakan, dan dua
+  halaman dokumen izin kini memutus `window.opener` lalu memakai
+  `location.replace(url)` pada tab yang sudah dibuka.
+- **File:** `src/utils/csv.js`, `src/utils/templateJadwal.js`,
+  `src/pages/IzinSaya.jsx`, `src/pages/admin/PengajuanIzin.jsx`.
+- **Verifikasi:** uji Node `amankanSelCsv` untuk `=`, `+`, `-`, `@`, tab, CR,
+  LF, nilai biasa, angka negatif, dan sel berkoma semua lulus; `npm run build`
+  lulus **8,28 dtk** (282 modul); `git diff --check` hanya memberi peringatan
+  LF/CRLF.
+- **Catatan/risiko:** perubahan **belum di-commit**. Uji nyata unduh CSV lalu buka
+  di Excel dan buka dokumen izin di browser masih perlu dilakukan. Uji manual
+  tampilan jam Admisi di akun pegawai sudah dilaporkan berhasil. Langkah
+  keamanan berikutnya: upgrade dependensi, lalu header HTTPS/CSP.
 
 ### 2026-10-29 20:41 WITA — Commit & push jendela absen baru, jam kerja unit, migrasi 25–27
 

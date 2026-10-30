@@ -22,7 +22,7 @@ dan pemisahan hak akses antara **Pegawai** dan **Super Admin**.
 
 ## 1. Prasyarat
 
-- Node.js 18+ (diuji pada Node 24)
+- Node.js 20.19+ atau 22.12+ (diuji pada Node 24; Vite 7 tidak mendukung Node 18)
 - Akun/proyek Supabase (gratis)
 - Browser modern + **HTTPS** saat produksi (Geolocation API mewajibkan konteks aman)
 
@@ -334,6 +334,8 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 | **Menu akun** | Klik avatar di kanan atas untuk membuka menu **Keluar** dengan animasi buka/tutup halus; tersedia di portal pegawai, Super Admin, dan kepala ruangan, termasuk tampilan HP |
 | **Grup sidebar** | Grup **Data & Struktur**, **Penjadwalan & Presensi**, **Layanan & Laporan**, dan **Keamanan** dapat dibuka/tutup dengan animasi gulir ke bawah; grup aktif terbuka otomatis |
 | **Privasi** | Promosi/penurunan role Super Admin hanya lewat SQL Admin IT; penugasan kepala unit diatur Super Admin dari menu **Kepala Unit**, satu kepala per unit, dan kepala ASN tidak dicatat sebagai pegawai |
+| **Header keamanan** | CSP produksi disisipkan sebagai `<meta>` saat build: `default-src 'self'`, `script-src 'self'`, `connect-src` hanya self + `*.supabase.co`, `frame-src 'none'`, `form-action 'self'`, `object-src 'none'`, `base-uri 'self'`, serta `Referrer-Policy: strict-origin-when-cross-origin`. Dev/HMR tidak terpengaruh |
+| **Batas GitHub Pages** | GitHub Pages tidak mendukung header HTTP kustom, sehingga HSTS, `X-Frame-Options`/`frame-ancestors`, `X-Content-Type-Options`, dan `Permissions-Policy` belum aktif; Cloudflare/proxy diperlukan bila ingin header penuh |
 
 ## 6. Alur absensi
 
@@ -578,7 +580,13 @@ dengan base path `/`.
 - Aplikasi memakai **custom domain** `presisiami.my.id`: `VITE_BASE_PATH` di
   workflow diset `/` dan `public/CNAME` berisi nama domain tersebut. DNS diatur
   di Rumahweb (4 A record GitHub Pages + CNAME `www`).
-- GPS hanya berjalan di **HTTPS**; GitHub Pages sudah menyediakannya.
+- GPS hanya berjalan di **HTTPS**; GitHub Pages sudah menyediakannya. **Enforce
+  HTTPS** sudah aktif (diverifikasi 2026-10-30): `http://` dialihkan **301** ke
+  HTTPS dan `www` diarahkan ke domain utama. Jika opsi ini dimatikan, aktifkan
+  kembali di **Settings → Pages → Enforce HTTPS**.
+- CSP disisipkan sebagai `<meta>` oleh `vite.config.js` hanya saat build, jadi
+  `dist/404.html` ikut membawanya. GitHub Pages tidak mendukung header HTTP
+  kustom; HSTS dan `frame-ancestors` memerlukan Cloudflare/proxy.
 
 **D. Vercel (opsional)**
 

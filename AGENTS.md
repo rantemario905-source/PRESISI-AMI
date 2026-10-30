@@ -9,7 +9,7 @@ mulai bekerja.** Dokumen ini juga menjadi **ledger instruksi user** untuk audit.
 
 Aplikasi absensi pegawai non-ASN RSUD Aji Muhammad Idris.
 
-- **Frontend:** React 18 + Vite 5 + Tailwind CSS 3 + React Router 6.
+- **Frontend:** React 18 + Vite 7 + Tailwind CSS 3 + React Router 7.
 - **Backend:** Supabase (Postgres, Auth, Storage, RPC `SECURITY DEFINER`).
 - **Fitur inti:** geofencing 50 m, anti Fake GPS, device binding satu perangkat
   aktif per pegawai, presensi shift/reguler dengan jendela waktu (masuk dibuka
@@ -202,6 +202,9 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-065 | 2026-10-29 15:03 | "ya setuju" + "kerjakan" (menyetujui rencana: masuk dibuka 1 jam sebelum, pulang ditutup 2 jam setelah jam pulang) | Menerapkan jendela absen baru: klien (`MENIT_AWAL_ABSEN_MASUK = 60`, `MENIT_TUTUP_ABSEN_PULANG = 120`, `tutupAbsenPulang`, teks `PanelAbsen`) dan server (migrasi **26**, `verifikasi_26.sql`, sinkron `schema.sql`); `npm run build` lulus 8,90 dtk; uji Node helper reguler 07.00/16.31/18.30 dan shift malam 19.00/08.01/10.00 (H+1) | selesai (kode); migrasi 26 sudah dijalankan (laporan user 2026-10-29) | 2026-10-29 15:03 — Jendela absen baru |
 | I-066 | 2026-10-29 (WITA) | "hari kerja admisi rawat jalan itu reguler tanpa shift, cuma jam kerjanya yang sedikit lebih cepat, Jam masuk 7.00-15.00 senin-jumat jam kerja sama" + "1. ya satu unit yang sama yaitu unit Admisi Rawat Jalan, 2. ADMISI RAWAT JALAN 3.superadmin saja" + "kerjakan" | Menambahkan jam kerja reguler per unit: tabel `jam_kerja_unit`, seed ADMISI RAWAT JALAN Senin–Jumat 07.00–15.00, konversi pegawai unit tersebut menjadi Reguler, override `jadwal_kerja`/`proses_alfa_otomatis` (fallback global), RLS Super Admin, migrasi **27**, `verifikasi_27.sql`, halaman/menu **Jam Kerja Unit**, service, route; `npm run build` lulus 16,74 dtk (ulang 7,58 dtk) | selesai (kode); migrasi 27 sudah dijalankan (laporan user 2026-10-29) | 2026-10-29 19:29 — Jam kerja reguler per unit |
 | I-067 | 2026-10-29 20:41 | "sebelum kita lanjut  commit dan push dulu sisa pekerjaan sebelumn rencana keamanan kita rencanakan" | Memverifikasi build, mencatat laporan migrasi 26–27 sudah dijalankan, lalu commit `6a7430e` dan push sisa pekerjaan jendela absen baru, jam kerja unit, migrasi 25–27, dan dokumen audit | selesai | 2026-10-29 20:41 — Commit & push sisa pekerjaan |
+| I-068 | 2026-10-29 (WITA) | "sudah saya uji sampai jam admisi sudah berubah di akunnya" | Mencatat uji tampilan jam Admisi berhasil; melanjutkan **Step 2** keamanan: pengaman formula CSV (`amankanSelCsv`), regex template jadwal, dan `window.opener`/`location.replace` di halaman dokumen | selesai (kode); belum di-commit | 2026-10-29 — Step 2 pengamanan CSV & dokumen |
+| I-069 | 2026-10-30 09:35 | "lanjutkan pekerjaan yang sempat terhenti kemarin tentang keamanan" (lampiran screenshot sesi Step 2/Step 3) | Melanjutkan **Step 3** keamanan: memverifikasi upgrade dependensi (Vite 7.3.7, `@vitejs/plugin-react` 5.2.0, React Router 7.18.5), Node CI 22, kecocokan lockfile, `npm audit` 0 kerentanan, build produksi + pratinjau SPA, serta menyinkronkan README/AGENTS/progress | selesai (kode); belum di-commit | 2026-10-30 09:35 — Step 3 upgrade dependensi |
+| I-070 | 2026-10-30 10:00 | "ya setuju" (menyetujui rencana Step 4: CSP meta + `Referrer-Policy` + Enforce HTTPS; Cloudflare opsional) | Menambahkan CSP produksi lewat plugin Vite (`script-src 'self'`, `connect-src` self + Supabase, `frame-src 'none'`, dll.), meta referrer, dan catatan Enforce HTTPS/batas GitHub Pages; verifikasi build, `404.html`, uji headless bahwa script inline diblokir, serta verifikasi HTTP/`www` **301** ke HTTPS | selesai (kode); belum di-commit | 2026-10-30 10:00 — Step 4 CSP meta & referrer |
 
 ---
 
@@ -279,7 +282,8 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   `is_superadmin()`. Kode ada di migrasi **27** + `verifikasi_27.sql`,
   `src/pages/admin/JamKerjaUnit.jsx`, dan `src/services/jamKerjaService.js`.
   **Migrasi 27 sudah dijalankan** di Supabase (laporan user 2026-10-29);
-  `verifikasi_27.sql` belum dikonfirmasi.
+  `verifikasi_27.sql` belum dikonfirmasi. Tampilan jam Admisi di akun pegawai
+  sudah diuji dan berubah (laporan user 2026-10-29).
 - **Radius absensi (2026-10-28, sudah di-commit & di-push):** radius geofencing
   kini **50 meter**
   di klien (`MAX_RADIUS_METERS`) dan server (migrasi **24** yang mendefinisikan
@@ -290,9 +294,15 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 - **Deploy:** GitHub Pages lewat `.github/workflows/deploy.yml`; URL live
   `https://presisiami.my.id/` (custom domain, DNS di Rumahweb); base path `/`;
   `public/CNAME` berisi `presisiami.my.id`; `www` redirect ke domain utama;
-  **Enforce HTTPS diklaim aktif 2026-10-27 10:39**, tetapi HTTP apex masih 200
-  saat dicek; secrets `VITE_SUPABASE_URL` +
-  `VITE_SUPABASE_ANON_KEY`.
+  **Enforce HTTPS aktif** (dicentang di Settings → Pages) dan diverifikasi
+  2026-10-30 10:06 WITA: `http://presisiami.my.id` → **301** `https://`,
+  `www` (HTTP/HTTPS) → **301** ke apex HTTPS; DNS apex 4 A record GitHub Pages,
+  `www` CNAME ke `rantemario905-source.github.io`. UI sempat menampilkan
+  "DNS Check in Progress" meski resolusi DNS sudah benar. CSP produksi
+  disisipkan sebagai `<meta>` oleh `vite.config.js` hanya saat build (Step 4),
+  sedangkan HSTS/`frame-ancestors`/`Permissions-Policy` belum aktif karena
+  GitHub Pages tidak mendukung header HTTP kustom. Node CI **22**; secrets
+  `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`.
   Setiap push ke `main` otomatis build + deploy.
 - Timezone aplikasi: `Asia/Makassar` (WITA, UTC+8).
 - `dist/` dan `.env` sudah diabaikan Git.
