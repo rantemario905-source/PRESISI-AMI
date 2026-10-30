@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-30 (Step 4 CSP meta & referrer; Step 2–4 belum di-commit) |
+| Terakhir diperbarui | 2026-10-30 10:09 WITA (commit `1fec429` — keamanan Step 2–4) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -113,15 +113,15 @@ pratinjau SPA lulus serta `npm audit` bersih. **Step 4 keamanan** menambahkan
 **CSP produksi** lewat `<meta>` (disisipkan plugin Vite saat build), **meta
 `Referrer-Policy`**, dan catatan **Enforce HTTPS**; uji headless memastikan
 script inline diblokir dan aplikasi tetap render. **Enforce HTTPS GitHub Pages
-sudah aktif dan terverifikasi** (HTTP apex/`www` 301 ke HTTPS). Step 2–4 masih
-di working tree, **belum di-commit**. Cloudflare (header HTTP penuh) belum
-dipakai.
+sudah aktif dan terverifikasi** (HTTP apex/`www` 301 ke HTTPS). Step 2–4 sudah
+**di-commit `1fec429` dan di-push** ke `origin/main` 2026-10-30; deploy GitHub
+Actions berjalan otomatis. Cloudflare (header HTTP penuh) belum dipakai.
 
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–27 | `src/`, `supabase/migrations/01–27` |
-| Commit Git | **Fitur terakhir** — `6a7430e` (jendela absen baru, jam kerja unit, migrasi 25–27); sebelumnya `bfbee59` | `git log` |
-| Perubahan lokal | **Ada perubahan belum di-commit** — Step 2 (pengaman CSV, `window.opener`), Step 3 (Vite 7, React Router 7, plugin React 5, Node CI 22), dan Step 4 (CSP meta, referrer) | `git status` |
+| Commit Git | **Fitur terakhir** — `1fec429` (pengaman CSV, Vite 7/React Router 7, CSP produksi); sebelumnya `6a7430e` | `git log` |
+| Perubahan lokal | **Bersih** setelah commit `1fec429` dan sinkronisasi dokumen audit | `git status` |
 | Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
@@ -137,14 +137,14 @@ dipakai.
 | Radius absensi | **Aktif 50 meter** — klien (`MAX_RADIUS_METERS`) dan server (migrasi 24 sudah dijalankan) | `src/config/constants.js`, `supabase/migrations/24_radius_50_meter.sql` |
 | Skrip `supabase/verifikasi_*.sql` | **Verifikasi 19 dan 20 lulus** (klaim user); verifikasi 21–27 belum dikonfirmasi | laporan user 2026-10-27 09:39 |
 | Build produksi | **Lulus** — base `/` 7,38 dtk (ulang 6,94 dtk, 2026-10-30 Step 4; 287 modul; `dist/index.html` 1,29 kB); pratinjau SPA root dan deep link `/admin/dashboard` 200 | `npm run build`, `npm run preview` |
-| Dependensi frontend | **Diperbarui (belum di-commit)** — Vite 7.3.7, `@vitejs/plugin-react` 5.2.0, React Router 7.18.5; Node CI 22; lockfile sinkron; `npm audit` 0 kerentanan | `package.json`, `package-lock.json`, `.github/workflows/deploy.yml` |
-| Header keamanan (CSP) | **Ada di kode (belum di-commit)** — CSP produksi via `<meta>`: `script-src 'self'`, `connect-src` self + `*.supabase.co`, `frame-src 'none'`, `form-action 'self'`, `object-src 'none'`, `base-uri 'self'`; meta referrer; hanya saat build. Uji headless: script inline diblokir, halaman render | `vite.config.js`, `index.html` |
+| Dependensi frontend | **Diperbarui & di-commit** — Vite 7.3.7, `@vitejs/plugin-react` 5.2.0, React Router 7.18.5; Node CI 22; lockfile sinkron; `npm audit` 0 kerentanan | `package.json`, `package-lock.json`, `.github/workflows/deploy.yml` |
+| Header keamanan (CSP) | **Ada di kode & di-commit** — CSP produksi via `<meta>`: `script-src 'self'`, `connect-src` self + `*.supabase.co`, `frame-src 'none'`, `form-action 'self'`, `object-src 'none'`, `base-uri 'self'`; meta referrer; hanya saat build. Uji headless: script inline diblokir, halaman render | `vite.config.js`, `index.html` |
 | Batas GitHub Pages | **Enforce HTTPS aktif & terverifikasi** (2026-10-30 10:06 WITA): HTTP apex dan `www` **301** ke HTTPS/apex. Namun HSTS, `X-Frame-Options`/`frame-ancestors`, `X-Content-Type-Options`, dan `Permissions-Policy` tetap belum aktif karena memerlukan header HTTP; Cloudflare/proxy opsional | `curl -I` HTTP/HTTPS apex & `www`, 2026-10-30 |
 | Kepala unit multi-unit | **Ada di kode** — tabel `kepala_unit` (satu unit satu kepala, boleh multi-unit), halaman **Kepala Unit**, pemilih unit aktif di portal kepala, kepala ASN tanpa baris `pegawai`, RPC `profil_saya()`/`simpan_kepala_unit()`, policy `unit_dikelola()` | migrasi 22, `KepalaUnit.jsx`, `kepalaUnitService.js`, `AuthContext.jsx`, `authService.js`, `PortalKepalaLayout.jsx` |
 | Jendela waktu absen | **Ada di kode** — masuk dibuka 1 jam sebelum; pulang 1 menit setelah hingga 2 jam setelah jam pulang (semua pola, termasuk shift malam) | migrasi 26, `PanelAbsen.jsx`, `jadwalAbsen.js` |
 | Jam kerja per unit | **Ada di kode** — override jam reguler per unit dengan fallback global; ADMISI RAWAT JALAN 07.00–15.00 Senin–Jumat; menu Super Admin; tampilan jam di akun pegawai sudah diuji dan berubah | migrasi 27, `JamKerjaUnit.jsx`, `jamKerjaService.js`, `jadwal_kerja`, `proses_alfa_otomatis` |
-| Keamanan ekspor CSV | **Ada di kode (belum di-commit)** — sel string berawalan `=`, `+`, `-`, `@`, tab, CR, atau LF diberi apostrof sebelum escaping; template jadwal memakai aturan yang sama | `src/utils/csv.js`, `src/utils/templateJadwal.js` |
-| Buka dokumen izin | **Ada di kode (belum di-commit)** — tab dokumen memutus `window.opener` dan memakai `location.replace` agar tidak membuka halaman Supabase dengan konteks pembuka | `src/pages/IzinSaya.jsx`, `src/pages/admin/PengajuanIzin.jsx` |
+| Keamanan ekspor CSV | **Ada di kode & di-commit** — sel string berawalan `=`, `+`, `-`, `@`, tab, CR, atau LF diberi apostrof sebelum escaping; template jadwal memakai aturan yang sama | `src/utils/csv.js`, `src/utils/templateJadwal.js` |
+| Buka dokumen izin | **Ada di kode & di-commit** — tab dokumen memutus `window.opener` dan memakai `location.replace` agar tidak membuka halaman Supabase dengan konteks pembuka | `src/pages/IzinSaya.jsx`, `src/pages/admin/PengajuanIzin.jsx` |
 | Hapus grup kosong | **Ada di kode** — semua grup 0 pegawai; "Belum ditentukan" (akun sistem) disembunyikan bila kosong | migrasi 18, `GrupShift.jsx` |
 | Bilah progres | **Ada di kode** — bilah biru muda di atas layar saat navigasi, login, logout, dan muat ulang profil | `ProgressContext.jsx`, `BilahProgres.jsx`, `PengamatRute.jsx` |
 | Logo aplikasi | **Ada di kode** — logo resmi RSUD AMI dipakai di login, header pegawai, sidebar admin/kepala ruangan, favicon, dan apple-touch-icon | `src/assets/logo-rsud-ami.png`, `LogoRSUD.jsx`, `favicon-32x32.png`, `apple-touch-icon.png` |
@@ -309,6 +309,26 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-30 10:09 WITA — Commit & push keamanan Step 2–4
+
+- **Perubahan:** menyimpan seluruh pekerjaan keamanan Step 2–4 ke commit
+  `1fec429` dan mendorongnya ke `origin/main`: pengaman formula CSV
+  (`amankanSelCsv`), pemutusan `window.opener` dokumen izin, upgrade Vite 7.3.7
+  + `@vitejs/plugin-react` 5.2.0 + React Router 7.18.5, Node CI 22, CSP
+  produksi via `<meta>`, dan `Referrer-Policy`. Deploy GitHub Actions berjalan
+  otomatis setelah push.
+- **File:** `.github/workflows/deploy.yml`, `package.json`,
+  `package-lock.json`, `vite.config.js`, `index.html`, `src/utils/csv.js`,
+  `src/utils/templateJadwal.js`, `src/pages/IzinSaya.jsx`,
+  `src/pages/admin/PengajuanIzin.jsx`, `README.md`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run build` lulus **7,26 dtk** (287 modul) sebelum commit;
+  `npm audit` 0 kerentanan; `git push` `271b14b..1fec429` berhasil; Enforce HTTPS
+  terverifikasi (HTTP apex/`www` **301** ke HTTPS). Setelah deploy, CSP aktif di
+  `https://presisiami.my.id/`—perlu dicek pada HTML live.
+- **Catatan/risiko:** uji browser manual dan HP (login/logout, navigasi,
+  absensi, dokumen, CSV, cetak laporan) masih perlu dilakukan pada build live.
+  HSTS/anti-clickjacking/`Permissions-Policy` tetap menunggu Cloudflare/proxy.
 
 ### 2026-10-30 10:00 WITA — Step 4: CSP meta & referrer
 

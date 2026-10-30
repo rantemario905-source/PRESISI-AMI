@@ -233,8 +233,11 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   2026-10-27 10:36. Koordinat terbaru
   `-0.23805651650343132, 117.41442516465149` sudah di-commit dan migrasi 21
   **sudah dijalankan di Supabase** (klaim user 2026-10-27 10:39). Commit terbaru
-  `a9a59ac` (Dinas Luar lintas unit + migrasi 23, radius 50 meter + migrasi 24,
-  perapian UI mobile dashboard & riwayat) di-commit dan di-push 2026-10-28.
+  `1fec429` (pengaman formula CSV & `window.opener`, upgrade Vite 7/React Router 7,
+  CSP produksi + `Referrer-Policy`) di-commit dan di-push 2026-10-30; sebelumnya
+  `6a7430e` (jendela absen baru, jam kerja unit, migrasi 25–27) dan `a9a59ac`
+  (Dinas Luar lintas unit + migrasi 23, radius 50 meter + migrasi 24,
+  perapian UI mobile dashboard & riwayat).
 - **Kepala unit (2026-10-28, sudah di-commit & di-push):** tabel `kepala_unit`
   menjadi sumber kebenaran penugasan (satu unit satu kepala, satu kepala boleh
   banyak unit). Kode, migrasi **22**, `verifikasi_22.sql`, `schema.sql`, dan
