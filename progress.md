@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-30 10:09 WITA (commit `1fec429` — keamanan Step 2–4) |
+| Terakhir diperbarui | 2026-10-30 23:23 WITA (Alfa otomatis diaktifkan; cron aktif) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -101,11 +101,13 @@ diselesaikan lewat koreksi Super Admin. Aturan diterapkan di klien
 07.00–15.00 dan libur Sabtu–Minggu tanpa mengubah jam global unit lain; pegawai
 unit tersebut yang masih Shift dikonversi menjadi Reguler oleh migrasi, dan
 tersedia menu **Jam Kerja Unit** khusus Super Admin; **tampilan jam Admisi di
-akun pegawai sudah diuji dan berubah** (laporan user 2026-10-29). Yang belum:
-konfirmasi `verifikasi_22.sql` sampai `verifikasi_27.sql` dan migrasi 09–18, uji
-manual alur lupa absen pulang, uji cetak manual laporan setelah perapian kop
-dan penanda tangan baru, penyiapan data operasional (grup shift, jadwal, hari
-libur), dan persiapan go-live. **Step 2 keamanan** (pengaman formula CSV dan
+akun pegawai sudah diuji dan berubah** (laporan user 2026-10-29). **Seluruh
+verifikasi SQL 09–27 sudah dijalankan dan uji manual dinyatakan aman, serta
+go-live sudah masuk rencana** (laporan user 2026-10-30). Data uji **sudah
+dibersihkan** (laporan 2026-10-30 23:01) dan **data operasional sudah
+dilengkapi** — jadwal dinas dan pemetaan pegawai (laporan 2026-10-30 23:04),
+serta **Alfa otomatis sudah diaktifkan** dan cron aktif (laporan 2026-10-30
+23:23). Yang tersisa: verifikasi pembentukan Alfa pertama dan eksekusi go-live. **Step 2 keamanan** (pengaman formula CSV dan
 pemisahan `window.opener` dokumen) sudah diuji user tanpa error, lalu **Step 3
 keamanan** menaikkan dependensi ke **Vite 7.3.7**, **`@vitejs/plugin-react`
 5.2.0**, dan **React Router 7.18.5** dengan Node CI **22**; build produksi dan
@@ -120,22 +122,23 @@ Actions berjalan otomatis. Cloudflare (header HTTP penuh) belum dipakai.
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–27 | `src/`, `supabase/migrations/01–27` |
-| Commit Git | **Fitur terakhir** — `1fec429` (pengaman CSV, Vite 7/React Router 7, CSP produksi); sebelumnya `6a7430e` | `git log` |
-| Perubahan lokal | **Bersih** setelah commit `1fec429` dan sinkronisasi dokumen audit | `git status` |
-| Migrasi DB 01–18 | **18 sudah dijalankan** (pesan server baru); 15–17 belum terkonfirmasi | uji Hapus grup, 2026-10-26 |
+| Commit Git | **Fitur terakhir** — `1fec429` (pengaman CSV, Vite 7/React Router 7, CSP produksi); dokumen `260f3c2`; sebelumnya `6a7430e` | `git log` |
+| Perubahan lokal | **Hanya dokumen audit** (`AGENTS.md`, `progress.md`) belum di-commit; kode bersih | `git status` |
+| Migrasi DB 01–18 | **Sudah dijalankan** — verifikasi 09–18 lulus | laporan user 2026-10-30 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
 | Migrasi DB 21 | **Sudah dijalankan** (klaim user 2026-10-27 10:39) | `supabase/migrations/21_koordinat_rsud.sql` |
-| Migrasi DB 22 | **Sudah dijalankan** (laporan user 2026-10-28); verifikasi 22 belum dikonfirmasi | `supabase/migrations/22_kepala_unit_multi_unit.sql`, `verifikasi_22.sql` |
-| Migrasi DB 23 | **Sudah dijalankan** (laporan user 2026-10-28); verifikasi 23 belum dikonfirmasi | `supabase/migrations/23_dinas_luar_lintas_unit.sql`, `verifikasi_23.sql` |
-| Migrasi DB 24 | **Sudah dijalankan** (laporan user 2026-10-28); radius server 50 m; verifikasi 24 belum dikonfirmasi | `supabase/migrations/24_radius_50_meter.sql`, `verifikasi_24.sql` |
+| Migrasi DB 22 | **Sudah dijalankan**; verifikasi 22 lulus (laporan user 2026-10-30) | `supabase/migrations/22_kepala_unit_multi_unit.sql`, `verifikasi_22.sql` |
+| Migrasi DB 23 | **Sudah dijalankan**; verifikasi 23 lulus (laporan user 2026-10-30) | `supabase/migrations/23_dinas_luar_lintas_unit.sql`, `verifikasi_23.sql` |
+| Migrasi DB 24 | **Sudah dijalankan**; radius server 50 m; verifikasi 24 lulus (laporan user 2026-10-30) | `supabase/migrations/24_radius_50_meter.sql`, `verifikasi_24.sql` |
 | Migrasi DB 25 | **Sudah dijalankan** (laporan user 2026-10-29); aturannya digantikan migrasi 26 | `supabase/migrations/25_batas_absen_pulang.sql`, `verifikasi_25.sql` |
-| Migrasi DB 26 | **Sudah dijalankan** (laporan user 2026-10-29); jendela absen baru berlaku di server; verifikasi 26 belum dikonfirmasi | `supabase/migrations/26_batas_absen_baru.sql`, `verifikasi_26.sql` |
-| Migrasi DB 27 | **Sudah dijalankan** (laporan user 2026-10-29); jam kerja per unit dan menu **Jam Kerja Unit** aktif; verifikasi 27 belum dikonfirmasi | `supabase/migrations/27_jam_kerja_unit.sql`, `verifikasi_27.sql` |
-| Data uji | **Sudah dibersihkan** — transaksi dihapus, 92 pegawai/grup/master shift dipertahankan | `supabase/cleanup_data_uji.sql`, laporan user 2026-10-27 11:02 |
+| Migrasi DB 26 | **Sudah dijalankan**; jendela absen baru berlaku di server; verifikasi 26 lulus (laporan user 2026-10-30) | `supabase/migrations/26_batas_absen_baru.sql`, `verifikasi_26.sql` |
+| Migrasi DB 27 | **Sudah dijalankan**; jam kerja per unit dan menu **Jam Kerja Unit** aktif; verifikasi 27 lulus (laporan user 2026-10-30) | `supabase/migrations/27_jam_kerja_unit.sql`, `verifikasi_27.sql` |
+| Data uji | **Sudah dibersihkan ulang setelah uji** — transaksi dihapus, 92 pegawai/grup/master shift dipertahankan | `supabase/cleanup_data_uji.sql`, laporan user 2026-10-30 23:01 |
+| Data operasional | **Lengkap** — jadwal dinas dan pemetaan pegawai sudah diisi | laporan user 2026-10-30 23:04 |
 | Koordinat RSUD AMI | **Ada di kode** — `-0.23805651650343132, 117.41442516465149` di klien dan schema | `src/config/constants.js`, `supabase/schema.sql`, migrasi 21 |
 | Radius absensi | **Aktif 50 meter** — klien (`MAX_RADIUS_METERS`) dan server (migrasi 24 sudah dijalankan) | `src/config/constants.js`, `supabase/migrations/24_radius_50_meter.sql` |
-| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 19 dan 20 lulus** (klaim user); verifikasi 21–27 belum dikonfirmasi | laporan user 2026-10-27 09:39 |
+| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 09–27 lulus** — dijalankan user, semua hasil `true` (laporan 2026-10-30) | laporan user 2026-10-30 |
 | Build produksi | **Lulus** — base `/` 7,38 dtk (ulang 6,94 dtk, 2026-10-30 Step 4; 287 modul; `dist/index.html` 1,29 kB); pratinjau SPA root dan deep link `/admin/dashboard` 200 | `npm run build`, `npm run preview` |
 | Dependensi frontend | **Diperbarui & di-commit** — Vite 7.3.7, `@vitejs/plugin-react` 5.2.0, React Router 7.18.5; Node CI 22; lockfile sinkron; `npm audit` 0 kerentanan | `package.json`, `package-lock.json`, `.github/workflows/deploy.yml` |
 | Header keamanan (CSP) | **Ada di kode & di-commit** — CSP produksi via `<meta>`: `script-src 'self'`, `connect-src` self + `*.supabase.co`, `frame-src 'none'`, `form-action 'self'`, `object-src 'none'`, `base-uri 'self'`; meta referrer; hanya saat build. Uji headless: script inline diblokir, halaman render | `vite.config.js`, `index.html` |
@@ -160,11 +163,12 @@ Actions berjalan otomatis. Cloudflare (header HTTP penuh) belum dipakai.
 | Menu kepala ASN | **Ada di kode** — “Kembali ke Absensi” (sidebar) dan tab Absensi (navigasi bawah HP) disembunyikan bila `sumber_akun = kepala_asn` | `PortalKepalaLayout.jsx`, `SidebarKepala.jsx` |
 | Dinas Luar lintas unit | **Ada di kode** — kepala unit dapat memilih pegawai lintas unit untuk Dinas Luar; Sakit/Cuti tetap per unit; pembuat grup membaca grup + dokumennya selama menjabat; akses dicabut otomatis saat jabatan berakhir; kepala ASN dapat mencatat (FK ke `auth.users`) | migrasi 23, `PengajuanIzin.jsx`, `leaveService.js`, `pegawaiService.js`, `verifikasi_23.sql` |
 | Lint/unit test | Tidak tersedia di `package.json` | `package.json` |
-| Alfa otomatis | Fitur ada, **default nonaktif** | migrasi 12, `PengaturanPresensi.jsx` |
-| Deploy GitHub Pages | **Aktif** — `https://presisiami.my.id/` live dengan base `/`; `www` redirect ke domain utama; Enforce HTTPS diklaim user, tetapi **HTTP apex masih 200** saat dicek 10:39 | workflow run `40439173719` sukses |
+| Alfa otomatis | **Aktif mulai 1 November 2026** — diaktifkan lewat Pengaturan Presensi; **pg_cron 1.6.4 aktif** dan job `presisi-alfa-otomatis` terdaftar/aktif tiap 15 menit; menunggu pembentukan Alfa pertama | migrasi 12/27, `PengaturanPresensi.jsx`, `supabase/jadwal_alfa.sql`, laporan user 2026-10-30 |
+| Deploy GitHub Pages | **Aktif** — `https://presisiami.my.id/` live dengan base `/`; `www` redirect ke domain utama; Enforce HTTPS aktif, HTTP apex/`www` **301** ke HTTPS (diverifikasi 2026-10-30) | workflow run `40439173719` sukses |
 | Supabase Auth | **Diklaim sudah diperbarui** ke domain baru (Site URL + Redirect URLs) | laporan user 2026-10-27 10:39 |
 | Uji login live | **Lulus** — Super Admin (desktop) + pegawai (mobile) | Laporan user 2026-10-25 13:37 |
 | Uji perangkat & absensi | **Lulus** — verifikasi perangkat, radius, akurasi, duplikasi | Laporan user 2026-10-25 14:04 |
+| Verifikasi & uji go-live | **Lulus** — seluruh `verifikasi_*.sql` dijalankan, uji manual aman, go-live masuk rencana | laporan user 2026-10-30 22:13 |
 
 **Pekerjaan terakhir:** mengembalikan tata letak `KepalaHalaman` ke judul
 kiri/aksi kanan, lalu memindahkan tombol aksi per halaman ke header kartu daftar,
@@ -234,41 +238,36 @@ dipakai setelah penanda tangan laporan diseragamkan. `npm run build` lulus
 **6,95 dtk**. Seluruh perubahan sudah di-commit `69cc041` dan di-push ke
 `origin/main` atas perintah user.
 
-**Langkah berikutnya yang disarankan:**
-1. Migrasi **22** sudah dijalankan; konfirmasi `supabase/verifikasi_22.sql`
-   sampai semua `true`, lalu uji menu **Kepala Unit**, login kepala ASN, pemilih
-   unit aktif, dan penyembunyian menu Absensi pada akun kepala ASN. Migrasi
-   **19-21** sudah dijalankan; `verifikasi_21.sql` belum dikonfirmasi.
-2. Jalankan migrasi **15**, **16**, **17**, lalu **18** berurutan di SQL Editor,
-   kemudian `supabase/verifikasi_15.sql`, `verifikasi_16.sql`,
-   `verifikasi_17.sql`, dan `verifikasi_18.sql` sampai semua `true`. Migrasi 16
-   **mengosongkan tabel `perangkat`** (data uji).
-3. Uji lokal: cetak **Laporan Bulanan** (satu pegawai dan semua pegawai unit)
-   lewat dialog cetak → **Simpan sebagai PDF**; periksa kop, ukuran font,
-   pemenggalan halaman, dan posisi tanda tangan Kasubbag Tata Usaha (Suriami,
-   SKM., M.Kes; NIP. 197312302007012011). Login sebagai kepala ASN dan pastikan
-   menu **Kembali ke Absensi** serta tab **Absensi** tidak tampil. Lalu kepala
-   ruangan mengubah
-   jadwal hari ini, pegawai mengajukan
-   perangkat kedua (harus ditolak sampai Admin IT reset), tombol absen terkunci
-   sebelum jam buka (masuk 20 menit sebelum, pulang 1 menit setelah), dan hapus
-   salah satu grup kosong operasional dari menu Grup Shift. Grup sistem
-   **Belum ditentukan** kini tersembunyi selama tidak berisi pegawai. Periksa
-   juga favicon tab browser, header sidebar Super Admin tanpa label role, label
-   dashboard (“Dashboard”, “Total Pegawai”, tanggal aktual, “Perlu Verifikasi”),
-   dan menu **Keluar** di avatar kanan atas pada desktop serta HP. Periksa juga
-   kerapatan menu sidebar Super Admin/kepala ruangan dan latar biru muda
-   transparan pada seluruh halaman portal Super Admin dan Kepala Ruangan;
-   periksa juga posisi tombol aksi per halaman (header kartu daftar, Tahun Hari
-   Libur, baris tab Koreksi/Verifikasi, dan atas kotak filter Rekapitulasi)
-   serta topbar tanpa subtitle rumah sakit.
-4. Lengkapi data operasional: seksi **Grup Shift**, pola kerja di **Data Pegawai**,
-   **Jadwal Shift**, dan **Hari Libur**.
-5. Pastikan migrasi 09–14 sudah dijalankan berurutan dan seluruh
-   `supabase/verifikasi_*.sql` bernilai `true`.
-6. Bersihkan data uji dengan `supabase/cleanup_data_uji.sql` sebelum go-live.
-7. Aktifkan Alfa otomatis + `pg_cron` **paling akhir**, setelah jadwal lengkap dan
-   hari libur terisi.
+**Pekerjaan terakhir (2026-10-30 22:13 WITA):** user melaporkan seluruh
+`supabase/verifikasi_*.sql` sudah dijalankan, pengujian manual aman, dan
+**go-live sudah masuk rencana**. Tidak ada perubahan kode; hanya pembaruan
+dokumen audit. Pemeriksaan live: `https://presisiami.my.id/` HTTP 200 dengan
+meta CSP dan Referrer terpasang.
+
+**Pekerjaan terakhir (2026-10-30 23:01 WITA):** user melaporkan
+`supabase/cleanup_data_uji.sql` sudah dijalankan. Data transaksi dibersihkan
+dan data master (92 pegawai, grup, serta master shift) dipertahankan. Tidak ada
+perubahan kode; hanya pembaruan dokumen audit.
+
+**Pekerjaan terakhir (2026-10-30 23:04 WITA):** user melaporkan data operasional
+sudah dilengkapi, meliputi jadwal dinas dan pemetaan pegawai. Tidak ada
+perubahan kode; hanya pembaruan dokumen audit.
+
+**Pekerjaan terakhir (2026-10-30 23:23 WITA):** user mengaktifkan **Alfa
+otomatis** lewat Pengaturan Presensi dengan **`alfa_mulai` 1 November 2026**.
+Screenshot Supabase menunjukkan job `presisi-alfa-otomatis` aktif tiap 15 menit
+dan `succeeded`; pada 23:30 user mengonfirmasi ekstensi **`pg_cron` 1.6.4 aktif**
+di project ABSENSI PEGAWAI. Status cron selesai; tinggal menunggu pembentukan
+Alfa pertama. Tidak ada perubahan kode; hanya pembaruan dokumen audit.
+
+**Langkah berikutnya yang disarankan (go-live):**
+1. Tidak ada tindakan cron lagi sebelum 1 November; biarkan job berjalan.
+2. Setelah 1 November: verifikasi pembentukan Alfa pertama. Karena 1 November
+   adalah hari kerja, pegawai reguler dapat tercatat Alfa pada 1 November setelah
+   jam kerja berakhir; shift malam menyusul setelah shiftnya selesai:
+   `select tanggal, count(*) from public.presensi where status_kehadiran = 'Alfa' group by tanggal order by tanggal desc;`
+3. Setelah go-live, pantau login, verifikasi perangkat, absensi masuk/pulang,
+   pengajuan izin, dan cetak laporan; catat temuan di `progress.md`.
 
 ---
 
@@ -309,6 +308,77 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-30 23:30 WITA — pg_cron terkonfirmasi aktif
+
+- **Perubahan:** mengonfirmasi berdasarkan screenshot user bahwa ekstensi
+  **pg_cron 1.6.4** sudah aktif di project ABSENSI PEGAWAI, dan job
+  `presisi-alfa-otomatis` sudah terdaftar serta aktif. Tidak ada perubahan kode;
+  hanya pembaruan dokumen audit.
+- **File:** `progress.md`, `AGENTS.md`.
+- **Verifikasi:** screenshot Database → Extensions menunjukkan toggle
+  `pg_cron` aktif; screenshot sebelumnya menunjukkan `cron.job` `active = true`
+  dan riwayat run `succeeded`.
+- **Catatan/risiko:** `alfa_mulai` diset **1 November 2026** sehingga belum ada
+  Alfa yang dibuat sampai tanggal tersebut.
+- **Koreksi (23:33):** user menyatakan 1 November adalah hari Senin; asumsi hari
+  Minggu dibatalkan. Alfa mengikuti `alfa_mulai` dan jam kerja, bukan nama hari,
+  sehingga Alfa reguler pertama dapat muncul pada 1 November setelah jam kerja
+  berakhir.
+
+### 2026-10-30 23:23 WITA — Alfa otomatis diaktifkan
+
+- **Perubahan:** mencatat user sudah mengaktifkan **Alfa otomatis** lewat
+  **Pengaturan Presensi**. Ekstensi `pg_cron` aktif dan job
+  `presisi-alfa-otomatis` berjalan setiap 15 menit dengan status `succeeded`.
+  Status Terkini, tabel Alfa otomatis, langkah go-live, dan backlog diperbarui;
+  tidak ada perubahan kode.
+- **File:** `progress.md`, `AGENTS.md`.
+- **Verifikasi:** laporan user 2026-10-30 23:23; screenshot Supabase
+  menunjukkan `cron.job` aktif `true` dan riwayat run `succeeded`. Pembentukan
+  data Alfa belum terverifikasi (query masih 0 baris sebelum aktivasi).
+- **Catatan/risiko:** pastikan **Alfa berlaku mulai** sudah sesuai tanggal
+  go-live agar presensi lama tidak ikut ditandai Alfa. Cron tetap perlu dipantau
+  beberapa hari pertama.
+
+### 2026-10-30 23:04 WITA — Data operasional lengkap
+
+- **Perubahan:** mencatat laporan user bahwa data operasional sudah dilengkapi,
+  termasuk **jadwal dinas** dan **pemetaan pegawai**. Status Terkini, langkah
+  go-live (tinggal Alfa otomatis + `pg_cron`), dan backlog diperbarui; tidak ada
+  perubahan kode.
+- **File:** `progress.md`, `AGENTS.md`.
+- **Verifikasi:** laporan user 2026-10-30 23:04; tidak ada SQL atau aplikasi
+  yang dijalankan agen pada sesi ini.
+- **Catatan/risiko:** kelengkapan jadwal per pegawai dan hari libur belum
+  diverifikasi lewat query; status dicatat sebagai klaim user. Alfa otomatis
+  tetap harus diaktifkan paling akhir setelah data dianggap final.
+
+### 2026-10-30 23:01 WITA — Cleanup data uji
+
+- **Perubahan:** mencatat `supabase/cleanup_data_uji.sql` sudah dijalankan: data
+  transaksi (presensi, koreksi, izin, jadwal, perangkat) dibersihkan, sedangkan
+  92 pegawai, grup, dan master shift dipertahankan. Status Terkini, langkah
+  go-live, dan backlog diperbarui; tidak ada perubahan kode.
+- **File:** `progress.md`, `AGENTS.md`.
+- **Verifikasi:** laporan user 2026-10-30 23:01; tidak ada SQL yang dijalankan
+  agen pada sesi ini.
+- **Catatan/risiko:** jumlah data master pasca-cleanup tidak diverifikasi ulang
+  lewat query; angka 92 mengacu pada laporan user dan isi skrip cleanup.
+
+### 2026-10-30 22:13 WITA — Verifikasi SQL & uji go-live dinyatakan aman
+
+- **Perubahan:** mencatat laporan user bahwa seluruh `supabase/verifikasi_*.sql`
+  sudah dijalankan, pengujian manual aman, dan **go-live sudah masuk rencana**.
+  Status Terkini, tabel status migrasi 22–27, status deploy, dan langkah
+  berikutnya diperbarui; tidak ada perubahan kode.
+- **File:** `progress.md`, `AGENTS.md`.
+- **Verifikasi:** laporan user 2026-10-30 22:13 (tidak dijalankan ulang oleh
+  agen). Pemeriksaan live: `https://presisiami.my.id/` HTTP 200 dan meta CSP +
+  Referrer terpasang.
+- **Catatan/risiko:** bukti keluaran `true` per skrip verifikasi tidak dilampirkan
+  pada sesi ini; status dicatat sebagai klaim user. Sisa pekerjaan go-live: data
+  operasional, pembersihan data uji akhir, dan aktivasi Alfa otomatis.
 
 ### 2026-10-30 10:09 WITA — Commit & push keamanan Step 2–4
 
@@ -1443,24 +1513,25 @@ dan `verifikasi_18` untuk hapus grup kosong.
 | # | Item | Dampak | Tindakan |
 |---|---|---|---|
 | B-1 | ~~Belum ada commit untuk Fase 4–8 + UI~~ | — | **Selesai:** commit `2c8a775` + push 2026-10-25 12:48 |
-| B-2 | Status migrasi 09–18 di Supabase belum diketahui | Fitur bisa gagal saat dipakai | Cek SQL Editor / jalankan migrasi berurutan |
-| B-3 | Hasil `supabase/verifikasi_09..18.sql` belum diketahui | Jaminan integritas DB belum ada | Jalankan dan pastikan semua `true` |
-| B-12 | Migrasi 15–18 belum dijalankan | UI baru tidak berfungsi dengan DB lama | Jalankan 15, 16, 17, lalu 18; **16 mengosongkan `perangkat`** |
-| B-13 | Uji lokal fitur baru belum dilakukan | Perilaku kepala ruangan, perangkat kedua, jendela waktu, dan hapus grup belum terbukti | Uji ubah jadwal hari ini, ajukan perangkat kedua, tombol absen sebelum jam buka, dan hapus grup kosong non-sistem |
+| B-2 | ~~Status migrasi 09–18 di Supabase belum diketahui~~ | - | **Selesai:** migrasi 01–27 sudah dijalankan (laporan user 2026-10-30) |
+| B-3 | ~~Hasil `supabase/verifikasi_09..18.sql` belum diketahui~~ | - | **Selesai:** verifikasi 09–27 lulus (laporan user 2026-10-30) |
+| B-12 | ~~Migrasi 15–18 belum dijalankan~~ | - | **Selesai:** dijalankan; verifikasi 15–18 lulus (laporan user 2026-10-30) |
+| B-13 | ~~Uji lokal fitur baru belum dilakukan~~ | - | **Selesai:** uji manual dinyatakan aman (laporan user 2026-10-30) |
 | B-14 | ~~Perubahan migrasi 15–17 belum di-commit~~ | - | **Selesai:** commit `c21ecf9` + push 2026-10-26 12:01 |
-| B-15 | Aturan jendela waktu (migrasi 17) belum dijalankan/diuji | Absen bisa ditolak atau tidak sesuai harapan | Jalankan 17 + `verifikasi_17.sql`, lalu uji absen 07.40 dan 16.31 |
-| B-16 | ~~Migrasi 18 dan UI grup sistem belum diuji/di-commit~~ | - | **Selesai:** commit `6343111` + push 2026-10-26 13:19; sisa uji `verifikasi_18.sql` |
-| B-17 | Kerapatan sidebar dan latar portal baru diuji lewat build | Tampilan di layar kecil/desktop belum terbukti | Uji visual `npm run dev` di desktop dan HP, lalu sesuaikan bila terlalu rapat/terlalu pucat |
+| B-15 | ~~Aturan jendela waktu (migrasi 17) belum dijalankan/diuji~~ | - | **Selesai:** digantikan migrasi 26; verifikasi 26 lulus (laporan user 2026-10-30) |
+| B-16 | ~~Migrasi 18 dan UI grup sistem belum diuji/di-commit~~ | - | **Selesai:** commit `6343111`; `verifikasi_18.sql` lulus (laporan user 2026-10-30) |
+| B-17 | ~~Kerapatan sidebar dan latar portal baru diuji lewat build~~ | - | **Selesai:** uji tampilan dinyatakan aman (laporan user 2026-10-30) |
 | B-18 | ~~Posisi aksi dekat judul dan penghapusan subtitle baru diuji lewat build~~ | - | **Digantikan I-026:** aksi tidak lagi menempel judul |
-| B-19 | Penempatan aksi per halaman baru diuji lewat build | Tombol bisa menumpuk atau salah posisi di layar sempit | Uji visual Data Pegawai, Grup Shift, Master Shift, Hari Libur, Koreksi, Dinas & Sakit, Cuti, Rekapitulasi, Verifikasi, dan Jadwal Shift di desktop serta HP |
+| B-19 | ~~Penempatan aksi per halaman baru diuji lewat build~~ | - | **Selesai:** uji tampilan per halaman dinyatakan aman (laporan user 2026-10-30) |
 | B-20 | ~~Migrasi 25 (batas akhir absen pulang) belum dijalankan~~ | - | **Selesai:** dijalankan user 2026-10-29; aturannya digantikan migrasi 26 |
-| B-21 | Alur lupa absen pulang belum diuji manual | Perilaku tombol dan pesan baru belum terbukti di perangkat | Uji di lokal: buka presensi kemarin tanpa jam pulang, pastikan Absen Hadir hari ini aktif dan muncul keterangan koreksi setelah batas |
-| B-22 | Migrasi 26 sudah dijalankan (laporan user 2026-10-29); verifikasi dan uji manual belum | Jendela absen baru belum terbukti lewat verifikasi/uji perangkat | Jalankan `verifikasi_26.sql`, lalu uji: masuk 1 jam sebelum (ditolak lebih awal), pulang lewat 2 jam (ditolak), dan shift malam lintas hari |
-| B-23 | Migrasi 27 sudah dijalankan (laporan user 2026-10-29); verifikasi dan uji manual belum | Jam kerja unit belum terbukti lewat verifikasi/uji perangkat | Jalankan `verifikasi_27.sql`, lalu uji pegawai ADMISI RAWAT JALAN: jadwal 07.00–15.00, absen masuk 06.00, pulang 15.01–17.00, Sabtu–Minggu libur |
+| B-21 | ~~Alur lupa absen pulang belum diuji manual~~ | - | **Selesai:** uji manual aman (laporan user 2026-10-30) |
+| B-22 | ~~Migrasi 26 sudah dijalankan; verifikasi dan uji manual belum~~ | - | **Selesai:** `verifikasi_26.sql` lulus dan uji jendela absen aman (laporan user 2026-10-30) |
+| B-23 | ~~Migrasi 27 sudah dijalankan; verifikasi dan uji manual belum~~ | - | **Selesai:** `verifikasi_27.sql` lulus dan tampilan jam Admisi diuji (laporan user 2026-10-30) |
+| B-24 | Go-live belum dieksekusi | Aplikasi belum dipakai produksi | Data uji sudah dibersihkan, data operasional lengkap, Alfa otomatis aktif mulai 1 November, dan `pg_cron` terkonfirmasi aktif (2026-10-30); tinggal verifikasi Alfa pertama dan eksekusi go-live |
 | B-4 | ~~`npm run build` belum dijalankan~~ | — | **Selesai:** lulus 2026-10-25 12:24 |
 | B-5 | ~~README menyebut Fase 1–7 saja~~ | — | **Selesai:** diperbarui ke Fase 1–8 + impor |
 | B-6 | ~~`verifikasi_10.sql` tidak ada di diagram README~~ | — | **Selesai:** ditambahkan ke struktur |
-| B-7 | Alfa otomatis belum tentu nonaktif di DB | Risiko Alfa salah dibuat | Cek `Pengaturan Presensi` |
+| B-7 | ~~Alfa otomatis belum tentu nonaktif di DB~~ | - | **Selesai:** diaktifkan user 2026-10-30; pantau pembentukan Alfa |
 | B-8 | Tidak ada lint/unit test | Regresi hanya tertangkap manual | Pertimbangkan uji dasar bila diminta |
 | B-9 | Tidak ada `.env.example` yang diperbarui? — ada, tapi nilainya harus dicek | Setup developer baru | Pastikan sesuai variabel terpakai |
 | B-10 | ~~Deploy GitHub Pages belum aktif~~ | — | **Selesai:** live 2026-10-25 13:19 |

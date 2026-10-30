@@ -205,6 +205,15 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-068 | 2026-10-29 (WITA) | "sudah saya uji sampai jam admisi sudah berubah di akunnya" | Mencatat uji tampilan jam Admisi berhasil; melanjutkan **Step 2** keamanan: pengaman formula CSV (`amankanSelCsv`), regex template jadwal, dan `window.opener`/`location.replace` di halaman dokumen | selesai (kode); belum di-commit | 2026-10-29 — Step 2 pengamanan CSV & dokumen |
 | I-069 | 2026-10-30 09:35 | "lanjutkan pekerjaan yang sempat terhenti kemarin tentang keamanan" (lampiran screenshot sesi Step 2/Step 3) | Melanjutkan **Step 3** keamanan: memverifikasi upgrade dependensi (Vite 7.3.7, `@vitejs/plugin-react` 5.2.0, React Router 7.18.5), Node CI 22, kecocokan lockfile, `npm audit` 0 kerentanan, build produksi + pratinjau SPA, serta menyinkronkan README/AGENTS/progress | selesai (kode); belum di-commit | 2026-10-30 09:35 — Step 3 upgrade dependensi |
 | I-070 | 2026-10-30 10:00 | "ya setuju" (menyetujui rencana Step 4: CSP meta + `Referrer-Policy` + Enforce HTTPS; Cloudflare opsional) | Menambahkan CSP produksi lewat plugin Vite (`script-src 'self'`, `connect-src` self + Supabase, `frame-src 'none'`, dll.), meta referrer, dan catatan Enforce HTTPS/batas GitHub Pages; verifikasi build, `404.html`, uji headless bahwa script inline diblokir, serta verifikasi HTTP/`www` **301** ke HTTPS | selesai (kode); belum di-commit | 2026-10-30 10:00 — Step 4 CSP meta & referrer |
+| I-071 | 2026-10-30 22:13 | "verifikasi sudah saya jalankan dan sudah testing dan aman sudah masuk rencana golive" | Mencatat laporan user bahwa seluruh `verifikasi_*.sql` sudah dijalankan, uji manual aman, dan go-live masuk rencana; memperbarui Status Terkini, status migrasi 22–27, status deploy, langkah go-live, serta fakta lingkungan. Tidak ada perubahan kode. Catatan: Step 2–4 sudah di-commit `1fec429` + sinkronisasi dokumen `260f3c2` dan di-push ke `origin/main` | selesai (dokumen); belum di-commit | 2026-10-30 22:13 — Verifikasi SQL & uji go-live |
+| I-072 | 2026-10-30 23:01 | "SUDAH CLEAN UP DATA UJI" | Mencatat `supabase/cleanup_data_uji.sql` sudah dijalankan: data transaksi dibersihkan, 92 pegawai/grup/master shift dipertahankan; memperbarui status data uji, sisa langkah go-live, dan backlog. Tidak ada perubahan kode | selesai (dokumen); belum di-commit | 2026-10-30 23:01 — Cleanup data uji |
+| I-073 | 2026-10-30 23:04 | "sudah sya lengkapi data operasional, jadwal dinas dan pemetaan pegawai" | Mencatat data operasional sudah dilengkapi: jadwal dinas dan pemetaan pegawai terisi; memperbarui Status Terkini, langkah go-live (tinggal Alfa otomatis + `pg_cron`), dan backlog. Tidak ada perubahan kode | selesai (dokumen); belum di-commit | 2026-10-30 23:04 — Data operasional lengkap |
+| I-074 | 2026-10-30 23:06 | "arahkan langkah aktivasi Alfa otomatis + pg_cron" | Menyusun panduan aktivasi: isi tanggal mulai + aktifkan di **Pengaturan Presensi**, uji manual, aktifkan ekstensi `pg_cron`, jalankan `supabase/jadwal_alfa.sql`, lalu verifikasi `cron.job`/`cron.job_run_details` dan data Alfa. Tidak ada perubahan kode | selesai (panduan) | 2026-10-30 23:06 — Panduan aktivasi Alfa & pg_cron |
+| I-075 | 2026-10-30 23:23 | "sudah saya aktifkan alfa otomatis di setting" | Mencatat Alfa otomatis sudah diaktifkan lewat **Pengaturan Presensi**; cron `presisi-alfa-otomatis` sudah aktif dan sukses. Menyusun langkah verifikasi pembentukan Alfa setelah jam kerja serta memperbarui Status Terkini/backlog. Tidak ada perubahan kode | selesai (dokumen); belum di-commit | 2026-10-30 23:23 — Alfa otomatis diaktifkan |
+| I-076 | 2026-10-30 23:28 | "oke apa yang perlu saya lakukan, hari ini tgl 30 dan saya set alfa otomatis tanggal 1, pg cron belum saya jalankan" | Memberikan checklist: `alfa_mulai` **1 November 2026**; tidak perlu Alfa manual sebelum tanggal itu; pastikan ekstensi `pg_cron` aktif dan `jadwal_alfa.sql` dijalankan **sebelum 1 November** pada project Supabase yang benar. Tidak ada perubahan kode | selesai (panduan) | 2026-10-30 23:23 — Alfa otomatis diaktifkan |
+| I-077 | 2026-10-30 23:30 | "[Image 1]" (screenshot Database Extensions) | Mengonfirmasi ekstensi **pg_cron 1.6.4** sudah aktif di project ABSENSI PEGAWAI; job `presisi-alfa-otomatis` sudah terdaftar dan aktif. Tidak ada perubahan kode | selesai (verifikasi) | 2026-10-30 23:30 — pg_cron terkonfirmasi aktif |
+| I-078 | 2026-10-30 23:33 | "tanggal 1 november itu hari senin" | Mengoreksi panduan: 1 November dianggap hari kerja (Senin), sehingga Alfa reguler pertama dapat muncul pada 1 November setelah jam kerja berakhir, bukan ditunda ke 2 November. Alfa mengikuti `alfa_mulai` dan jam kerja, bukan asumsi nama hari. Tidak ada perubahan kode | selesai (dokumen); belum di-commit | 2026-10-30 23:33 — Koreksi hari 1 November |
+| I-079 | 2026-10-30 23:45 | "commit dan push, kemudian b-8 dan b-9, baru mulai kerjakan yang lain" | Commit & push pembaruan dokumen audit I-071–I-078, lalu mengerjakan **B-8** (uji dasar/lint) dan **B-9** (`.env.example`), baru melanjutkan pekerjaan lain | berjalan | — |
 
 ---
 
@@ -233,16 +242,18 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   2026-10-27 10:36. Koordinat terbaru
   `-0.23805651650343132, 117.41442516465149` sudah di-commit dan migrasi 21
   **sudah dijalankan di Supabase** (klaim user 2026-10-27 10:39). Commit terbaru
-  `1fec429` (pengaman formula CSV & `window.opener`, upgrade Vite 7/React Router 7,
-  CSP produksi + `Referrer-Policy`) di-commit dan di-push 2026-10-30; sebelumnya
-  `6a7430e` (jendela absen baru, jam kerja unit, migrasi 25–27) dan `a9a59ac`
+  `260f3c2` (sinkronisasi dokumen audit) dan `1fec429` (pengaman formula CSV &
+  `window.opener`, upgrade Vite 7/React Router 7, CSP produksi +
+  `Referrer-Policy`) di-commit dan di-push 2026-10-30; sebelumnya `6a7430e`
+  (jendela absen baru, jam kerja unit, migrasi 25–27) dan `a9a59ac`
   (Dinas Luar lintas unit + migrasi 23, radius 50 meter + migrasi 24,
   perapian UI mobile dashboard & riwayat).
 - **Kepala unit (2026-10-28, sudah di-commit & di-push):** tabel `kepala_unit`
   menjadi sumber kebenaran penugasan (satu unit satu kepala, satu kepala boleh
   banyak unit). Kode, migrasi **22**, `verifikasi_22.sql`, `schema.sql`, dan
   `cleanup_data_uji.sql` sudah masuk repo; **migrasi 22 sudah dijalankan di
-  Supabase** (laporan user 2026-10-28); `verifikasi_22.sql` belum dikonfirmasi.
+  Supabase** (laporan user 2026-10-28); `verifikasi_22.sql` lulus (laporan user
+  2026-10-30).
   Kepala ASN memakai metadata `jenis_akun = kepala_asn` dan tidak dicatat di
   `public.pegawai`.
 - **Penanda tangan laporan (2026-10-28, sudah di-commit & di-push):** seluruh
@@ -255,7 +266,7 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 - **Dinas Luar lintas unit (2026-10-28, sudah di-commit & di-push):** migrasi
   **23**, `verifikasi_23.sql`, dan sinkronisasi `schema.sql` sudah dibuat; migrasi
   23 **sudah dijalankan** di Supabase (laporan user 2026-10-28), `verifikasi_23.sql`
-  belum dikonfirmasi. Kepala unit dapat mencatat Dinas Luar untuk
+  lulus (laporan user 2026-10-30). Kepala unit dapat mencatat Dinas Luar untuk
   pegawai lintas unit; Sakit/Cuti tetap per unit. Pembuat grup dapat membaca
   seluruh grup dan dokumennya hanya selama masih menjabat kepala unit. FK
   `izin_cuti.dibuat_oleh`/`dibatalkan_oleh` kini mengacu ke `auth.users` agar
@@ -272,7 +283,7 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   `src/services/attendanceService.js`, serta migrasi **26** +
   `verifikasi_26.sql`. Migrasi **25** sudah dijalankan tetapi aturannya
   digantikan migrasi 26; **migrasi 26 sudah dijalankan** di Supabase (laporan
-  user 2026-10-29), `verifikasi_26.sql` belum dikonfirmasi.
+  user 2026-10-29), `verifikasi_26.sql` lulus (laporan user 2026-10-30).
   `verifikasi_17.sql` dan `verifikasi_25.sql` kini historis.
 - **Jam kerja reguler per unit (2026-10-29, sudah dijalankan):** tabel `jam_kerja_unit`
   menyimpan override per unit per hari dengan fallback ke `jam_kerja_reguler`
@@ -285,7 +296,7 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   `is_superadmin()`. Kode ada di migrasi **27** + `verifikasi_27.sql`,
   `src/pages/admin/JamKerjaUnit.jsx`, dan `src/services/jamKerjaService.js`.
   **Migrasi 27 sudah dijalankan** di Supabase (laporan user 2026-10-29);
-  `verifikasi_27.sql` belum dikonfirmasi. Tampilan jam Admisi di akun pegawai
+  `verifikasi_27.sql` lulus (laporan user 2026-10-30). Tampilan jam Admisi di akun pegawai
   sudah diuji dan berubah (laporan user 2026-10-29).
 - **Radius absensi (2026-10-28, sudah di-commit & di-push):** radius geofencing
   kini **50 meter**
@@ -293,7 +304,7 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   ulang `submit_presensi`, plus `schema.sql`). `verifikasi_24.sql` memeriksa
   radius 50 m dipakai dan radius 100 m hilang. Migrasi 24 **sudah dijalankan**
   di Supabase (laporan user 2026-10-28), sehingga server memakai radius 50 m;
-  `verifikasi_24.sql` belum dikonfirmasi.
+  `verifikasi_24.sql` lulus (laporan user 2026-10-30).
 - **Deploy:** GitHub Pages lewat `.github/workflows/deploy.yml`; URL live
   `https://presisiami.my.id/` (custom domain, DNS di Rumahweb); base path `/`;
   `public/CNAME` berisi `presisiami.my.id`; `www` redirect ke domain utama;
@@ -307,5 +318,13 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   GitHub Pages tidak mendukung header HTTP kustom. Node CI **22**; secrets
   `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`.
   Setiap push ke `main` otomatis build + deploy.
+- **Go-live (2026-10-30):** user melaporkan seluruh `supabase/verifikasi_*.sql`
+  sudah dijalankan, uji manual aman, go-live sudah masuk rencana, dan
+  `supabase/cleanup_data_uji.sql` **sudah dijalankan** (transaksi dibersihkan,
+  92 pegawai/grup/master shift dipertahankan), dan **data operasional sudah
+  dilengkapi** (jadwal dinas serta pemetaan pegawai, laporan 2026-10-30 23:04).
+  Tidak ada perubahan kode. **Alfa otomatis sudah diaktifkan** (laporan user
+  2026-10-30 23:23) dan cron `presisi-alfa-otomatis` aktif; sisa langkah:
+  verifikasi pembentukan Alfa pertama dan pantau pasca go-live.
 - Timezone aplikasi: `Asia/Makassar` (WITA, UTC+8).
 - `dist/` dan `.env` sudah diabaikan Git.
