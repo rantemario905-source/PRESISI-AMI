@@ -372,10 +372,10 @@ export async function bacaTemplateJadwal(file, konteks) {
     try {
       rows = await bacaXlsx(file)
     } catch (err) {
+      if (String(err?.message ?? '').includes('sheet')) throw err
       throw new Error(
-        err?.message?.includes('sheet')
-          ? err.message
-          : 'File Excel tidak dapat dibaca. Pastikan file tidak rusak dan berformat .xlsx.',
+        'File Excel tidak dapat dibaca. Pastikan file tidak rusak dan berformat .xlsx.',
+        { cause: err },
       )
     }
   } else {

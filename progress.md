@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-30 23:23 WITA (Alfa otomatis diaktifkan; cron aktif) |
+| Terakhir diperbarui | 2026-10-30 23:59 WITA (cek bug pra-commit B-8/B-9) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -118,12 +118,17 @@ script inline diblokir dan aplikasi tetap render. **Enforce HTTPS GitHub Pages
 sudah aktif dan terverifikasi** (HTTP apex/`www` 301 ke HTTPS). Step 2–4 sudah
 **di-commit `1fec429` dan di-push** ke `origin/main` 2026-10-30; deploy GitHub
 Actions berjalan otomatis. Cloudflare (header HTTP penuh) belum dipakai.
+Pekerjaan terbaru (2026-10-30 23:45): **B-8** menambahkan **ESLint** dan **24 uji
+dasar** memakai `node:test` (CSV, format, geofencing, izin, jadwal absen), serta
+menjalankan lint/test sebelum build di CI; **B-9** mengganti nilai asli
+`.env.example` dengan placeholder. Perubahan ini **belum di-commit** dan menunggu
+perintah user.
 
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–27 | `src/`, `supabase/migrations/01–27` |
-| Commit Git | **Fitur terakhir** — `1fec429` (pengaman CSV, Vite 7/React Router 7, CSP produksi); dokumen `260f3c2`; sebelumnya `6a7430e` | `git log` |
-| Perubahan lokal | **Hanya dokumen audit** (`AGENTS.md`, `progress.md`) belum di-commit; kode bersih | `git status` |
+| Commit Git | **Dokumen audit** — `5b9ac5e`; **fitur terakhir** — `1fec429` (pengaman CSV, Vite 7/React Router 7, CSP produksi); sebelumnya `6a7430e` | `git log` |
+| Perubahan lokal | **B-8/B-9 belum di-commit** — ESLint, 24 uji `node:test`, CI lint/test, `.env.example`, perbaikan kecil `format.js`/`templateJadwal.js`; dokumen audit ikut diperbarui | `git status` |
 | Migrasi DB 01–18 | **Sudah dijalankan** — verifikasi 09–18 lulus | laporan user 2026-10-30 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
@@ -162,7 +167,7 @@ Actions berjalan otomatis. Cloudflare (header HTTP penuh) belum dipakai.
 | Penanda tangan laporan | **Ada di kode** — Kasubbag Tata Usaha, Suriami, SKM., M.Kes, NIP. 197312302007012011 untuk semua pegawai | `src/config/constants.js`, `BlokTandaTangan.jsx` |
 | Menu kepala ASN | **Ada di kode** — “Kembali ke Absensi” (sidebar) dan tab Absensi (navigasi bawah HP) disembunyikan bila `sumber_akun = kepala_asn` | `PortalKepalaLayout.jsx`, `SidebarKepala.jsx` |
 | Dinas Luar lintas unit | **Ada di kode** — kepala unit dapat memilih pegawai lintas unit untuk Dinas Luar; Sakit/Cuti tetap per unit; pembuat grup membaca grup + dokumennya selama menjabat; akses dicabut otomatis saat jabatan berakhir; kepala ASN dapat mencatat (FK ke `auth.users`) | migrasi 23, `PengajuanIzin.jsx`, `leaveService.js`, `pegawaiService.js`, `verifikasi_23.sql` |
-| Lint/unit test | Tidak tersedia di `package.json` | `package.json` |
+| Lint/unit test | **Tersedia** — ESLint (`npm run lint`) dan 24 uji `node:test` (`npm test`); CI menjalankan keduanya sebelum build; belum di-commit | `eslint.config.js`, `tests/`, `package.json`, `.github/workflows/deploy.yml` |
 | Alfa otomatis | **Aktif mulai 1 November 2026** — diaktifkan lewat Pengaturan Presensi; **pg_cron 1.6.4 aktif** dan job `presisi-alfa-otomatis` terdaftar/aktif tiap 15 menit; menunggu pembentukan Alfa pertama | migrasi 12/27, `PengaturanPresensi.jsx`, `supabase/jadwal_alfa.sql`, laporan user 2026-10-30 |
 | Deploy GitHub Pages | **Aktif** — `https://presisiami.my.id/` live dengan base `/`; `www` redirect ke domain utama; Enforce HTTPS aktif, HTTP apex/`www` **301** ke HTTPS (diverifikasi 2026-10-30) | workflow run `40439173719` sukses |
 | Supabase Auth | **Diklaim sudah diperbarui** ke domain baru (Site URL + Redirect URLs) | laporan user 2026-10-27 10:39 |
@@ -308,6 +313,34 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-30 23:45 WITA — B-8 lint/uji dasar & B-9 `.env.example`
+
+- **Perubahan:** menambahkan **ESLint 10** (flat config, plugin React Hooks dan
+  React Refresh), script `lint`/`test`/`test:watch`, serta **24 uji dasar**
+  memakai `node:test` untuk `csv.js` (`amankanSelCsv`), `format.js`,
+  `geofencing.js`, `izin.js`, dan `jadwalAbsen.js`. CI deploy kini menjalankan
+  `npm run lint` dan `npm test` sebelum build. `.env.example` diganti memakai
+  placeholder dan tidak lagi memuat URL/anon key project asli.
+- **Perbaikan bug:** `format.js` menolak periode bulan di luar 01–12 (sebelumnya
+  `2026-13` bergulir ke Januari 2027); `templateJadwal.js` mempertahankan
+  `cause` saat membungkus error file Excel dan tidak lagi memanggil
+  `includes()` pada `message` yang bukan string.
+- **Cek bug pra-commit (23:59):** ditemukan `namaBulan()` memakai zona waktu
+  perangkat sehingga `2026-10` tampil “September 2026” pada perangkat dengan
+  zona negatif; diperbaiki dengan `timeZone: Asia/Makassar` dan dikunci lewat
+  `tests/formatZonaWaktu.test.js` (child process `TZ=America/Los_Angeles`).
+- **File:** `package.json`, `package-lock.json`, `eslint.config.js`,
+  `tests/*.test.js`, `.env.example`, `.github/workflows/deploy.yml`,
+  `src/utils/format.js`, `src/utils/templateJadwal.js`, `AGENTS.md`,
+  `progress.md`.
+- **Verifikasi:** `npm run lint` lulus tanpa temuan; `npm test` **24/24 lulus**
+  pada Node 24 dan Node 22.13; `npm run build` lulus (13,09 dtk Node 24; 14,66 dtk
+  Node 22.13); `npm ci --dry-run` sesuai; `npm audit` 0 kerentanan.
+- **Catatan/risiko:** anon key lama masih ada di riwayat Git (anon key memang
+  dipakai klien; service_role tidak pernah disimpan). Perubahan **belum
+  di-commit** dan menunggu perintah user. CI akan memblokir deploy bila lint
+  error atau uji gagal.
 
 ### 2026-10-30 23:30 WITA — pg_cron terkonfirmasi aktif
 
@@ -1532,8 +1565,8 @@ dan `verifikasi_18` untuk hapus grup kosong.
 | B-5 | ~~README menyebut Fase 1–7 saja~~ | — | **Selesai:** diperbarui ke Fase 1–8 + impor |
 | B-6 | ~~`verifikasi_10.sql` tidak ada di diagram README~~ | — | **Selesai:** ditambahkan ke struktur |
 | B-7 | ~~Alfa otomatis belum tentu nonaktif di DB~~ | - | **Selesai:** diaktifkan user 2026-10-30; pantau pembentukan Alfa |
-| B-8 | Tidak ada lint/unit test | Regresi hanya tertangkap manual | Pertimbangkan uji dasar bila diminta |
-| B-9 | Tidak ada `.env.example` yang diperbarui? — ada, tapi nilainya harus dicek | Setup developer baru | Pastikan sesuai variabel terpakai |
+| B-8 | ~~Tidak ada lint/unit test~~ | - | **Selesai:** ESLint + 24 uji `node:test`; lint/test/build lulus 2026-10-30 (belum di-commit) |
+| B-9 | ~~`.env.example` perlu dicek~~ | - | **Selesai:** nilai asli diganti placeholder 2026-10-30 (belum di-commit); anon key lama masih ada di riwayat Git |
 | B-10 | ~~Deploy GitHub Pages belum aktif~~ | — | **Selesai:** live 2026-10-25 13:19 |
 | B-11 | ~~Base path `/PRESISI-AMI/` terikat nama repo~~ | - | **Selesai:** pindah ke custom domain `presisiami.my.id`, `VITE_BASE_PATH` diset `/` (2026-10-27 10:31) |
 

@@ -45,6 +45,8 @@ Jalankan:
 
 ```bash
 npm run dev      # development  → http://localhost:5173
+npm run lint     # ESLint seluruh repo
+npm test         # uji dasar node:test
 npm run build    # build produksi
 npm run preview  # pratinjau hasil build
 ```

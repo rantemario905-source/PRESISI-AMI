@@ -31,12 +31,14 @@ Aplikasi absensi pegawai non-ASN RSUD Aji Muhammad Idris.
 ```bash
 npm install          # pasang dependensi
 npm run dev          # development → http://localhost:5173
+npm run lint         # ESLint seluruh repo
+npm test             # uji dasar node:test
 npm run build        # build produksi (verifikasi utama)
 npm run preview      # pratinjau hasil build
 ```
 
-- **Tidak ada** `lint` maupun `test` di `package.json`. Jangan mengarang perintah.
-- Verifikasi kode = `npm run build`.
+- Verifikasi kode = `npm run lint`, `npm test`, lalu `npm run build`.
+- Workflow deploy menjalankan lint dan test sebelum build; kegagalan memblokir deploy.
 - Verifikasi DB = jalankan `supabase/verifikasi_*.sql` di Supabase SQL Editor dan
   pastikan semua hasil `true`.
 - Skrip bantu (butuh Secret key, jangan pernah di-commit):
@@ -213,7 +215,8 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-076 | 2026-10-30 23:28 | "oke apa yang perlu saya lakukan, hari ini tgl 30 dan saya set alfa otomatis tanggal 1, pg cron belum saya jalankan" | Memberikan checklist: `alfa_mulai` **1 November 2026**; tidak perlu Alfa manual sebelum tanggal itu; pastikan ekstensi `pg_cron` aktif dan `jadwal_alfa.sql` dijalankan **sebelum 1 November** pada project Supabase yang benar. Tidak ada perubahan kode | selesai (panduan) | 2026-10-30 23:23 — Alfa otomatis diaktifkan |
 | I-077 | 2026-10-30 23:30 | "[Image 1]" (screenshot Database Extensions) | Mengonfirmasi ekstensi **pg_cron 1.6.4** sudah aktif di project ABSENSI PEGAWAI; job `presisi-alfa-otomatis` sudah terdaftar dan aktif. Tidak ada perubahan kode | selesai (verifikasi) | 2026-10-30 23:30 — pg_cron terkonfirmasi aktif |
 | I-078 | 2026-10-30 23:33 | "tanggal 1 november itu hari senin" | Mengoreksi panduan: 1 November dianggap hari kerja (Senin), sehingga Alfa reguler pertama dapat muncul pada 1 November setelah jam kerja berakhir, bukan ditunda ke 2 November. Alfa mengikuti `alfa_mulai` dan jam kerja, bukan asumsi nama hari. Tidak ada perubahan kode | selesai (dokumen); belum di-commit | 2026-10-30 23:33 — Koreksi hari 1 November |
-| I-079 | 2026-10-30 23:45 | "commit dan push, kemudian b-8 dan b-9, baru mulai kerjakan yang lain" | Commit & push pembaruan dokumen audit I-071–I-078, lalu mengerjakan **B-8** (uji dasar/lint) dan **B-9** (`.env.example`), baru melanjutkan pekerjaan lain | berjalan | — |
+| I-079 | 2026-10-30 23:45 | "commit dan push, kemudian b-8 dan b-9, baru mulai kerjakan yang lain" | Commit & push pembaruan dokumen audit I-071–I-078 (`5b9ac5e`), lalu mengerjakan **B-8** (ESLint + 24 uji `node:test` + CI lint/test) dan **B-9** (`.env.example` placeholder); `npm run lint`, `npm test`, dan `npm run build` lulus; perubahan B-8/B-9 belum di-commit | selesai (menunggu perintah commit) | 2026-10-30 23:59 — B-8 lint/uji dasar & B-9 `.env.example` |
+| I-080 | 2026-10-30 23:59 | "sebelum commit cek indikasi bug dulu" | Audit pra-commit B-8/B-9: menemukan bug zona waktu pada `namaBulan()` (zona perangkat negatif membuat Oktober tampil September), memperbaikinya dengan `timeZone: Asia/Makassar` + uji regresi child process `TZ=America/Los_Angeles`, dan memperkuat penanganan `message` non-string di `templateJadwal.js`; `npm run lint` bersih, `npm test` 24/24 (Node 24 & 22.13), `npm run build` lulus; belum di-commit | selesai (menunggu perintah commit) | 2026-10-30 23:59 — Cek bug pra-commit B-8/B-9 |
 
 ---
 
@@ -242,8 +245,9 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   2026-10-27 10:36. Koordinat terbaru
   `-0.23805651650343132, 117.41442516465149` sudah di-commit dan migrasi 21
   **sudah dijalankan di Supabase** (klaim user 2026-10-27 10:39). Commit terbaru
-  `260f3c2` (sinkronisasi dokumen audit) dan `1fec429` (pengaman formula CSV &
-  `window.opener`, upgrade Vite 7/React Router 7, CSP produksi +
+  `5b9ac5e` (sinkronisasi dokumen audit I-071–I-078) di-push 2026-10-30;
+  sebelumnya `260f3c2` (sinkronisasi dokumen audit) dan `1fec429` (pengaman
+  formula CSV & `window.opener`, upgrade Vite 7/React Router 7, CSP produksi +
   `Referrer-Policy`) di-commit dan di-push 2026-10-30; sebelumnya `6a7430e`
   (jendela absen baru, jam kerja unit, migrasi 25–27) dan `a9a59ac`
   (Dinas Luar lintas unit + migrasi 23, radius 50 meter + migrasi 24,

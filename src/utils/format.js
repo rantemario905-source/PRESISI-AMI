@@ -143,8 +143,11 @@ export function daftarTanggal(mulai, selesai) {
 
 /** Tanggal akhir bulan dari periode "YYYY-MM" */
 export function akhirBulan(periode) {
-  if (!/^\d{4}-\d{2}$/.test(String(periode ?? ''))) return ''
-  const [tahun, bulan] = periode.split('-').map(Number)
+  const cocok = /^(\d{4})-(\d{2})$/.exec(String(periode ?? ''))
+  if (!cocok) return ''
+  const tahun = Number(cocok[1])
+  const bulan = Number(cocok[2])
+  if (bulan < 1 || bulan > 12) return ''
   return new Date(Date.UTC(tahun, bulan, 0)).toISOString().slice(0, 10)
 }
 
@@ -155,9 +158,13 @@ export function periodeBulanIni() {
 
 /** "Oktober 2026" dari periode "2026-10" */
 export function namaBulan(periode) {
-  if (!/^\d{4}-\d{2}$/.test(String(periode ?? ''))) return '—'
-  const [tahun, bulan] = periode.split('-').map(Number)
+  const cocok = /^(\d{4})-(\d{2})$/.exec(String(periode ?? ''))
+  if (!cocok) return '—'
+  const tahun = Number(cocok[1])
+  const bulan = Number(cocok[2])
+  if (bulan < 1 || bulan > 12) return '—'
   return new Intl.DateTimeFormat('id-ID', {
+    timeZone: ZONA_WAKTU,
     month: 'long',
     year: 'numeric',
   }).format(new Date(Date.UTC(tahun, bulan - 1, 1)))
