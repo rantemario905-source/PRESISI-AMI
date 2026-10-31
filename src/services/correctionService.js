@@ -4,6 +4,7 @@
  * ==========================================================================
  */
 import { supabase } from '../utils/supabaseClient.js'
+import { ambilSemuaHalaman } from '../utils/paginasi.js'
 
 /**
  * Presensi dalam rentang tanggal (inklusif).
@@ -15,19 +16,22 @@ export async function ambilPresensiPeriode({ mulai, selesai, unit = 'semua' }) {
       ? 'id, user_id, tanggal, jam_masuk, jam_pulang, status_kehadiran, menit_terlambat, jarak_masuk, jarak_pulang, dikoreksi_oleh, alasan_koreksi, pegawai:pegawai!presensi_user_id_fkey ( nama, unit_kerja )'
       : 'id, user_id, tanggal, jam_masuk, jam_pulang, status_kehadiran, menit_terlambat, jarak_masuk, jarak_pulang, dikoreksi_oleh, alasan_koreksi, pegawai:pegawai!presensi_user_id_fkey!inner ( nama, unit_kerja )'
 
-  let kueri = supabase
-    .from('presensi')
-    .select(kolom)
-    .gte('tanggal', mulai)
-    .lte('tanggal', selesai)
-    .order('tanggal', { ascending: false })
-    .order('jam_masuk', { ascending: false, nullsFirst: false })
+  const buatKueri = () => {
+    let kueri = supabase
+      .from('presensi')
+      .select(kolom)
+      .gte('tanggal', mulai)
+      .lte('tanggal', selesai)
 
-  if (unit !== 'semua') kueri = kueri.eq('pegawai.unit_kerja', unit)
+    if (unit !== 'semua') kueri = kueri.eq('pegawai.unit_kerja', unit)
 
-  const { data, error } = await kueri
-  if (error) throw error
-  return data ?? []
+    return kueri
+      .order('tanggal', { ascending: false })
+      .order('jam_masuk', { ascending: false, nullsFirst: false })
+      .order('id', { ascending: true })
+  }
+
+  return ambilSemuaHalaman(buatKueri)
 }
 
 /**

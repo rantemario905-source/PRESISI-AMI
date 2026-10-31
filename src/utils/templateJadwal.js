@@ -464,8 +464,16 @@ export function parseTemplateRows(rows, konteks) {
   const petaHari = new Map()
   for (let i = 0; i < header.length; i += 1) {
     if (i === idxUserId || i === idxNama || i === idxUnit) continue
-    const hari = angkaHari(header[i])
-    if (!hari) continue
+    const sel = header[i]
+    if (!sel) continue
+    const hari = angkaHari(sel)
+    if (!hari) {
+      errors.push({
+        baris: idxHeader + 1,
+        pesan: `Kolom "${sel}" tidak dikenali. Gunakan template yang diunduh dari aplikasi.`,
+      })
+      continue
+    }
     if (petaHari.has(hari)) {
       errors.push({
         baris: idxHeader + 1,

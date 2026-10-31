@@ -15,6 +15,7 @@
 import { supabase } from '../utils/supabaseClient.js'
 import { kelompokkanIzin, jenisUntukKategori } from '../utils/izin.js'
 import { MAKS_UKURAN_DOKUMEN, buatIdGrup } from '../utils/dokumenIzin.js'
+import { ambilSemuaHalaman } from '../utils/paginasi.js'
 
 const BUCKET = 'dokumen-izin'
 const KOLOM_IZIN =
@@ -30,18 +31,20 @@ const KOLOM_IZIN =
  * @returns {Promise<Array<object>>}
  */
 export async function ambilDaftarIzin({ kategori = 'semua', status = 'semua' } = {}) {
-  let kueri = supabase
-    .from('izin_cuti')
-    .select(KOLOM_IZIN)
-    .order('dibuat_pada', { ascending: false })
+  const buatKueri = () => {
+    let kueri = supabase.from('izin_cuti').select(KOLOM_IZIN)
 
-  const jenis = jenisUntukKategori(kategori)
-  if (kategori !== 'semua') kueri = kueri.in('jenis', jenis)
-  if (status !== 'semua') kueri = kueri.eq('status', status)
+    const jenis = jenisUntukKategori(kategori)
+    if (kategori !== 'semua') kueri = kueri.in('jenis', jenis)
+    if (status !== 'semua') kueri = kueri.eq('status', status)
 
-  const { data, error } = await kueri
-  if (error) throw error
-  return kelompokkanIzin(data ?? [])
+    return kueri
+      .order('dibuat_pada', { ascending: false })
+      .order('id', { ascending: true })
+  }
+
+  const data = await ambilSemuaHalaman(buatKueri)
+  return kelompokkanIzin(data)
 }
 
 /**

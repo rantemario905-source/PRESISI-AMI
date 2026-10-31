@@ -5,6 +5,7 @@
  */
 import { supabase } from '../utils/supabaseClient.js'
 import { daftarTanggal } from '../utils/format.js'
+import { ambilSemuaHalaman } from '../utils/paginasi.js'
 
 /* ------------------------------- Master -------------------------------- */
 
@@ -36,19 +37,26 @@ export async function hapusMasterShift(id) {
 /* ------------------------------- Jadwal -------------------------------- */
 
 /** Jadwal shift pada rentang tanggal (inklusif), lengkap dengan nama shift & pegawai */
-export async function ambilJadwalRentang(mulai, selesai) {
-  const { data, error } = await supabase
-    .from('jadwal_shift')
-    .select(
-      'id, user_id, tanggal, shift_id, shift_master ( id, nama_shift, jam_mulai, jam_selesai ), pegawai:pegawai!jadwal_shift_user_id_fkey ( nama, unit_kerja )',
-    )
-    .gte('tanggal', mulai)
-    .lte('tanggal', selesai)
-    .order('tanggal', { ascending: false })
-    .order('nama', { referencedTable: 'pegawai', ascending: true })
+export async function ambilJadwalRentang(mulai, selesai, { userIds } = {}) {
+  if (Array.isArray(userIds) && userIds.length === 0) return []
 
-  if (error) throw error
-  return data ?? []
+  const buatKueri = () => {
+    let kueri = supabase
+      .from('jadwal_shift')
+      .select(
+        'id, user_id, tanggal, shift_id, shift_master ( id, nama_shift, jam_mulai, jam_selesai ), pegawai:pegawai!jadwal_shift_user_id_fkey ( nama, unit_kerja )',
+      )
+      .gte('tanggal', mulai)
+      .lte('tanggal', selesai)
+
+    if (userIds?.length) kueri = kueri.in('user_id', userIds)
+
+    return kueri
+      .order('tanggal', { ascending: true })
+      .order('user_id', { ascending: true })
+  }
+
+  return ambilSemuaHalaman(buatKueri)
 }
 
 /**

@@ -169,8 +169,28 @@ export default function JadwalShift({ mode = 'admin' }) {
     }
   }, [modeKepala, unitKepala])
 
+  const pegawaiGrup = useMemo(
+    () =>
+      pegawai
+        .filter(
+          (p) =>
+            p.unit_kerja === grupNama && (p.pola_kerja ?? 'shift') === 'shift',
+        )
+        .sort((a, b) => a.nama.localeCompare(b.nama, 'id')),
+    [pegawai, grupNama],
+  )
+
+  const idPegawaiGrup = useMemo(
+    () => pegawaiGrup.map((p) => p.id),
+    [pegawaiGrup],
+  )
+
   const muatJadwal = useCallback(async () => {
-    if (!periodeValid(periode)) {
+    if (
+      !periodeValid(periode) ||
+      !grupNama ||
+      idPegawaiGrup.length === 0
+    ) {
       setJadwal([])
       setLiburMap(new Map())
       setMemuatJadwal(false)
@@ -182,7 +202,9 @@ export default function JadwalShift({ mode = 'admin' }) {
     try {
       const akhir = akhirBulan(periode)
       const [dataJadwal, dataLibur] = await Promise.all([
-        ambilJadwalRentang(`${periode}-01`, akhir),
+        ambilJadwalRentang(`${periode}-01`, akhir, {
+          userIds: idPegawaiGrup,
+        }),
         ambilHariLiburRentang(`${periode}-01`, akhir),
       ])
       setJadwal(dataJadwal)
@@ -192,7 +214,7 @@ export default function JadwalShift({ mode = 'admin' }) {
     } finally {
       setMemuatJadwal(false)
     }
-  }, [periode])
+  }, [periode, grupNama, idPegawaiGrup])
 
   useEffect(() => {
     muatAwal()
@@ -223,17 +245,6 @@ export default function JadwalShift({ mode = 'admin' }) {
       setGrupNama(kandidat?.nama ?? '')
     }
   }, [grupTersaring, grupNama, pegawai, modeKepala, unitKepala])
-
-  const pegawaiGrup = useMemo(
-    () =>
-      pegawai
-        .filter(
-          (p) =>
-            p.unit_kerja === grupNama && (p.pola_kerja ?? 'shift') === 'shift',
-        )
-        .sort((a, b) => a.nama.localeCompare(b.nama, 'id')),
-    [pegawai, grupNama],
-  )
 
   useEffect(() => {
     if (!pegawaiGrup.some((p) => p.id === pegawaiMobileId)) {
@@ -422,6 +433,7 @@ export default function JadwalShift({ mode = 'admin' }) {
       const dataSumber = await ambilJadwalRentang(
         `${sumber}-01`,
         akhirBulan(sumber),
+        { userIds: idPegawaiGrup },
       )
       const idPegawai = new Set(pegawaiGrup.map((p) => p.id))
       const peta = new Map()
@@ -673,7 +685,9 @@ export default function JadwalShift({ mode = 'admin' }) {
       setPesan(
         `Impor jadwal selesai: ${ringkasan?.dibuat ?? 0} dibuat, ${
           ringkasan?.diperbarui ?? 0
-        } diubah, ${ringkasan?.dihapus ?? 0} dihapus.`,
+        } diubah, ${ringkasan?.dihapus ?? 0} dihapus, ${
+          ringkasan?.dilewati ?? 0
+        } dilewati.`,
       )
       await muatJadwal()
     } catch (err) {
