@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-31 12:53 WITA (uji manual paginasi jadwal lulus) |
+| Terakhir diperbarui | 2026-10-31 13:20 WITA (commit & push paginasi data) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -133,12 +133,14 @@ header tak dikenal, dan ringkasan impor menampilkan `dilewati`. Tidak ada
 migrasi DB dan tidak perlu impor ulang; `npm run lint` bersih, `npm test`
 **30/30**, `npm run build` lulus **15,01 dtk** (ulang 10,67 dtk). Uji manual
 user 2026-10-31 12:53: seluruh tanggal termasuk 1–2 November sudah muncul.
+Perbaikan ini sudah **di-commit `22c2bab`** dan di-push ke `origin/main` pada
+2026-10-31 13:20.
 
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–27 | `src/`, `supabase/migrations/01–27` |
-| Commit Git | **B-8/B-9** — `42cb317` (lint, 24 uji `node:test`, CI lint/test, `.env.example`, perbaikan zona waktu); dokumen audit `5b9ac5e`; **fitur sebelumnya** — `1fec429` | `git log` |
-| Perubahan lokal | **Ada perubahan belum di-commit** — paginasi data, filter unit jadwal, penguatan parser template, uji baru, dan dokumen audit I-082–I-084 | `git status` |
+| Commit Git | **Paginasi data** — `22c2bab` (jadwal 1–2 November, rekap/laporan, koreksi, izin, uji template); sebelumnya **B-8/B-9** — `42cb317`; dokumen audit `5b9ac5e`; **fitur sebelumnya** — `1fec429` | `git log` |
+| Perubahan lokal | **Bersih setelah commit `22c2bab` + sinkronisasi dokumen audit** | `git status` |
 | Migrasi DB 01–18 | **Sudah dijalankan** — verifikasi 09–18 lulus | laporan user 2026-10-30 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
@@ -154,7 +156,7 @@ user 2026-10-31 12:53: seluruh tanggal termasuk 1–2 November sudah muncul.
 | Koordinat RSUD AMI | **Ada di kode** — `-0.23805651650343132, 117.41442516465149` di klien dan schema | `src/config/constants.js`, `supabase/schema.sql`, migrasi 21 |
 | Radius absensi | **Aktif 50 meter** — klien (`MAX_RADIUS_METERS`) dan server (migrasi 24 sudah dijalankan) | `src/config/constants.js`, `supabase/migrations/24_radius_50_meter.sql` |
 | Skrip `supabase/verifikasi_*.sql` | **Verifikasi 09–27 lulus** — dijalankan user, semua hasil `true` (laporan 2026-10-30) | laporan user 2026-10-30 |
-| Build produksi | **Lulus** — base `/` **15,01 dtk** (ulang 10,67 dtk, 2026-10-31; 288 modul); `dist/index.html` 1,29 kB | `npm run build` |
+| Build produksi | **Lulus** — base `/` **15,01 dtk** (ulang 10,67 dtk; **13,18 dtk** sebelum commit 2026-10-31; 288 modul); `dist/index.html` 1,29 kB | `npm run build` |
 | Dependensi frontend | **Diperbarui & di-commit** — Vite 7.3.7, `@vitejs/plugin-react` 5.2.0, React Router 7.18.5; Node CI 22; lockfile sinkron; `npm audit` 0 kerentanan | `package.json`, `package-lock.json`, `.github/workflows/deploy.yml` |
 | Header keamanan (CSP) | **Ada di kode & di-commit** — CSP produksi via `<meta>`: `script-src 'self'`, `connect-src` self + `*.supabase.co`, `frame-src 'none'`, `form-action 'self'`, `object-src 'none'`, `base-uri 'self'`; meta referrer; hanya saat build. Uji headless: script inline diblokir, halaman render | `vite.config.js`, `index.html` |
 | Batas GitHub Pages | **Enforce HTTPS aktif & terverifikasi** (2026-10-30 10:06 WITA): HTTP apex dan `www` **301** ke HTTPS/apex. Namun HSTS, `X-Frame-Options`/`frame-ancestors`, `X-Content-Type-Options`, dan `Permissions-Policy` tetap belum aktif karena memerlukan header HTTP; Cloudflare/proxy opsional | `curl -I` HTTP/HTTPS apex & `www`, 2026-10-30 |
@@ -177,8 +179,8 @@ user 2026-10-31 12:53: seluruh tanggal termasuk 1–2 November sudah muncul.
 | Penanda tangan laporan | **Ada di kode** — Kasubbag Tata Usaha, Suriami, SKM., M.Kes, NIP. 197312302007012011 untuk semua pegawai | `src/config/constants.js`, `BlokTandaTangan.jsx` |
 | Menu kepala ASN | **Ada di kode** — “Kembali ke Absensi” (sidebar) dan tab Absensi (navigasi bawah HP) disembunyikan bila `sumber_akun = kepala_asn` | `PortalKepalaLayout.jsx`, `SidebarKepala.jsx` |
 | Dinas Luar lintas unit | **Ada di kode** — kepala unit dapat memilih pegawai lintas unit untuk Dinas Luar; Sakit/Cuti tetap per unit; pembuat grup membaca grup + dokumennya selama menjabat; akses dicabut otomatis saat jabatan berakhir; kepala ASN dapat mencatat (FK ke `auth.users`) | migrasi 23, `PengajuanIzin.jsx`, `leaveService.js`, `pegawaiService.js`, `verifikasi_23.sql` |
-| Lint/unit test | **Tersedia** — ESLint (`npm run lint`) bersih dan **30 uji** `node:test` (`npm test`) lulus; B-8/B-9 di commit `42cb317`, uji paginasi/template masih lokal | `eslint.config.js`, `tests/`, `package.json`, `.github/workflows/deploy.yml` |
-| Paginasi data | **Ada di kode (lokal, belum di-commit)** — helper halaman 500; jadwal shift dibatasi unit aktif; rekap/laporan, koreksi, dan daftar izin memakai paginasi; parser template menolak header tak dikenal; uji manual user 2026-10-31 lulus (tanggal 1–2 muncul) | `src/utils/paginasi.js`, `shiftService.js`, `reportService.js`, `correctionService.js`, `leaveService.js`, `templateJadwal.js` |
+| Lint/unit test | **Tersedia** — ESLint (`npm run lint`) bersih dan **30 uji** `node:test` (`npm test`) lulus; B-8/B-9 di commit `42cb317`, uji paginasi/template di commit `22c2bab` | `eslint.config.js`, `tests/`, `package.json`, `.github/workflows/deploy.yml` |
+| Paginasi data | **Ada di kode & di-commit `22c2bab`** — helper halaman 500; jadwal shift dibatasi unit aktif; rekap/laporan, koreksi, dan daftar izin memakai paginasi; parser template menolak header tak dikenal; uji manual user 2026-10-31 lulus (tanggal 1–2 muncul) | `src/utils/paginasi.js`, `shiftService.js`, `reportService.js`, `correctionService.js`, `leaveService.js`, `templateJadwal.js` |
 | Alfa otomatis | **Aktif mulai 1 November 2026** — diaktifkan lewat Pengaturan Presensi; **pg_cron 1.6.4 aktif** dan job `presisi-alfa-otomatis` terdaftar/aktif tiap 15 menit; menunggu pembentukan Alfa pertama (1 November 2026 hari Minggu, sehingga Alfa reguler diperkirakan muncul Senin 2 November) | migrasi 12/27, `PengaturanPresensi.jsx`, `supabase/jadwal_alfa.sql`, laporan user 2026-10-30 |
 | Deploy GitHub Pages | **Aktif** — `https://presisiami.my.id/` live dengan base `/`; `www` redirect ke domain utama; Enforce HTTPS aktif, HTTP apex/`www` **301** ke HTTPS (diverifikasi 2026-10-30) | workflow run `40439173719` sukses |
 | Supabase Auth | **Diklaim sudah diperbarui** ke domain baru (Site URL + Redirect URLs) | laporan user 2026-10-27 10:39 |
@@ -276,7 +278,7 @@ dan `succeeded`; pada 23:30 user mengonfirmasi ekstensi **`pg_cron` 1.6.4 aktif*
 di project ABSENSI PEGAWAI. Status cron selesai; tinggal menunggu pembentukan
 Alfa pertama. Tidak ada perubahan kode; hanya pembaruan dokumen audit.
 
-**Pekerjaan terakhir (2026-10-31 12:37 WITA, belum di-commit):** memperbaiki
+**Pekerjaan terakhir (2026-10-31 12:37 WITA, di-commit `22c2bab`):** memperbaiki
 jadwal dinas tanggal 1–2 November 2026 yang tidak tampil setelah impor. Data
 sudah masuk database (total November 1064 baris); UI terpotong karena
 `ambilJadwalRentang` mengambil seluruh unit tanpa paginasi dan batas Supabase
@@ -337,6 +339,24 @@ dan `verifikasi_18` untuk hapus grup kosong.
 
 ## 3. Log Kronologis Pekerjaan
 
+### 2026-10-31 13:20 WITA — Commit & push paginasi data
+
+- **Perubahan:** meng-commit perbaikan paginasi data (jadwal 1–2 November,
+  rekap/laporan, koreksi, izin, validasi template, uji baru) beserta dokumen
+  audit I-082–I-084, lalu push ke `origin/main`.
+- **File:** `src/utils/paginasi.js` (baru), `src/services/shiftService.js`,
+  `src/pages/admin/JadwalShift.jsx`, `src/services/reportService.js`,
+  `src/services/correctionService.js`, `src/services/leaveService.js`,
+  `src/utils/templateJadwal.js`, `tests/paginasi.test.js` (baru),
+  `tests/templateJadwal.test.js` (baru), `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **30/30** lulus;
+  `npm run build` lulus **13,18 dtk** (288 modul); staged diff diperiksa tanpa
+  rahasia.
+- **Commit:** `22c2bab` “PRESISI AMI: paginasi data jadwal dan laporan”;
+  dokumen audit disinkronkan pada commit terpisah dan di-push bersama.
+- **Catatan/risiko:** tidak ada migrasi DB dan tidak perlu impor ulang. Uji
+  manual user 2026-10-31 12:53 sudah memastikan tanggal 1–2 November muncul.
+
 ### 2026-10-31 12:53 WITA — Uji manual paginasi jadwal lulus
 
 - **Perubahan:** user mengonfirmasi hasil uji manual: seluruh tanggal jadwal,
@@ -346,8 +366,9 @@ dan `verifikasi_18` untuk hapus grup kosong.
 - **File:** `progress.md`, `AGENTS.md`.
 - **Verifikasi:** laporan user 2026-10-31 12:53. Tidak ada lint/test/build baru
   karena tidak ada perubahan kode.
-- **Catatan/risiko:** perbaikan paginasi dan dokumen audit masih berada di
-  working tree dan **belum di-commit**; menunggu perintah user.
+- **Catatan/risiko:** pada saat entri ini ditulis, perbaikan paginasi dan
+  dokumen audit masih di working tree; keduanya sudah di-commit `22c2bab` pada
+  2026-10-31 13:20.
 
 ### 2026-10-31 12:37 WITA — Paginasi jadwal 1000 baris (tanggal 1–2 tampil)
 
@@ -376,8 +397,8 @@ dan `verifikasi_18` untuk hapus grup kosong.
   halaman jadwal kini memerlukan 3 halaman data + 1 pemeriksaan kosong
   (4 permintaan) untuk data tersebut. Bila batas server lebih kecil dari 500,
   helper tetap berlanjut karena offset naik sesuai jumlah baris yang
-  benar-benar diterima. Semua perubahan dan dokumen ini belum di-commit,
-  menunggu perintah user.
+  benar-benar diterima. Semua perubahan dan dokumen ini sudah di-commit
+  `22c2bab` pada 2026-10-31 13:20; uji manual user lulus 12:53.
 
 ### 2026-10-31 12:07 WITA — Koreksi hari 1 November 2026 (Minggu)
 
@@ -395,8 +416,8 @@ dan `verifikasi_18` untuk hapus grup kosong.
   Tidak ada build/lint karena tidak ada perubahan kode.
 - **Catatan/risiko:** `alfa_mulai` tetap 1 November 2026; job cron tetap
   berjalan tiap 15 menit. Bila unit tertentu punya jadwal shift pada Minggu,
-  Alfa dapat terbentuk lebih awal dan itu bukan kesalahan. Perubahan dokumen
-  ini belum di-commit dan menunggu perintah user.
+  Alfa dapat terbentuk lebih awal dan itu bukan kesalahan. Dokumen ini ikut
+  di-commit `22c2bab` pada 2026-10-31 13:20.
 
 ### 2026-10-30 23:45 WITA — B-8 lint/uji dasar & B-9 `.env.example`
 
