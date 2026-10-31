@@ -35,7 +35,7 @@ const STATUS = {
   terikat_perangkat_lain: {
     varian: 'bahaya',
     label: 'Perangkat Lain',
-    pesan: 'Akun ini terikat pada perangkat lain. Hubungi Admin IT untuk reset perangkat.',
+    pesan: 'Kamu Menggunakan Perangkat/Browser Yang berbeda dengan yang terdaftar',
     aksi: null,
   },
   pending_perangkat_lain: {
@@ -78,11 +78,17 @@ export default function KartuStatusPerangkat({
       </div>
 
       <Alert variant={info.varian === 'sukses' ? 'sukses' : info.varian} className="mb-4">
-        {info.pesan}
-        {infoAktif && (
-          <span className="mt-2 block text-[11px] font-semibold opacity-80">
-            Perangkat aktif: {infoAktif}
-          </span>
+        <p>{info.pesan}</p>
+        {status === 'terikat_perangkat_lain' ? (
+          <p className="mt-1 text-[11px] font-medium opacity-85">
+            Reset Perangkat Hub Tim IT
+          </p>
+        ) : (
+          infoAktif && (
+            <span className="mt-2 block text-[11px] font-semibold opacity-80">
+              Perangkat aktif: {infoAktif}
+            </span>
+          )
         )}
       </Alert>
 

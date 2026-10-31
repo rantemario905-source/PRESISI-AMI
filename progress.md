@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-31 13:20 WITA (commit & push paginasi data) |
+| Terakhir diperbarui | 2026-10-31 15:35 WITA (pemberitahuan perangkat berbeda & reset) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -338,6 +338,29 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-10-31 15:35 WITA — Pemberitahuan perangkat berbeda & reset
+- **Perubahan:** memperbarui `src/components/kartu/KartuStatusPerangkat.jsx` dan
+  `src/components/PanelAbsen.jsx` untuk menampilkan pesan status `terikat_perangkat_lain`:
+  *“Kamu Menggunakan Perangkat/Browser Yang berbeda dengan yang terdaftar”*
+  dengan catatan kecil di bawahnya: *“Reset Perangkat Hub Tim IT”*, serta
+  menghilangkan rincian perangkat aktif.
+- **File:** `src/components/kartu/KartuStatusPerangkat.jsx`, `src/components/PanelAbsen.jsx`, `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **30/30** lulus;
+  `npm run build` lulus **8,52 dtk** (288 modul).
+- **Catatan/risiko:** perubahan ditahan di working tree, belum di-commit/dipush.
+
+### 2026-10-31 15:10 WITA — Pesan libur ramah & hijau di Panel Absen
+- **Perubahan:** memperbarui `src/components/PanelAbsen.jsx` untuk menampilkan
+  pesan libur (akhir pekan, hari libur nasional, atau libur shift) dengan
+  varian alert **sukses (hijau)**, emoticon menarik (“Nikmati Akhir Pekan Anda! 🌴”,
+  “Hari Libur Nasional 🎉”, “Jadwal Libur Hari Ini 🌟”), ucapan istirahat yang cukup,
+  serta catatan kecil di bawahnya: *“Jika jadwal tidak sesuai, hubungi Kepala Unit/IT.”*
+- **File:** `src/components/PanelAbsen.jsx`, `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **30/30** uji lulus;
+  `npm run build` lulus **9,13 dtk** (288 modul).
+- **Catatan/risiko:** perubahan ditahan di working tree, belum di-commit/dipush,
+  menunggu instruksi eksplisit user.
 
 ### 2026-10-31 13:20 WITA — Commit & push paginasi data
 

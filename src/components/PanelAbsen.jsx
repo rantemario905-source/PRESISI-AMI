@@ -170,6 +170,31 @@ export default function PanelAbsen({
     perangkatTerkunci || (jadwalTerkunci && !malamKemarinAktif) || masukBelumDibuka
   const terkunciPulang = perangkatTerkunci || pulangBelumDibuka || pulangTerlewat
 
+  const isLibur = Boolean(
+    jadwal?.libur ||
+      jadwal?.alasan === 'akhir_pekan' ||
+      jadwal?.alasan === 'libur_jadwal' ||
+      jadwal?.alasan === 'hari_libur'
+  )
+
+  let judulLibur = 'Hari Ini Libur 🌟'
+  let pesanLibur = 'Hari ini libur, istirahatlah yang cukup! ✨'
+  if (jadwal?.alasan === 'akhir_pekan') {
+    judulLibur = 'Nikmati Akhir Pekan Anda! 🌴'
+    pesanLibur =
+      'Hari ini akhir pekan — libur. Istirahatlah yang cukup dan nikmati waktu bersama keluarga! ☕'
+  } else if (jadwal?.alasan === 'hari_libur') {
+    judulLibur = 'Hari Libur Nasional 🎉'
+    pesanLibur = `${
+      jadwal?.nama_hari_libur ? `Hari libur "${jadwal.nama_hari_libur}".` : 'Hari libur.'
+    } Istirahatlah yang cukup! 🛋️`
+  } else if (jadwal?.libur || jadwal?.alasan === 'libur_jadwal') {
+    judulLibur = 'Jadwal Libur Hari Ini 🌟'
+    pesanLibur = 'Hari ini jadwal Anda libur. Istirahatlah yang cukup! ✨'
+  } else if (jadwal?.pesan_jadwal) {
+    pesanLibur = jadwal.pesan_jadwal
+  }
+
   /** "20:02" tanpa akhiran WITA, agar pas di kartu jam */
   const jamSingkat = (iso) => (iso ? formatJam(iso).replace(' WITA', '') : '--:--')
 
@@ -300,17 +325,31 @@ export default function PanelAbsen({
 
         {perangkatTerkunci && (
           <Alert variant="peringatan" title="Tombol Absen Terkunci" className="mb-4">
-            {statusPerangkat === 'terikat_perangkat_lain'
-              ? 'Akun ini terikat pada perangkat lain. Hubungi Admin IT untuk reset perangkat.'
-              : statusPerangkat === 'pending_perangkat_lain'
-                ? 'Pengajuan perangkat lain sedang menunggu persetujuan Admin IT.'
-                : 'Hanya perangkat yang sudah disetujui Admin IT yang dapat melakukan absensi.'}
+            {statusPerangkat === 'terikat_perangkat_lain' ? (
+              <>
+                <p>Kamu Menggunakan Perangkat/Browser Yang berbeda dengan yang terdaftar.</p>
+                <p className="mt-1 text-[11px] font-medium opacity-85">
+                  Reset Perangkat Hub Tim IT
+                </p>
+              </>
+            ) : statusPerangkat === 'pending_perangkat_lain' ? (
+              'Pengajuan perangkat lain sedang menunggu persetujuan Admin IT.'
+            ) : (
+              'Hanya perangkat yang sudah disetujui Admin IT yang dapat melakukan absensi.'
+            )}
           </Alert>
         )}
 
         {jadwalTerkunci && !sudahMasuk && !malamKemarinAktif && (
-          <Alert variant="peringatan" title="Absensi Dikunci" className="mb-4">
-            {jadwal?.pesan_jadwal || 'Anda tidak dijadwalkan untuk absensi hari ini.'}
+          <Alert
+            variant={isLibur ? 'sukses' : 'peringatan'}
+            title={isLibur ? judulLibur : 'Absensi Dikunci'}
+            className="mb-4"
+          >
+            <p>{pesanLibur}</p>
+            <p className="mt-1 text-[11px] font-medium opacity-85">
+              Jika jadwal tidak sesuai, hubungi Kepala Unit/IT.
+            </p>
           </Alert>
         )}
 
