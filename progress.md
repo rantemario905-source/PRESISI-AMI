@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-10-31 15:35 WITA (pemberitahuan perangkat berbeda & reset) |
+| Terakhir diperbarui | 2026-11-02 09:43 WITA (commit & push bebas radius) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -107,7 +107,10 @@ go-live sudah masuk rencana** (laporan user 2026-10-30). Data uji **sudah
 dibersihkan** (laporan 2026-10-30 23:01) dan **data operasional sudah
 dilengkapi** — jadwal dinas dan pemetaan pegawai (laporan 2026-10-30 23:04),
 serta **Alfa otomatis sudah diaktifkan** dan cron aktif (laporan 2026-10-30
-23:23). Yang tersisa: verifikasi pembentukan Alfa pertama dan eksekusi go-live. **Step 2 keamanan** (pengaman formula CSV dan
+23:23). **Go-live sudah dieksekusi pada Minggu, 1 November 2026** dan pegawai
+sudah mulai absen masuk serta pulang (laporan user 2026-11-01 17:58). Yang
+tersisa: verifikasi pembentukan Alfa otomatis pertama setelah jam kerja hari
+kerja pertama dan pemantauan pasca go-live. **Step 2 keamanan** (pengaman formula CSV dan
 pemisahan `window.opener` dokumen) sudah diuji user tanpa error, lalu **Step 3
 keamanan** menaikkan dependensi ke **Vite 7.3.7**, **`@vitejs/plugin-react`
 5.2.0**, dan **React Router 7.18.5** dengan Node CI **22**; build produksi dan
@@ -134,11 +137,26 @@ migrasi DB dan tidak perlu impor ulang; `npm run lint` bersih, `npm test`
 **30/30**, `npm run build` lulus **15,01 dtk** (ulang 10,67 dtk). Uji manual
 user 2026-10-31 12:53: seluruh tanggal termasuk 1–2 November sudah muncul.
 Perbaikan ini sudah **di-commit `22c2bab`** dan di-push ke `origin/main` pada
-2026-10-31 13:20.
+2026-10-31 13:20. Pesan libur hijau dan pemberitahuan perangkat berbeda
+(`PanelAbsen`, `KartuStatusPerangkat`) sudah **di-commit `f332efb`** dan
+di-push ke `origin/main` pada 2026-10-31. **Go-live produksi dimulai
+Minggu, 1 November 2026**: pegawai sudah melakukan absen masuk dan pulang
+(laporan user 2026-11-01 17:58); yang dipantau tersisa adalah pembentukan Alfa
+otomatis pertama pada hari kerja pertama setelah jam kerja berakhir.
+Pekerjaan terbaru (2026-11-01 18:13): **pengecualian radius untuk pegawai
+tertentu** (mis. dokter spesialis yang bertugas dari rumah) — flag **per
+pegawai** `bebas_radius` (default `false`) yang hanya dapat diaktifkan Super
+Admin lewat **Data Pegawai**; `submit_presensi` tetap menghitung/menyimpan
+jarak tetapi hanya menolak radius 50 m bila flag mati. Validasi perangkat,
+anti Fake GPS, akurasi GPS, jadwal, jendela absen, serta aturan Sabtu/Minggu/hari
+libur **tidak berubah**, sehingga pegawai lain tetap terkena radius 50 m.
+Migrasi **28** dan `verifikasi_28.sql` **sudah dijalankan** di Supabase dan
+verifikasi lulus (laporan user 2026-11-02), sehingga flag **Bebas Radius**
+aktif di server; sisa hanya uji manual absen dari luar area.
 
 | Aspek | Status | Bukti |
 |---|---|---|
-| Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–27 | `src/`, `supabase/migrations/01–27` |
+| Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–28 | `src/`, `supabase/migrations/01–28` |
 | Commit Git | **Paginasi data** — `22c2bab` (jadwal 1–2 November, rekap/laporan, koreksi, izin, uji template); sebelumnya **B-8/B-9** — `42cb317`; dokumen audit `5b9ac5e`; **fitur sebelumnya** — `1fec429` | `git log` |
 | Perubahan lokal | **Bersih setelah commit `22c2bab` + sinkronisasi dokumen audit** | `git status` |
 | Migrasi DB 01–18 | **Sudah dijalankan** — verifikasi 09–18 lulus | laporan user 2026-10-30 |
@@ -151,18 +169,21 @@ Perbaikan ini sudah **di-commit `22c2bab`** dan di-push ke `origin/main` pada
 | Migrasi DB 25 | **Sudah dijalankan** (laporan user 2026-10-29); aturannya digantikan migrasi 26 | `supabase/migrations/25_batas_absen_pulang.sql`, `verifikasi_25.sql` |
 | Migrasi DB 26 | **Sudah dijalankan**; jendela absen baru berlaku di server; verifikasi 26 lulus (laporan user 2026-10-30) | `supabase/migrations/26_batas_absen_baru.sql`, `verifikasi_26.sql` |
 | Migrasi DB 27 | **Sudah dijalankan**; jam kerja per unit dan menu **Jam Kerja Unit** aktif; verifikasi 27 lulus (laporan user 2026-10-30) | `supabase/migrations/27_jam_kerja_unit.sql`, `verifikasi_27.sql` |
+| Migrasi DB 28 | **Sudah dijalankan**; verifikasi 28 lulus (laporan user 2026-11-02); flag **Bebas Radius** aktif di server | `supabase/migrations/28_bebas_radius.sql`, `verifikasi_28.sql` |
 | Data uji | **Sudah dibersihkan ulang setelah uji** — transaksi dihapus, 92 pegawai/grup/master shift dipertahankan | `supabase/cleanup_data_uji.sql`, laporan user 2026-10-30 23:01 |
 | Data operasional | **Lengkap** — jadwal dinas dan pemetaan pegawai sudah diisi | laporan user 2026-10-30 23:04 |
+| Go-live | **Sudah berjalan sejak Minggu, 1 November 2026** — pegawai absen masuk dan pulang; absen akhir pekan hanya untuk pegawai shift yang dijadwalkan | laporan user 2026-11-01 17:58 |
 | Koordinat RSUD AMI | **Ada di kode** — `-0.23805651650343132, 117.41442516465149` di klien dan schema | `src/config/constants.js`, `supabase/schema.sql`, migrasi 21 |
 | Radius absensi | **Aktif 50 meter** — klien (`MAX_RADIUS_METERS`) dan server (migrasi 24 sudah dijalankan) | `src/config/constants.js`, `supabase/migrations/24_radius_50_meter.sql` |
-| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 09–27 lulus** — dijalankan user, semua hasil `true` (laporan 2026-10-30) | laporan user 2026-10-30 |
-| Build produksi | **Lulus** — base `/` **15,01 dtk** (ulang 10,67 dtk; **13,18 dtk** sebelum commit 2026-10-31; 288 modul); `dist/index.html` 1,29 kB | `npm run build` |
+| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 09–28 lulus** — dijalankan user, semua hasil `true` (laporan 2026-10-30; verifikasi 28 laporan 2026-11-02) | laporan user 2026-10-30 & 2026-11-02; `supabase/verifikasi_28.sql` |
+| Build produksi | **Lulus** — base `/` **8,46 dtk** (ulang 8,69 dtk; pengecualian radius pegawai tertentu; 288 modul); sebelumnya 15,01 dtk / 10,67 dtk; `dist/index.html` 1,29 kB | `npm run build` 2026-11-01 |
 | Dependensi frontend | **Diperbarui & di-commit** — Vite 7.3.7, `@vitejs/plugin-react` 5.2.0, React Router 7.18.5; Node CI 22; lockfile sinkron; `npm audit` 0 kerentanan | `package.json`, `package-lock.json`, `.github/workflows/deploy.yml` |
 | Header keamanan (CSP) | **Ada di kode & di-commit** — CSP produksi via `<meta>`: `script-src 'self'`, `connect-src` self + `*.supabase.co`, `frame-src 'none'`, `form-action 'self'`, `object-src 'none'`, `base-uri 'self'`; meta referrer; hanya saat build. Uji headless: script inline diblokir, halaman render | `vite.config.js`, `index.html` |
 | Batas GitHub Pages | **Enforce HTTPS aktif & terverifikasi** (2026-10-30 10:06 WITA): HTTP apex dan `www` **301** ke HTTPS/apex. Namun HSTS, `X-Frame-Options`/`frame-ancestors`, `X-Content-Type-Options`, dan `Permissions-Policy` tetap belum aktif karena memerlukan header HTTP; Cloudflare/proxy opsional | `curl -I` HTTP/HTTPS apex & `www`, 2026-10-30 |
 | Kepala unit multi-unit | **Ada di kode** — tabel `kepala_unit` (satu unit satu kepala, boleh multi-unit), halaman **Kepala Unit**, pemilih unit aktif di portal kepala, kepala ASN tanpa baris `pegawai`, RPC `profil_saya()`/`simpan_kepala_unit()`, policy `unit_dikelola()` | migrasi 22, `KepalaUnit.jsx`, `kepalaUnitService.js`, `AuthContext.jsx`, `authService.js`, `PortalKepalaLayout.jsx` |
 | Jendela waktu absen | **Ada di kode** — masuk dibuka 1 jam sebelum; pulang 1 menit setelah hingga 2 jam setelah jam pulang (semua pola, termasuk shift malam) | migrasi 26, `PanelAbsen.jsx`, `jadwalAbsen.js` |
 | Jam kerja per unit | **Ada di kode** — override jam reguler per unit dengan fallback global; ADMISI RAWAT JALAN 07.00–15.00 Senin–Jumat; menu Super Admin; tampilan jam di akun pegawai sudah diuji dan berubah | migrasi 27, `JamKerjaUnit.jsx`, `jamKerjaService.js`, `jadwal_kerja`, `proses_alfa_otomatis` |
+| Pengecualian radius pegawai tertentu | **Aktif** — flag `pegawai.bebas_radius` per pegawai (Super Admin); pegawai tersebut tetap pegawai reguler biasa dan hanya berbeda karena boleh absen di mana saja. `submit_presensi` tetap mencatat jarak dan hanya melewati penolakan radius bila flag aktif; validasi lain tidak berubah; opsi `abaikanRadius` hanya untuk tampilan | migrasi 28, `verifikasi_28.sql`, `geofencing.js`, `PanelAbsen.jsx`, `DataPegawai.jsx`, `pegawaiService.js` |
 | Keamanan ekspor CSV | **Ada di kode & di-commit** — sel string berawalan `=`, `+`, `-`, `@`, tab, CR, atau LF diberi apostrof sebelum escaping; template jadwal memakai aturan yang sama | `src/utils/csv.js`, `src/utils/templateJadwal.js` |
 | Buka dokumen izin | **Ada di kode & di-commit** — tab dokumen memutus `window.opener` dan memakai `location.replace` agar tidak membuka halaman Supabase dengan konteks pembuka | `src/pages/IzinSaya.jsx`, `src/pages/admin/PengajuanIzin.jsx` |
 | Hapus grup kosong | **Ada di kode** — semua grup 0 pegawai; "Belum ditentukan" (akun sistem) disembunyikan bila kosong | migrasi 18, `GrupShift.jsx` |
@@ -339,6 +360,102 @@ dan `verifikasi_18` untuk hapus grup kosong.
 
 ## 3. Log Kronologis Pekerjaan
 
+### 2026-11-02 09:43 WITA — Commit & push bebas radius
+- **Perubahan:** menindaklanjuti laporan pegawai yang ditolak dengan jarak 130 m
+  padahal berada di gedung utama. Analisis menunjukkan pesan berasal dari
+  validasi klien, titik MapAtlas hanya 10,5 m dari pusat, sehingga selisihnya
+  berasal dari pembacaan GPS perangkat (bukan rumus radius atau server). User
+  memutuskan **belum mengubah apa pun**; rencana perbaikan akurasi GPS ditahan.
+  Pekerjaan **Bebas Radius** (kode, migrasi 28, verifikasi 28, dokumentasi)
+  di-commit dan di-push.
+- **File:** `AGENTS.md`, `README.md`, `progress.md`,
+  `src/components/PanelAbsen.jsx`, `src/pages/Dashboard.jsx`,
+  `src/pages/admin/DataPegawai.jsx`, `src/services/pegawaiService.js`,
+  `src/utils/geofencing.js`, `supabase/schema.sql`, `tests/geofencing.test.js`,
+  `supabase/migrations/28_bebas_radius.sql`, `supabase/verifikasi_28.sql`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **32/32**; `npm run build`
+  lulus. Migrasi 28 dan `verifikasi_28.sql` sudah dijalankan user (2026-11-02).
+- **Catatan/risiko:** kasus GPS meleset 130 m dicatat sebagai **B-29** dan belum
+  diperbaiki; uji manual **B-28** masih tersisa. Perubahan kode Bebas Radius
+  memerlukan deploy GitHub Pages agar aktif di produksi.
+
+### 2026-11-02 08:55 WITA — Migrasi 28 & verifikasi 28 berhasil
+- **Perubahan:** mencatat laporan user bahwa migrasi **28** dan
+  `verifikasi_28.sql` sudah dijalankan serta lulus di Supabase. Flag
+  **Bebas Radius** kini aktif di server: `submit_presensi` hanya menolak radius
+  50 m bila flag mati, sedangkan pegawai dengan flag tersebut tetap pegawai
+  reguler biasa dan hanya berbeda karena boleh absen di mana saja. Status
+  "belum aktif di server" pada entri sebelumnya (2026-11-01 18:55) dengan ini
+  sudah tidak berlaku. Tidak ada perubahan kode.
+- **File:** `progress.md`, `AGENTS.md`, `README.md`.
+- **Verifikasi:** konfirmasi user "sudah saya run dan succses" (2026-11-02
+  08:55); `npm run lint`, `npm test` 32/32, dan `npm run build` terakhir lulus
+  sebelum perubahan dokumen ini.
+- **Catatan/risiko:** sisa uji manual (B-28): satu pegawai bebas radius absen
+  dari luar area pada jam reguler dan satu pegawai biasa tetap ditolak di luar
+  50 m. Perubahan dokumen ditahan di working tree (belum di-commit).
+
+### 2026-11-01 18:55 WITA — Sinkronisasi istilah bebas radius
+- **Perubahan:** menyelaraskan seluruh istilah fitur menjadi **Bebas Radius** /
+  **pegawai tertentu**. Pegawai dengan flag ini adalah **pegawai reguler biasa**
+  dengan jam kerja dan aturan yang sama; satu-satunya perbedaan adalah mereka
+  boleh absen di mana saja (tidak terkena radius 50 m). Istilah lama dihapus
+  dari label, judul, dan deskripsi; teks verbatim instruksi lama di
+  `AGENTS.md` tetap dipertahankan sebagai catatan audit. Nama file migrasi
+  disinkronkan menjadi `28_bebas_radius.sql` (sesuai file nyata) di
+  `schema.sql`, `progress.md`, dan `AGENTS.md`.
+- **File:** `supabase/schema.sql`, `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **32/32**; `npm run build`
+  lulus **11,87 dtk** (288 modul). Tidak ada perubahan kode.
+- **Catatan/risiko:** migrasi 28 dan `verifikasi_28.sql` tetap **belum
+  dijalankan**; urutan deploy **migrasi 28 → verifikasi 28 → kode** masih
+  berlaku. Perubahan dokumen ditahan di working tree (belum di-commit).
+
+### 2026-11-01 18:13 WITA — Pengecualian radius pegawai tertentu
+- **Perubahan:** menambahkan pengecualian radius **per pegawai** bagi pegawai
+  tertentu yang boleh absen di mana saja dengan jam kerja reguler; selain itu
+  mereka diperlakukan **sama persis seperti pegawai reguler biasa**. Flag
+  `pegawai.bebas_radius` (default `false`) hanya dapat diubah
+  Super Admin lewat **Data Pegawai** dan dicatat pada
+  `bebas_radius_diubah_pada`/`bebas_radius_diubah_oleh`. `submit_presensi`
+  tetap menghitung dan menyimpan jarak serta menandai
+  `lokasi_masuk/pulang.di_luar_radius`, tetapi hanya menolak radius 50 m bila
+  flag mati; validasi perangkat, anti Fake GPS, akurasi, jadwal, jendela absen,
+  dan aturan hari libur tidak berubah. `profil_saya()` mengirim `bebas_radius`;
+  klien memakai `periksaLokasi(pos, { abaikanRadius })` hanya untuk tampilan.
+- **File:** `supabase/migrations/28_bebas_radius.sql`,
+  `supabase/verifikasi_28.sql`, `supabase/schema.sql`, `README.md`,
+  `src/utils/geofencing.js`, `src/components/PanelAbsen.jsx`,
+  `src/components/kartu/KartuRiwayat.jsx`, `src/pages/Dashboard.jsx`,
+  `src/pages/RiwayatSaya.jsx`, `src/pages/admin/DataPegawai.jsx`,
+  `src/services/pegawaiService.js`, `tests/geofencing.test.js`, `progress.md`,
+  `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **32/32** lulus (2 uji baru
+  pengecualian radius + deteksi Fake GPS tetap aktif); `npm run build` lulus
+  **8,46 dtk** (ulang 8,69 dtk; 288 modul). Migrasi 28 dan `verifikasi_28.sql` **belum
+  dijalankan** di Supabase sehingga perilaku server belum berubah.
+- **Catatan/risiko:** urutan deploy wajib **migrasi 28 → verifikasi 28 → kode**.
+  Bila kode ter-deploy lebih dulu, daftar Data Pegawai tetap tampil (fallback
+  kolom) tetapi penyimpanan menampilkan pesan agar migrasi dijalankan. Flag
+  bersifat permanen sampai dinonaktifkan Super Admin; jejak perubahan, jarak,
+  dan koordinat tetap tersimpan. Laporan PDF tidak menampilkan jarak; riwayat
+  memberi penanda **bebas radius** untuk jarak di atas 50 m.
+
+### 2026-11-01 17:58 WITA — Go-live produksi dimulai
+- **Perubahan:** mencatat konfirmasi user bahwa **go-live sudah dilaksanakan
+  pada Minggu, 1 November 2026** dan pegawai sudah mulai melakukan **absen
+  masuk dan absen pulang**. Tidak ada perubahan kode.
+- **File:** `progress.md`, `AGENTS.md`.
+- **Verifikasi:** klaim user (bukan hasil perintah verifikasi); status server
+  sudah sesuai aturan — pegawai reguler diblokir pada akhir pekan/hari libur
+  (`schema.sql` pesan "Hari libur ... Anda tidak dijadwalkan shift"), sehingga
+  absen hari ini berasal dari pegawai shift yang memiliki `jadwal_shift`.
+- **Catatan/risiko:** sisa pekerjaan adalah memantau **pembentukan Alfa
+  otomatis pertama** setelah jam kerja hari kerja pertama, memastikan tidak ada
+  pegawai reguler yang lolos absen di hari libur, dan memantau keluhan
+  operasional pasca go-live. Perubahan dokumen ditahan di working tree (belum
+  di-commit).
+
 ### 2026-10-31 15:35 WITA — Pemberitahuan perangkat berbeda & reset
 - **Perubahan:** memperbarui `src/components/kartu/KartuStatusPerangkat.jsx` dan
   `src/components/PanelAbsen.jsx` untuk menampilkan pesan status `terikat_perangkat_lain`:
@@ -348,7 +465,9 @@ dan `verifikasi_18` untuk hapus grup kosong.
 - **File:** `src/components/kartu/KartuStatusPerangkat.jsx`, `src/components/PanelAbsen.jsx`, `progress.md`, `AGENTS.md`.
 - **Verifikasi:** `npm run lint` bersih; `npm test` **30/30** lulus;
   `npm run build` lulus **8,52 dtk** (288 modul).
-- **Catatan/risiko:** perubahan ditahan di working tree, belum di-commit/dipush.
+- **Catatan/risiko:** perubahan semula ditahan di working tree. (koreksi
+  2026-11-01: sudah **di-commit `f332efb`** bersama pesan libur dan di-push ke
+  `origin/main` pada 2026-10-31.)
 
 ### 2026-10-31 15:10 WITA — Pesan libur ramah & hijau di Panel Absen
 - **Perubahan:** memperbarui `src/components/PanelAbsen.jsx` untuk menampilkan
@@ -359,8 +478,9 @@ dan `verifikasi_18` untuk hapus grup kosong.
 - **File:** `src/components/PanelAbsen.jsx`, `progress.md`, `AGENTS.md`.
 - **Verifikasi:** `npm run lint` bersih; `npm test` **30/30** uji lulus;
   `npm run build` lulus **9,13 dtk** (288 modul).
-- **Catatan/risiko:** perubahan ditahan di working tree, belum di-commit/dipush,
-  menunggu instruksi eksplisit user.
+- **Catatan/risiko:** perubahan semula ditahan di working tree. (koreksi
+  2026-11-01: sudah **di-commit `f332efb`** dan di-push ke `origin/main` pada
+  2026-10-31.)
 
 ### 2026-10-31 13:20 WITA — Commit & push paginasi data
 
@@ -1694,8 +1814,12 @@ dan `verifikasi_18` untuk hapus grup kosong.
 | B-21 | ~~Alur lupa absen pulang belum diuji manual~~ | - | **Selesai:** uji manual aman (laporan user 2026-10-30) |
 | B-22 | ~~Migrasi 26 sudah dijalankan; verifikasi dan uji manual belum~~ | - | **Selesai:** `verifikasi_26.sql` lulus dan uji jendela absen aman (laporan user 2026-10-30) |
 | B-23 | ~~Migrasi 27 sudah dijalankan; verifikasi dan uji manual belum~~ | - | **Selesai:** `verifikasi_27.sql` lulus dan tampilan jam Admisi diuji (laporan user 2026-10-30) |
-| B-24 | Go-live belum dieksekusi | Aplikasi belum dipakai produksi | Data uji sudah dibersihkan, data operasional lengkap, Alfa otomatis aktif mulai 1 November, dan `pg_cron` terkonfirmasi aktif (2026-10-30); tinggal verifikasi Alfa pertama dan eksekusi go-live |
+| B-24 | ~~Go-live belum dieksekusi~~ | - | **Selesai:** go-live dimulai Minggu, 1 November 2026 dan pegawai sudah absen masuk/pulang (laporan user 2026-11-01 17:58); sisa pantauan Alfa otomatis pertama |
+| B-26 | Verifikasi pembentukan Alfa otomatis pertama setelah go-live | Belum ada bukti baris Alfa terbentuk di produksi | Pantau `presensi` setelah jam kerja hari kerja pertama; cron `presisi-alfa-otomatis` sudah aktif (2026-10-30) |
 | B-25 | ~~Uji manual jadwal 1.064 baris setelah paginasi~~ | - | **Selesai:** user memastikan seluruh tanggal termasuk 1–2 November muncul (2026-10-31 12:53) |
+| B-27 | ~~Migrasi 28 dan verifikasi 28 belum dijalankan~~ | - | **Selesai:** migrasi 28 dijalankan dan `verifikasi_28.sql` lulus (laporan user 2026-11-02); flag **Bebas Radius** aktif di server |
+| B-28 | Uji manual pegawai bebas radius dan pegawai biasa setelah migrasi 28 | Belum ada bukti uji di perangkat | Uji satu pegawai bebas radius absen dari luar area pada jam reguler dan satu pegawai biasa tetap ditolak di luar 50 m |
+| B-29 | Kasus GPS meleset 130 m di gedung utama (pesan klien) | Pegawai di dalam area bisa ditolak; sebaliknya lokasi luar bisa lolos | Ditahan atas keputusan user 2026-11-02. Opsi: sampling GPS beberapa detik, perketat akurasi (20–25 m), tampilkan akurasi pada pesan, dan/atau audit percobaan gagal; perlu keputusan batas akurasi |
 | B-4 | ~~`npm run build` belum dijalankan~~ | — | **Selesai:** lulus 2026-10-25 12:24 |
 | B-5 | ~~README menyebut Fase 1–7 saja~~ | — | **Selesai:** diperbarui ke Fase 1–8 + impor |
 | B-6 | ~~`verifikasi_10.sql` tidak ada di diagram README~~ | — | **Selesai:** ditambahkan ke struktur |

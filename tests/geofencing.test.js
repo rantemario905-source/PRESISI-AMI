@@ -29,6 +29,31 @@ test('periksaLokasi menolak lokasi di luar radius 50 meter', () => {
   assert.equal(hasil.kode, 'LUAR_RADIUS')
 })
 
+test('periksaLokasi mengizinkan luar radius untuk pegawai dengan pengecualian', () => {
+  const hasil = periksaLokasi(posisi(RSUD_AMI.lat + 0.001, RSUD_AMI.lng), {
+    abaikanRadius: true,
+  })
+  assert.equal(hasil.valid, true)
+  assert.equal(hasil.kode, 'VALID_LUAR_RADIUS')
+  assert.ok(hasil.jarak > 100)
+})
+
+test('pengecualian radius tidak mematikan deteksi Fake GPS', () => {
+  assert.equal(
+    periksaLokasi(
+      { coords: { ...posisi(RSUD_AMI.lat + 0.001, RSUD_AMI.lng).coords, isMocked: true } },
+      { abaikanRadius: true },
+    ).kode,
+    'MOCK_LOCATION',
+  )
+  assert.equal(
+    periksaLokasi(posisi(RSUD_AMI.lat + 0.001, RSUD_AMI.lng, 60), {
+      abaikanRadius: true,
+    }).kode,
+    'AKURASI_BURUK',
+  )
+})
+
 test('periksaLokasi menolak Fake GPS dan akurasi tidak wajar', () => {
   assert.equal(
     periksaLokasi({ coords: { ...posisi(RSUD_AMI.lat, RSUD_AMI.lng).coords, isMocked: true } }).kode,

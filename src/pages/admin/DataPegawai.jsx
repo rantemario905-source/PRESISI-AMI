@@ -2,9 +2,10 @@
  * ==========================================================================
  * Super Admin — Data Pegawai
  * --------------------------------------------------------------------------
- * Melihat pegawai non-ASN, memperbarui nama/unit kerja/pola kerja, serta
- * memantau status perangkat. Akun Super Admin tidak ditampilkan karena bukan
- * pegawai. Penugasan kepala unit diatur di halaman Kepala Unit.
+ * Melihat pegawai non-ASN, memperbarui nama/unit kerja/pola kerja, mengatur
+ * pengecualian radius, serta memantau status perangkat. Akun Super
+ * Admin tidak ditampilkan karena bukan pegawai. Penugasan kepala unit diatur
+ * di menu Kepala Unit.
  * ==========================================================================
  */
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -40,6 +41,7 @@ export default function DataPegawai() {
     nama: '',
     unitKerja: '',
     polaKerja: 'shift',
+    bebasRadius: false,
   })
 
   const muat = useCallback(async () => {
@@ -76,6 +78,7 @@ export default function DataPegawai() {
       nama: baris.nama,
       unitKerja: baris.unit_kerja,
       polaKerja: baris.pola_kerja ?? 'shift',
+      bebasRadius: baris.bebas_radius === true,
     })
   }
 
@@ -95,6 +98,7 @@ export default function DataPegawai() {
         nama: form.nama,
         unitKerja: form.unitKerja,
         polaKerja: form.polaKerja,
+        bebasRadius: form.bebasRadius,
       })
 
       let pesanBaru = `Data ${namaBaru} berhasil diperbarui.`
@@ -102,6 +106,10 @@ export default function DataPegawai() {
         pesanBaru = `Pola kerja ${namaBaru} diubah menjadi ${
           form.polaKerja === 'reguler' ? 'Reguler' : 'Shift'
         }.`
+      } else if (form.bebasRadius !== (pilih.bebas_radius === true)) {
+        pesanBaru = form.bebasRadius
+          ? `${namaBaru} kini diizinkan absen dari luar area.`
+          : `Pengecualian radius ${namaBaru} dinonaktifkan.`
       }
 
       setPilih(null)
@@ -118,7 +126,7 @@ export default function DataPegawai() {
     <>
       <KepalaHalaman
         judul="Data Pegawai"
-        deskripsi="Kelola nama, grup/unit, dan pola kerja (Reguler/Shift) pegawai non-ASN. Penugasan kepala unit diatur di menu Kepala Unit. Akun Super Admin tidak ditampilkan."
+        deskripsi="Kelola nama, grup/unit, pola kerja (Reguler/Shift), dan pengecualian radius pegawai non-ASN. Penugasan kepala unit diatur di menu Kepala Unit. Akun Super Admin tidak ditampilkan."
       />
 
       {pesan && (
@@ -226,6 +234,9 @@ export default function DataPegawai() {
                         <Badge variant={baris.pola_kerja === 'reguler' ? 'info' : 'netral'}>
                           {baris.pola_kerja === 'reguler' ? 'Reguler' : 'Shift'}
                         </Badge>
+                        {baris.bebas_radius === true && (
+                          <Badge variant="sukses">Bebas Radius</Badge>
+                        )}
                       </div>
                     </div>
 
@@ -279,9 +290,14 @@ export default function DataPegawai() {
                           )}
                         </td>
                         <td className="px-5 py-3">
-                          <Badge variant={baris.pola_kerja === 'reguler' ? 'info' : 'netral'}>
-                            {baris.pola_kerja === 'reguler' ? 'Reguler' : 'Shift'}
-                          </Badge>
+                          <div className="flex flex-wrap gap-1">
+                            <Badge variant={baris.pola_kerja === 'reguler' ? 'info' : 'netral'}>
+                              {baris.pola_kerja === 'reguler' ? 'Reguler' : 'Shift'}
+                            </Badge>
+                            {baris.bebas_radius === true && (
+                              <Badge variant="sukses">Bebas Radius</Badge>
+                            )}
+                          </div>
                         </td>
                         <td className="px-5 py-3">
                           <Badge variant={baris.kepala_ruangan ? 'peringatan' : 'netral'}>
@@ -372,6 +388,27 @@ export default function DataPegawai() {
                 Pegawai shift hanya dijadwalkan lewat menu Jadwal Shift.
               </p>
             </div>
+
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-3">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                checked={form.bebasRadius}
+                disabled={menyimpan}
+                onChange={(e) =>
+                  setForm((l) => ({ ...l, bebasRadius: e.target.checked }))
+                }
+              />
+              <span className="min-w-0">
+                <span className="block text-[13px] font-semibold text-slate-800">
+                  Boleh absen dari luar area (bebas radius)
+                </span>
+                <span className="mt-0.5 block text-[11px] leading-relaxed text-slate-400">
+                  Pengecualian radius 50 meter untuk pegawai tertentu. Jam kerja, jendela
+                  absen, anti Fake GPS, dan verifikasi perangkat tetap berlaku.
+                </span>
+              </span>
+            </label>
 
             <div className="aksi-modal">
               <Button variant="sekunder" onClick={() => setPilih(null)}>

@@ -172,6 +172,7 @@ export default function Dashboard() {
               jadwal={jadwal}
               jadwalKemarin={jadwalKemarin}
               deviceToken={deviceToken}
+              bebasRadius={profil?.bebas_radius === true}
               onBerhasil={muatData}
             />
 

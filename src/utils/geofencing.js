@@ -4,7 +4,8 @@
  * --------------------------------------------------------------------------
  * 1. Haversine       → jarak akurat (meter) GPS pengguna vs RSUD AMI
  * 2. Mock Location   → tolak jika isMocked=true ATAU accuracy===0
- * 3. Radius 50 m     → tolak jika berada di luar radius rumah sakit
+ * 3. Radius 50 m     → tolak jika berada di luar radius rumah sakit, kecuali
+ *                      pegawai yang diizinkan server (bebas_radius)
  *
  * Validasi ini adalah lapisan UX; validasi otoritatif (keamanan ketat)
  * dilakukan ulang di sisi server melalui RPC `submit_presensi`
@@ -39,16 +40,19 @@ export function haversineMeter(lat1, lng1, lat2, lng2) {
  * Memvalidasi posisi hasil Geolocation API terhadap aturan absensi.
  *
  * @param {GeolocationPosition} position - objek posisi dari browser
+ * @param {{ abaikanRadius?: boolean }} [opsi] - `abaikanRadius` hanya untuk
+ *   pegawai yang diizinkan absen dari luar area (flag server).
  * @returns {{
  *   valid: boolean,
- *   kode: 'VALID'|'MOCK_LOCATION'|'AKURASI_TIDAK_SAH'|'AKURASI_BURUK'|'LUAR_RADIUS'|'LOKASI_TIDAK_SAH',
+ *   kode: 'VALID'|'VALID_LUAR_RADIUS'|'MOCK_LOCATION'|'AKURASI_TIDAK_SAH'|'AKURASI_BURUK'|'LUAR_RADIUS'|'LOKASI_TIDAK_SAH',
  *   pesan: string,
  *   jarak?: number,
  *   koordinat?: { lat: number, lng: number },
  *   akurasi?: number
  * }}
  */
-export function periksaLokasi(position) {
+export function periksaLokasi(position, opsi = {}) {
+  const abaikanRadius = opsi?.abaikanRadius === true
   const coords = position?.coords
 
   if (!coords || typeof coords.latitude !== 'number' || typeof coords.longitude !== 'number') {
@@ -97,6 +101,19 @@ export function periksaLokasi(position) {
   const jarak = haversineMeter(RSUD_AMI.lat, RSUD_AMI.lng, koordinat.lat, koordinat.lng)
 
   if (jarak > MAX_RADIUS_METERS) {
+    if (abaikanRadius) {
+      return {
+        valid: true,
+        kode: 'VALID_LUAR_RADIUS',
+        pesan: `Lokasi di luar radius ${MAX_RADIUS_METERS} meter. Jarak ${Math.round(
+          jarak,
+        )} meter dari rumah sakit — absensi tetap diizinkan.`,
+        jarak,
+        koordinat,
+        akurasi,
+      }
+    }
+
     return {
       valid: false,
       kode: 'LUAR_RADIUS',

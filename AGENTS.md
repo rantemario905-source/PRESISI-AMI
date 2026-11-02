@@ -17,8 +17,9 @@ Aplikasi absensi pegawai non-ASN RSUD Aji Muhammad Idris.
   setelah jam pulang), jam kerja reguler khusus per unit, jadwal shift, hari
   libur, keterlambatan, Alfa otomatis, Dinas/Sakit/Cuti, koreksi presensi,
   rekapitulasi, laporan presensi bulanan per pegawai (PDF A4), impor jadwal
-  CSV/XLSX, hapus grup shift kosong, serta kepala unit multi-unit dan kepala ASN
-  tanpa baris pegawai.
+  CSV/XLSX, hapus grup shift kosong, pengecualian radius untuk pegawai tertentu
+  (tanpa mengubah aturan 50 m bagi pegawai lain), serta kepala unit multi-unit
+  dan kepala ASN tanpa baris pegawai.
 - **Peran:** `pegawai`, `superadmin`, dan penugasan `kepala_unit` (satu unit satu
   kepala, satu kepala boleh banyak unit). Kepala ASN memakai metadata
   `jenis_akun = kepala_asn` dan tidak dicatat di `public.pegawai`.
@@ -44,7 +45,7 @@ npm run preview      # pratinjau hasil build
 - Skrip bantu (butuh Secret key, jangan pernah di-commit):
   `node scripts/impor-akun.mjs ...`, `node scripts/verifikasi-impor.mjs ...`.
 
-**Urutan migrasi wajib:** `01 → 02 → ... → 27`, satu per satu. Jangan mengulang
+**Urutan migrasi wajib:** `01 → 02 → ... → 28`, satu per satu. Jangan mengulang
 migrasi lama bila tidak diperlukan. `supabase/schema.sql` adalah gabungan
 seluruh migrasi untuk instalasi sekali jalan.
 
@@ -224,6 +225,11 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-085 | 2026-10-31 13:20 | "commit dan push" | Memverifikasi `npm run lint`, `npm test` (30/30), dan `npm run build` (13,18 dtk); memeriksa staged diff tanpa rahasia; commit `22c2bab` “PRESISI AMI: paginasi data jadwal dan laporan” lalu push ke `origin/main`; menyinkronkan dokumen audit | selesai | 2026-10-31 13:20 — Commit & push paginasi data |
 | I-086 | 2026-10-31 15:10 | "pada hari libur shift dan hari libur kerja reguler [Image 1] kita buat pesan yang singkat untuk pegawai yang libur dengan warna hijau dengan emoticon yang menarik , contohnya pesan hari ini libur istirahatlah yang cukup, dan pesan kecil dibawahnya jika jadwal tidak sesuai hubungi Kepala Unit/IT" + "kalau akhir Pekan, Contoh, Nikmati Akhir Pekan Anda" + "ya terapkan , pastikan tidak ada bug, dan juga pastikan uinya rapih di mobile" | Memperbarui `PanelAbsen.jsx` untuk menampilkan pesan libur (akhir pekan, hari libur nasional, libur shift) dengan varian alert hijau (`variant="sukses"`), emoticon menarik (“Nikmati Akhir Pekan Anda! 🌴”, “Hari Libur Nasional 🎉”, “Jadwal Libur Hari Ini 🌟”), ucapan istirahat, serta catatan kecil *“Jika jadwal tidak sesuai, hubungi Kepala Unit/IT.”*; verifikasi `npm run lint`, `npm test` (30/30), `npm run build` lulus | selesai (lokal) | 2026-10-31 15:10 — Pesan libur ramah & hijau |
 | I-087 | 2026-10-31 15:35 | "[Image 1] notifikasi status perangkat lain ubah menjadi, Kamu Menggunakan Perangkat/Browser Yang berbeda dengan yang terdaftar, tulisan kecil dibawahnya Reset Perangkat Hub Tim IT, jadi tidak perlu cantumkan perangkat aktif" | Memperbarui `KartuStatusPerangkat.jsx` dan `PanelAbsen.jsx` untuk mengubah teks status `terikat_perangkat_lain` menjadi *“Kamu Menggunakan Perangkat/Browser Yang berbeda dengan yang terdaftar”* dengan catatan kecil *“Reset Perangkat Hub Tim IT”*, serta menghapus rincian perangkat aktif; verifikasi `npm run lint`, `npm test` (30/30), `npm run build` lulus | selesai (lokal) | 2026-10-31 15:35 — Pemberitahuan perangkat berbeda & reset |
+| I-088 | 2026-11-01 17:58 | "hari ini minggu dan sudah golive, pegawai sudah mulai absen masuk dan pulang dari tadi" + "catat konfirmasi go live" | Mencatat konfirmasi **go-live produksi dimulai Minggu, 1 November 2026** dan pegawai sudah absen masuk/pulang; memperbarui Status Terkini, tabel status (baris Go-live), backlog B-24 (selesai) + B-26 (pantau Alfa pertama), entri Log Kronologis, serta koreksi catatan commit `f332efb`. Tidak ada perubahan kode; dokumen ditahan di working tree | selesai (dokumen); belum di-commit | 2026-11-01 17:58 — Go-live produksi dimulai |
+| I-089 | 2026-11-01 17:58 | "direktur ingin jika dr yang on call contohnya dr spesialis poliklinik di unit instalasi non rawat inap bisa absen di rumah,dia tidak terkena radius 50 meter jadi dia bisa absen di rumah dengan jam kerja reguler, bagaimana kita mmebuat sistemnya tanpa mengganggu sistem radius yang sudah berjalan,tanpa terjadinya bug dan eror pada aplikasi" + "kerjakan dan setelah pekerjaan selesai pastikan tidak ada bug yang mempengaruhi sistem yang lain" + jawaban: per pegawai, tetap jam reguler, Super Admin saja | Menambahkan pengecualian radius per pegawai: kolom `pegawai.bebas_radius` + audit, `submit_presensi` hanya menolak radius bila flag mati (validasi lain tetap), `profil_saya()` mengirim flag, RPC Data Pegawai + checkbox/badge **Bebas Radius**, opsi `abaikanRadius` pada geofencing dengan penanda riwayat, migrasi **28** + `verifikasi_28.sql`, sinkron `schema.sql`; `npm run lint` bersih, `npm test` **32/32**, `npm run build` lulus 8,46 dtk (ulang 8,69 dtk) | selesai (kode); migrasi 28 belum dijalankan | 2026-11-01 18:13 — Pengecualian radius pegawai tertentu |
+| I-090 | 2026-11-01 18:40 | "ya sinkronkan semua yang masih menyebutkan oncall, karna perintah saya terakhir untuk tidak menyebutkan on call pada pegawai yang tidak terkana batas lokasi, sama persis pegawai reguler biasa cuma mereka bedanya bisa absen dimana aja" | Menyinkronkan istilah menjadi **Bebas Radius** / **pegawai tertentu**: nama file migrasi `28_bebas_radius_oncall.sql` → `28_bebas_radius.sql` (sesuai file nyata) di `schema.sql` dan dokumen; label/badge lama dihapus; penjelasan menegaskan pegawai tersebut tetap pegawai reguler biasa dan hanya berbeda karena boleh absen di mana saja; verifikasi ulang `npm run lint`, `npm test`, `npm run build` | selesai (dokumen; kode tidak berubah) | 2026-11-01 18:55 — Sinkronisasi istilah bebas radius |
+| I-091 | 2026-11-02 08:55 | "sudah saya run dan succses" | Mencatat migrasi **28** dan `verifikasi_28.sql` sudah dijalankan serta lulus di Supabase; flag **Bebas Radius** kini aktif di server. Memperbarui Status Terkini, tabel status migrasi/verifikasi, catatan lingkungan, dan backlog (sisa uji manual). Tidak ada perubahan kode | selesai (dokumen); belum di-commit | 2026-11-02 08:55 — Migrasi 28 & verifikasi 28 berhasil |
+| I-092 | 2026-11-02 09:43 | "kalau beigut kita tidak perlu mengubah apapun dulu, commit dan push pekerjaan terakhir" | Menahan rencana perbaikan akurasi GPS setelah temuan jarak 130 m; memverifikasi `npm run lint`, `npm test`, `npm run build`; meng-commit pekerjaan **Bebas Radius** + migrasi 28 + dokumen audit dan push ke `origin/main` | selesai | 2026-11-02 09:43 — Commit & push bebas radius |
 
 ---
 
@@ -337,6 +343,13 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   Tidak ada perubahan kode. **Alfa otomatis sudah diaktifkan** (laporan user
   2026-10-30 23:23) dan cron `presisi-alfa-otomatis` aktif; sisa langkah:
   verifikasi pembentukan Alfa pertama dan pantau pasca go-live.
+- **Go-live produksi (2026-11-01):** go-live **sudah dimulai Minggu,
+  1 November 2026** dan pegawai sudah melakukan absen masuk serta pulang
+  (laporan user 2026-11-01 17:58). Absen di akhir pekan hanya sah untuk pegawai
+  shift yang memiliki `jadwal_shift`; pegawai reguler tetap diblokir server
+  dengan pesan "Hari libur ... Anda tidak dijadwalkan shift". Sisa pekerjaan:
+  verifikasi pembentukan Alfa otomatis pertama setelah jam kerja hari kerja
+  pertama dan pemantauan operasional pasca go-live.
 - **Paginasi data (2026-10-31, sudah di-commit `22c2bab`):** jadwal tanggal 1–2
   tidak tampil karena `ambilJadwalRentang` membaca seluruh unit tanpa paginasi
   dan terpotong batas **1000 baris** Supabase (total November 2026 = 1064).
@@ -347,5 +360,16 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   migrasi DB dan tidak perlu impor ulang; `npm run lint` bersih, `npm test`
   **30/30**, `npm run build` lulus **15,01 dtk** (ulang 10,67 dtk). Uji manual
   user 2026-10-31 12:53: seluruh tanggal termasuk 1–2 November sudah muncul.
+- **Pengecualian radius tertentu (2026-11-01):** kolom `pegawai.bebas_radius`
+  (default `false`) + audit `bebas_radius_diubah_pada`/`_oleh`, diatur Super
+  Admin dari **Data Pegawai**. `submit_presensi` tetap menghitung/menyimpan
+  jarak dan menandai `lokasi_masuk/pulang.di_luar_radius`, tetapi hanya menolak
+  radius bila flag mati; validasi perangkat, anti Fake GPS, akurasi, jadwal,
+  jendela absen, dan aturan hari libur tidak berubah. Klien memakai
+  `periksaLokasi(pos, { abaikanRadius })` hanya untuk tampilan; server tetap
+  otoritatif. Migrasi **28** dan `verifikasi_28.sql` **sudah dijalankan** di
+  Supabase dan verifikasi lulus (laporan user 2026-11-02), sehingga flag
+  **Bebas Radius** aktif di server. Sisa: uji manual satu pegawai bebas radius
+  absen dari luar area dan satu pegawai biasa tetap ditolak di luar 50 m.
 - Timezone aplikasi: `Asia/Makassar` (WITA, UTC+8).
 - `dist/` dan `.env` sudah diabaikan Git.

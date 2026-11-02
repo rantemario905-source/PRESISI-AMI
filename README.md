@@ -12,8 +12,9 @@ dan pemisahan hak akses antara **Pegawai** dan **Super Admin**.
 > pengelolaan jadwal oleh kepala unit, hari libur, deteksi keterlambatan,
 > Alfa otomatis**, **impor jadwal CSV/XLSX**, **satu perangkat aktif per
 > pegawai**, **jendela waktu absensi**, **hapus grup shift kosong**, **kepala
-> unit multi-unit dan kepala ASN tanpa baris pegawai**, serta **jam kerja
-> reguler khusus per unit**.
+> unit multi-unit dan kepala ASN tanpa baris pegawai**, **jam kerja
+> reguler khusus per unit**, serta **pengecualian radius untuk pegawai
+> tertentu**.
 
 > **Dokumentasi audit:** progres pekerjaan tercatat di [`progress.md`](progress.md)
 > dan aturan kerja agen serta log instruksi user di [`AGENTS.md`](AGENTS.md).
@@ -89,6 +90,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 | 25 | `supabase/migrations/25_batas_absen_pulang.sql` | Batas akhir absen pulang: 23.59 WITA pada tanggal kerja (reguler/shift tidak lintas hari) dan 12.00 WITA pada tanggal selesai untuk shift malam (digantikan migrasi 26) |
 | 26 | `supabase/migrations/26_batas_absen_baru.sql` | Jendela absen baru: masuk dibuka 1 jam sebelum jam masuk; pulang ditutup 2 jam setelah jam pulang untuk semua pola kerja |
 | 27 | `supabase/migrations/27_jam_kerja_unit.sql` | Jam kerja reguler per unit: tabel `jam_kerja_unit`, override `jadwal_kerja`/Alfa, seed ADMISI RAWAT JALAN Senin–Jumat 07.00–15.00, dan pegawai unit tersebut dijadikan berpola Reguler |
+| 28 | `supabase/migrations/28_bebas_radius.sql` | Pengecualian radius untuk pegawai tertentu: kolom `pegawai.bebas_radius` (default `false`), `submit_presensi` hanya menolak radius bila flag mati, `profil_saya()` mengirim status, dan RPC Data Pegawai mencatat audit perubahan |
 
 > Bila database sudah pernah dijalankan sampai file 08, jalankan **file 09** untuk
 > mengaktifkan alur Dinas & Sakit / Cuti, **file 11** untuk pengaturan kepala
@@ -100,8 +102,9 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > untuk koordinat RSUD AMI, **file 22** untuk kepala unit multi-unit, **file 23**
 > untuk Dinas Luar lintas unit, **file 24** untuk radius absensi 50 meter,
 > **file 25** untuk batas akhir absen pulang versi pertama, **file 26** untuk
-> jendela absen baru (masuk 1 jam sebelum, pulang ditutup 2 jam setelah), dan
-> **file 27** untuk jam kerja reguler khusus per unit.
+> jendela absen baru (masuk 1 jam sebelum, pulang ditutup 2 jam setelah),
+> **file 27** untuk jam kerja reguler khusus per unit, dan **file 28** untuk
+> pengecualian radius pegawai tertentu.
 > File 10 hanya berisi RPC perubahan role yang tidak dipakai UI, jadi boleh
 > dilewati. Jalankan migrasi secara bertahap - jangan mengulang file lama bila
 > tidak diperlukan.
@@ -116,7 +119,8 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > **`supabase/verifikasi_20.sql`**, **`supabase/verifikasi_21.sql`**,
 > **`supabase/verifikasi_22.sql`**, **`supabase/verifikasi_23.sql`**,
 > **`supabase/verifikasi_24.sql`**, **`supabase/verifikasi_25.sql`**,
-> **`supabase/verifikasi_26.sql`**, dan **`supabase/verifikasi_27.sql`** setelah
+> **`supabase/verifikasi_26.sql`**, **`supabase/verifikasi_27.sql`**, dan
+> **`supabase/verifikasi_28.sql`** setelah
 > migrasi terkait. Seluruh nilai
 > pemeriksaan harus `true`; bila ada yang `false`, jangan lanjutkan pemakaian.
 > `verifikasi_13.sql` dan `verifikasi_14.sql` hanya berlaku sebelum migrasi 15;
@@ -132,7 +136,12 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > ditutup 2 jam setelah). Setelah migrasi 26, `verifikasi_17.sql` dan
 > `verifikasi_25.sql` bersifat historis; verifikasi aktif adalah
 > `verifikasi_26.sql`. Migrasi 27 wajib dijalankan agar menu **Jam Kerja Unit**
-> berfungsi dan unit dengan jam khusus memakai jadwalnya sendiri.
+> berfungsi dan unit dengan jam khusus memakai jadwalnya sendiri. Migrasi 28
+> wajib dijalankan **sebelum** kode baru di-deploy agar kolom `bebas_radius`
+> dan RPC Data Pegawai tersedia; tanpa migrasi ini pengecualian radius belum
+> aktif dan penyimpanan Data Pegawai menampilkan pesan agar migrasi dijalankan.
+> **Status 2026-11-02:** migrasi 28 dan `verifikasi_28.sql` sudah dijalankan
+> dan lulus, sehingga **Bebas Radius** aktif di server.
 > Bila muncul `function public.is_superadmin() does not exist`, jalankan versi
 > terbaru migrasi 19 — file ini membuat ulang fungsi inti tersebut sekaligus
 > memeriksa keberadaan tabel `pegawai`/`presensi`.
@@ -140,7 +149,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 **B. Sekaligus**
 
 Salin seluruh isi `supabase/schema.sql`, tempel, lalu **Run**.
-Isinya identik dengan gabungan kedua puluh tujuh file di atas (termasuk migrasi 15-27).
+Isinya identik dengan gabungan kedua puluh delapan file di atas (termasuk migrasi 15-28).
 
 **C. Membuat akun pegawai**
 

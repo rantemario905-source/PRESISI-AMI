@@ -113,6 +113,7 @@ export default function PanelAbsen({
   jadwal,
   jadwalKemarin,
   deviceToken,
+  bebasRadius = false,
   onBerhasil,
 }) {
   const [proses, setProses] = useState(null) // 'masuk' | 'pulang' | null
@@ -217,8 +218,8 @@ export default function PanelAbsen({
       // 1. Ambil posisi GPS presisi tinggi
       const posisi = await dapatkanLokasi()
 
-      // 2. Validasi klien: mock location + radius
-      const cek = periksaLokasi(posisi)
+      // 2. Validasi klien: mock location + radius (bebas radius boleh di luar area)
+      const cek = periksaLokasi(posisi, { abaikanRadius: bebasRadius })
       if (!cek.valid) {
         setHasil({ tipe: 'galat', pesan: cek.pesan })
         return
@@ -236,11 +237,13 @@ export default function PanelAbsen({
 
       // 4. Notifikasi sukses
       const jam = data?.waktu ? formatJam(data.waktu) : ''
+      const diLuarRadius =
+        cek.kode === 'VALID_LUAR_RADIUS' || data?.di_luar_radius === true
       setHasil({
         tipe: 'sukses',
         pesan: `${data?.pesan ?? 'Absensi berhasil dicatat.'} Jam ${jam}, jarak ${
           data?.jarak != null ? formatJarak(Number(data.jarak)) : formatJarak(cek.jarak)
-        } dari rumah sakit.`,
+        } dari rumah sakit${diLuarRadius ? ' (di luar area)' : ''}.`,
       })
       onBerhasil?.()
     } catch (err) {
@@ -286,7 +289,7 @@ export default function PanelAbsen({
               <path d="M12 21s7-5.1 7-11a7 7 0 10-14 0c0 5.9 7 11 7 11z" />
               <circle cx="12" cy="10" r="2.5" />
             </svg>
-            Radius {MAX_RADIUS_METERS} m
+            {bebasRadius ? 'Bebas Radius' : `Radius ${MAX_RADIUS_METERS} m`}
           </span>
         </div>
 
@@ -320,7 +323,9 @@ export default function PanelAbsen({
               ? `Shift malam yang dimulai ${formatTanggalRingkas(
                   jadwalKemarin.tanggal,
                 )} masih berlangsung. Absen masuk akan dicatat untuk tanggal tersebut.`
-              : 'Pastikan Anda berada di dalam area rumah sakit sebelum menekan tombol absen.'}
+              : bebasRadius
+                ? 'Anda dapat melakukan absensi dari luar area rumah sakit. Jam kerja tetap berlaku.'
+                : 'Pastikan Anda berada di dalam area rumah sakit sebelum menekan tombol absen.'}
         </p>
 
         {perangkatTerkunci && (
