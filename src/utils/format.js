@@ -5,9 +5,21 @@
  */
 import { ZONA_WAKTU } from '../config/constants.js'
 
+const cacheFormatter = new Map()
+
+function ambilFormatter(locale, opsi) {
+  const kunci = `${locale}|${JSON.stringify(opsi)}`
+  let formatter = cacheFormatter.get(kunci)
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, opsi)
+    cacheFormatter.set(kunci, formatter)
+  }
+  return formatter
+}
+
 /** Tanggal hari ini dalam format YYYY-MM-DD menurut zona WITA */
 export function hariIni() {
-  return new Intl.DateTimeFormat('en-CA', {
+  return ambilFormatter('en-CA', {
     timeZone: ZONA_WAKTU,
     year: 'numeric',
     month: '2-digit',
@@ -19,7 +31,7 @@ export function hariIni() {
 export function formatTanggal(iso, opsi = {}) {
   if (!iso) return '—'
   const tanggal = String(iso).length === 10 ? `${iso}T00:00:00+08:00` : iso
-  return new Intl.DateTimeFormat('id-ID', {
+  return ambilFormatter('id-ID', {
     timeZone: ZONA_WAKTU,
     weekday: 'long',
     day: 'numeric',
@@ -32,7 +44,7 @@ export function formatTanggal(iso, opsi = {}) {
 /** "21 Okt 2026" — versi ringkas untuk tabel */
 export function formatTanggalRingkas(iso) {
   if (!iso) return '—'
-  return new Intl.DateTimeFormat('id-ID', {
+  return ambilFormatter('id-ID', {
     timeZone: ZONA_WAKTU,
     day: '2-digit',
     month: 'short',
@@ -43,7 +55,7 @@ export function formatTanggalRingkas(iso) {
 /** "Senin, 21 Okt 2026" — untuk tabel laporan bulanan */
 export function formatTanggalHari(iso) {
   if (!iso) return '—'
-  return new Intl.DateTimeFormat('id-ID', {
+  return ambilFormatter('id-ID', {
     timeZone: ZONA_WAKTU,
     weekday: 'long',
     day: '2-digit',
@@ -56,7 +68,7 @@ export function formatTanggalHari(iso) {
 export function formatTanggalPanjang(iso) {
   if (!iso) return '—'
   const tanggal = String(iso).length === 10 ? `${iso}T00:00:00+08:00` : iso
-  return new Intl.DateTimeFormat('id-ID', {
+  return ambilFormatter('id-ID', {
     timeZone: ZONA_WAKTU,
     day: 'numeric',
     month: 'long',
@@ -67,7 +79,7 @@ export function formatTanggalPanjang(iso) {
 /** "07:15 WITA" dari timestamp ISO */
 export function formatJam(iso) {
   if (!iso) return '—'
-  const jam = new Intl.DateTimeFormat('id-ID', {
+  const jam = ambilFormatter('id-ID', {
     timeZone: ZONA_WAKTU,
     hour: '2-digit',
     minute: '2-digit',
@@ -100,7 +112,7 @@ export function inisialNama(nama = '') {
 /** Nilai untuk <input type="date">: "YYYY-MM-DD" menurut WITA */
 export function formatTanggalInput(iso) {
   if (!iso) return ''
-  return new Intl.DateTimeFormat('en-CA', {
+  return ambilFormatter('en-CA', {
     timeZone: ZONA_WAKTU,
     year: 'numeric',
     month: '2-digit',
@@ -111,7 +123,7 @@ export function formatTanggalInput(iso) {
 /** Nilai untuk <input type="time">: "HH:mm" menurut WITA */
 export function formatJamInput(iso) {
   if (!iso) return ''
-  return new Intl.DateTimeFormat('en-GB', {
+  return ambilFormatter('en-GB', {
     timeZone: ZONA_WAKTU,
     hour: '2-digit',
     minute: '2-digit',
@@ -163,7 +175,7 @@ export function namaBulan(periode) {
   const tahun = Number(cocok[1])
   const bulan = Number(cocok[2])
   if (bulan < 1 || bulan > 12) return '—'
-  return new Intl.DateTimeFormat('id-ID', {
+  return ambilFormatter('id-ID', {
     timeZone: ZONA_WAKTU,
     month: 'long',
     year: 'numeric',

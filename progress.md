@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-02 09:43 WITA (commit & push bebas radius) |
+| Terakhir diperbarui | 2026-11-03 13:29 WITA (perbaikan lag ketik alasan koreksi) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -154,6 +154,23 @@ Migrasi **28** dan `verifikasi_28.sql` **sudah dijalankan** di Supabase dan
 verifikasi lulus (laporan user 2026-11-02), sehingga flag **Bebas Radius**
 aktif di server; sisa hanya uji manual absen dari luar area.
 
+Pekerjaan terbaru (2026-11-03): **koreksi presensi shift malam otomatis H+1** —
+helper `susunWaktuKoreksi` mempertahankan timestamp asli bila jam tidak diubah
+(termasuk absen masuk setelah tengah malam) dan menggeser jam pulang ke hari
+berikutnya bila tidak lebih lambat dari jam masuk, sehingga koreksi shift malam
+(mis. masuk 20.31, pulang 08.00) tidak lagi ditolak. Form koreksi menampilkan
+pratinjau tanggal/jam dan penanda **H+1**. `npm run lint` bersih, `npm test`
+**38/38**, `npm run build` lulus **8,29 dtk**.
+
+Penyempurnaan terbaru (2026-11-03 13:29): **lag mengetik alasan koreksi
+diperbaiki**. Penyebab: state form berada di komponen induk sehingga setiap
+ketikan merender ulang seluruh daftar (mobile + desktop), dan setiap baris
+membuat `Intl.DateTimeFormat` baru (benchmark 1.600 formatter baru = 271 ms vs
+cache 4 ms). Perbaikan: formatter di-cache level modul, form dipisah ke
+`FormKoreksiPresensi.jsx`, dan daftar dipisah ke `DaftarPresensiKoreksi.jsx`
+dengan `React.memo`. `npm run lint` bersih, `npm test` **38/38**, `npm run build`
+lulus **8,37 dtk**.
+
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–28 | `src/`, `supabase/migrations/01–28` |
@@ -184,6 +201,7 @@ aktif di server; sisa hanya uji manual absen dari luar area.
 | Jendela waktu absen | **Ada di kode** — masuk dibuka 1 jam sebelum; pulang 1 menit setelah hingga 2 jam setelah jam pulang (semua pola, termasuk shift malam) | migrasi 26, `PanelAbsen.jsx`, `jadwalAbsen.js` |
 | Jam kerja per unit | **Ada di kode** — override jam reguler per unit dengan fallback global; ADMISI RAWAT JALAN 07.00–15.00 Senin–Jumat; menu Super Admin; tampilan jam di akun pegawai sudah diuji dan berubah | migrasi 27, `JamKerjaUnit.jsx`, `jamKerjaService.js`, `jadwal_kerja`, `proses_alfa_otomatis` |
 | Pengecualian radius pegawai tertentu | **Aktif** — flag `pegawai.bebas_radius` per pegawai (Super Admin); pegawai tersebut tetap pegawai reguler biasa dan hanya berbeda karena boleh absen di mana saja. `submit_presensi` tetap mencatat jarak dan hanya melewati penolakan radius bila flag aktif; validasi lain tidak berubah; opsi `abaikanRadius` hanya untuk tampilan | migrasi 28, `verifikasi_28.sql`, `geofencing.js`, `PanelAbsen.jsx`, `DataPegawai.jsx`, `pegawaiService.js` |
+| Koreksi presensi shift malam | **Ada di kode (belum di-commit)** — jam pulang otomatis digeser ke H+1 bila tidak lebih lambat dari jam masuk; timestamp asli dipertahankan bila jam tidak diubah; form menampilkan pratinjau tanggal/jam dan penanda H+1 | `src/utils/koreksiPresensi.js`, `src/pages/admin/KoreksiPresensi.jsx`, `tests/koreksiPresensi.test.js` |
 | Keamanan ekspor CSV | **Ada di kode & di-commit** — sel string berawalan `=`, `+`, `-`, `@`, tab, CR, atau LF diberi apostrof sebelum escaping; template jadwal memakai aturan yang sama | `src/utils/csv.js`, `src/utils/templateJadwal.js` |
 | Buka dokumen izin | **Ada di kode & di-commit** — tab dokumen memutus `window.opener` dan memakai `location.replace` agar tidak membuka halaman Supabase dengan konteks pembuka | `src/pages/IzinSaya.jsx`, `src/pages/admin/PengajuanIzin.jsx` |
 | Hapus grup kosong | **Ada di kode** — semua grup 0 pegawai; "Belum ditentukan" (akun sistem) disembunyikan bila kosong | migrasi 18, `GrupShift.jsx` |
@@ -200,7 +218,7 @@ aktif di server; sisa hanya uji manual absen dari luar area.
 | Penanda tangan laporan | **Ada di kode** — Kasubbag Tata Usaha, Suriami, SKM., M.Kes, NIP. 197312302007012011 untuk semua pegawai | `src/config/constants.js`, `BlokTandaTangan.jsx` |
 | Menu kepala ASN | **Ada di kode** — “Kembali ke Absensi” (sidebar) dan tab Absensi (navigasi bawah HP) disembunyikan bila `sumber_akun = kepala_asn` | `PortalKepalaLayout.jsx`, `SidebarKepala.jsx` |
 | Dinas Luar lintas unit | **Ada di kode** — kepala unit dapat memilih pegawai lintas unit untuk Dinas Luar; Sakit/Cuti tetap per unit; pembuat grup membaca grup + dokumennya selama menjabat; akses dicabut otomatis saat jabatan berakhir; kepala ASN dapat mencatat (FK ke `auth.users`) | migrasi 23, `PengajuanIzin.jsx`, `leaveService.js`, `pegawaiService.js`, `verifikasi_23.sql` |
-| Lint/unit test | **Tersedia** — ESLint (`npm run lint`) bersih dan **30 uji** `node:test` (`npm test`) lulus; B-8/B-9 di commit `42cb317`, uji paginasi/template di commit `22c2bab` | `eslint.config.js`, `tests/`, `package.json`, `.github/workflows/deploy.yml` |
+| Lint/unit test | **Tersedia** — ESLint (`npm run lint`) bersih dan **38 uji** `node:test` (`npm test`) lulus; B-8/B-9 di commit `42cb317`, uji paginasi/template di commit `22c2bab`, uji koreksi H+1 masih di working tree | `eslint.config.js`, `tests/`, `package.json`, `.github/workflows/deploy.yml` |
 | Paginasi data | **Ada di kode & di-commit `22c2bab`** — helper halaman 500; jadwal shift dibatasi unit aktif; rekap/laporan, koreksi, dan daftar izin memakai paginasi; parser template menolak header tak dikenal; uji manual user 2026-10-31 lulus (tanggal 1–2 muncul) | `src/utils/paginasi.js`, `shiftService.js`, `reportService.js`, `correctionService.js`, `leaveService.js`, `templateJadwal.js` |
 | Alfa otomatis | **Aktif mulai 1 November 2026** — diaktifkan lewat Pengaturan Presensi; **pg_cron 1.6.4 aktif** dan job `presisi-alfa-otomatis` terdaftar/aktif tiap 15 menit; menunggu pembentukan Alfa pertama (1 November 2026 hari Minggu, sehingga Alfa reguler diperkirakan muncul Senin 2 November) | migrasi 12/27, `PengaturanPresensi.jsx`, `supabase/jadwal_alfa.sql`, laporan user 2026-10-30 |
 | Deploy GitHub Pages | **Aktif** — `https://presisiami.my.id/` live dengan base `/`; `www` redirect ke domain utama; Enforce HTTPS aktif, HTTP apex/`www` **301** ke HTTPS (diverifikasi 2026-10-30) | workflow run `40439173719` sukses |
@@ -359,6 +377,47 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-03 13:29 WITA — Perbaikan lag mengetik alasan koreksi
+- **Perubahan:** menindaklanjuti laporan form koreksi terasa berat saat mengetik
+  alasan. Akar masalah: state `form` berada di halaman induk sehingga setiap
+  ketukan merender ulang seluruh daftar presensi (varian HP dan tabel desktop
+  sama-sama dirender), dan setiap baris membuat `Intl.DateTimeFormat` baru
+  (benchmark 1.600 formatter baru 271 ms vs cache 4 ms). Langkah yang dikerjakan:
+  (1) cache formatter level modul di `src/utils/format.js`; (2) memisahkan form
+  ke `FormKoreksiPresensi.jsx` dengan state lokal, `useMemo` pratinjau, dan
+  callback `onSelesai`; (3) memisahkan daftar ke `DaftarPresensiKoreksi.jsx`
+  yang dibungkus `React.memo`, dengan `bukaKoreksi`/`tutupKoreksi`/`selesaiKoreksi`
+  stabil via `useCallback`.
+- **File:** `src/utils/format.js`, `src/pages/admin/KoreksiPresensi.jsx`,
+  `src/components/admin/FormKoreksiPresensi.jsx` (baru),
+  `src/components/admin/DaftarPresensiKoreksi.jsx` (baru), `progress.md`,
+  `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **38/38** lulus;
+  `npm run build` lulus **8,37 dtk** (291 modul).
+- **Catatan/risiko:** perilaku simpan, validasi, dan pratinjau H+1 tidak berubah.
+  Belum diuji manual di perangkat; perubahan ditahan di working tree menunggu uji
+  user. Bila masih berat pada bulan lintas unit yang sangat besar, opsi lanjutan
+  adalah pagination/virtualisasi daftar.
+
+### 2026-11-03 12:07 WITA — Koreksi presensi shift malam otomatis H+1
+- **Perubahan:** melanjutkan pekerjaan yang terhenti karena crash. Form koreksi
+  sebelumnya menolak jam pulang shift malam (mis. masuk 20.31, pulang 08.00)
+  karena jam pulang digabung ke tanggal presensi sehingga dianggap lebih awal
+  dari jam masuk. Ditambahkan helper `susunWaktuKoreksi` yang mempertahankan
+  timestamp asli bila jam tidak diubah (termasuk absen masuk setelah tengah
+  malam), menggeser jam pulang ke H+1 (maksimal 7 hari) bila tidak lebih lambat
+  dari jam masuk, dan menandai `pulangLintasHari`. Form **Koreksi Presensi**
+  memakai helper saat menyimpan dan menampilkan pratinjau tanggal/jam masuk dan
+  pulang beserta penanda H+1. Server `koreksi_presensi` tidak diubah karena tidak
+  membatasi urutan waktu.
+- **File:** `src/utils/koreksiPresensi.js` (baru), `src/pages/admin/KoreksiPresensi.jsx`,
+  `tests/koreksiPresensi.test.js` (baru), `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **38/38** lulus (6 uji baru
+  koreksi H+1); `npm run build` lulus **8,29 dtk** (289 modul).
+- **Catatan/risiko:** belum diuji manual di UI; perubahan ditahan di working tree
+  menunggu uji user. Menit terlambat untuk absen masuk setelah tengah malam tetap
+  dihitung server terhadap tanggal presensi (perilaku lama, di luar lingkup).
 
 ### 2026-11-02 09:43 WITA — Commit & push bebas radius
 - **Perubahan:** menindaklanjuti laporan pegawai yang ditolak dengan jarak 130 m
@@ -1820,6 +1879,7 @@ dan `verifikasi_18` untuk hapus grup kosong.
 | B-27 | ~~Migrasi 28 dan verifikasi 28 belum dijalankan~~ | - | **Selesai:** migrasi 28 dijalankan dan `verifikasi_28.sql` lulus (laporan user 2026-11-02); flag **Bebas Radius** aktif di server |
 | B-28 | Uji manual pegawai bebas radius dan pegawai biasa setelah migrasi 28 | Belum ada bukti uji di perangkat | Uji satu pegawai bebas radius absen dari luar area pada jam reguler dan satu pegawai biasa tetap ditolak di luar 50 m |
 | B-29 | Kasus GPS meleset 130 m di gedung utama (pesan klien) | Pegawai di dalam area bisa ditolak; sebaliknya lokasi luar bisa lolos | Ditahan atas keputusan user 2026-11-02. Opsi: sampling GPS beberapa detik, perketat akurasi (20–25 m), tampilkan akurasi pada pesan, dan/atau audit percobaan gagal; perlu keputusan batas akurasi |
+| B-30 | Uji manual koreksi presensi shift malam H+1 | Belum ada bukti uji di UI | Koreksi presensi shift malam (mis. masuk 20.31, pulang 08.00), lalu pastikan jam pulang tersimpan pada tanggal H+1 dan pratinjau menampilkan penanda H+1 |
 | B-4 | ~~`npm run build` belum dijalankan~~ | — | **Selesai:** lulus 2026-10-25 12:24 |
 | B-5 | ~~README menyebut Fase 1–7 saja~~ | — | **Selesai:** diperbarui ke Fase 1–8 + impor |
 | B-6 | ~~`verifikasi_10.sql` tidak ada di diagram README~~ | — | **Selesai:** ditambahkan ke struktur |
