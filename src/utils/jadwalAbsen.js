@@ -4,7 +4,7 @@
  * --------------------------------------------------------------------------
  * Aturan (sama dengan validasi server di submit_presensi):
  *   - Absen masuk dibuka MENIT_AWAL_ABSEN_MASUK menit sebelum jam masuk.
- *   - Absen pulang dibuka MENIT_JEDA_ABSEN_PULANG menit setelah jam pulang.
+ *   - Absen pulang dibuka tepat pada jam pulang (MENIT_JEDA_ABSEN_PULANG = 0).
  *   - Absen pulang ditutup MENIT_TUTUP_ABSEN_PULANG menit setelah jam pulang.
  * Berlaku untuk pola Reguler maupun Shift, termasuk shift malam lintas hari.
  * ==========================================================================
@@ -77,7 +77,7 @@ export function tutupAbsenPulang(jadwal) {
   return new Date(selesai.getTime() + MENIT_TUTUP_ABSEN_PULANG * 60_000)
 }
 
-/** "07.40" atau "16.31" menurut WITA. */
+/** "07.40" atau "16.30" menurut WITA. */
 export function formatJamBuka(date) {
   if (!date) return ''
   return new Intl.DateTimeFormat('id-ID', {

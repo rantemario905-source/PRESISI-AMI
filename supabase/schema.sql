@@ -2048,7 +2048,7 @@ commit;
 --      Sabtu–Minggu libur. Hari libur nasional/cuti bersama diinput manual.
 --   4. Presensi reguler dikunci pada akhir pekan/hari libur. Pegawai shift
 --      hanya boleh absen bila dijadwalkan, kecuali mode transisi diaktifkan.
---   5. Keterlambatan dihitung tanpa toleransi; 08.00.01 = 1 menit.
+--   5. Keterlambatan dihitung per menit penuh; 08.00.59 = 0 menit, 08.01 = 1 menit.
 --   6. Alfa otomatis dibuat setelah jam kerja berakhir (bukan jam tetap).
 --
 -- CATATAN: butir 4 (mode transisi) dihapus oleh bagian 13 di akhir file ini.
@@ -2440,7 +2440,7 @@ begin
     return 0;
   end if;
 
-  v_menit := ceil(extract(epoch from (p_waktu - v_mulai)) / 60.0)::int;
+  v_menit := floor(extract(epoch from (p_waktu - v_mulai)) / 60.0)::int;
   return greatest(v_menit, 0);
 end;
 $$;
@@ -2921,7 +2921,7 @@ begin
       end if;
 
       if v_waktu > v_mulai then
-        v_menit := ceil(extract(epoch from (v_waktu - v_mulai)) / 60.0)::int;
+        v_menit := floor(extract(epoch from (v_waktu - v_mulai)) / 60.0)::int;
       else
         v_menit := 0;
       end if;
@@ -4323,7 +4323,7 @@ begin
       end if;
 
       if v_waktu > v_mulai then
-        v_menit := ceil(extract(epoch from (v_waktu - v_mulai)) / 60.0)::int;
+        v_menit := floor(extract(epoch from (v_waktu - v_mulai)) / 60.0)::int;
       else
         v_menit := 0;
       end if;
@@ -4404,9 +4404,8 @@ begin
         v_selesai := v_selesai + interval '1 day';
       end if;
 
-      if v_waktu < v_selesai + interval '1 minute' then
-        raise exception 'Absen pulang baru dapat dilakukan mulai pukul % WITA (setelah jam pulang %).',
-          to_char((v_selesai + interval '1 minute') at time zone 'Asia/Makassar', 'HH24:MI'),
+      if v_waktu < v_selesai then
+        raise exception 'Absen pulang baru dapat dilakukan mulai pukul % WITA (jam pulang).',
           to_char(v_selesai at time zone 'Asia/Makassar', 'HH24:MI');
       end if;
     end if;
@@ -6668,7 +6667,7 @@ begin
       end if;
 
       if v_waktu > v_mulai then
-        v_menit := ceil(extract(epoch from (v_waktu - v_mulai)) / 60.0)::int;
+        v_menit := floor(extract(epoch from (v_waktu - v_mulai)) / 60.0)::int;
       else
         v_menit := 0;
       end if;
@@ -6740,7 +6739,7 @@ begin
       raise exception 'Anda sudah melakukan absen pulang hari ini.';
     end if;
 
-    -- Batas absen pulang: 1 menit setelah jam pulang pada jadwal hari kerja
+    -- Batas absen pulang: mulai tepat pada jam pulang pada jadwal hari kerja
     -- presensi tersebut (shift malam dihitung lintas hari).
     select * into v_jadwal from public.jadwal_kerja(v_user, v_row.tanggal);
     if coalesce(v_jadwal.terjadwal, false)
@@ -6752,9 +6751,8 @@ begin
         v_selesai := v_selesai + interval '1 day';
       end if;
 
-      if v_waktu < v_selesai + interval '1 minute' then
-        raise exception 'Absen pulang baru dapat dilakukan mulai pukul % WITA (setelah jam pulang %).',
-          to_char((v_selesai + interval '1 minute') at time zone 'Asia/Makassar', 'HH24:MI'),
+      if v_waktu < v_selesai then
+        raise exception 'Absen pulang baru dapat dilakukan mulai pukul % WITA (jam pulang).',
           to_char(v_selesai at time zone 'Asia/Makassar', 'HH24:MI');
       end if;
     end if;
@@ -6927,7 +6925,7 @@ begin
       end if;
 
       if v_waktu > v_mulai then
-        v_menit := ceil(extract(epoch from (v_waktu - v_mulai)) / 60.0)::int;
+        v_menit := floor(extract(epoch from (v_waktu - v_mulai)) / 60.0)::int;
       else
         v_menit := 0;
       end if;
@@ -7000,7 +6998,7 @@ begin
     end if;
 
     -- Batas absen pulang:
-    --   - mulai 1 menit setelah jam pulang pada jadwal hari kerja presensi;
+    --   - mulai tepat pada jam pulang pada jadwal hari kerja presensi;
     --   - berakhir 23.59 WITA pada tanggal kerja, atau 12.00 WITA pada
     --     tanggal selesai untuk shift malam (lintas hari).
     select * into v_jadwal from public.jadwal_kerja(v_user, v_row.tanggal);
@@ -7016,9 +7014,8 @@ begin
         v_batas_pulang := public.waktu_wita(v_row.tanggal + 1, time '00:00');
       end if;
 
-      if v_waktu < v_selesai + interval '1 minute' then
-        raise exception 'Absen pulang baru dapat dilakukan mulai pukul % WITA (setelah jam pulang %).',
-          to_char((v_selesai + interval '1 minute') at time zone 'Asia/Makassar', 'HH24:MI'),
+      if v_waktu < v_selesai then
+        raise exception 'Absen pulang baru dapat dilakukan mulai pukul % WITA (jam pulang).',
           to_char(v_selesai at time zone 'Asia/Makassar', 'HH24:MI');
       end if;
 
@@ -7075,7 +7072,7 @@ commit;
 --   Mengubah jendela waktu absensi untuk seluruh pola kerja (reguler dan
 --   shift), menggantikan aturan migrasi 17 dan 25:
 --     - absen masuk dibuka 1 jam (60 menit) sebelum jam masuk;
---     - absen pulang dibuka 1 menit setelah jam pulang dan ditutup 2 jam
+--     - absen pulang dibuka tepat pada jam pulang dan ditutup 2 jam
 --       (120 menit) setelah jam pulang;
 --     - shift malam lintas hari mengikuti tanggal selesainya (mis. shift
 --       20.00-08.00 ditutup pukul 10.00 besoknya).
@@ -7198,7 +7195,7 @@ begin
       end if;
 
       if v_waktu > v_mulai then
-        v_menit := ceil(extract(epoch from (v_waktu - v_mulai)) / 60.0)::int;
+        v_menit := floor(extract(epoch from (v_waktu - v_mulai)) / 60.0)::int;
       else
         v_menit := 0;
       end if;
@@ -7270,7 +7267,7 @@ begin
       raise exception 'Tidak ada presensi terbuka yang dapat dipulangkan. Hubungi Super Admin bila presensi Anda terlewat.';
     end if;
 
-    -- Jendela absen pulang: mulai 1 menit setelah jam pulang dan ditutup
+    -- Jendela absen pulang: dibuka tepat pada jam pulang dan ditutup
     -- 2 jam setelah jam pulang (shift malam dihitung lintas hari).
     select * into v_jadwal from public.jadwal_kerja(v_user, v_row.tanggal);
     if coalesce(v_jadwal.terjadwal, false)
@@ -7284,9 +7281,8 @@ begin
 
       v_batas_pulang := v_selesai + interval '2 hours';
 
-      if v_waktu < v_selesai + interval '1 minute' then
-        raise exception 'Absen pulang baru dapat dilakukan mulai pukul % WITA (setelah jam pulang %).',
-          to_char((v_selesai + interval '1 minute') at time zone 'Asia/Makassar', 'HH24:MI'),
+      if v_waktu < v_selesai then
+        raise exception 'Absen pulang baru dapat dilakukan mulai pukul % WITA (jam pulang).',
           to_char(v_selesai at time zone 'Asia/Makassar', 'HH24:MI');
       end if;
 
@@ -7903,7 +7899,7 @@ begin
       end if;
 
       if v_waktu > v_mulai then
-        v_menit := ceil(extract(epoch from (v_waktu - v_mulai)) / 60.0)::int;
+        v_menit := floor(extract(epoch from (v_waktu - v_mulai)) / 60.0)::int;
       else
         v_menit := 0;
       end if;
@@ -7979,7 +7975,7 @@ begin
       raise exception 'Tidak ada presensi terbuka yang dapat dipulangkan. Hubungi Super Admin bila presensi Anda terlewat.';
     end if;
 
-    -- Jendela absen pulang: mulai 1 menit setelah jam pulang dan ditutup
+    -- Jendela absen pulang: dibuka tepat pada jam pulang dan ditutup
     -- 2 jam setelah jam pulang (shift malam dihitung lintas hari).
     select * into v_jadwal from public.jadwal_kerja(v_user, v_row.tanggal);
     if coalesce(v_jadwal.terjadwal, false)
@@ -7993,9 +7989,8 @@ begin
 
       v_batas_pulang := v_selesai + interval '2 hours';
 
-      if v_waktu < v_selesai + interval '1 minute' then
-        raise exception 'Absen pulang baru dapat dilakukan mulai pukul % WITA (setelah jam pulang %).',
-          to_char((v_selesai + interval '1 minute') at time zone 'Asia/Makassar', 'HH24:MI'),
+      if v_waktu < v_selesai then
+        raise exception 'Absen pulang baru dapat dilakukan mulai pukul % WITA (jam pulang).',
           to_char(v_selesai at time zone 'Asia/Makassar', 'HH24:MI');
       end if;
 

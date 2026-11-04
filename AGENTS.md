@@ -232,6 +232,10 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-092 | 2026-11-02 09:43 | "kalau beigut kita tidak perlu mengubah apapun dulu, commit dan push pekerjaan terakhir" | Menahan rencana perbaikan akurasi GPS setelah temuan jarak 130 m; memverifikasi `npm run lint`, `npm test`, `npm run build`; meng-commit pekerjaan **Bebas Radius** + migrasi 28 + dokumen audit dan push ke `origin/main` | selesai | 2026-11-02 09:43 — Commit & push bebas radius |
 | I-093 | 2026-11-03 12:07 | "lanjutkan pekerjaan terakhir yang terhenti[Image 1]  karena crash" | Melanjutkan pekerjaan koreksi presensi shift malam H+1 yang terhenti: helper `susunWaktuKoreksi`, pratinjau + penanda H+1 di `KoreksiPresensi.jsx`, uji unit, dan dokumen audit; `npm run lint` bersih, `npm test` 38/38, `npm run build` lulus 8,29 dtk | selesai (kode; belum di-commit) | 2026-11-03 12:07 — Koreksi presensi shift malam H+1 |
 | I-094 | 2026-11-03 13:29 | "kerjakan 1-3 saja" (menyetujui Langkah 1–3 rencana perbaikan lag mengetik alasan koreksi) | Langkah 1: cache `Intl.DateTimeFormat` level modul di `src/utils/format.js`. Langkah 2: memisahkan form koreksi ke `FormKoreksiPresensi.jsx` agar state ketikan tidak merender daftar. Langkah 3: memisahkan daftar ke `DaftarPresensiKoreksi.jsx` dengan `React.memo` dan `onKoreksi` stabil. `npm run lint` bersih, `npm test` 38/38, `npm run build` lulus 8,37 dtk | selesai (kode; belum di-commit) | 2026-11-03 13:29 — Perbaikan lag ketik alasan koreksi |
+| I-095 | 2026-11-03 15:55 | "ada kasus user mobile yang white screen seperti ini, dan juga kadang sekali sekali saya di laptop juga merasakan ketika membuka menu menu, cari tau kemungkina bug nya dan lakukan perbaikan" + jawaban: "1. ya normal lagi setelah refresh 2.a" | Mendiagnosis white screen: tidak ada Error Boundary, chunk lama 404 setelah deploy (GitHub Pages `max-age=600`), formatter tanggal bisa melempar `RangeError`, dan `localStorage` kepala belum diamankan. Perbaikan: `ErrorBoundary` root/rute/halaman, pemulihan otomatis sekali (`?perbarui` + guard 30 detik), listener `vite:preloadError`, fallback statis `index.html`, formatter tanggal aman, `localStorage` `try/catch`. `npm run lint` bersih, `npm test` **46/46**, `npm run build` lulus 7,78 dtk (ulang 14,87 dtk); uji headless login render dan fallback statis tampil. Catatan: I-093/I-094 ternyata sudah masuk commit `089b4e7` | selesai (kode); belum di-commit | 2026-11-03 15:55 — Ketahanan halaman & anti white screen |
+| I-096 | 2026-11-04 11:11 | "kemudian aplikasi saat ini menghitung terlambat contoh di jam reguler, jika masuk di jam 8.00 saya terlambat 1 menit, ubah aturan itu, harusnya terlambat jika sudah 8.01, dan jam pulang ubah agat terbuka di jam pas waktu pulang semisal 16.30 sudah terbuka" | Mengubah aturan keterlambatan menjadi per menit penuh (`floor`): 08.00.59 = 0 menit, 08.01 = 1 menit (sebelumnya `ceil` 08.00.01 = 1 menit). Absen pulang dibuka tepat pada jam pulang (16.30), bukan 16.31, dan tetap ditutup 2 jam setelahnya. Perubahan di `constants.js` (`MENIT_JEDA_ABSEN_PULANG = 0`), `jadwalAbsen.js`, teks `PanelAbsen.jsx`, uji `jadwalAbsen.test.js`, migrasi **29** + `verifikasi_29.sql`, sinkron `schema.sql` dan README; `npm run lint` bersih, `npm test` **46/46**, `npm run build` lulus 8,95 dtk | selesai (kode); migrasi 29 belum dijalankan | 2026-11-04 11:11 — Toleransi keterlambatan & jam pulang tepat waktu |
+| I-097 | 2026-11-04 11:18 | "ada beberapa pegawia kemarin yang absen masuk di jam 8.00, sudah saya run migrasi dan verif, tapi saya lihat mereka masih erhitung terlambat di sistem" + jawaban: "Sejak go-live 1 Nov 2026 (Recommended)" + "ya kerjakan" | Menjelaskan bahwa migrasi 29 hanya mengubah perhitungan absensi/koreksi berikutnya; baris presensi lama masih menyimpan `menit_terlambat` hasil `ceil`. Membuat migrasi **30** (`30_hitung_ulang_menit_terlambat.sql`) yang menghitung ulang data sejak **1 November 2026** memakai `hitung_menit_terlambat()` (floor), hanya baris ber-`jam_masuk`, idempoten, tanpa mengubah jadwal/status/perangkat; menambah `verifikasi_30.sql`; memperbarui README + dokumen audit. Catatan: migrasi 29 dan verifikasi 29 dilaporkan sudah dijalankan user 2026-11-04 | selesai (kode); migrasi 30 belum dijalankan | 2026-11-04 11:18 — Hitung ulang menit terlambat data lama |
+| I-098 | 2026-11-04 11:22 | "sudah saya jalankan dan berhasil" | Mencatat konfirmasi migrasi **30** dan verifikasinya sudah dijalankan dan berhasil; `menit_terlambat` data sejak 1 November 2026 sudah dihitung ulang. Memperbarui status migrasi/verifikasi, backlog B-33 (selesai), dan entri log. Tidak ada perubahan kode | selesai (dokumen); belum di-commit | 2026-11-04 11:22 — Migrasi 30 berhasil dijalankan |
 
 ---
 
@@ -373,5 +377,29 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   Supabase dan verifikasi lulus (laporan user 2026-11-02), sehingga flag
   **Bebas Radius** aktif di server. Sisa: uji manual satu pegawai bebas radius
   absen dari luar area dan satu pegawai biasa tetap ditolak di luar 50 m.
+- **Ketahanan halaman (2026-11-03, belum di-commit):** `ErrorBoundary` root
+  (`src/main.jsx`), per-rute (`src/App.jsx`), dan per-halaman portal admin/kepala;
+  kegagalan chunk dipulihkan otomatis sekali lewat `?perbarui` + guard 30 detik
+  (`src/utils/pemulihanHalaman.js`) dan listener `vite:preloadError`. `index.html`
+  memiliki fallback statis untuk browser yang gagal memuat JS. Penyebab utama
+  white screen: chunk hash lama **404** setelah deploy sementara HTML masih
+  di-cache (`Cache-Control: max-age=600` di GitHub Pages). Formatter tanggal di
+  `src/utils/format.js` mengembalikan `—` untuk nilai tidak valid.
+- **Toleransi keterlambatan & jam pulang (2026-11-04, belum di-commit):**
+  keterlambatan dihitung server per menit penuh (`floor`): 08.00.59 = 0 menit,
+  08.01 = 1 menit; `hitung_menit_terlambat` memakai aturan sama untuk koreksi.
+  Absen pulang dibuka tepat pada jam pulang (16.30) dan ditutup 2 jam setelahnya.
+  Kode klien: `MENIT_JEDA_ABSEN_PULANG = 0` di `src/config/constants.js`,
+  `bukaAbsenPulang()` menambahkan 0, teks `PanelAbsen.jsx` diperbarui. Server:
+  migrasi **29** + `verifikasi_29.sql` (dijalankan user 2026-11-04), dan
+  `schema.sql` disinkronkan. Verifikasi lokal: lint bersih, `npm test` **46/46**,
+  `npm run build` lulus 8,95 dtk.
+- **Backfill menit terlambat (2026-11-04, sudah dijalankan):** migrasi **29**
+  tidak mengubah baris presensi lama, sehingga absen 08.00.xx sebelum migrasi
+  tetap terbaca terlambat. Migrasi **30** + `verifikasi_30.sql` menghitung ulang
+  `menit_terlambat` sejak go-live **1 November 2026** dengan
+  `hitung_menit_terlambat()` (floor); hanya baris ber-`jam_masuk`, idempoten.
+  Migrasi 30 dan verifikasinya **sudah dijalankan dan berhasil** (laporan user
+  2026-11-04 11:22).
 - Timezone aplikasi: `Asia/Makassar` (WITA, UTC+8).
 - `dist/` dan `.env` sudah diabaikan Git.

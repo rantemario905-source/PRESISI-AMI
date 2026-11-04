@@ -30,7 +30,8 @@
  * ==========================================================================
  */
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import ErrorBoundary from './components/ErrorBoundary.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import PortalAdminLayout from './components/layout/PortalAdminLayout.jsx'
 import PortalKepalaLayout from './components/layout/PortalKepalaLayout.jsx'
@@ -58,11 +59,11 @@ const PengajuanIzin = lazy(() => import('./pages/admin/PengajuanIzin.jsx'))
 const Rekapitulasi = lazy(() => import('./pages/admin/Rekapitulasi.jsx'))
 const LaporanBulanan = lazy(() => import('./pages/admin/LaporanBulanan.jsx'))
 
-export default function App() {
+function RuteAplikasi() {
+  const { pathname } = useLocation()
+
   return (
-    <BrowserRouter basename={import.meta.env.BASE_URL}>
-      <BilahProgres />
-      <PengamatRute />
+    <ErrorBoundary key={pathname}>
       <Suspense fallback={<LayarMemuat label="Memuat halaman…" />}>
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -148,6 +149,16 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
+    </ErrorBoundary>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <BilahProgres />
+      <PengamatRute />
+      <RuteAplikasi />
     </BrowserRouter>
   )
 }

@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-03 13:29 WITA (perbaikan lag ketik alasan koreksi) |
+| Terakhir diperbarui | 2026-11-04 11:22 WITA (konfirmasi backfill menit terlambat) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -171,11 +171,42 @@ cache 4 ms). Perbaikan: formatter di-cache level modul, form dipisah ke
 dengan `React.memo`. `npm run lint` bersih, `npm test` **38/38**, `npm run build`
 lulus **8,37 dtk**.
 
+Pekerjaan terbaru (2026-11-03 15:55): **ketahanan halaman terhadap white screen**.
+Akar masalah: tidak ada Error Boundary sehingga error render atau kegagalan
+mengunduh chunk halaman memutihkan seluruh aplikasi; GitHub Pages mengirim
+`Cache-Control: max-age=600` untuk `index.html`/aset dan mengembalikan **404**
+untuk chunk hash lama, sehingga perangkat yang masih memegang HTML lama gagal
+membuka menu setelah deploy. Perbaikan: `ErrorBoundary` di root, per-rute, dan
+per-halaman portal; pemulihan otomatis sekali dengan penanda `?perbarui` +
+guard 30 detik; listener `vite:preloadError`; fallback statis di `index.html`;
+formatter tanggal mengembalikan `—` untuk nilai tidak valid; pembacaan
+`localStorage` unit kepala diamankan. `npm run lint` bersih, `npm test`
+**46/46**, `npm run build` lulus **7,78 dtk** (ulang 14,87 dtk).
+
+Pekerjaan terbaru (2026-11-04 11:11): **toleransi keterlambatan dan jam pulang
+tepat waktu**. Keterlambatan kini dihitung per menit penuh (`floor`): masuk
+pukul 08.00.59 masih 0 menit, sedangkan 08.01 dihitung 1 menit (sebelumnya
+08.00.01 sudah dianggap 1 menit karena `ceil`). Absen pulang dibuka tepat pada
+jam pulang jadwal (16.30 sudah bisa), bukan 1 menit setelahnya, dan tetap
+ditutup 2 jam setelah jam pulang. Perubahan diterapkan di klien
+(`MENIT_JEDA_ABSEN_PULANG = 0`, teks Panel Absen, uji) dan server lewat migrasi
+**29** + `verifikasi_29.sql`. `npm run lint` bersih, `npm test` **46/46**,
+`npm run build` lulus **8,95 dtk**.
+
+Penyusulan terbaru (2026-11-04 11:18): **data presensi lama belum ikut
+dihitung ulang**. User melaporkan pegawai yang absen masuk pukul 08.00 kemarin
+masih terbaca terlambat meskipun migrasi dan verifikasi 29 sudah dijalankan.
+Penyebab: migrasi 29 hanya mengubah fungsi untuk absensi/koreksi berikutnya,
+sedangkan baris `presensi` lama menyimpan `menit_terlambat` hasil aturan `ceil`.
+Perbaikan data disiapkan di migrasi **30** (hitung ulang sejak go-live
+`2026-11-01`, hanya baris ber-`jam_masuk`, idempoten) + `verifikasi_30.sql`;
+migrasi 30 **sudah dijalankan dan berhasil** (laporan user 2026-11-04 11:22).
+
 | Aspek | Status | Bukti |
 |---|---|---|
-| Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–28 | `src/`, `supabase/migrations/01–28` |
+| Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–30 | `src/`, `supabase/migrations/01–30` |
 | Commit Git | **Paginasi data** — `22c2bab` (jadwal 1–2 November, rekap/laporan, koreksi, izin, uji template); sebelumnya **B-8/B-9** — `42cb317`; dokumen audit `5b9ac5e`; **fitur sebelumnya** — `1fec429` | `git log` |
-| Perubahan lokal | **Bersih setelah commit `22c2bab` + sinkronisasi dokumen audit** | `git status` |
+| Perubahan lokal | **Ada yang belum di-commit** — ketahanan halaman (anti white screen) + toleransi keterlambatan & jam pulang tepat waktu; HEAD `089b4e7` | `git status` |
 | Migrasi DB 01–18 | **Sudah dijalankan** — verifikasi 09–18 lulus | laporan user 2026-10-30 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
@@ -187,21 +218,25 @@ lulus **8,37 dtk**.
 | Migrasi DB 26 | **Sudah dijalankan**; jendela absen baru berlaku di server; verifikasi 26 lulus (laporan user 2026-10-30) | `supabase/migrations/26_batas_absen_baru.sql`, `verifikasi_26.sql` |
 | Migrasi DB 27 | **Sudah dijalankan**; jam kerja per unit dan menu **Jam Kerja Unit** aktif; verifikasi 27 lulus (laporan user 2026-10-30) | `supabase/migrations/27_jam_kerja_unit.sql`, `verifikasi_27.sql` |
 | Migrasi DB 28 | **Sudah dijalankan**; verifikasi 28 lulus (laporan user 2026-11-02); flag **Bebas Radius** aktif di server | `supabase/migrations/28_bebas_radius.sql`, `verifikasi_28.sql` |
+| Migrasi DB 29 | **Sudah dijalankan** (laporan user 2026-11-04) — toleransi keterlambatan per menit penuh dan jam pulang tepat waktu; verifikasi 29 dijalankan user | `supabase/migrations/29_toleransi_terlambat_dan_jam_pulang.sql`, `verifikasi_29.sql` |
+| Migrasi DB 30 | **Sudah dijalankan** (laporan user 2026-11-04) — `menit_terlambat` data lama sejak 1 November 2026 sudah dihitung ulang | `supabase/migrations/30_hitung_ulang_menit_terlambat.sql`, `verifikasi_30.sql` |
 | Data uji | **Sudah dibersihkan ulang setelah uji** — transaksi dihapus, 92 pegawai/grup/master shift dipertahankan | `supabase/cleanup_data_uji.sql`, laporan user 2026-10-30 23:01 |
 | Data operasional | **Lengkap** — jadwal dinas dan pemetaan pegawai sudah diisi | laporan user 2026-10-30 23:04 |
 | Go-live | **Sudah berjalan sejak Minggu, 1 November 2026** — pegawai absen masuk dan pulang; absen akhir pekan hanya untuk pegawai shift yang dijadwalkan | laporan user 2026-11-01 17:58 |
 | Koordinat RSUD AMI | **Ada di kode** — `-0.23805651650343132, 117.41442516465149` di klien dan schema | `src/config/constants.js`, `supabase/schema.sql`, migrasi 21 |
 | Radius absensi | **Aktif 50 meter** — klien (`MAX_RADIUS_METERS`) dan server (migrasi 24 sudah dijalankan) | `src/config/constants.js`, `supabase/migrations/24_radius_50_meter.sql` |
-| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 09–28 lulus** — dijalankan user, semua hasil `true` (laporan 2026-10-30; verifikasi 28 laporan 2026-11-02) | laporan user 2026-10-30 & 2026-11-02; `supabase/verifikasi_28.sql` |
-| Build produksi | **Lulus** — base `/` **8,46 dtk** (ulang 8,69 dtk; pengecualian radius pegawai tertentu; 288 modul); sebelumnya 15,01 dtk / 10,67 dtk; `dist/index.html` 1,29 kB | `npm run build` 2026-11-01 |
+| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 09–30 dijalankan user** (29 dan 30 laporan 2026-11-04) | laporan user 2026-11-04; `supabase/verifikasi_30.sql` |
+| Build produksi | **Lulus** — base `/` **8,95 dtk** (293 modul; toleransi terlambat & jam pulang); sebelumnya 7,78/14,87 dtk (ketahanan halaman), 8,46/8,69 dtk (bebas radius) | `npm run build` 2026-11-04 |
 | Dependensi frontend | **Diperbarui & di-commit** — Vite 7.3.7, `@vitejs/plugin-react` 5.2.0, React Router 7.18.5; Node CI 22; lockfile sinkron; `npm audit` 0 kerentanan | `package.json`, `package-lock.json`, `.github/workflows/deploy.yml` |
 | Header keamanan (CSP) | **Ada di kode & di-commit** — CSP produksi via `<meta>`: `script-src 'self'`, `connect-src` self + `*.supabase.co`, `frame-src 'none'`, `form-action 'self'`, `object-src 'none'`, `base-uri 'self'`; meta referrer; hanya saat build. Uji headless: script inline diblokir, halaman render | `vite.config.js`, `index.html` |
 | Batas GitHub Pages | **Enforce HTTPS aktif & terverifikasi** (2026-10-30 10:06 WITA): HTTP apex dan `www` **301** ke HTTPS/apex. Namun HSTS, `X-Frame-Options`/`frame-ancestors`, `X-Content-Type-Options`, dan `Permissions-Policy` tetap belum aktif karena memerlukan header HTTP; Cloudflare/proxy opsional | `curl -I` HTTP/HTTPS apex & `www`, 2026-10-30 |
 | Kepala unit multi-unit | **Ada di kode** — tabel `kepala_unit` (satu unit satu kepala, boleh multi-unit), halaman **Kepala Unit**, pemilih unit aktif di portal kepala, kepala ASN tanpa baris `pegawai`, RPC `profil_saya()`/`simpan_kepala_unit()`, policy `unit_dikelola()` | migrasi 22, `KepalaUnit.jsx`, `kepalaUnitService.js`, `AuthContext.jsx`, `authService.js`, `PortalKepalaLayout.jsx` |
-| Jendela waktu absen | **Ada di kode** — masuk dibuka 1 jam sebelum; pulang 1 menit setelah hingga 2 jam setelah jam pulang (semua pola, termasuk shift malam) | migrasi 26, `PanelAbsen.jsx`, `jadwalAbsen.js` |
+| Jendela waktu absen | **Ada di kode** — masuk dibuka 1 jam sebelum; pulang dibuka tepat pada jam pulang hingga 2 jam setelahnya (semua pola, termasuk shift malam) | migrasi 29, `PanelAbsen.jsx`, `jadwalAbsen.js` |
+| Toleransi keterlambatan | **Aktif di server (migrasi 29 dijalankan 2026-11-04)** — per menit penuh: 08.00.59 = 0 menit, 08.01 = 1 menit; koreksi memakai aturan sama; data lama sudah dihitung ulang (migrasi 30) | migrasi 29–30, `hitung_menit_terlambat`, `submit_presensi` |
 | Jam kerja per unit | **Ada di kode** — override jam reguler per unit dengan fallback global; ADMISI RAWAT JALAN 07.00–15.00 Senin–Jumat; menu Super Admin; tampilan jam di akun pegawai sudah diuji dan berubah | migrasi 27, `JamKerjaUnit.jsx`, `jamKerjaService.js`, `jadwal_kerja`, `proses_alfa_otomatis` |
 | Pengecualian radius pegawai tertentu | **Aktif** — flag `pegawai.bebas_radius` per pegawai (Super Admin); pegawai tersebut tetap pegawai reguler biasa dan hanya berbeda karena boleh absen di mana saja. `submit_presensi` tetap mencatat jarak dan hanya melewati penolakan radius bila flag aktif; validasi lain tidak berubah; opsi `abaikanRadius` hanya untuk tampilan | migrasi 28, `verifikasi_28.sql`, `geofencing.js`, `PanelAbsen.jsx`, `DataPegawai.jsx`, `pegawaiService.js` |
-| Koreksi presensi shift malam | **Ada di kode (belum di-commit)** — jam pulang otomatis digeser ke H+1 bila tidak lebih lambat dari jam masuk; timestamp asli dipertahankan bila jam tidak diubah; form menampilkan pratinjau tanggal/jam dan penanda H+1 | `src/utils/koreksiPresensi.js`, `src/pages/admin/KoreksiPresensi.jsx`, `tests/koreksiPresensi.test.js` |
+| Koreksi presensi shift malam | **Ada di kode & sudah di-commit `089b4e7`** — jam pulang otomatis digeser ke H+1 bila tidak lebih lambat dari jam masuk; timestamp asli dipertahankan bila jam tidak diubah; form menampilkan pratinjau tanggal/jam dan penanda H+1 | `src/utils/koreksiPresensi.js`, `src/components/admin/FormKoreksiPresensi.jsx`, `tests/koreksiPresensi.test.js` |
+| Ketahanan halaman (anti white screen) | **Ada di kode (belum di-commit)** — ErrorBoundary root/rute/halaman portal, muat ulang otomatis sekali saat chunk gagal (`?perbarui` + guard 30 detik), listener `vite:preloadError`, fallback statis di `index.html`, formatter tanggal aman untuk nilai rusak, `localStorage` kepala diamankan | `src/components/ErrorBoundary.jsx`, `src/utils/pemulihanHalaman.js`, `src/main.jsx`, `src/App.jsx`, `PortalAdminLayout.jsx`, `PortalKepalaLayout.jsx`, `index.html`, `format.js` |
 | Keamanan ekspor CSV | **Ada di kode & di-commit** — sel string berawalan `=`, `+`, `-`, `@`, tab, CR, atau LF diberi apostrof sebelum escaping; template jadwal memakai aturan yang sama | `src/utils/csv.js`, `src/utils/templateJadwal.js` |
 | Buka dokumen izin | **Ada di kode & di-commit** — tab dokumen memutus `window.opener` dan memakai `location.replace` agar tidak membuka halaman Supabase dengan konteks pembuka | `src/pages/IzinSaya.jsx`, `src/pages/admin/PengajuanIzin.jsx` |
 | Hapus grup kosong | **Ada di kode** — semua grup 0 pegawai; "Belum ditentukan" (akun sistem) disembunyikan bila kosong | migrasi 18, `GrupShift.jsx` |
@@ -218,7 +253,7 @@ lulus **8,37 dtk**.
 | Penanda tangan laporan | **Ada di kode** — Kasubbag Tata Usaha, Suriami, SKM., M.Kes, NIP. 197312302007012011 untuk semua pegawai | `src/config/constants.js`, `BlokTandaTangan.jsx` |
 | Menu kepala ASN | **Ada di kode** — “Kembali ke Absensi” (sidebar) dan tab Absensi (navigasi bawah HP) disembunyikan bila `sumber_akun = kepala_asn` | `PortalKepalaLayout.jsx`, `SidebarKepala.jsx` |
 | Dinas Luar lintas unit | **Ada di kode** — kepala unit dapat memilih pegawai lintas unit untuk Dinas Luar; Sakit/Cuti tetap per unit; pembuat grup membaca grup + dokumennya selama menjabat; akses dicabut otomatis saat jabatan berakhir; kepala ASN dapat mencatat (FK ke `auth.users`) | migrasi 23, `PengajuanIzin.jsx`, `leaveService.js`, `pegawaiService.js`, `verifikasi_23.sql` |
-| Lint/unit test | **Tersedia** — ESLint (`npm run lint`) bersih dan **38 uji** `node:test` (`npm test`) lulus; B-8/B-9 di commit `42cb317`, uji paginasi/template di commit `22c2bab`, uji koreksi H+1 masih di working tree | `eslint.config.js`, `tests/`, `package.json`, `.github/workflows/deploy.yml` |
+| Lint/unit test | **Tersedia** — ESLint (`npm run lint`) bersih dan **46 uji** `node:test` (`npm test`) lulus; B-8/B-9 di commit `42cb317`, uji paginasi/template di commit `22c2bab`, uji koreksi H+1 dan pemulihan halaman di working tree | `eslint.config.js`, `tests/`, `package.json`, `.github/workflows/deploy.yml` |
 | Paginasi data | **Ada di kode & di-commit `22c2bab`** — helper halaman 500; jadwal shift dibatasi unit aktif; rekap/laporan, koreksi, dan daftar izin memakai paginasi; parser template menolak header tak dikenal; uji manual user 2026-10-31 lulus (tanggal 1–2 muncul) | `src/utils/paginasi.js`, `shiftService.js`, `reportService.js`, `correctionService.js`, `leaveService.js`, `templateJadwal.js` |
 | Alfa otomatis | **Aktif mulai 1 November 2026** — diaktifkan lewat Pengaturan Presensi; **pg_cron 1.6.4 aktif** dan job `presisi-alfa-otomatis` terdaftar/aktif tiap 15 menit; menunggu pembentukan Alfa pertama (1 November 2026 hari Minggu, sehingga Alfa reguler diperkirakan muncul Senin 2 November) | migrasi 12/27, `PengaturanPresensi.jsx`, `supabase/jadwal_alfa.sql`, laporan user 2026-10-30 |
 | Deploy GitHub Pages | **Aktif** — `https://presisiami.my.id/` live dengan base `/`; `www` redirect ke domain utama; Enforce HTTPS aktif, HTTP apex/`www` **301** ke HTTPS (diverifikasi 2026-10-30) | workflow run `40439173719` sukses |
@@ -377,6 +412,90 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-04 11:22 WITA — Migrasi 30 berhasil dijalankan
+- **Perubahan:** mencatat konfirmasi user bahwa migrasi **30**
+  (`30_hitung_ulang_menit_terlambat.sql`) dan verifikasinya sudah dijalankan
+  dan berhasil. `menit_terlambat` untuk presensi sejak **1 November 2026**
+  kini memakai aturan menit penuh, sehingga absen 08.00.xx tidak lagi terbaca
+  terlambat. Tidak ada perubahan kode.
+- **File:** `progress.md`, `AGENTS.md`.
+- **Verifikasi:** laporan user 2026-11-04 ("sudah saya jalankan dan berhasil").
+  Verifikasi 29 dan 30 dijalankan user. Tampilan Riwayat/Laporan perlu dimuat
+  ulang agar membaca nilai terbaru.
+- **Catatan/risiko:** bila masih ada baris yang tampak terlambat, periksa
+  jadwal pegawai pada tanggal tersebut dan muat ulang halaman.
+
+### 2026-11-04 11:18 WITA — Hitung ulang menit terlambat data lama
+- **Perubahan:** menindaklanjuti laporan bahwa pegawai yang absen masuk pukul
+  08.00 masih terbaca terlambat setelah migrasi 29 dijalankan. Akar masalah:
+  migrasi 29 hanya mengubah fungsi untuk absensi/koreksi berikutnya; baris
+  `presensi` yang sudah tersimpan masih memakai `menit_terlambat` hasil aturan
+  lama (`ceil`). Ditambahkan skrip backfill yang menghitung ulang memakai
+  `public.hitung_menit_terlambat()` sejak go-live **1 November 2026**, hanya
+  untuk baris ber-`jam_masuk`, dan hanya memperbarui baris yang nilainya
+  berbeda (idempoten). Jadwal, status, perangkat, dan data lain tidak diubah.
+- **File:** `supabase/migrations/30_hitung_ulang_menit_terlambat.sql` (baru),
+  `supabase/verifikasi_30.sql` (baru), `README.md`, `progress.md`, `AGENTS.md`.
+- **Verifikasi:** belum dijalankan di Supabase. `verifikasi_30.sql` memeriksa:
+  fungsi memakai `floor`, tidak ada selisih nilai sejak 1 November 2026, tidak
+  ada menit negatif, absen di bawah 1 menit tidak terlambat, dan absen ≥ 1
+  menit tetap terlambat.
+- **Catatan/risiko:** backfill memakai jadwal yang berlaku saat ini untuk
+  tanggal tersebut; bila jadwal lama pernah diubah setelah presensi tercatat,
+  nilai dapat ikut menyesuaikan. Untuk data uji pra-go-live sengaja tidak
+  disentuh.
+
+### 2026-11-04 11:11 WITA — Toleransi keterlambatan & jam pulang tepat waktu
+- **Perubahan:** memperbaiki dua aturan waktu absensi. (1) Keterlambatan
+  sebelumnya memakai `ceil`, sehingga masuk pukul 08.00.01 sudah dihitung
+  1 menit; kini memakai `floor` per menit penuh: 08.00.59 masih 0 menit dan
+  08.01.00 dihitung 1 menit. (2) Absen pulang sebelumnya baru dibuka 1 menit
+  setelah jam pulang (16.31); kini dibuka tepat pada jam pulang (16.30) dan
+  tetap ditutup 2 jam setelah jam pulang. Aturan yang sama diterapkan pada
+  koreksi presensi lewat `hitung_menit_terlambat`.
+- **File:** `supabase/migrations/29_toleransi_terlambat_dan_jam_pulang.sql`
+  (baru), `supabase/verifikasi_29.sql` (baru), `supabase/schema.sql`,
+  `src/config/constants.js`, `src/utils/jadwalAbsen.js`,
+  `src/components/PanelAbsen.jsx`, `tests/jadwalAbsen.test.js`, `README.md`,
+  `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **46/46** lulus;
+  `npm run build` lulus **8,95 dtk** (293 modul). Uji unit pembukaan pulang:
+  reguler 16.30 tepat dan shift malam 08.00 tepat. Migrasi 29 dan
+  `verifikasi_29.sql` **belum dijalankan** di Supabase.
+- **Catatan/risiko:** server tetap sumber kebenaran; selama migrasi 29 belum
+  dijalankan, aturan lama (ceil dan pulang 16.31) masih berlaku di produksi
+  meskipun klien sudah membuka tombol pulang pada 16.30. Jalankan migrasi 29
+  lebih dulu sebelum/bersamaan deploy, lalu `verifikasi_29.sql`.
+
+### 2026-11-03 15:55 WITA — Ketahanan halaman & anti white screen
+- **Perubahan:** menindaklanjuti laporan white screen pada user mobile dan
+  kadang-kadang di laptop saat membuka menu. Diagnosis: (1) tidak ada Error
+  Boundary sehingga error render/lifecycle atau kegagalan `import()` chunk
+  memutihkan seluruh aplikasi; (2) `index.html` dan aset GitHub Pages memakai
+  `Cache-Control: max-age=600` dan chunk hash lama mengembalikan **404** setelah
+  deploy, sehingga perangkat dengan HTML lama gagal membuka menu (gejala hilang
+  setelah refresh, sesuai laporan user); (3) formatter tanggal dapat melempar
+  `RangeError` untuk nilai tidak valid; (4) pembacaan `localStorage` unit kepala
+  belum diamankan. Perbaikan: Error Boundary root + per-rute + per-halaman
+  portal (sidebar tetap tampil saat halaman gagal), pemulihan otomatis sekali
+  dengan penanda `?perbarui` dan guard 30 detik, listener `vite:preloadError`,
+  fallback statis di `index.html` + `<noscript>`, formatter tanggal
+  mengembalikan `—`, dan `localStorage` kepala memakai `try/catch`.
+- **File:** `src/components/ErrorBoundary.jsx` (baru),
+  `src/utils/pemulihanHalaman.js` (baru), `tests/pemulihanHalaman.test.js`
+  (baru), `src/main.jsx`, `src/App.jsx`,
+  `src/components/layout/PortalAdminLayout.jsx`,
+  `src/components/layout/PortalKepalaLayout.jsx`, `src/utils/format.js`,
+  `tests/format.test.js`, `index.html`, `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **46/46** lulus;
+  `npm run build` lulus **7,78 dtk** (ulang 14,87 dtk; 293 modul). Uji headless Chrome:
+  halaman login tetap render; saat berkas JS utama dihapus, fallback statis
+  “Jika layar ini tidak berubah…” tampil (bukan putih).
+- **Catatan/risiko:** pemulihan otomatis dibatasi sekali per 30 detik dan tidak
+  diulang bila URL sudah berpenanda, sehingga tidak ada loop muat ulang.
+  Perubahan ditahan di working tree menunggu uji user; perlu deploy GitHub Pages
+  agar aktif di produksi. Uji manual di perangkat user tetap disarankan.
 
 ### 2026-11-03 13:29 WITA — Perbaikan lag mengetik alasan koreksi
 - **Perubahan:** menindaklanjuti laporan form koreksi terasa berat saat mengetik
@@ -1880,6 +1999,9 @@ dan `verifikasi_18` untuk hapus grup kosong.
 | B-28 | Uji manual pegawai bebas radius dan pegawai biasa setelah migrasi 28 | Belum ada bukti uji di perangkat | Uji satu pegawai bebas radius absen dari luar area pada jam reguler dan satu pegawai biasa tetap ditolak di luar 50 m |
 | B-29 | Kasus GPS meleset 130 m di gedung utama (pesan klien) | Pegawai di dalam area bisa ditolak; sebaliknya lokasi luar bisa lolos | Ditahan atas keputusan user 2026-11-02. Opsi: sampling GPS beberapa detik, perketat akurasi (20–25 m), tampilkan akurasi pada pesan, dan/atau audit percobaan gagal; perlu keputusan batas akurasi |
 | B-30 | Uji manual koreksi presensi shift malam H+1 | Belum ada bukti uji di UI | Koreksi presensi shift malam (mis. masuk 20.31, pulang 08.00), lalu pastikan jam pulang tersimpan pada tanggal H+1 dan pratinjau menampilkan penanda H+1 |
+| B-31 | Uji manual fallback white screen setelah deploy | Perbaikan belum aktif di produksi sampai di-push/deploy | Setelah deploy, buka aplikasi, biarkan tab lama, lalu buka menu; pastikan muncul pemulihan/muat ulang otomatis, bukan layar putih. Uji juga di HP user yang melaporkan |
+| B-32 | ~~Migrasi 29 dan verifikasi 29 belum dijalankan~~ | - | **Selesai:** dijalankan user 2026-11-04; aturan baru aktif di server |
+| B-33 | ~~Migrasi 30 (backfill menit terlambat) belum dijalankan~~ | - | **Selesai:** dijalankan user 2026-11-04; `menit_terlambat` data sejak 1 November 2026 sudah dihitung ulang |
 | B-4 | ~~`npm run build` belum dijalankan~~ | — | **Selesai:** lulus 2026-10-25 12:24 |
 | B-5 | ~~README menyebut Fase 1–7 saja~~ | — | **Selesai:** diperbarui ke Fase 1–8 + impor |
 | B-6 | ~~`verifikasi_10.sql` tidak ada di diagram README~~ | — | **Selesai:** ditambahkan ke struktur |

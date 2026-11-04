@@ -13,7 +13,6 @@ import { useEffect, useState } from 'react'
 import {
   MAX_RADIUS_METERS,
   MENIT_AWAL_ABSEN_MASUK,
-  MENIT_JEDA_ABSEN_PULANG,
 } from '../config/constants.js'
 import { dapatkanLokasi, periksaLokasi } from '../utils/geofencing.js'
 import { kirimPresensi } from '../services/attendanceService.js'
@@ -393,9 +392,8 @@ export default function PanelAbsen({
 
         {pulangBelumDibuka && (
           <Alert variant="info" title="Absen Pulang Belum Dibuka" className="mb-4">
-            Absen pulang dibuka pukul <b>{formatJamBuka(bukaPulang)} WITA</b>, yaitu{' '}
-            {MENIT_JEDA_ABSEN_PULANG} menit setelah jam pulang{' '}
-            {formatJamJadwal(jadwalPulang?.jam_selesai)}.
+            Absen pulang dibuka pukul <b>{formatJamBuka(bukaPulang)} WITA</b>, tepat pada jam
+            pulang {formatJamJadwal(jadwalPulang?.jam_selesai)}.
           </Alert>
         )}
 

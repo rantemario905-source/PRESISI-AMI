@@ -11,6 +11,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { NAMA_APLIKASI } from '../../config/constants.js'
 import { Spinner } from '../ui/index.js'
+import ErrorBoundary from '../ErrorBoundary.jsx'
 import MenuAkun from './MenuAkun.jsx'
 import SidebarAdmin from './SidebarAdmin.jsx'
 
@@ -92,15 +93,17 @@ export default function PortalAdminLayout() {
           className="mx-auto w-full max-w-7xl px-3.5 py-4 sm:px-6 sm:py-6"
         >
           {/* Boundary lokal: sidebar tetap tampil saat chunk halaman diunduh */}
-          <Suspense
-            fallback={
-              <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500">
-                <Spinner /> Memuat halaman…
-              </div>
-            }
-          >
-            <Outlet />
-          </Suspense>
+          <ErrorBoundary key={pathname} kompak>
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500">
+                  <Spinner /> Memuat halaman…
+                </div>
+              }
+            >
+              <Outlet />
+            </Suspense>
+          </ErrorBoundary>
         </main>
 
         <footer className="tanpa-cetak mx-auto w-full max-w-7xl px-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] text-center text-[10px] text-slate-400 sm:px-6 sm:pb-6 sm:text-[11px]">

@@ -5,6 +5,8 @@ import {
   daftarTanggal,
   formatJam,
   formatJarak,
+  formatTanggal,
+  formatTanggalRingkas,
   gabungTanggalJam,
   inisialNama,
   namaBulan,
@@ -53,3 +55,10 @@ test('formatJam memakai WITA', () => {
   assert.equal(formatJam('2026-10-30T23:15:00.000Z'), '07:15 WITA')
   assert.equal(formatJam(null), '—')
 })
+
+test('formatter tanggal tidak melempar saat nilai tidak valid', () => {
+  assert.equal(formatJam('bukan-tanggal'), '—')
+  assert.equal(formatTanggal('bukan-tanggal'), '—')
+  assert.equal(formatTanggalRingkas('bukan-tanggal'), '—')
+})
+

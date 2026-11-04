@@ -17,6 +17,16 @@ function ambilFormatter(locale, opsi) {
   return formatter
 }
 
+/**
+ * Ubah nilai menjadi Date yang valid. Mengembalikan null untuk nilai rusak
+ * agar formatter tidak melempar RangeError dan memutihkan halaman.
+ */
+function keTanggal(nilai) {
+  if (nilai instanceof Date) return Number.isFinite(nilai.getTime()) ? nilai : null
+  const tanggal = new Date(nilai)
+  return Number.isFinite(tanggal.getTime()) ? tanggal : null
+}
+
 /** Tanggal hari ini dalam format YYYY-MM-DD menurut zona WITA */
 export function hariIni() {
   return ambilFormatter('en-CA', {
@@ -30,7 +40,9 @@ export function hariIni() {
 /** "Senin, 21 Oktober 2026" */
 export function formatTanggal(iso, opsi = {}) {
   if (!iso) return '—'
-  const tanggal = String(iso).length === 10 ? `${iso}T00:00:00+08:00` : iso
+  const nilai = String(iso).length === 10 ? `${iso}T00:00:00+08:00` : iso
+  const tanggal = keTanggal(nilai)
+  if (!tanggal) return '—'
   return ambilFormatter('id-ID', {
     timeZone: ZONA_WAKTU,
     weekday: 'long',
@@ -38,53 +50,61 @@ export function formatTanggal(iso, opsi = {}) {
     month: 'long',
     year: 'numeric',
     ...opsi,
-  }).format(new Date(tanggal))
+  }).format(tanggal)
 }
 
 /** "21 Okt 2026" — versi ringkas untuk tabel */
 export function formatTanggalRingkas(iso) {
   if (!iso) return '—'
+  const tanggal = keTanggal(`${String(iso).slice(0, 10)}T00:00:00+08:00`)
+  if (!tanggal) return '—'
   return ambilFormatter('id-ID', {
     timeZone: ZONA_WAKTU,
     day: '2-digit',
     month: 'short',
     year: 'numeric',
-  }).format(new Date(`${String(iso).slice(0, 10)}T00:00:00+08:00`))
+  }).format(tanggal)
 }
 
 /** "Senin, 21 Okt 2026" — untuk tabel laporan bulanan */
 export function formatTanggalHari(iso) {
   if (!iso) return '—'
+  const tanggal = keTanggal(`${String(iso).slice(0, 10)}T00:00:00+08:00`)
+  if (!tanggal) return '—'
   return ambilFormatter('id-ID', {
     timeZone: ZONA_WAKTU,
     weekday: 'long',
     day: '2-digit',
     month: 'short',
     year: 'numeric',
-  }).format(new Date(`${String(iso).slice(0, 10)}T00:00:00+08:00`))
+  }).format(tanggal)
 }
 
 /** "21 Oktober 2026" — untuk baris tempat/tanggal tanda tangan */
 export function formatTanggalPanjang(iso) {
   if (!iso) return '—'
-  const tanggal = String(iso).length === 10 ? `${iso}T00:00:00+08:00` : iso
+  const nilai = String(iso).length === 10 ? `${iso}T00:00:00+08:00` : iso
+  const tanggal = keTanggal(nilai)
+  if (!tanggal) return '—'
   return ambilFormatter('id-ID', {
     timeZone: ZONA_WAKTU,
     day: 'numeric',
     month: 'long',
     year: 'numeric',
-  }).format(new Date(tanggal))
+  }).format(tanggal)
 }
 
 /** "07:15 WITA" dari timestamp ISO */
 export function formatJam(iso) {
   if (!iso) return '—'
+  const tanggal = keTanggal(iso)
+  if (!tanggal) return '—'
   const jam = ambilFormatter('id-ID', {
     timeZone: ZONA_WAKTU,
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
-  }).format(new Date(iso))
+  }).format(tanggal)
   return `${jam.replace('.', ':')} WITA`
 }
 
@@ -112,23 +132,27 @@ export function inisialNama(nama = '') {
 /** Nilai untuk <input type="date">: "YYYY-MM-DD" menurut WITA */
 export function formatTanggalInput(iso) {
   if (!iso) return ''
+  const tanggal = keTanggal(iso)
+  if (!tanggal) return ''
   return ambilFormatter('en-CA', {
     timeZone: ZONA_WAKTU,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
-  }).format(new Date(iso))
+  }).format(tanggal)
 }
 
 /** Nilai untuk <input type="time">: "HH:mm" menurut WITA */
 export function formatJamInput(iso) {
   if (!iso) return ''
+  const tanggal = keTanggal(iso)
+  if (!tanggal) return ''
   return ambilFormatter('en-GB', {
     timeZone: ZONA_WAKTU,
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
-  }).format(new Date(iso))
+  }).format(tanggal)
 }
 
 /**

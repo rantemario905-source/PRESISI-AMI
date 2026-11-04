@@ -9,6 +9,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { NAMA_APLIKASI, NAMA_RUMAH_SAKIT } from '../../config/constants.js'
 import { Spinner } from '../ui/index.js'
+import ErrorBoundary from '../ErrorBoundary.jsx'
 import MenuAkun from './MenuAkun.jsx'
 import SidebarKepala from './SidebarKepala.jsx'
 import NavigasiBawah, { MENU_PORTAL_KEPALA } from '../NavigasiBawah.jsx'
@@ -48,8 +49,14 @@ export default function PortalKepalaLayout() {
       setUnitAktif('')
       return
     }
-    const tersimpan =
-      typeof window === 'undefined' ? '' : window.localStorage.getItem(KUNCI_UNIT_AKTIF) ?? ''
+    const tersimpan = (() => {
+      try {
+        return window.localStorage.getItem(KUNCI_UNIT_AKTIF) ?? ''
+      } catch {
+        // localStorage dapat diblokir (mode privat/WebView) — jangan crash.
+        return ''
+      }
+    })()
     setUnitAktif((lama) => {
       if (lama && daftarUnit.includes(lama)) return lama
       if (tersimpan && daftarUnit.includes(tersimpan)) return tersimpan
@@ -157,21 +164,23 @@ export default function PortalKepalaLayout() {
         </header>
 
         <main id="konten" className="mx-auto w-full max-w-7xl px-3.5 py-4 sm:px-6 sm:py-6">
-          <Suspense
-            fallback={
-              <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500">
-                <Spinner /> Memuat halaman…
-              </div>
-            }
-          >
-            <Outlet
-              context={{
-                unitAktif,
-                unitDikelola: daftarUnit,
-                pilihUnit,
-              }}
-            />
-          </Suspense>
+          <ErrorBoundary key={pathname} kompak>
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500">
+                  <Spinner /> Memuat halaman…
+                </div>
+              }
+            >
+              <Outlet
+                context={{
+                  unitAktif,
+                  unitDikelola: daftarUnit,
+                  pilihUnit,
+                }}
+              />
+            </Suspense>
+          </ErrorBoundary>
         </main>
 
         <footer className="tanpa-cetak mx-auto w-full max-w-7xl px-4 pb-[calc(5.75rem+env(safe-area-inset-bottom))] text-center text-[10px] text-slate-400 sm:px-6 sm:pb-6 sm:text-[11px]">
