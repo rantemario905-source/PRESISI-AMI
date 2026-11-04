@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-04 21:00 WITA (commit & push tab berwarna) |
+| Terakhir diperbarui | 2026-11-04 21:30 WITA (notifikasi Alfa merah) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,7 +37,14 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-04 21:00):** **commit & push** `07f340e` —
+**Pekerjaan terbaru (2026-11-04 21:30):** **notifikasi Alfa** — saat jam absen
+masuk terlewat, panel tidak lagi menjelaskan teknis "Absen Masuk Ditutup". Judul,
+deskripsi, dan label tombol kini **"Alfa Hari Ini"** / "Anda tercatat Alfa hari
+ini." dengan gradasi header **merah** (rose). Alert teknis dihapus. Verifikasi
+lokal: `npm run lint` bersih, `npm test` **68/68**, `npm run build` lulus
+**9,35 dtk**.
+
+**Pekerjaan sebelumnya (2026-11-04 21:00):** **commit & push** `07f340e` —
 tutup absen masuk tepat jam selesai, ACC pengaduan Super Admin (migrasi 34),
 tab berwarna & berikon, serta sinkronisasi dokumen. Verifikasi sebelum commit:
 `npm run lint` bersih, `npm test` **68/68**, `npm run build` lulus **7,60 dtk**.
@@ -503,6 +510,22 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-04 21:30 WITA — Notifikasi Alfa menggantikan "Absen Masuk Ditutup"
+
+- **Perubahan:** ketika jam absen masuk terlewat, `PanelAbsen` tidak lagi
+  menampilkan penjelasan teknis. Judul status, deskripsi, dan label tombol masuk
+  menjadi **"Alfa Hari Ini"** / **"Anda tercatat Alfa hari ini."**; gradasi header
+  berubah menjadi **merah** (`from-rose-600 to-rose-700`) dengan prioritas
+  Alfa > lengkap > normal; Alert "Absen Masuk Ditutup" dihapus karena duplikatif.
+  Logika penguncian tombol (`terkunciMasuk`) dan server tidak diubah — Alfa tetap
+  dibentuk `proses_alfa_otomatis`.
+- **File:** `src/components/PanelAbsen.jsx`, `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **68/68** lulus;
+  `npm run build` lulus **9,35 dtk**.
+- **Catatan/risiko:** hanya tampilan; pegawai libur dan shift malam kemarin tidak
+  terpengaruh karena `masukTerlewat` memerlukan jadwal hari ini. Uji visual di
+  perangkat belum dilakukan.
 
 ### 2026-11-04 21:00 WITA — Commit & push tutup absen masuk + ACC pengaduan
 

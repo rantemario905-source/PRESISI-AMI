@@ -216,7 +216,9 @@ export default function PanelAbsen({
         : 'Sudah absen masuk'
       : malamKemarinAktif
         ? 'Shift malam kemarin'
-        : 'Belum absen hari ini'
+        : masukTerlewat
+          ? 'Alfa Hari Ini'
+          : 'Belum absen hari ini'
 
   /** Aksi absen: geolokasi → validasi → RPC server */
   async function jalankanAbsen(tipe) {
@@ -269,7 +271,11 @@ export default function PanelAbsen({
     <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-kartu">
       <div
         className={`bg-gradient-to-br px-4 pb-4 pt-4 text-white sm:px-5 ${
-          sudahPulang ? 'from-green-600 to-green-700' : 'from-sky-600 to-sky-700'
+          masukTerlewat
+            ? 'from-rose-600 to-rose-700'
+            : sudahPulang
+              ? 'from-green-600 to-green-700'
+              : 'from-sky-600 to-sky-700'
         }`}
       >
         <div className="flex items-start justify-between gap-3">
@@ -333,7 +339,7 @@ export default function PanelAbsen({
                   jadwalKemarin.tanggal,
                 )} masih berlangsung. Absen masuk dicatat untuk tanggal tersebut.`
               : masukTerlewat
-                ? 'Jam kerja sudah berakhir. Hubungi Kepala Unit/IT bila perlu koreksi.'
+                ? 'Anda tercatat Alfa hari ini.'
                 : bebasRadius
                   ? 'Absen bisa dilakukan dari luar area rumah sakit.'
                   : 'Absen hanya bisa dilakukan di dalam area rumah sakit.'}
@@ -397,13 +403,6 @@ export default function PanelAbsen({
           </Alert>
         )}
 
-        {masukTerlewat && !jadwalTerkunci && (
-          <Alert variant="peringatan" title="Absen Masuk Ditutup" className="mb-4">
-            Jam kerja berakhir pukul <b>{formatJamBuka(batasMasuk)} WITA</b>. Hubungi
-            Kepala Unit/IT bila perlu koreksi.
-          </Alert>
-        )}
-
         {pulangBelumDibuka && (
           <Alert variant="info" title="Absen Pulang Belum Dibuka" className="mb-4">
             Absen pulang dibuka pukul <b>{formatJamBuka(bukaPulang)} WITA</b>, tepat pada jam
@@ -438,7 +437,7 @@ export default function PanelAbsen({
               </>
             ) : masukTerlewat ? (
               <>
-                <IkonMasuk /> Absen Masuk Ditutup
+                <IkonMasuk /> Alfa Hari Ini
               </>
             ) : masukBelumDibuka ? (
               <>
