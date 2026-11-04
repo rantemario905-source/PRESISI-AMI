@@ -11,10 +11,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { ambilDokumenUrl } from '../services/leaveService.js'
 import { ambilIzinSaya } from '../services/izinPegawaiService.js'
-import { formatTanggalRingkas } from '../utils/format.js'
 import { labelJenis } from '../utils/izin.js'
-import { labelStatusIzin, varianStatusIzin } from '../utils/status.js'
-import { Alert, Badge, Spinner, TabBar } from '../components/ui/index.js'
+import { labelStatusIzin, varianJenisIzin, varianStatusIzin } from '../utils/status.js'
+import { Alert, Badge, Spinner, TabBar, TampilanPeriode } from '../components/ui/index.js'
 import BarAtas from '../components/BarAtas.jsx'
 
 const TAB = [
@@ -155,15 +154,17 @@ export default function IzinSaya() {
                     className="rounded-xl border border-slate-200 bg-slate-50/50 p-3"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <Badge variant="info">{labelJenis(baris.jenis)}</Badge>
+                      <Badge variant={varianJenisIzin(baris.jenis)}>{labelJenis(baris.jenis)}</Badge>
                       <Badge variant={varianStatusIzin(baris.status)}>
                         {labelStatusIzin(baris.status)}
                       </Badge>
                     </div>
-                    <p className="mt-2 text-[13px] font-bold text-slate-800">
-                      {formatTanggalRingkas(baris.tanggal_mulai)} —{' '}
-                      {formatTanggalRingkas(baris.tanggal_selesai)}
-                    </p>
+                    <div className="mt-2">
+                      <TampilanPeriode
+                        mulai={baris.tanggal_mulai}
+                        selesai={baris.tanggal_selesai}
+                      />
+                    </div>
                     {baris.alasan && (
                       <p className="mt-1 line-clamp-3 text-xs leading-relaxed text-slate-500">
                         {baris.alasan}
@@ -215,12 +216,13 @@ export default function IzinSaya() {
                     {tersaring.map((baris) => (
                       <tr key={baris.grup_id} className="align-top hover:bg-slate-50/70">
                         <td className="px-5 py-3">
-                          <Badge variant="info">{labelJenis(baris.jenis)}</Badge>
+                          <Badge variant={varianJenisIzin(baris.jenis)}>{labelJenis(baris.jenis)}</Badge>
                         </td>
-                        <td className="whitespace-nowrap px-5 py-3 text-xs text-slate-600">
-                          {formatTanggalRingkas(baris.tanggal_mulai)}
-                          <br />
-                          s.d. {formatTanggalRingkas(baris.tanggal_selesai)}
+                        <td className="px-5 py-3">
+                          <TampilanPeriode
+                            mulai={baris.tanggal_mulai}
+                            selesai={baris.tanggal_selesai}
+                          />
                         </td>
                         <td className="px-5 py-3">
                           <Badge variant={varianStatusIzin(baris.status)}>

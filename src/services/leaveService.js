@@ -128,7 +128,8 @@ export async function ambilDokumenUrl(path, detik = 3600) {
 }
 
 /**
- * Catat pengajuan baru (status menunggu).
+ * Catat pengajuan baru. Super Admin langsung disetujui oleh server; kepala
+ * ruangan tetap berstatus menunggu.
  *
  * @param {{ grupId: string, jenis: string, userIds: string[], tanggalMulai: string, tanggalSelesai: string, keterangan?: string, dokumen?: { path: string, nama: string, tipe: string, ukuran: number }|null }} params
  */
@@ -158,7 +159,8 @@ export async function catatIzinGrup({
 }
 
 /**
- * Ubah pengajuan selama masih menunggu.
+ * Ubah pengajuan selama masih menunggu. Perubahan oleh Super Admin langsung
+ * disetujui oleh server.
  * `dokumen` null berarti pertahankan dokumen lama (khusus edit).
  */
 export async function ubahIzinGrup({

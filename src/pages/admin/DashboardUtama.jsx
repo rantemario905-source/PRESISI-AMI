@@ -11,7 +11,7 @@ import { supabase } from '../../utils/supabaseClient.js'
 import { ambilPresensiHariIni, ambilStatistik } from '../../services/adminDashboardService.js'
 import { formatJarak, formatJam, formatTanggal } from '../../utils/format.js'
 import { varianStatusKehadiran } from '../../utils/status.js'
-import { Alert, Badge, Button, Spinner } from '../../components/ui/index.js'
+import { Alert, Badge, Spinner, TombolMuatUlang } from '../../components/ui/index.js'
 import KepalaHalaman from '../../components/admin/KepalaHalaman.jsx'
 import KartuStatistik from '../../components/admin/KartuStatistik.jsx'
 
@@ -65,9 +65,7 @@ export default function DashboardUtama() {
         judul="Dashboard"
         deskripsi={`Pemantauan presensi ${tanggalHariIni}`}
         aksi={
-          <Button variant="sekunder" size="sm" onClick={muat} disabled={memuat}>
-            {memuat ? 'Memuat…' : 'Muat ulang'}
-          </Button>
+          <TombolMuatUlang onClick={muat} memuat={memuat} />
         }
       />
 

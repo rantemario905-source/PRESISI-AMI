@@ -6,7 +6,7 @@
  * Kebijakan: tepat 1 perangkat aktif per pegawai (dijaga RPC server).
  * ==========================================================================
  */
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   ambilDaftarPerangkat,
   resetPerangkat,
@@ -15,7 +15,7 @@ import {
 } from '../../services/adminDeviceService.js'
 import { formatTanggal } from '../../utils/format.js'
 import { labelStatusPerangkat, varianStatusPerangkat } from '../../utils/status.js'
-import { Alert, Badge, Button, Modal, Spinner, TabBar } from '../../components/ui/index.js'
+import { Alert, Badge, Button, Modal, PencarianNama, Spinner, TabBar, TombolMuatUlang } from '../../components/ui/index.js'
 import KepalaHalaman from '../../components/admin/KepalaHalaman.jsx'
 
 const TAB = [
@@ -32,6 +32,7 @@ export default function VerifikasiPerangkat() {
   const [galat, setGalat] = useState(null)
   const [pesan, setPesan] = useState(null)
   const [diproses, setDiproses] = useState(null)
+  const [cari, setCari] = useState('')
 
   const [modalTolak, setModalTolak] = useState(null)
   const [catatanTolak, setCatatanTolak] = useState('')
@@ -52,6 +53,16 @@ export default function VerifikasiPerangkat() {
   useEffect(() => {
     muat(tab)
   }, [tab, muat])
+
+  const tersaring = useMemo(() => {
+    const kata = cari.trim().toLowerCase()
+    if (!kata) return daftar
+    return daftar.filter((baris) =>
+      `${baris.pegawai?.nama ?? ''} ${baris.pegawai?.unit_kerja ?? ''}`
+        .toLowerCase()
+        .includes(kata),
+    )
+  }, [cari, daftar])
 
   const jalankan = async (id, aksi, sukses) => {
     setDiproses(id)
@@ -160,13 +171,25 @@ export default function VerifikasiPerangkat() {
         onChange={setTab}
         label="Status perangkat"
         aksi={
-          <Button variant="sekunder" size="sm" onClick={() => muat(tab)} disabled={memuat}>
-            Muat ulang
-          </Button>
+          <TombolMuatUlang onClick={() => muat(tab)} memuat={memuat} />
         }
       />
 
       <section className="rounded-2xl border border-slate-200 bg-white shadow-kartu">
+        <div className="flex flex-col gap-2 border-b border-slate-200 px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <PencarianNama
+            nilai={cari}
+            onChange={setCari}
+            placeholder="Cari nama atau unit pegawai…"
+            className="w-full sm:max-w-xs"
+          />
+          <p className="text-[11px] font-semibold text-slate-500 sm:text-xs">
+            {cari
+              ? `${tersaring.length} dari ${daftar.length} perangkat`
+              : `${daftar.length} perangkat`}
+          </p>
+        </div>
+
         {memuat ? (
           <div className="flex items-center justify-center gap-2 py-14 text-sm text-slate-500">
             <Spinner /> Memuat perangkat…
@@ -176,11 +199,21 @@ export default function VerifikasiPerangkat() {
             <p className="text-sm font-semibold text-slate-600">Tidak ada data pada kategori ini</p>
             <p className="mt-1 text-xs text-slate-400">Pengajuan pegawai akan muncul di sini.</p>
           </div>
+        ) : tersaring.length === 0 ? (
+          <div className="px-4 py-12 text-center">
+            <p className="text-sm font-semibold text-slate-600">Nama tidak ditemukan</p>
+            <p className="mt-1 text-xs text-slate-400">
+              Coba kata kunci lain atau hapus filter nama.
+            </p>
+            <Button variant="lembut" size="sm" className="mt-3" onClick={() => setCari('')}>
+              Hapus filter
+            </Button>
+          </div>
         ) : (
           <>
             {/* HP: kartu perangkat */}
             <div className="divide-y divide-slate-100 md:hidden">
-              {daftar.map((baris) => (
+              {tersaring.map((baris) => (
                 <article key={baris.id} className="px-4 py-3.5">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
@@ -240,7 +273,7 @@ export default function VerifikasiPerangkat() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {daftar.map((baris) => (
+                  {tersaring.map((baris) => (
                     <tr key={baris.id} className="align-top hover:bg-slate-50/70">
                       <td className="px-5 py-3">
                         <p className="font-semibold text-slate-800">{baris.pegawai?.nama ?? '—'}</p>

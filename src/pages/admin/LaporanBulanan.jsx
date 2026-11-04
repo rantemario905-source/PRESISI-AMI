@@ -14,7 +14,7 @@ import { ambilLaporanBulanan } from '../../services/reportService.js'
 import { ambilUnitKerja } from '../../services/pegawaiService.js'
 import { namaBulan, periodeBulanIni } from '../../utils/format.js'
 import { kelompokkanPresensi } from '../../utils/laporan.js'
-import { Alert, Button, Spinner } from '../../components/ui/index.js'
+import { Alert, Button, Spinner, TombolMuatUlang } from '../../components/ui/index.js'
 import KepalaHalaman from '../../components/admin/KepalaHalaman.jsx'
 import LembarLaporan from '../../components/laporan/LembarLaporan.jsx'
 
@@ -210,9 +210,7 @@ export default function LaporanBulanan({ mode = 'superadmin' }) {
               {namaBulan(periode)} · {data.pegawai.length} pegawai · {jumlahCatatan} catatan.
             </p>
             <div className="aksi-halaman">
-              <Button variant="sekunder" size="sm" onClick={muat} disabled={memuat}>
-                Muat ulang
-              </Button>
+              <TombolMuatUlang onClick={muat} memuat={memuat} />
               <Button size="sm" onClick={cetak} disabled={memuat || daftarCetak.length === 0}>
                 Cetak PDF
               </Button>

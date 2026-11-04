@@ -16,7 +16,7 @@ import {
   simpanPengaturanPresensi,
 } from '../../services/pengaturanService.js'
 import { formatJam, hariIni } from '../../utils/format.js'
-import { Alert, Badge, Button, Spinner } from '../../components/ui/index.js'
+import { Alert, Badge, Button, Spinner, TombolMuatUlang } from '../../components/ui/index.js'
 import KepalaHalaman from '../../components/admin/KepalaHalaman.jsx'
 
 export default function PengaturanPresensi() {
@@ -116,9 +116,7 @@ export default function PengaturanPresensi() {
         judul="Pengaturan Presensi"
         deskripsi="Atur kapan Alfa otomatis dijalankan dan lengkapi persiapan jadwal."
         aksi={
-          <Button size="sm" variant="sekunder" onClick={muat} disabled={memuat}>
-            Muat ulang
-          </Button>
+          <TombolMuatUlang onClick={muat} memuat={memuat} />
         }
       />
 

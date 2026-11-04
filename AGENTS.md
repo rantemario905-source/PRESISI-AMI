@@ -237,6 +237,8 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-097 | 2026-11-04 11:18 | "ada beberapa pegawia kemarin yang absen masuk di jam 8.00, sudah saya run migrasi dan verif, tapi saya lihat mereka masih erhitung terlambat di sistem" + jawaban: "Sejak go-live 1 Nov 2026 (Recommended)" + "ya kerjakan" | Menjelaskan bahwa migrasi 29 hanya mengubah perhitungan absensi/koreksi berikutnya; baris presensi lama masih menyimpan `menit_terlambat` hasil `ceil`. Membuat migrasi **30** (`30_hitung_ulang_menit_terlambat.sql`) yang menghitung ulang data sejak **1 November 2026** memakai `hitung_menit_terlambat()` (floor), hanya baris ber-`jam_masuk`, idempoten, tanpa mengubah jadwal/status/perangkat; menambah `verifikasi_30.sql`; memperbarui README + dokumen audit. Catatan: migrasi 29 dan verifikasi 29 dilaporkan sudah dijalankan user 2026-11-04 | selesai (kode); migrasi 30 belum dijalankan | 2026-11-04 11:18 — Hitung ulang menit terlambat data lama |
 | I-098 | 2026-11-04 11:22 | "sudah saya jalankan dan berhasil" | Mencatat konfirmasi migrasi **30** dan verifikasinya sudah dijalankan dan berhasil; `menit_terlambat` data sejak 1 November 2026 sudah dihitung ulang. Memperbarui status migrasi/verifikasi, backlog B-33 (selesai), dan entri log. Tidak ada perubahan kode | selesai (dokumen); belum di-commit | 2026-11-04 11:22 — Migrasi 30 berhasil dijalankan |
 | I-099 | 2026-11-04 11:24 | "sudah tidak terlambat, sekarang commit dan push" | Memverifikasi `npm run lint` (bersih), `npm test` (**46/46**), `npm run build` (lulus **7,12 dtk**); memeriksa staged diff tanpa rahasia; commit `17d8efb` (ketahanan halaman/anti white screen, toleransi keterlambatan, jam pulang tepat waktu, migrasi 29–30, verifikasi 29–30, uji, README) lalu push ke `origin/main` (`089b4e7..17d8efb`); menyinkronkan dokumen audit | selesai | 2026-11-04 11:24 — Commit & push ketahanan halaman + toleransi terlambat |
+| I-100 | 2026-11-04 (WITA) | Instruksi sesi (teks verbatim tidak tersimpan pada ringkasan konteks): perbaikan UI — tombol muat ulang, kalender periode Cuti/Dinas-Sakit, warna berbeda per jenis, filter nama, dan pengajuan Super Admin langsung disetujui `(rekonstruksi)`; klarifikasi: muat ulang = **tombol** (bukan layar), kalender dipakai di form **dan** daftar, warna Sakit rose, Dinas Luar violet, Cuti teal, perubahan Super Admin atas pengajuan menunggu juga langsung disetujui, lalu "kerjakan pastikan tidak ada bug dan sistem yang rusak" | Menambahkan `TombolMuatUlang`, `PencarianNama`, `PemilihPeriode`, `TampilanPeriode`, utilitas `kalender.js`, varian warna `sakit`/`cuti`/`dinas`; menerapkan filter nama + reload di Verifikasi Perangkat/Koreksi Presensi, reload di halaman admin/pegawai/ErrorBoundary, kalender di form dan tampilan daftar; membuat migrasi **31** + `verifikasi_31.sql` agar Super Admin langsung menyetujui dan menandai presensi; sinkron `schema.sql`, README, dan dokumen audit | selesai | 2026-11-04 11:46 — Perapian UI & ACC otomatis Super Admin |
+| I-101 | 2026-11-04 13:42 | "sudah saya run dan succses, commit dan push" | Mencatat migrasi **31** dan `verifikasi_31.sql` sudah dijalankan dan lulus; memverifikasi `npm run lint`, `npm test` **54/54**, `npm run build`; meng-commit pekerjaan perapian UI & ACC otomatis Super Admin (komponen UI baru, filter nama, pemilih/tampilan periode, warna jenis izin, migrasi 31) beserta dokumen audit dan push ke `origin/main` | selesai | 2026-11-04 13:42 — Migrasi 31 dijalankan & commit/push perapian UI |
 
 ---
 
@@ -405,5 +407,19 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   `hitung_menit_terlambat()` (floor); hanya baris ber-`jam_masuk`, idempoten.
   Migrasi 30 dan verifikasinya **sudah dijalankan dan berhasil** (laporan user
   2026-11-04 11:22).
+- **Perapian UI & ACC otomatis (2026-11-04, belum di-commit):** komponen baru
+  `TombolMuatUlang`, `PencarianNama`, `PemilihPeriode`, `TampilanPeriode`, serta
+  utilitas `src/utils/kalender.js`. Tombol muat ulang diterapkan di dashboard,
+  data pegawai, pengaturan, laporan, verifikasi perangkat, koreksi, pengajuan
+  izin, riwayat, dan ErrorBoundary. Filter nama tersedia di Verifikasi Perangkat
+  dan Koreksi Presensi (data + audit). Warna jenis: Sakit rose, Dinas Luar
+  violet, Cuti teal, dipusatkan di `varianJenisIzin()`/`varianStatusKehadiran()`.
+  Migrasi **31** membuat `catat_izin_grup`/`ubah_izin_grup` otomatis memanggil
+  `putuskan_izin_grup` saat pemanggil Super Admin, sehingga pengajuan baru atau
+  perubahan atas pengajuan menunggu langsung `disetujui`; pengajuan kepala
+  ruangan tetap `menunggu`. Verifikasi lokal: `npm run lint` bersih,
+  `npm test` **54/54**, dan `npm run build` lulus **9,65 dtk**.
+  Migrasi 31 dan `verifikasi_31.sql` **sudah dijalankan** di Supabase
+  (laporan user 2026-11-04); ACC otomatis Super Admin aktif.
 - Timezone aplikasi: `Asia/Makassar` (WITA, UTC+8).
 - `dist/` dan `.env` sudah diabaikan Git.

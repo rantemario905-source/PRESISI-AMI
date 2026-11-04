@@ -29,8 +29,18 @@ import { ambilPegawaiIzin, ambilSemuaPegawai } from '../../services/pegawaiServi
 import { buatIdGrup, siapkanDokumenIzin } from '../../utils/dokumenIzin.js'
 import { formatTanggalRingkas, hariIni } from '../../utils/format.js'
 import { labelJenis } from '../../utils/izin.js'
-import { labelStatusIzin, varianStatusIzin } from '../../utils/status.js'
-import { Alert, Badge, Button, Modal, Spinner, TabBar } from '../../components/ui/index.js'
+import { labelStatusIzin, varianJenisIzin, varianStatusIzin } from '../../utils/status.js'
+import {
+  Alert,
+  Badge,
+  Button,
+  Modal,
+  PemilihPeriode,
+  Spinner,
+  TabBar,
+  TampilanPeriode,
+  TombolMuatUlang,
+} from '../../components/ui/index.js'
 import KepalaHalaman from '../../components/admin/KepalaHalaman.jsx'
 
 const TAB = [
@@ -319,21 +329,33 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
       }
 
       if (form.grupId) {
-        await ubahIzinGrup(data)
+        const hasil = await ubahIzinGrup(data)
         tersimpan = true
         if (unggahan && form.dokumenLama?.path && form.dokumenLama.path !== unggahan.path) {
           await hapusDokumenIzin(form.dokumenLama.path)
         }
-        setPesan('Pengajuan berhasil diperbarui dan tetap menunggu persetujuan Super Admin.')
+        const otomatis = !adalahKepala && hasil?.otomatis_disetujui === true
+        setPesan(
+          otomatis
+            ? 'Pengajuan berhasil diperbarui dan langsung disetujui. Presensi anggota grup telah ditandai.'
+            : 'Pengajuan berhasil diperbarui dan tetap menunggu persetujuan Super Admin.',
+        )
+        setModalForm(false)
+        setTab(otomatis ? 'disetujui' : 'menunggu')
+        await muat(otomatis ? 'disetujui' : 'menunggu')
       } else {
-        await catatIzinGrup(data)
+        const hasil = await catatIzinGrup(data)
         tersimpan = true
-        setPesan('Pengajuan berhasil dicatat. Menunggu persetujuan Super Admin.')
+        const otomatis = !adalahKepala && hasil?.otomatis_disetujui === true
+        setPesan(
+          otomatis
+            ? 'Pengajuan berhasil dicatat dan langsung disetujui. Presensi anggota grup telah ditandai.'
+            : 'Pengajuan berhasil dicatat. Menunggu persetujuan Super Admin.',
+        )
+        setModalForm(false)
+        setTab(otomatis ? 'disetujui' : 'menunggu')
+        await muat(otomatis ? 'disetujui' : 'menunggu')
       }
-
-      setModalForm(false)
-      setTab('menunggu')
-      await muat('menunggu')
     } catch (err) {
       // Hapus file baru HANYA bila RPC gagal. Jika RPC sudah sukses tetapi
       // pemuatan ulang gagal, file tersebut sudah tertaut ke pengajuan.
@@ -444,7 +466,7 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
             ? kategori === 'dinas-sakit'
               ? `Catat Sakit dan Dinas Luar untuk unit ${labelUnit}; Dinas Luar boleh melibatkan pegawai lintas unit. Persetujuan dilakukan Super Admin.`
               : `Catat dan kelola cuti untuk pegawai di unit ${labelUnit}. Persetujuan dilakukan Super Admin.`
-            : `Catat ${judulKategori.toLowerCase()} atas nama pegawai, periksa dokumen, lalu setujui atau tolak.`
+            : `Catat ${judulKategori.toLowerCase()} atas nama pegawai; pengajuan baru langsung disetujui. Pengajuan kepala unit dapat disetujui atau ditolak di sini.`
         }
       />
 
@@ -501,9 +523,7 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
             </p>
           </div>
           <div className="aksi-halaman">
-            <Button variant="sekunder" size="sm" onClick={() => muat(tab)} disabled={memuat}>
-              Muat ulang
-            </Button>
+            <TombolMuatUlang onClick={() => muat(tab)} memuat={memuat} />
             <Button size="sm" onClick={bukaFormBaru} disabled={!pegawai.length}>
               + Catat {judulKategori}
             </Button>
@@ -537,11 +557,8 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
                   </div>
 
                   <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <Badge variant="info">{labelJenis(grup.jenis)}</Badge>
-                    <span className="text-xs font-semibold text-slate-600">
-                      {formatTanggalRingkas(grup.tanggal_mulai)} –{' '}
-                      {formatTanggalRingkas(grup.tanggal_selesai)}
-                    </span>
+                    <Badge variant={varianJenisIzin(grup.jenis)}>{labelJenis(grup.jenis)}</Badge>
+                    <TampilanPeriode mulai={grup.tanggal_mulai} selesai={grup.tanggal_selesai} />
                     {grup.jenis === 'Dinas Luar' && (
                       <span className="text-[11px] font-semibold text-slate-400">
                         {grup.jumlah_anggota} pegawai
@@ -651,12 +668,10 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
                         <p className="text-xs text-slate-500">{unitAnggota(grup)}</p>
                       </td>
                       <td className="px-5 py-3">
-                        <Badge variant="info">{labelJenis(grup.jenis)}</Badge>
+                        <Badge variant={varianJenisIzin(grup.jenis)}>{labelJenis(grup.jenis)}</Badge>
                       </td>
-                      <td className="whitespace-nowrap px-5 py-3 text-xs text-slate-600">
-                        {formatTanggalRingkas(grup.tanggal_mulai)}
-                        <br />
-                        s.d. {formatTanggalRingkas(grup.tanggal_selesai)}
+                      <td className="px-5 py-3">
+                        <TampilanPeriode mulai={grup.tanggal_mulai} selesai={grup.tanggal_selesai} />
                       </td>
                       <td className="max-w-[220px] px-5 py-3 text-xs text-slate-600">
                         {grup.alasan || '—'}
@@ -843,35 +858,17 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
             </div>
           )}
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <label className="label-input" htmlFor="izin-mulai">
-                Tanggal Mulai
-              </label>
-              <input
-                id="izin-mulai"
-                type="date"
-                className="input-dasar"
-                value={form.tanggalMulai}
-                onChange={(e) => setForm((lama) => ({ ...lama, tanggalMulai: e.target.value }))}
-                required
-              />
-            </div>
-            <div>
-              <label className="label-input" htmlFor="izin-selesai">
-                Tanggal Selesai
-              </label>
-              <input
-                id="izin-selesai"
-                type="date"
-                className="input-dasar"
-                min={form.tanggalMulai}
-                value={form.tanggalSelesai}
-                onChange={(e) => setForm((lama) => ({ ...lama, tanggalSelesai: e.target.value }))}
-                required
-              />
-            </div>
-          </div>
+          <PemilihPeriode
+            mulai={form.tanggalMulai}
+            selesai={form.tanggalSelesai}
+            onChange={({ mulai, selesai }) =>
+              setForm((lama) => ({
+                ...lama,
+                tanggalMulai: mulai,
+                tanggalSelesai: selesai,
+              }))
+            }
+          />
 
           <div>
             <label className="label-input" htmlFor="izin-keterangan">
@@ -942,12 +939,25 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
             </p>
           )}
 
+          {!adalahKepala && (
+            <p className="rounded-lg bg-emerald-50 px-3 py-2 text-[11px] leading-relaxed text-emerald-800">
+              Pengajuan yang Anda simpan langsung disetujui dan presensi anggota grup
+              otomatis ditandai.
+            </p>
+          )}
+
           <div className="aksi-modal">
             <Button variant="sekunder" onClick={() => setModalForm(false)} disabled={menyimpan}>
               Batal
             </Button>
             <Button type="submit" disabled={!bolehSimpan}>
-              {menyimpan ? 'Menyimpan…' : form.grupId ? 'Simpan Perubahan' : 'Simpan Pengajuan'}
+              {menyimpan
+                ? 'Menyimpan…'
+                : !adalahKepala
+                  ? 'Simpan & Setujui'
+                  : form.grupId
+                    ? 'Simpan Perubahan'
+                    : 'Simpan Pengajuan'}
             </Button>
           </div>
         </form>

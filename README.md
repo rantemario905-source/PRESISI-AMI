@@ -93,6 +93,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 | 28 | `supabase/migrations/28_bebas_radius.sql` | Pengecualian radius untuk pegawai tertentu: kolom `pegawai.bebas_radius` (default `false`), `submit_presensi` hanya menolak radius bila flag mati, `profil_saya()` mengirim status, dan RPC Data Pegawai mencatat audit perubahan |
 | 29 | `supabase/migrations/29_toleransi_terlambat_dan_jam_pulang.sql` | Toleransi keterlambatan: dihitung per menit penuh (08.00.59 = 0 menit, 08.01 = 1 menit). Absen pulang dibuka tepat pada jam pulang (16.30 sudah bisa) dan tetap ditutup 2 jam setelahnya |
 | 30 | `supabase/migrations/30_hitung_ulang_menit_terlambat.sql` | Hitung ulang `menit_terlambat` data lama sejak go-live 1 November 2026 memakai aturan menit penuh; hanya baris ber-`jam_masuk`, idempoten, tidak mengubah data lain |
+| 31 | `supabase/migrations/31_auto_setujui_superadmin.sql` | Pengajuan Sakit/Dinas Luar/Cuti yang dicatat atau diubah Super Admin langsung berstatus `disetujui` dan presensi terkait ditandai; pengajuan kepala ruangan tetap `menunggu` |
 
 > Bila database sudah pernah dijalankan sampai file 08, jalankan **file 09** untuk
 > mengaktifkan alur Dinas & Sakit / Cuti, **file 11** untuk pengaturan kepala
@@ -107,8 +108,9 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > jendela absen baru (masuk 1 jam sebelum, pulang ditutup 2 jam setelah),
 > **file 27** untuk jam kerja reguler khusus per unit, **file 28** untuk
 > pengecualian radius pegawai tertentu, **file 29** untuk toleransi
-> keterlambatan serta jam pulang tepat waktu, dan **file 30** untuk menghitung
-> ulang menit terlambat data lama sejak go-live.
+> keterlambatan serta jam pulang tepat waktu, **file 30** untuk menghitung
+> ulang menit terlambat data lama sejak go-live, dan **file 31** untuk
+> persetujuan otomatis pengajuan yang dicatat Super Admin.
 > File 10 hanya berisi RPC perubahan role yang tidak dipakai UI, jadi boleh
 > dilewati. Jalankan migrasi secara bertahap - jangan mengulang file lama bila
 > tidak diperlukan.
@@ -123,8 +125,9 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > **`supabase/verifikasi_20.sql`**, **`supabase/verifikasi_21.sql`**,
 > **`supabase/verifikasi_22.sql`**, **`supabase/verifikasi_23.sql`**,
 > **`supabase/verifikasi_24.sql`**, **`supabase/verifikasi_25.sql`**,
-> **`supabase/verifikasi_26.sql`**, **`supabase/verifikasi_27.sql`**, dan
-> **`supabase/verifikasi_28.sql`** setelah
+> **`supabase/verifikasi_26.sql`**, **`supabase/verifikasi_27.sql`**,
+> **`supabase/verifikasi_28.sql`**, **`supabase/verifikasi_29.sql`**,
+> **`supabase/verifikasi_30.sql`**, dan **`supabase/verifikasi_31.sql`** setelah
 > migrasi terkait. Seluruh nilai
 > pemeriksaan harus `true`; bila ada yang `false`, jangan lanjutkan pemakaian.
 > `verifikasi_13.sql` dan `verifikasi_14.sql` hanya berlaku sebelum migrasi 15;
@@ -151,6 +154,10 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > `verifikasi_29.sql` setelahnya. Setelah itu jalankan migrasi 30 agar data
 > presensi lama sejak 1 November 2026 ikut dihitung ulang, lalu
 > `verifikasi_30.sql`.
+> Migrasi 31 wajib dijalankan agar pengajuan yang dicatat atau diubah Super
+> Admin langsung disetujui dan presensi terkait ditandai. Pengajuan yang
+> dicatat kepala ruangan tetap menunggu persetujuan Super Admin. Jalankan
+> `verifikasi_31.sql` setelahnya.
 > Bila muncul `function public.is_superadmin() does not exist`, jalankan versi
 > terbaru migrasi 19 — file ini membuat ulang fungsi inti tersebut sekaligus
 > memeriksa keberadaan tabel `pegawai`/`presensi`.
@@ -158,7 +165,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 **B. Sekaligus**
 
 Salin seluruh isi `supabase/schema.sql`, tempel, lalu **Run**.
-Isinya identik dengan gabungan kedua puluh delapan file di atas (termasuk migrasi 15-28).
+Isinya identik dengan gabungan seluruh 31 file migrasi di atas (termasuk migrasi 15-31).
 
 **C. Membuat akun pegawai**
 
@@ -253,6 +260,10 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 │   ├── verifikasi_25.sql       # Pemeriksaan batas akhir absen pulang (versi pertama)
 │   ├── verifikasi_26.sql       # Pemeriksaan jendela absen baru (1 jam / 2 jam)
 │   ├── verifikasi_27.sql       # Pemeriksaan jam kerja reguler per unit
+│   ├── verifikasi_28.sql       # Pemeriksaan pengecualian radius pegawai
+│   ├── verifikasi_29.sql       # Pemeriksaan toleransi terlambat & jam pulang
+│   ├── verifikasi_30.sql       # Pemeriksaan hitung ulang menit terlambat
+│   ├── verifikasi_31.sql       # Pemeriksaan persetujuan otomatis Super Admin
 │   └── jadwal_alfa.sql         # Opsional: jadwal pg_cron untuk Alfa
 ├── scripts/
 │   ├── impor-akun.mjs          # Impor akun massal via Supabase Admin API
@@ -392,8 +403,8 @@ Akses: login dengan akun ber-role `superadmin`, lalu buka `/superadmin-portal`.
 | **Hari Libur** | Input manual hari libur nasional/cuti bersama per tahun |
 | **Pengaturan Presensi** | Aktivasi Alfa otomatis dan proses Alfa manual. Mode transisi sudah dihapus |
 | **Koreksi Presensi** | Ubah jam/status dengan **alasan wajib** + audit trail permanen |
-| **Dinas & Sakit** | Catat Sakit (1 pegawai) atau Dinas Luar (1–4 pegawai/grup), dokumen wajib, setujui/tolak per grup |
-| **Cuti** | Catat Cuti (1 pegawai), dokumen opsional, setujui/tolak |
+| **Dinas & Sakit** | Catat Sakit (1 pegawai) atau Dinas Luar (1–4 pegawai/grup), dokumen wajib, setujui/tolak per grup; catatan Super Admin langsung disetujui |
+| **Cuti** | Catat Cuti (1 pegawai), dokumen opsional, setujui/tolak; catatan Super Admin langsung disetujui |
 | **Rekapitulasi** | Rekap bulanan per unit (ringkasan/detail), ekspor CSV, dan cetak PDF A4 |
 | **Laporan Bulanan** | Laporan presensi bulanan **per pegawai** (satu pegawai atau semua pegawai unit) siap dicetak PDF A4 portrait dengan kop instansi dan tanda tangan |
 
@@ -486,7 +497,9 @@ Akses: login dengan akun ber-role `superadmin`, lalu buka `/superadmin-portal`.
 **Efek persetujuan Dinas & Sakit / Cuti:** baris presensi seluruh anggota grup pada
 rentang tanggal tersebut dibuat atau ditandai sesuai jenis. Presensi yang sudah memiliki
 jam masuk atau sudah dikoreksi Admin tidak ditimpa. Pembatalan oleh Super Admin menghapus
-penanda otomatis tersebut.
+penanda otomatis tersebut. Pengajuan yang **dicatat atau diubah Super Admin** langsung
+disetujui dan penanda presensi dijalankan pada saat penyimpanan; pengajuan yang dicatat
+kepala ruangan tetap menunggu persetujuan Super Admin.
 
 **Aturan dokumen:** Sakit dan Dinas Luar **wajib** memiliki dokumen JPG/PNG maks. 1 MB
 saat disimpan. Cuti boleh tanpa dokumen. Satu grup Dinas Luar memakai satu dokumen

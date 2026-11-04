@@ -9,7 +9,7 @@
  */
 import { Component } from 'react'
 import { adalahGalatMuatModul, muatUlangSekali } from '../utils/pemulihanHalaman.js'
-import { Button } from './ui/index.js'
+import { Button, TombolMuatUlang } from './ui/index.js'
 
 export default class ErrorBoundary extends Component {
   constructor(props) {
@@ -88,7 +88,7 @@ export default class ErrorBoundary extends Component {
             <Button variant="sekunder" onClick={this.kembaliKeBeranda}>
               Kembali ke beranda
             </Button>
-            <Button onClick={this.muatUlang}>Muat ulang</Button>
+            <TombolMuatUlang onClick={this.muatUlang} />
           </div>
 
           {galat?.message && (

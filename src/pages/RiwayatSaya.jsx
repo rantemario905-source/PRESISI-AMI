@@ -17,16 +17,16 @@ import {
   periodeBulanIni,
 } from '../utils/format.js'
 import { varianStatusKehadiran } from '../utils/status.js'
-import { Alert, Badge, Button, Spinner } from '../components/ui/index.js'
+import { Alert, Badge, Spinner, TombolMuatUlang } from '../components/ui/index.js'
 import BarAtas from '../components/BarAtas.jsx'
 
 const STATUS = [
-  { nama: 'Hadir', warna: 'bg-green-50 text-green-800' },
-  { nama: 'Sakit', warna: 'bg-sky-50 text-sky-800' },
-  { nama: 'Cuti', warna: 'bg-slate-100 text-slate-700' },
-  { nama: 'Dinas Luar', warna: 'bg-amber-50 text-amber-800' },
-  { nama: 'Alfa', warna: 'bg-red-50 text-red-800' },
-  { nama: 'Koreksi', warna: 'bg-amber-50 text-amber-800' },
+  { nama: 'Hadir', warna: 'border-green-200 bg-green-50 text-green-800' },
+  { nama: 'Sakit', warna: 'border-rose-200 bg-rose-50 text-rose-800' },
+  { nama: 'Cuti', warna: 'border-teal-200 bg-teal-50 text-teal-800' },
+  { nama: 'Dinas Luar', warna: 'border-violet-200 bg-violet-50 text-violet-800' },
+  { nama: 'Alfa', warna: 'border-red-200 bg-red-50 text-red-800' },
+  { nama: 'Koreksi', warna: 'border-amber-200 bg-amber-50 text-amber-800' },
 ]
 
 /** "20:02 WITA" → "20:02" agar pas di kartu ringkas */
@@ -109,7 +109,7 @@ export default function RiwayatSaya() {
           {STATUS.map((s) => (
             <div
               key={s.nama}
-              className={`min-w-0 rounded-xl border border-slate-200 px-1.5 py-2.5 text-center shadow-kartu sm:px-2 ${s.warna}`}
+              className={`min-w-0 rounded-xl border px-1.5 py-2.5 text-center shadow-kartu sm:px-2 ${s.warna}`}
             >
               <p className="text-[9px] font-bold uppercase leading-tight tracking-wide text-slate-500 sm:text-[10px]">
                 {s.nama}
@@ -127,9 +127,7 @@ export default function RiwayatSaya() {
               <h2 className="text-sm font-bold text-slate-800">Detail Harian</h2>
               <p className="text-xs text-slate-500">{riwayat.length} catatan presensi</p>
             </div>
-            <Button variant="sekunder" size="sm" onClick={muat} disabled={memuat}>
-              Muat ulang
-            </Button>
+            <TombolMuatUlang onClick={muat} memuat={memuat} />
           </div>
 
           {memuat ? (

@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-04 11:24 WITA (commit & push) |
+| Terakhir diperbarui | 2026-11-04 13:42 WITA (commit & push perapian UI & ACC otomatis) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -202,11 +202,28 @@ Perbaikan data disiapkan di migrasi **30** (hitung ulang sejak go-live
 `2026-11-01`, hanya baris ber-`jam_masuk`, idempoten) + `verifikasi_30.sql`;
 migrasi 30 **sudah dijalankan dan berhasil** (laporan user 2026-11-04 11:22).
 
+Pekerjaan terbaru (2026-11-04 11:46 WITA, belum di-commit): **perapian UI dan
+persetujuan otomatis Super Admin**. Ditambahkan komponen bersama
+`TombolMuatUlang`, `PencarianNama`, `PemilihPeriode`, dan `TampilanPeriode`
+serta utilitas `src/utils/kalender.js`; tombol muat ulang diterapkan di
+dashboard, data pegawai, pengaturan, laporan, verifikasi perangkat, koreksi,
+pengajuan izin, riwayat, dan ErrorBoundary; filter nama tersedia di Verifikasi
+Perangkat dan Koreksi Presensi; pemilih/tampilan periode dipakai di form dan
+daftar Cuti/Dinas-Sakit. Warna jenis izin dipusatkan di
+`varianJenisIzin()`/`varianStatusKehadiran()` (Sakit rose, Dinas Luar violet,
+Cuti teal). Migrasi **31** membuat `catat_izin_grup`/`ubah_izin_grup` langsung
+menyetujui pengajuan yang dicatat atau diubah Super Admin, sehingga presensi
+terkait langsung ditandai; pengajuan kepala ruangan tetap `menunggu`.
+`npm run lint` bersih, `npm test` **54/54**, dan `npm run build` lulus
+**9,65 dtk**. Migrasi **31** dan `verifikasi_31.sql` **sudah dijalankan** di
+Supabase dan lulus (laporan user 2026-11-04 13:42), sehingga pengajuan Super
+Admin langsung `disetujui`.
+
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–30 | `src/`, `supabase/migrations/01–30` |
-| Commit Git | **`17d8efb`** — ketahanan halaman, toleransi keterlambatan, jam pulang tepat waktu, migrasi 29–30; sebelumnya **paginasi data** — `22c2bab`, **B-8/B-9** — `42cb317` | `git log` |
-| Perubahan lokal | **Bersih setelah commit `17d8efb`** | `git status` |
+| Commit Git | **Perapian UI & ACC otomatis Super Admin (migrasi 31)** — commit terbaru; sebelumnya **`17d8efb`** — ketahanan halaman, toleransi keterlambatan, jam pulang tepat waktu, migrasi 29–30; **paginasi data** — `22c2bab`, **B-8/B-9** — `42cb317` | `git log` |
+| Perubahan lokal | **Bersih setelah commit perapian UI & ACC otomatis Super Admin** | `git status` |
 | Migrasi DB 01–18 | **Sudah dijalankan** — verifikasi 09–18 lulus | laporan user 2026-10-30 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
@@ -220,13 +237,14 @@ migrasi 30 **sudah dijalankan dan berhasil** (laporan user 2026-11-04 11:22).
 | Migrasi DB 28 | **Sudah dijalankan**; verifikasi 28 lulus (laporan user 2026-11-02); flag **Bebas Radius** aktif di server | `supabase/migrations/28_bebas_radius.sql`, `verifikasi_28.sql` |
 | Migrasi DB 29 | **Sudah dijalankan** (laporan user 2026-11-04) — toleransi keterlambatan per menit penuh dan jam pulang tepat waktu; verifikasi 29 dijalankan user | `supabase/migrations/29_toleransi_terlambat_dan_jam_pulang.sql`, `verifikasi_29.sql` |
 | Migrasi DB 30 | **Sudah dijalankan** (laporan user 2026-11-04) — `menit_terlambat` data lama sejak 1 November 2026 sudah dihitung ulang | `supabase/migrations/30_hitung_ulang_menit_terlambat.sql`, `verifikasi_30.sql` |
+| Migrasi DB 31 | **Sudah dijalankan**; `verifikasi_31.sql` lulus (laporan user 2026-11-04) — pengajuan Sakit/Dinas Luar/Cuti yang dicatat atau diubah Super Admin langsung `disetujui` dan presensi ditandai; pengajuan kepala ruangan tetap `menunggu` | `supabase/migrations/31_auto_setujui_superadmin.sql`, `verifikasi_31.sql` |
 | Data uji | **Sudah dibersihkan ulang setelah uji** — transaksi dihapus, 92 pegawai/grup/master shift dipertahankan | `supabase/cleanup_data_uji.sql`, laporan user 2026-10-30 23:01 |
 | Data operasional | **Lengkap** — jadwal dinas dan pemetaan pegawai sudah diisi | laporan user 2026-10-30 23:04 |
 | Go-live | **Sudah berjalan sejak Minggu, 1 November 2026** — pegawai absen masuk dan pulang; absen akhir pekan hanya untuk pegawai shift yang dijadwalkan | laporan user 2026-11-01 17:58 |
 | Koordinat RSUD AMI | **Ada di kode** — `-0.23805651650343132, 117.41442516465149` di klien dan schema | `src/config/constants.js`, `supabase/schema.sql`, migrasi 21 |
 | Radius absensi | **Aktif 50 meter** — klien (`MAX_RADIUS_METERS`) dan server (migrasi 24 sudah dijalankan) | `src/config/constants.js`, `supabase/migrations/24_radius_50_meter.sql` |
 | Skrip `supabase/verifikasi_*.sql` | **Verifikasi 09–30 dijalankan user** (29 dan 30 laporan 2026-11-04) | laporan user 2026-11-04; `supabase/verifikasi_30.sql` |
-| Build produksi | **Lulus** — base `/` **8,95 dtk** (293 modul; toleransi terlambat & jam pulang); sebelumnya 7,78/14,87 dtk (ketahanan halaman), 8,46/8,69 dtk (bebas radius) | `npm run build` 2026-11-04 |
+| Build produksi | **Lulus** — base `/` **9,65 dtk** (perapian UI & komponen baru); sebelumnya 8,95 dtk (toleransi terlambat & jam pulang), 7,78/14,87 dtk (ketahanan halaman), 8,46/8,69 dtk (bebas radius) | `npm run build` 2026-11-04 |
 | Dependensi frontend | **Diperbarui & di-commit** — Vite 7.3.7, `@vitejs/plugin-react` 5.2.0, React Router 7.18.5; Node CI 22; lockfile sinkron; `npm audit` 0 kerentanan | `package.json`, `package-lock.json`, `.github/workflows/deploy.yml` |
 | Header keamanan (CSP) | **Ada di kode & di-commit** — CSP produksi via `<meta>`: `script-src 'self'`, `connect-src` self + `*.supabase.co`, `frame-src 'none'`, `form-action 'self'`, `object-src 'none'`, `base-uri 'self'`; meta referrer; hanya saat build. Uji headless: script inline diblokir, halaman render | `vite.config.js`, `index.html` |
 | Batas GitHub Pages | **Enforce HTTPS aktif & terverifikasi** (2026-10-30 10:06 WITA): HTTP apex dan `www` **301** ke HTTPS/apex. Namun HSTS, `X-Frame-Options`/`frame-ancestors`, `X-Content-Type-Options`, dan `Permissions-Policy` tetap belum aktif karena memerlukan header HTTP; Cloudflare/proxy opsional | `curl -I` HTTP/HTTPS apex & `www`, 2026-10-30 |
@@ -253,7 +271,7 @@ migrasi 30 **sudah dijalankan dan berhasil** (laporan user 2026-11-04 11:22).
 | Penanda tangan laporan | **Ada di kode** — Kasubbag Tata Usaha, Suriami, SKM., M.Kes, NIP. 197312302007012011 untuk semua pegawai | `src/config/constants.js`, `BlokTandaTangan.jsx` |
 | Menu kepala ASN | **Ada di kode** — “Kembali ke Absensi” (sidebar) dan tab Absensi (navigasi bawah HP) disembunyikan bila `sumber_akun = kepala_asn` | `PortalKepalaLayout.jsx`, `SidebarKepala.jsx` |
 | Dinas Luar lintas unit | **Ada di kode** — kepala unit dapat memilih pegawai lintas unit untuk Dinas Luar; Sakit/Cuti tetap per unit; pembuat grup membaca grup + dokumennya selama menjabat; akses dicabut otomatis saat jabatan berakhir; kepala ASN dapat mencatat (FK ke `auth.users`) | migrasi 23, `PengajuanIzin.jsx`, `leaveService.js`, `pegawaiService.js`, `verifikasi_23.sql` |
-| Lint/unit test | **Tersedia** — ESLint (`npm run lint`) bersih dan **46 uji** `node:test` (`npm test`) lulus; B-8/B-9 di commit `42cb317`, uji paginasi/template di commit `22c2bab`, uji koreksi H+1 dan pemulihan halaman di working tree | `eslint.config.js`, `tests/`, `package.json`, `.github/workflows/deploy.yml` |
+| Lint/unit test | **Tersedia** — ESLint (`npm run lint`) bersih dan **54 uji** `node:test` (`npm test`) lulus; B-8/B-9 di commit `42cb317`, uji paginasi/template di commit `22c2bab`, uji koreksi H+1, pemulihan halaman, kalender, dan varian warna di working tree | `eslint.config.js`, `tests/`, `package.json`, `.github/workflows/deploy.yml` |
 | Paginasi data | **Ada di kode & di-commit `22c2bab`** — helper halaman 500; jadwal shift dibatasi unit aktif; rekap/laporan, koreksi, dan daftar izin memakai paginasi; parser template menolak header tak dikenal; uji manual user 2026-10-31 lulus (tanggal 1–2 muncul) | `src/utils/paginasi.js`, `shiftService.js`, `reportService.js`, `correctionService.js`, `leaveService.js`, `templateJadwal.js` |
 | Alfa otomatis | **Aktif mulai 1 November 2026** — diaktifkan lewat Pengaturan Presensi; **pg_cron 1.6.4 aktif** dan job `presisi-alfa-otomatis` terdaftar/aktif tiap 15 menit; menunggu pembentukan Alfa pertama (1 November 2026 hari Minggu, sehingga Alfa reguler diperkirakan muncul Senin 2 November) | migrasi 12/27, `PengaturanPresensi.jsx`, `supabase/jadwal_alfa.sql`, laporan user 2026-10-30 |
 | Deploy GitHub Pages | **Aktif** — `https://presisiami.my.id/` live dengan base `/`; `www` redirect ke domain utama; Enforce HTTPS aktif, HTTP apex/`www` **301** ke HTTPS (diverifikasi 2026-10-30) | workflow run `40439173719` sukses |
@@ -412,6 +430,60 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-04 11:46 WITA — Perapian UI & ACC otomatis Super Admin
+- **Perubahan:** melanjutkan pekerjaan I-100 yang terhenti karena limit usage.
+  Menambahkan komponen bersama `TombolMuatUlang`, `PencarianNama`,
+  `PemilihPeriode`, dan `TampilanPeriode` serta utilitas `src/utils/kalender.js`
+  (tanggal murni tanpa zona waktu). Tombol **Muat ulang** diterapkan di
+  DashboardUtama, DataPegawai, PengaturanPresensi, LaporanBulanan,
+  VerifikasiPerangkat, KoreksiPresensi, PengajuanIzin, RiwayatSaya, dan
+  ErrorBoundary. Filter nama memakai `PencarianNama` di Verifikasi Perangkat
+  (perangkat + audit) dan Koreksi Presensi (data + audit). `PemilihPeriode`
+  dipakai di form Pengajuan Izin, sedangkan `TampilanPeriode` merapikan rentang
+  tanggal di daftar Pengajuan Izin dan Izin Saya. Warna jenis izin dipusatkan di
+  `varianJenisIzin()`/`varianStatusKehadiran()` dengan varian Badge baru
+  (`sakit` rose, `cuti` teal, `dinas` violet); riwayat memakai varian yang sama.
+  Migrasi **31** membuat `catat_izin_grup` dan `ubah_izin_grup` otomatis
+  memanggil `putuskan_izin_grup` saat pemanggil Super Admin, sehingga pengajuan
+  baru atau perubahan atas pengajuan menunggu langsung `disetujui` dan presensi
+  terkait ditandai; pengajuan kepala ruangan tetap `menunggu`.
+- **File:** `src/components/ui/TombolMuatUlang.jsx`,
+  `src/components/ui/PencarianNama.jsx`, `src/components/ui/PemilihPeriode.jsx`,
+  `src/components/ui/TampilanPeriode.jsx`, `src/components/ui/index.js`,
+  `src/components/ui/Badge.jsx`, `src/utils/kalender.js`,
+  `src/utils/status.js`, `src/services/leaveService.js`,
+  `src/components/ErrorBoundary.jsx`, `src/components/kartu/KartuRiwayat.jsx`,
+  `src/pages/IzinSaya.jsx`, `src/pages/RiwayatSaya.jsx`,
+  `src/pages/admin/DashboardUtama.jsx`, `src/pages/admin/DataPegawai.jsx`,
+  `src/pages/admin/KoreksiPresensi.jsx`, `src/pages/admin/LaporanBulanan.jsx`,
+  `src/pages/admin/PengajuanIzin.jsx`, `src/pages/admin/PengaturanPresensi.jsx`,
+  `src/pages/admin/VerifikasiPerangkat.jsx`,
+  `supabase/migrations/31_auto_setujui_superadmin.sql` (baru),
+  `supabase/verifikasi_31.sql` (baru), `supabase/schema.sql`, `README.md`,
+  `progress.md`, `AGENTS.md`, serta uji `tests/kalender.test.js`,
+  `tests/status.test.js`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **54/54** lulus;
+  `npm run build` lulus **9,65 dtk**. Migrasi 31 dan `verifikasi_31.sql`
+  **belum dijalankan** di Supabase.
+- **Catatan/risiko:** selama migrasi 31 belum dijalankan, pengajuan Super Admin
+  masih berstatus `menunggu` di server meskipun UI sudah siap. Jalankan migrasi
+  31 lalu `verifikasi_31.sql` sebelum mengandalkan fitur ACC otomatis.
+- **Koreksi (2026-11-04 13:42):** migrasi **31** dan `verifikasi_31.sql` sudah
+  dijalankan dan lulus di Supabase (laporan user), sehingga ACC otomatis Super
+  Admin aktif di server.
+
+### 2026-11-04 13:42 WITA — Migrasi 31 dijalankan & commit/push perapian UI
+- **Perubahan:** mencatat konfirmasi user bahwa migrasi **31** dan
+  `verifikasi_31.sql` sudah dijalankan dan berhasil; fitur ACC otomatis Super
+  Admin aktif. Lalu memverifikasi dan meng-commit seluruh pekerjaan yang
+  tertahan (komponen UI baru, filter nama, pemilih/tampilan periode, warna jenis
+  izin, dan migrasi 31) beserta dokumen audit.
+- **File:** lihat `git show --stat` commit terbaru.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **54/54** lulus;
+  `npm run build` lulus (lihat entri commit).
+- **Catatan/risiko:** tidak ada migrasi yang tertunda. Deploy GitHub Pages
+  berjalan otomatis dari push.
 
 ### 2026-11-04 11:24 WITA — Commit & push ketahanan halaman + toleransi terlambat
 - **Perubahan:** memverifikasi lalu meng-commit seluruh pekerjaan yang tertahan:
@@ -2013,6 +2085,8 @@ dan `verifikasi_18` untuk hapus grup kosong.
 | B-31 | Uji manual fallback white screen setelah deploy | Perbaikan belum aktif di produksi sampai di-push/deploy | Setelah deploy, buka aplikasi, biarkan tab lama, lalu buka menu; pastikan muncul pemulihan/muat ulang otomatis, bukan layar putih. Uji juga di HP user yang melaporkan |
 | B-32 | ~~Migrasi 29 dan verifikasi 29 belum dijalankan~~ | - | **Selesai:** dijalankan user 2026-11-04; aturan baru aktif di server |
 | B-33 | ~~Migrasi 30 (backfill menit terlambat) belum dijalankan~~ | - | **Selesai:** dijalankan user 2026-11-04; `menit_terlambat` data sejak 1 November 2026 sudah dihitung ulang |
+| B-34 | ~~Migrasi 31 (ACC otomatis Super Admin) dan verifikasi 31 belum dijalankan~~ | - | **Selesai:** migrasi 31 dan `verifikasi_31.sql` dijalankan dan lulus (laporan user 2026-11-04); ACC otomatis Super Admin aktif |
+| B-35 | Uji manual komponen UI baru (muat ulang, filter nama, pemilih periode, warna jenis) | Belum ada bukti uji di perangkat | Uji tombol Muat ulang, filter nama di Verifikasi/Koreksi, pemilih periode di form Cuti/Dinas-Sakit, dan warna badge Sakit/Cuti/Dinas Luar di HP dan desktop |
 | B-4 | ~~`npm run build` belum dijalankan~~ | — | **Selesai:** lulus 2026-10-25 12:24 |
 | B-5 | ~~README menyebut Fase 1–7 saja~~ | — | **Selesai:** diperbarui ke Fase 1–8 + impor |
 | B-6 | ~~`verifikasi_10.sql` tidak ada di diagram README~~ | — | **Selesai:** ditambahkan ke struktur |

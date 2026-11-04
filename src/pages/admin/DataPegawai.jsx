@@ -15,7 +15,7 @@ import {
   perbaruiPegawai,
 } from '../../services/pegawaiService.js'
 import { formatTanggalInput, formatTanggalRingkas } from '../../utils/format.js'
-import { Alert, Badge, Button, Modal, Spinner } from '../../components/ui/index.js'
+import { Alert, Badge, Button, Modal, Spinner, TombolMuatUlang } from '../../components/ui/index.js'
 import KepalaHalaman from '../../components/admin/KepalaHalaman.jsx'
 
 const STATUS_PERANGKAT = {
@@ -200,9 +200,7 @@ export default function DataPegawai() {
             </p>
           </div>
           <div className="aksi-halaman">
-            <Button variant="sekunder" size="sm" onClick={muat} disabled={memuat}>
-              Muat ulang
-            </Button>
+            <TombolMuatUlang onClick={muat} memuat={memuat} />
           </div>
         </div>
 

@@ -31,14 +31,24 @@ export function labelStatusIzin(status) {
   )
 }
 
+export function varianJenisIzin(jenis) {
+  return (
+    {
+      Sakit: 'sakit',
+      Cuti: 'cuti',
+      'Dinas Luar': 'dinas',
+    }[jenis] ?? 'info'
+  )
+}
+
 export function varianStatusKehadiran(status) {
   return (
     {
       Hadir: 'sukses',
       Alfa: 'bahaya',
-      Sakit: 'info',
-      Cuti: 'info',
-      'Dinas Luar': 'info',
+      Sakit: 'sakit',
+      Cuti: 'cuti',
+      'Dinas Luar': 'dinas',
       Koreksi: 'peringatan',
     }[status] ?? 'netral'
   )

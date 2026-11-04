@@ -5,15 +5,7 @@
 import { Link } from 'react-router-dom'
 import { formatJarak, formatJam, formatTanggalRingkas } from '../../utils/format.js'
 import Badge from '../ui/Badge.jsx'
-
-const VARIASI_STATUS = {
-  Hadir: 'sukses',
-  Sakit: 'info',
-  Cuti: 'netral',
-  'Dinas Luar': 'peringatan',
-  Alfa: 'bahaya',
-  Koreksi: 'peringatan',
-}
+import { varianStatusKehadiran } from '../../utils/status.js'
 
 export default function KartuRiwayat({ riwayat }) {
   return (
@@ -45,7 +37,7 @@ export default function KartuRiwayat({ riwayat }) {
                   <p className="text-[13px] font-bold text-slate-800">
                     {formatTanggalRingkas(baris.tanggal)}
                   </p>
-                  <Badge variant={VARIASI_STATUS[baris.status_kehadiran] ?? 'netral'}>
+                  <Badge variant={varianStatusKehadiran(baris.status_kehadiran)}>
                     {baris.status_kehadiran}
                   </Badge>
                 </div>
@@ -105,7 +97,7 @@ export default function KartuRiwayat({ riwayat }) {
                     </td>
                     <td className="px-3 py-2.5 text-slate-600">{formatJarak(baris.jarak_masuk)}</td>
                     <td className="px-3 py-2.5">
-                      <Badge variant={VARIASI_STATUS[baris.status_kehadiran] ?? 'netral'}>
+                      <Badge variant={varianStatusKehadiran(baris.status_kehadiran)}>
                         {baris.status_kehadiran}
                       </Badge>
                     </td>

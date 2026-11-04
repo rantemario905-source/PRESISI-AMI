@@ -6,7 +6,7 @@
  * audit (koreksi_presensi) oleh RPC `koreksi_presensi`.
  * ==========================================================================
  */
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ambilAuditKoreksi, ambilPresensiPeriode } from '../../services/correctionService.js'
 import { ambilUnitKerja } from '../../services/pegawaiService.js'
 import {
@@ -15,7 +15,15 @@ import {
   formatTanggalRingkas,
   periodeBulanIni,
 } from '../../utils/format.js'
-import { Alert, Button, Modal, Spinner, TabBar } from '../../components/ui/index.js'
+import {
+  Alert,
+  Button,
+  Modal,
+  PencarianNama,
+  Spinner,
+  TabBar,
+  TombolMuatUlang,
+} from '../../components/ui/index.js'
 import KepalaHalaman from '../../components/admin/KepalaHalaman.jsx'
 import DaftarPresensiKoreksi from '../../components/admin/DaftarPresensiKoreksi.jsx'
 import FormKoreksiPresensi from '../../components/admin/FormKoreksiPresensi.jsx'
@@ -35,8 +43,31 @@ export default function KoreksiPresensi() {
   const [memuat, setMemuat] = useState(true)
   const [galat, setGalat] = useState(null)
   const [pesan, setPesan] = useState(null)
+  const [cari, setCari] = useState('')
 
   const [pilih, setPilih] = useState(null)
+
+  const daftarTersaring = useMemo(() => {
+    const kata = cari.trim().toLowerCase()
+    if (!kata) return daftar
+    return daftar.filter((baris) =>
+      `${baris.pegawai?.nama ?? ''} ${baris.pegawai?.unit_kerja ?? ''}`
+        .toLowerCase()
+        .includes(kata),
+    )
+  }, [cari, daftar])
+
+  const auditTersaring = useMemo(() => {
+    const kata = cari.trim().toLowerCase()
+    if (!kata) return audit
+    return audit.filter((baris) =>
+      `${baris.presensi?.pegawai?.nama ?? ''} ${baris.pegawai?.nama ?? ''} ${
+        baris.presensi?.pegawai?.unit_kerja ?? ''
+      }`
+        .toLowerCase()
+        .includes(kata),
+    )
+  }, [audit, cari])
 
   const muat = useCallback(async () => {
     setMemuat(true)
@@ -113,11 +144,27 @@ export default function KoreksiPresensi() {
         onChange={setTab}
         label="Jenis data koreksi"
         aksi={
-          <Button variant="sekunder" size="sm" onClick={muat} disabled={memuat}>
-            Muat ulang
-          </Button>
+          <TombolMuatUlang onClick={muat} memuat={memuat} />
         }
       />
+
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <PencarianNama
+          nilai={cari}
+          onChange={setCari}
+          placeholder={tab === 'audit' ? 'Cari nama pegawai atau admin…' : 'Cari nama pegawai…'}
+          className="w-full sm:max-w-xs"
+        />
+        <p className="text-[11px] font-semibold text-slate-500 sm:text-xs">
+          {tab === 'data'
+            ? cari
+              ? `${daftarTersaring.length} dari ${daftar.length} presensi`
+              : `${daftar.length} presensi`
+            : cari
+              ? `${auditTersaring.length} dari ${audit.length} koreksi`
+              : `${audit.length} koreksi`}
+        </p>
+      </div>
 
       {tab === 'data' && (
         <>
@@ -163,8 +210,18 @@ export default function KoreksiPresensi() {
               <div className="px-4 py-14 text-center text-sm text-slate-500">
                 Tidak ada data presensi pada periode &amp; unit ini.
               </div>
+            ) : daftarTersaring.length === 0 ? (
+              <div className="px-4 py-14 text-center">
+                <p className="text-sm font-semibold text-slate-600">Nama tidak ditemukan</p>
+                <p className="mt-1 text-xs text-slate-400">
+                  Coba kata kunci lain atau hapus filter nama.
+                </p>
+                <Button variant="lembut" size="sm" className="mt-3" onClick={() => setCari('')}>
+                  Hapus filter
+                </Button>
+              </div>
             ) : (
-              <DaftarPresensiKoreksi daftar={daftar} onKoreksi={bukaKoreksi} />
+              <DaftarPresensiKoreksi daftar={daftarTersaring} onKoreksi={bukaKoreksi} />
             )}
           </section>
         </>
@@ -175,7 +232,7 @@ export default function KoreksiPresensi() {
           <div className="border-b border-slate-200 px-4 py-3.5 sm:px-5 sm:py-4">
             <h2 className="text-sm font-bold text-slate-800">Audit Trail Koreksi</h2>
             <p className="text-[11px] text-slate-500 sm:text-xs">
-              100 koreksi terakhir beserta admin pelaksana
+              Audit trail koreksi beserta admin pelaksana
             </p>
           </div>
 
@@ -183,11 +240,21 @@ export default function KoreksiPresensi() {
             <div className="px-4 py-14 text-center text-sm text-slate-500">
               Belum ada koreksi tercatat.
             </div>
+          ) : auditTersaring.length === 0 ? (
+            <div className="px-4 py-14 text-center">
+              <p className="text-sm font-semibold text-slate-600">Nama tidak ditemukan</p>
+              <p className="mt-1 text-xs text-slate-400">
+                Coba kata kunci lain atau hapus filter nama.
+              </p>
+              <Button variant="lembut" size="sm" className="mt-3" onClick={() => setCari('')}>
+                Hapus filter
+              </Button>
+            </div>
           ) : (
             <>
               {/* HP: kartu audit */}
               <div className="divide-y divide-slate-100 md:hidden">
-                {audit.map((baris) => (
+                {auditTersaring.map((baris) => (
                   <article key={baris.id} className="px-4 py-3.5">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
@@ -232,7 +299,7 @@ export default function KoreksiPresensi() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {audit.map((baris) => (
+                    {auditTersaring.map((baris) => (
                       <tr key={baris.id} className="align-top hover:bg-slate-50/70">
                         <td className="whitespace-nowrap px-5 py-3 text-xs text-slate-600">
                           {formatTanggal(baris.waktu_koreksi)}

@@ -4,6 +4,9 @@ const VARIASI = {
   bahaya: 'bg-red-100 text-red-800',
   peringatan: 'bg-amber-100 text-amber-800',
   info: 'bg-sky-100 text-sky-800',
+  sakit: 'bg-rose-100 text-rose-800',
+  cuti: 'bg-teal-100 text-teal-800',
+  dinas: 'bg-violet-100 text-violet-800',
   netral: 'bg-slate-100 text-slate-700',
 }
 
