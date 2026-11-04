@@ -248,6 +248,8 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-108 | 2026-11-04 15:55 | "dijadikan exel" (menyetujui rencana: footer Jadwal Shift dipatok + hapus CSV, termasuk laporan error jadi Excel) | Memakai flex kolom pada `.lembar-jadwal` + tinggi cetak `calc(215mm - 17mm)` agar footer di dasar kertas; menghapus opsi/impor CSV di Jadwal Shift (template wajib `.xlsx`, file `.csv` ditolak), menghapus `unduhTemplateCsv`/`parseCsv`/`deteksiPemisah`/`csvBaris`, mengubah laporan error menjadi `.xlsx`, memperbarui teks arahan modal + sheet Petunjuk + README/AGENTS; verifikasi `npm run lint` bersih, `npm test` **63/63**, `npm run build` lulus **11,08 dtk** | selesai (kode; belum di-commit) | 2026-11-04 15:55 — Footer jadwal dipatok & impor jadwal hanya Excel |
 | I-109 | 2026-11-04 16:15 | "pilih A" (menyetujui opsi A: pakai RPC `nama_kepala_unit` tanpa migrasi) | Memperbaiki nama tanda tangan cetak jadwal: `cetakJadwal()` tidak lagi memakai `profil.nama`/`daftar_kepala_unit().nama`, melainkan RPC `nama_kepala_unit(unit)` via `ambilNamaKepalaUnit()`; kepala ASN memakai `nama_kepala`, kepala non-ASN memakai `pegawai.nama`. Verifikasi `npm run lint` bersih, `npm test` **63/63**, `npm run build` lulus **11,79 dtk**; tanpa migrasi DB | selesai (kode; belum di-commit) | 2026-11-04 16:15 — Nama tanda tangan cetak jadwal |
 | I-110 | 2026-11-04 16:22 | "ya terapkan kita lihat hasilnya" (menyetujui rencana mengecilkan tabel cetak jadwal) | Mengecilkan kolom/rapatkan tabel cetak jadwal agar UGD satu halaman F4: nama 58 mm, No 7 mm, font 7 pt, padding 0,6×0,5 mm, hari 5,5 pt, legenda 2 mm, tanda tangan 4 mm/ruang 10 mm. Verifikasi `npm run lint` bersih, `npm test` **63/63**, `npm run build` lulus **7,68 dtk** | selesai (kode; belum di-commit) | 2026-11-04 16:22 — Cetak jadwal UGD jadi satu halaman |
+| I-111 | 2026-11-04 17:12 | "ya kerjakn, pastikan tidak ada bug dan eror sistem yang sudah ada, lakukan pengecekan ulang dan perbaiki jika ada eror atau indikasi bug" | Melanjutkan rencana **Pengaduan Presensi** (absen pulang terlewat) yang sempat terhenti: migrasi **33** (`pengaduan_presensi`, RPC ajukan/putuskan/daftar, RLS, policy foto `pengaduan/<user_id>/`), `verifikasi_33.sql`, sinkron `schema.sql`; halaman pegawai `/pengaduan`, halaman kepala `/kepala-ruangan/pengaduan`, tab baca-saja **Riwayat Pengaduan** di Koreksi Presensi, tombol di Panel Absen, menu sidebar/navigasi, service + helper + uji. Audit ulang: `schema.sql` identik migrasi 33, tombol persetujuan disembunyikan untuk pengaduan milik kepala sendiri. `npm run lint` bersih, `npm test` **67/67**, `npm run build` lulus **7,47 dtk** | selesai (kode); migrasi 33 belum dijalankan | 2026-11-04 17:12 — Pengaduan absen pulang |
+| I-112 | 2026-11-04 17:35 | "migrasi 33 sudah saya jalankan uji, b-35 juga sudah, b-26 alfa otomatis sudah jalan" | Mencatat konfirmasi migrasi **33** + `verifikasi_33.sql` sudah dijalankan dan diuji, **B-35** selesai, dan **B-26** Alfa otomatis sudah berjalan; memperbarui Status Terkini, backlog (B-26/B-35/B-38/B-39 selesai), dan Log Kronologis. Tidak ada perubahan kode | selesai (dokumen); belum di-commit | 2026-11-04 17:35 — Konfirmasi migrasi 33, B-26, B-35, B-38, B-39 |
 
 ---
 
@@ -447,5 +449,21 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   **16,38 dtk**. Migrasi 32 dan `verifikasi_32.sql` **sudah dijalankan dan
   lulus** di Supabase (laporan user 2026-11-04); Tukar Shift aktif. Sisa: uji
   manual tukar shift & cetak jadwal F4, lalu commit/push menunggu perintah.
+- **Pengaduan presensi (2026-11-04, sudah dijalankan; belum di-commit):** pegawai yang lupa absen
+  pulang mengajukan lewat `/pengaduan` (jam pulang, alasan min. 10 karakter, foto
+  bukti JPG/PNG wajib ≤ 1 MB, maks. 7 hari, shift malam H+1). Kepala unit
+  memutuskan di `/kepala-ruangan/pengaduan` (jam pulang boleh disesuaikan;
+  penolakan wajib catatan; tidak boleh menyetujui pengaduan sendiri). Persetujuan
+  mengisi `presensi.jam_pulang`, status **Koreksi**, dan `alasan_koreksi`; Super
+  Admin hanya melihat riwayat di **Koreksi Presensi → Riwayat Pengaduan**. Tabel
+  `pengaduan_presensi` + RPC `ajukan_pengaduan_presensi`,
+  `putuskan_pengaduan_presensi`, `daftar_pengaduan_presensi`,
+  `validasi_dokumen_pengaduan` ada di migrasi **33** (+ `verifikasi_33.sql`,
+  sinkron `schema.sql`); foto memakai bucket privat `dokumen-izin` prefix
+  `pengaduan/<user_id>/`. Verifikasi lokal: lint bersih, `npm test` **67/67**,
+  `npm run build` lulus 7,47 dtk. **Migrasi 33 dan `verifikasi_33.sql` sudah
+  dijalankan dan diuji** (laporan user 2026-11-04 17:35). Pada laporan yang sama
+  user juga mengonfirmasi **B-35** (uji komponen UI baru) dan **B-26** (Alfa
+  otomatis pertama) sudah berjalan.
 - Timezone aplikasi: `Asia/Makassar` (WITA, UTC+8).
 - `dist/` dan `.env` sudah diabaikan Git.

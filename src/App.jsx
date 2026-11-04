@@ -44,6 +44,7 @@ import { LayarMemuat } from './components/ui/index.js'
 const Dashboard = lazy(() => import('./pages/Dashboard.jsx'))
 const IzinSaya = lazy(() => import('./pages/IzinSaya.jsx'))
 const RiwayatSaya = lazy(() => import('./pages/RiwayatSaya.jsx'))
+const Pengaduan = lazy(() => import('./pages/Pengaduan.jsx'))
 const DashboardUtama = lazy(() => import('./pages/admin/DashboardUtama.jsx'))
 const DataPegawai = lazy(() => import('./pages/admin/DataPegawai.jsx'))
 const KepalaUnit = lazy(() => import('./pages/admin/KepalaUnit.jsx'))
@@ -58,6 +59,7 @@ const KoreksiPresensi = lazy(() => import('./pages/admin/KoreksiPresensi.jsx'))
 const PengajuanIzin = lazy(() => import('./pages/admin/PengajuanIzin.jsx'))
 const Rekapitulasi = lazy(() => import('./pages/admin/Rekapitulasi.jsx'))
 const LaporanBulanan = lazy(() => import('./pages/admin/LaporanBulanan.jsx'))
+const PengaduanKepala = lazy(() => import('./pages/admin/PengaduanKepala.jsx'))
 
 function RuteAplikasi() {
   const { pathname } = useLocation()
@@ -96,6 +98,15 @@ function RuteAplikasi() {
           />
 
           <Route
+            path="/pengaduan"
+            element={
+              <ProtectedRoute peran="pegawai">
+                <Pengaduan />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/kepala-ruangan"
             element={
               <ProtectedRoute peran={['pegawai', 'kepala']} kepalaRuangan>
@@ -113,6 +124,7 @@ function RuteAplikasi() {
               element={<PengajuanIzin mode="kepala" kategori="dinas-sakit" />}
             />
             <Route path="cuti" element={<PengajuanIzin mode="kepala" kategori="cuti" />} />
+            <Route path="pengaduan" element={<PengaduanKepala />} />
             <Route path="laporan" element={<LaporanBulanan mode="kepala" />} />
           </Route>
 

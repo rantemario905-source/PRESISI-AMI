@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-04 16:22 WITA (cetak jadwal UGD jadi satu halaman) |
+| Terakhir diperbarui | 2026-11-04 17:35 WITA (migrasi 33, B-26, B-35, B-38, B-39 selesai) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -36,6 +36,22 @@
 ---
 
 ## 1. Status Terkini
+
+**Pekerjaan terbaru (2026-11-04 17:12):** **Pengaduan Presensi** (absen pulang
+terlewat) untuk semua pola kerja: pegawai mengajukan lewat `/pengaduan` dengan
+jam pulang, alasan min. 10 karakter, dan **foto bukti wajib** (JPG/PNG maks.
+1 MB) dalam **7 hari**; kepala unit menyetujui/menolak di
+`/kepala-ruangan/pengaduan` (jam pulang boleh disesuaikan, tolak wajib catatan,
+tidak boleh menyetujui pengaduan sendiri); persetujuan mengisi `jam_pulang` dan
+status **Koreksi**; Super Admin hanya melihat riwayat di
+**Koreksi Presensi → Riwayat Pengaduan**. Kode memakai RPC `SECURITY DEFINER`
+dan tabel `pengaduan_presensi` (migrasi **33**) dengan foto di bucket privat
+`dokumen-izin` prefix `pengaduan/<user_id>/`. Verifikasi lokal: `npm run lint`
+bersih, `npm test` **67/67**, `npm run build` lulus **7,47 dtk**. **Migrasi 33
+dan `verifikasi_33.sql` sudah dijalankan serta diuji** (laporan user
+2026-11-04 17:35). Pada laporan yang sama user juga mengonfirmasi **B-35**
+(komponen UI baru) dan **B-26** (Alfa otomatis pertama) sudah berjalan.
+Perubahan kode masih **ditahan di working tree** (belum di-commit).
 
 **Ringkasan:** seluruh fitur inti (Fase 1–8 + penyempurnaan UI navigasi) sudah ada
 di kode, live di GitHub Pages, dan **login, verifikasi perangkat, serta absensi
@@ -448,6 +464,55 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-04 17:35 WITA — Konfirmasi migrasi 33, B-26, B-35, B-38, B-39
+
+- **Perubahan:** user mengonfirmasi **migrasi 33** dan `verifikasi_33.sql` sudah
+  dijalankan dan diuji, **B-35** (uji komponen UI baru) selesai, dan **B-26**
+  (Alfa otomatis) sudah berjalan. Tidak ada perubahan kode; hanya pembaruan
+  dokumen audit.
+- **File:** `progress.md`, `AGENTS.md`.
+- **Verifikasi:** klaim user 2026-11-04 17:35; tidak ada perintah verifikasi kode
+  yang dijalankan ulang pada sesi ini.
+- **Catatan/risiko:** seluruh pekerjaan **Pengaduan Presensi** dan tukar shift
+  masih **ditahan di working tree** (belum di-commit) menunggu perintah user.
+  Sisa uji manual: B-37 (tukar shift, laporan, cetak jadwal F4), B-28 (bebas
+  radius), dan B-29 (akurasi GPS, ditahan).
+
+### 2026-11-04 17:12 WITA — Pengaduan absen pulang (migrasi 33)
+
+- **Perubahan:** melanjutkan rencana pengaduan presensi yang sempat terhenti
+  karena forceclose. Pegawai dapat mengadukan presensi yang sudah memiliki
+  `jam_masuk` tetapi belum `jam_pulang` (reguler/shift, maks. 7 hari) lewat menu
+  **Pengaduan**. Form mewajibkan jam pulang, alasan min. 10 karakter, dan foto
+  bukti JPG/PNG (kompres otomatis ≤ 1 MB); shift malam otomatis H+1. Kepala unit
+  meninjau di menu **Pengaduan Presensi**: setuju (jam pulang boleh disesuaikan)
+  atau tolak (catatan wajib), tidak dapat menyetujui pengaduan sendiri.
+  Persetujuan mengisi `presensi.jam_pulang`, status `Koreksi`, dan `alasan_koreksi`;
+  riwayat tetap tersimpan. Super Admin hanya melihat riwayat (tab baru di
+  **Koreksi Presensi**). Server memakai RPC `SECURITY DEFINER`
+  (`ajukan_pengaduan_presensi`, `putuskan_pengaduan_presensi`,
+  `daftar_pengaduan_presensi`, `validasi_dokumen_pengaduan`), RLS baca per peran,
+  dan policy unggah foto prefix `pengaduan/<user_id>/`.
+- **File:** `supabase/migrations/33_pengaduan_presensi.sql`,
+  `supabase/verifikasi_33.sql`, `supabase/schema.sql`,
+  `src/services/pengaduanService.js`, `src/utils/pengaduan.js`,
+  `src/pages/Pengaduan.jsx`, `src/pages/admin/PengaduanKepala.jsx`,
+  `src/components/pengaduan/{FormPengaduan,DaftarPengaduan,ModalPutusanPengaduan}.jsx`,
+  `src/App.jsx`, `src/components/BarAtas.jsx`,
+  `src/components/NavigasiBawah.jsx`, `src/components/PanelAbsen.jsx`,
+  `src/components/layout/{PortalKepalaLayout,SidebarKepala}.jsx`,
+  `src/pages/admin/KoreksiPresensi.jsx`, `tests/pengaduan.test.js`, `README.md`,
+  `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **67/67** lulus;
+  `npm run build` lulus **7,47 dtk**. Audit ulang pra-commit: `schema.sql`
+  identik dengan migrasi 33, RPC/policy memakai pola migrasi 32, dan tombol
+  persetujuan disembunyikan untuk pengaduan milik kepala sendiri.
+- **Catatan/risiko:** migrasi **33** dan `verifikasi_33.sql` **belum dijalankan**
+  di Supabase, sehingga menu pengaduan akan gagal sampai migrasi dijalankan. Uji
+  manual alur ajukan → setujui/tolak → laporan belum dilakukan. Pengaduan yang
+  presensinya sudah terisi `jam_pulang` (mis. pegawai akhirnya absen pulang)
+  tidak dapat disetujui; kepala unit dapat menolaknya dengan catatan.
 
 ### 2026-11-04 16:22 WITA — Cetak jadwal UGD jadi satu halaman
 
@@ -2257,7 +2322,7 @@ dan `verifikasi_18` untuk hapus grup kosong.
 | B-22 | ~~Migrasi 26 sudah dijalankan; verifikasi dan uji manual belum~~ | - | **Selesai:** `verifikasi_26.sql` lulus dan uji jendela absen aman (laporan user 2026-10-30) |
 | B-23 | ~~Migrasi 27 sudah dijalankan; verifikasi dan uji manual belum~~ | - | **Selesai:** `verifikasi_27.sql` lulus dan tampilan jam Admisi diuji (laporan user 2026-10-30) |
 | B-24 | ~~Go-live belum dieksekusi~~ | - | **Selesai:** go-live dimulai Minggu, 1 November 2026 dan pegawai sudah absen masuk/pulang (laporan user 2026-11-01 17:58); sisa pantauan Alfa otomatis pertama |
-| B-26 | Verifikasi pembentukan Alfa otomatis pertama setelah go-live | Belum ada bukti baris Alfa terbentuk di produksi | Pantau `presensi` setelah jam kerja hari kerja pertama; cron `presisi-alfa-otomatis` sudah aktif (2026-10-30) |
+| B-26 | ~~Verifikasi pembentukan Alfa otomatis pertama setelah go-live~~ | - | **Selesai:** Alfa otomatis sudah berjalan (laporan user 2026-11-04 17:35) |
 | B-25 | ~~Uji manual jadwal 1.064 baris setelah paginasi~~ | - | **Selesai:** user memastikan seluruh tanggal termasuk 1–2 November muncul (2026-10-31 12:53) |
 | B-27 | ~~Migrasi 28 dan verifikasi 28 belum dijalankan~~ | - | **Selesai:** migrasi 28 dijalankan dan `verifikasi_28.sql` lulus (laporan user 2026-11-02); flag **Bebas Radius** aktif di server |
 | B-28 | Uji manual pegawai bebas radius dan pegawai biasa setelah migrasi 28 | Belum ada bukti uji di perangkat | Uji satu pegawai bebas radius absen dari luar area pada jam reguler dan satu pegawai biasa tetap ditolak di luar 50 m |
@@ -2267,8 +2332,10 @@ dan `verifikasi_18` untuk hapus grup kosong.
 | B-32 | ~~Migrasi 29 dan verifikasi 29 belum dijalankan~~ | - | **Selesai:** dijalankan user 2026-11-04; aturan baru aktif di server |
 | B-33 | ~~Migrasi 30 (backfill menit terlambat) belum dijalankan~~ | - | **Selesai:** dijalankan user 2026-11-04; `menit_terlambat` data sejak 1 November 2026 sudah dihitung ulang |
 | B-34 | ~~Migrasi 31 (ACC otomatis Super Admin) dan verifikasi 31 belum dijalankan~~ | - | **Selesai:** migrasi 31 dan `verifikasi_31.sql` dijalankan dan lulus (laporan user 2026-11-04); ACC otomatis Super Admin aktif |
-| B-35 | Uji manual komponen UI baru (muat ulang, filter nama, pemilih periode, warna jenis) | Belum ada bukti uji di perangkat | Uji tombol Muat ulang, filter nama di Verifikasi/Koreksi, pemilih periode di form Cuti/Dinas-Sakit, dan warna badge Sakit/Cuti/Dinas Luar di HP dan desktop |
+| B-35 | ~~Uji manual komponen UI baru (muat ulang, filter nama, pemilih periode, warna jenis)~~ | - | **Selesai:** diuji user 2026-11-04 17:35 |
 | B-36 | ~~Migrasi 32 (tukar shift) dan verifikasi 32 belum dijalankan~~ | - | **Selesai:** migrasi 32 dan `verifikasi_32.sql` dijalankan dan lulus (laporan user 2026-11-04); server menyimpan riwayat tukar shift |
+| B-38 | ~~Migrasi 33 (pengaduan presensi) dan `verifikasi_33.sql` belum dijalankan~~ | - | **Selesai:** dijalankan user 2026-11-04 17:35 |
+| B-39 | ~~Uji manual pengaduan absen pulang~~ | - | **Selesai:** diuji user 2026-11-04 17:35 |
 | B-37 | Uji manual tukar shift, laporan, & cetak jadwal F4 landscape | Belum ada bukti uji di perangkat | Tukar dua pegawai shift → pastikan jadwal bertukar dan laporan bulanan memuat kolom Shift + blok Riwayat Tukar; laporan pegawai **Reguler** tanpa kolom Shift; footer `Dicetak melalui PRESISI-AMI` menempel dasar kertas dan tanpa teks Halaman; cetak jadwal → periksa F4 landscape, footer di dasar, warna Pagi/Siang/Malam, dan tanda tangan Kepala Ruangan **bergelar** (ASN dari `nama_kepala`, non-ASN dari `pegawai.nama`), baik dicetak kepala itu sendiri maupun Super Admin; impor jadwal → hanya `.xlsx` (file `.csv` ditolak) dan laporan error terunduh sebagai `.xlsx` |
 | B-4 | ~~`npm run build` belum dijalankan~~ | — | **Selesai:** lulus 2026-10-25 12:24 |
 | B-5 | ~~README menyebut Fase 1–7 saja~~ | — | **Selesai:** diperbarui ke Fase 1–8 + impor |

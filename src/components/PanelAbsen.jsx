@@ -10,6 +10,7 @@
  * ==========================================================================
  */
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   MAX_RADIUS_METERS,
   MENIT_AWAL_ABSEN_MASUK,
@@ -369,7 +370,13 @@ export default function PanelAbsen({
             Presensi tanggal {formatTanggalRingkas(presensiKemarin.tanggal)} belum memiliki
             jam pulang. Batas absen pulang (2 jam setelah jam pulang) sudah terlewat
             {batasPulangKemarin ? `, yaitu pukul ${formatJamBuka(batasPulangKemarin)} WITA` : ''}.
-            Ajukan koreksi presensi kepada Super Admin.
+            Ajukan pengaduan kepada Kepala Unit bila Anda tidak sempat absen pulang.
+            <Link
+              to="/pengaduan"
+              className="mt-2 inline-flex min-h-[36px] items-center rounded-lg bg-amber-700 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
+            >
+              Ajukan Pengaduan
+            </Link>
           </Alert>
         )}
 
@@ -378,7 +385,13 @@ export default function PanelAbsen({
             Batas absen pulang untuk presensi tanggal{' '}
             {formatTanggalRingkas(presensiAktif.tanggal)} sudah terlewat
             {batasPulang ? `, yaitu pukul ${formatJamBuka(batasPulang)} WITA` : ''}.
-            Ajukan koreksi presensi kepada Super Admin.
+            Ajukan pengaduan kepada Kepala Unit bila Anda tidak sempat absen pulang.
+            <Link
+              to="/pengaduan"
+              className="mt-2 inline-flex min-h-[36px] items-center rounded-lg bg-amber-700 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
+            >
+              Ajukan Pengaduan
+            </Link>
           </Alert>
         )}
 

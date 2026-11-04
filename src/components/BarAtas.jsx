@@ -13,6 +13,7 @@ const MENU_PEGAWAI = [
   { ke: '/', label: 'Absensi', akhir: true },
   { ke: '/izin-saya', label: 'Dinas & Cuti' },
   { ke: '/riwayat', label: 'Riwayat' },
+  { ke: '/pengaduan', label: 'Pengaduan' },
 ]
 
 export default function BarAtas({ onKeluar }) {

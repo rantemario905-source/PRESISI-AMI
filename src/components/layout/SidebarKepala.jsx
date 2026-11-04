@@ -38,6 +38,16 @@ const MENU = [
     ),
   },
   {
+    label: 'Pengaduan Presensi',
+    ke: '/kepala-ruangan/pengaduan',
+    ikon: (
+      <>
+        <path d="M21 15a4 4 0 01-4 4H7l-4 3V5a2 2 0 012-2h12a4 4 0 014 4z" />
+        <path d="M8 9h8M8 13h5" />
+      </>
+    ),
+  },
+  {
     label: 'Laporan Bulanan',
     ke: '/kepala-ruangan/laporan',
     ikon: (

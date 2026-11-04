@@ -8,6 +8,10 @@
  */
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ambilAuditKoreksi, ambilPresensiPeriode } from '../../services/correctionService.js'
+import {
+  ambilDaftarPengaduan,
+  ambilDokumenPengaduanUrl,
+} from '../../services/pengaduanService.js'
 import { ambilUnitKerja } from '../../services/pegawaiService.js'
 import {
   akhirBulan,
@@ -27,10 +31,12 @@ import {
 import KepalaHalaman from '../../components/admin/KepalaHalaman.jsx'
 import DaftarPresensiKoreksi from '../../components/admin/DaftarPresensiKoreksi.jsx'
 import FormKoreksiPresensi from '../../components/admin/FormKoreksiPresensi.jsx'
+import DaftarPengaduan from '../../components/pengaduan/DaftarPengaduan.jsx'
 
 const TAB = [
   { nilai: 'data', label: 'Data Presensi' },
   { nilai: 'audit', label: 'Audit Trail' },
+  { nilai: 'pengaduan', label: 'Riwayat Pengaduan' },
 ]
 
 export default function KoreksiPresensi() {
@@ -40,7 +46,10 @@ export default function KoreksiPresensi() {
   const [units, setUnits] = useState([])
   const [daftar, setDaftar] = useState([])
   const [audit, setAudit] = useState([])
+  const [pengaduan, setPengaduan] = useState([])
+  const [statusPengaduan, setStatusPengaduan] = useState('semua')
   const [memuat, setMemuat] = useState(true)
+  const [memuatPengaduan, setMemuatPengaduan] = useState(false)
   const [galat, setGalat] = useState(null)
   const [pesan, setPesan] = useState(null)
   const [cari, setCari] = useState('')
@@ -68,6 +77,48 @@ export default function KoreksiPresensi() {
         .includes(kata),
     )
   }, [audit, cari])
+
+  const pengaduanTersaring = useMemo(() => {
+    const kata = cari.trim().toLowerCase()
+    if (!kata) return pengaduan
+    return pengaduan.filter((baris) =>
+      `${baris.pegawai_nama ?? ''} ${baris.unit_kerja ?? ''}`
+        .toLowerCase()
+        .includes(kata),
+    )
+  }, [cari, pengaduan])
+
+  const muatPengaduan = useCallback(async () => {
+    setMemuatPengaduan(true)
+    try {
+      const data = await ambilDaftarPengaduan({
+        unit,
+        status: statusPengaduan,
+      })
+      setPengaduan(data)
+      setGalat(null)
+    } catch (err) {
+      setGalat(err.message || 'Gagal memuat riwayat pengaduan.')
+    } finally {
+      setMemuatPengaduan(false)
+    }
+  }, [unit, statusPengaduan])
+
+  const lihatFotoPengaduan = async (baris) => {
+    if (!baris.dokumen_path) return
+    const jendela = window.open('about:blank', '_blank')
+    if (jendela) jendela.opener = null
+    setGalat(null)
+    try {
+      const url = await ambilDokumenPengaduanUrl(baris.dokumen_path)
+      if (!url) throw new Error('Foto bukti tidak tersedia.')
+      if (jendela) jendela.location.replace(url)
+      else window.open(url, '_blank', 'noopener,noreferrer')
+    } catch (err) {
+      if (jendela) jendela.close()
+      setGalat(err.message || 'Gagal membuka foto bukti.')
+    }
+  }
 
   const muat = useCallback(async () => {
     setMemuat(true)
@@ -102,6 +153,11 @@ export default function KoreksiPresensi() {
       .then(setAudit)
       .catch((err) => setGalat(err.message || 'Gagal memuat audit trail.'))
   }, [tab, pesan])
+
+  useEffect(() => {
+    if (tab !== 'pengaduan') return
+    muatPengaduan()
+  }, [tab, muatPengaduan, pesan])
 
   const bukaKoreksi = useCallback((baris) => {
     setPilih(baris)
@@ -144,7 +200,10 @@ export default function KoreksiPresensi() {
         onChange={setTab}
         label="Jenis data koreksi"
         aksi={
-          <TombolMuatUlang onClick={muat} memuat={memuat} />
+          <TombolMuatUlang
+            onClick={tab === 'pengaduan' ? muatPengaduan : muat}
+            memuat={tab === 'pengaduan' ? memuatPengaduan : memuat}
+          />
         }
       />
 
@@ -152,7 +211,13 @@ export default function KoreksiPresensi() {
         <PencarianNama
           nilai={cari}
           onChange={setCari}
-          placeholder={tab === 'audit' ? 'Cari nama pegawai atau admin…' : 'Cari nama pegawai…'}
+          placeholder={
+            tab === 'audit'
+              ? 'Cari nama pegawai atau admin…'
+              : tab === 'pengaduan'
+                ? 'Cari nama pegawai atau unit…'
+                : 'Cari nama pegawai…'
+          }
           className="w-full sm:max-w-xs"
         />
         <p className="text-[11px] font-semibold text-slate-500 sm:text-xs">
@@ -160,9 +225,13 @@ export default function KoreksiPresensi() {
             ? cari
               ? `${daftarTersaring.length} dari ${daftar.length} presensi`
               : `${daftar.length} presensi`
-            : cari
-              ? `${auditTersaring.length} dari ${audit.length} koreksi`
-              : `${audit.length} koreksi`}
+            : tab === 'pengaduan'
+              ? cari
+                ? `${pengaduanTersaring.length} dari ${pengaduan.length} pengaduan`
+                : `${pengaduan.length} pengaduan`
+              : cari
+                ? `${auditTersaring.length} dari ${audit.length} koreksi`
+                : `${audit.length} koreksi`}
         </p>
       </div>
 
@@ -222,6 +291,66 @@ export default function KoreksiPresensi() {
               </div>
             ) : (
               <DaftarPresensiKoreksi daftar={daftarTersaring} onKoreksi={bukaKoreksi} />
+            )}
+          </section>
+        </>
+      )}
+
+      {tab === 'pengaduan' && (
+        <>
+          <div className="mb-4 grid gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-kartu sm:grid-cols-2 sm:p-4 lg:max-w-xl">
+            <div>
+              <label className="label-input" htmlFor="pengaduan-unit-admin">
+                Unit Kerja
+              </label>
+              <select
+                id="pengaduan-unit-admin"
+                className="input-dasar"
+                value={unit}
+                onChange={(event) => setUnit(event.target.value)}
+              >
+                <option value="semua">Semua unit</option>
+                {units.map((u) => (
+                  <option key={u} value={u}>
+                    {u}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="label-input" htmlFor="pengaduan-status-admin">
+                Status
+              </label>
+              <select
+                id="pengaduan-status-admin"
+                className="input-dasar"
+                value={statusPengaduan}
+                onChange={(event) => setStatusPengaduan(event.target.value)}
+              >
+                <option value="semua">Semua status</option>
+                <option value="menunggu">Menunggu</option>
+                <option value="disetujui">Disetujui</option>
+                <option value="ditolak">Ditolak</option>
+              </select>
+            </div>
+          </div>
+
+          <Alert variant="info" className="mb-4">
+            Persetujuan pengaduan dilakukan oleh Kepala Unit. Super Admin hanya
+            dapat melihat riwayat.
+          </Alert>
+
+          <section className="rounded-2xl border border-slate-200 bg-white shadow-kartu">
+            {memuatPengaduan ? (
+              <div className="flex items-center justify-center gap-2 py-14 text-sm text-slate-500">
+                <Spinner /> Memuat pengaduan…
+              </div>
+            ) : (
+              <DaftarPengaduan
+                daftar={pengaduanTersaring}
+                onLihatFoto={lihatFotoPengaduan}
+                pesanKosong="Belum ada pengaduan pada filter ini."
+              />
             )}
           </section>
         </>

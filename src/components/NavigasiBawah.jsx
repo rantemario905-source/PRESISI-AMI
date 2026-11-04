@@ -8,12 +8,14 @@ export const MENU_PEGAWAI = [
   { ke: '/', label: 'Absensi', akhir: true, ikon: 'absensi' },
   { ke: '/izin-saya', label: 'Dinas & Cuti', ikon: 'izin' },
   { ke: '/riwayat', label: 'Riwayat', ikon: 'riwayat' },
+  { ke: '/pengaduan', label: 'Pengaduan', ikon: 'pengaduan' },
 ]
 
 export const MENU_PORTAL_KEPALA = [
   { ke: '/kepala-ruangan/jadwal-shift', label: 'Jadwal', ikon: 'jadwal' },
   { ke: '/kepala-ruangan/dinas-sakit', label: 'Dinas', ikon: 'izin' },
   { ke: '/kepala-ruangan/cuti', label: 'Cuti', ikon: 'cuti' },
+  { ke: '/kepala-ruangan/pengaduan', label: 'Aduan', ikon: 'pengaduan' },
   { ke: '/kepala-ruangan/laporan', label: 'Laporan', ikon: 'laporan' },
   { ke: '/', label: 'Absensi', akhir: true, ikon: 'absensi' },
 ]
@@ -51,6 +53,24 @@ function Ikon({ nama }) {
       >
         <circle cx="12" cy="12" r="9" />
         <path d="M12 7v5l3 2" />
+      </svg>
+    )
+  }
+
+  if (nama === 'pengaduan') {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-[21px] w-[21px]"
+        aria-hidden="true"
+      >
+        <path d="M21 15a4 4 0 01-4 4H7l-4 3V5a2 2 0 012-2h12a4 4 0 014 4z" />
+        <path d="M8 9h8M8 13h5" />
       </svg>
     )
   }
@@ -155,7 +175,13 @@ export default function NavigasiBawah({
     ? [...MENU_PEGAWAI, { ke: '/kepala-ruangan', label: 'Unit', ikon: 'unit' }]
     : MENU_PEGAWAI)
   const kolom =
-    daftar.length >= 5 ? 'grid-cols-5' : daftar.length >= 4 ? 'grid-cols-4' : 'grid-cols-3'
+    daftar.length >= 6
+      ? 'grid-cols-6'
+      : daftar.length >= 5
+        ? 'grid-cols-5'
+        : daftar.length >= 4
+          ? 'grid-cols-4'
+          : 'grid-cols-3'
 
   return (
     <nav

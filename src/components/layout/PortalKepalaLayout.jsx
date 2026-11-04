@@ -18,6 +18,7 @@ const JUDUL_HALAMAN = {
   '/kepala-ruangan/jadwal-shift': 'Jadwal Shift Unit',
   '/kepala-ruangan/dinas-sakit': 'Dinas & Sakit Unit',
   '/kepala-ruangan/cuti': 'Cuti Unit',
+  '/kepala-ruangan/pengaduan': 'Pengaduan Presensi',
   '/kepala-ruangan/laporan': 'Laporan Bulanan',
 }
 

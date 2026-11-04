@@ -14,7 +14,8 @@ dan pemisahan hak akses antara **Pegawai** dan **Super Admin**.
 > pegawai**, **jendela waktu absensi**, **hapus grup shift kosong**, **kepala
 > unit multi-unit dan kepala ASN tanpa baris pegawai**, **jam kerja
 > reguler khusus per unit**, **pengecualian radius untuk pegawai
-> tertentu**, serta **tukar shift teraudit dan cetak jadwal shift (F4 landscape)**.
+> tertentu**, **tukar shift teraudit dan cetak jadwal shift (F4 landscape)**,
+> serta **pengaduan absen pulang dengan foto bukti dan persetujuan kepala unit**.
 
 > **Dokumentasi audit:** progres pekerjaan tercatat di [`progress.md`](progress.md)
 > dan aturan kerja agen serta log instruksi user di [`AGENTS.md`](AGENTS.md).
@@ -95,6 +96,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 | 30 | `supabase/migrations/30_hitung_ulang_menit_terlambat.sql` | Hitung ulang `menit_terlambat` data lama sejak go-live 1 November 2026 memakai aturan menit penuh; hanya baris ber-`jam_masuk`, idempoten, tidak mengubah data lain |
 | 31 | `supabase/migrations/31_auto_setujui_superadmin.sql` | Pengajuan Sakit/Dinas Luar/Cuti yang dicatat atau diubah Super Admin langsung berstatus `disetujui` dan presensi terkait ditandai; pengajuan kepala ruangan tetap `menunggu` |
 | 32 | `supabase/migrations/32_tukar_shift.sql` | Tukar shift teraudit: tabel `tukar_shift` + RPC `tukar_shift()` yang menukar dua baris `jadwal_shift` secara atomik dan mencatat riwayat (shift asal/pengganti, alasan, pelaku) untuk laporan bulanan |
+| 33 | `supabase/migrations/33_pengaduan_presensi.sql` | Pengaduan absen pulang: tabel `pengaduan_presensi` + foto bukti wajib (maks. 7 hari), persetujuan kepala unit, Super Admin hanya melihat riwayat; persetujuan mengisi `jam_pulang` dan status `Koreksi` |
 
 > Bila database sudah pernah dijalankan sampai file 08, jalankan **file 09** untuk
 > mengaktifkan alur Dinas & Sakit / Cuti, **file 11** untuk pengaturan kepala
@@ -111,8 +113,9 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > pengecualian radius pegawai tertentu, **file 29** untuk toleransi
 > keterlambatan serta jam pulang tepat waktu, **file 30** untuk menghitung
 > ulang menit terlambat data lama sejak go-live, dan **file 31** untuk
-> persetujuan otomatis pengajuan yang dicatat Super Admin, serta **file 32**
-> untuk tukar shift teraudit (riwayat tukar + laporan bulanan).
+> persetujuan otomatis pengajuan yang dicatat Super Admin, **file 32**
+> untuk tukar shift teraudit (riwayat tukar + laporan bulanan), serta **file 33**
+> untuk pengaduan absen pulang (foto bukti + persetujuan kepala unit).
 > File 10 hanya berisi RPC perubahan role yang tidak dipakai UI, jadi boleh
 > dilewati. Jalankan migrasi secara bertahap - jangan mengulang file lama bila
 > tidak diperlukan.
@@ -129,8 +132,8 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > **`supabase/verifikasi_24.sql`**, **`supabase/verifikasi_25.sql`**,
 > **`supabase/verifikasi_26.sql`**, **`supabase/verifikasi_27.sql`**,
 > **`supabase/verifikasi_28.sql`**, **`supabase/verifikasi_29.sql`**,
-> **`supabase/verifikasi_30.sql`**, **`supabase/verifikasi_31.sql`**, dan
-> **`supabase/verifikasi_32.sql`** setelah
+> **`supabase/verifikasi_30.sql`**, **`supabase/verifikasi_31.sql`**,
+> **`supabase/verifikasi_32.sql`**, dan **`supabase/verifikasi_33.sql`** setelah
 > migrasi terkait. Seluruh nilai
 > pemeriksaan harus `true`; bila ada yang `false`, jangan lanjutkan pemakaian.
 > `verifikasi_13.sql` dan `verifikasi_14.sql` hanya berlaku sebelum migrasi 15;
@@ -164,6 +167,11 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > Migrasi 32 wajib dijalankan agar **Tukar Shift** di menu Jadwal Shift bekerja
 > (menukar jadwal dua pegawai + mencatat riwayat untuk laporan bulanan). Jalankan
 > `verifikasi_32.sql` setelahnya.
+> Migrasi 33 wajib dijalankan agar menu **Pengaduan Presensi** (pegawai) dan
+> **Pengaduan Presensi** (kepala unit) berfungsi. Foto bukti tetap di bucket
+> privat `dokumen-izin` dengan prefix `pengaduan/<user_id>/`. Super Admin hanya
+> dapat melihat riwayat di **Koreksi Presensi → Riwayat Pengaduan**. Jalankan
+> `verifikasi_33.sql` setelahnya.
 > Bila muncul `function public.is_superadmin() does not exist`, jalankan versi
 > terbaru migrasi 19 — file ini membuat ulang fungsi inti tersebut sekaligus
 > memeriksa keberadaan tabel `pegawai`/`presensi`.
@@ -171,7 +179,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 **B. Sekaligus**
 
 Salin seluruh isi `supabase/schema.sql`, tempel, lalu **Run**.
-Isinya identik dengan gabungan seluruh 32 file migrasi di atas (termasuk migrasi 15-32).
+Isinya identik dengan gabungan seluruh 33 file migrasi di atas (termasuk migrasi 15-33).
 
 **C. Membuat akun pegawai**
 
@@ -271,6 +279,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 │   ├── verifikasi_30.sql       # Pemeriksaan hitung ulang menit terlambat
 │   ├── verifikasi_31.sql       # Pemeriksaan persetujuan otomatis Super Admin
 │   ├── verifikasi_32.sql       # Pemeriksaan tukar shift teraudit
+│   ├── verifikasi_33.sql       # Pemeriksaan pengaduan absen pulang
 │   └── jadwal_alfa.sql         # Opsional: jadwal pg_cron untuk Alfa
 ├── scripts/
 │   ├── impor-akun.mjs          # Impor akun massal via Supabase Admin API
@@ -330,6 +339,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
         ├── Dashboard.jsx       # Halaman absensi pegawai (/)
         ├── IzinSaya.jsx        # Riwayat baca-saja Dinas & Sakit / Cuti (/izin-saya)
         ├── RiwayatSaya.jsx     # Riwayat & rekap bulanan pegawai (/riwayat)
+        ├── Pengaduan.jsx       # Pengaduan absen pulang pegawai (/pengaduan)
         ├── NotFound.jsx
         └── admin/              # Portal Super Admin & kepala unit
             ├── DashboardUtama.jsx
@@ -344,6 +354,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
             ├── KoreksiPresensi.jsx
             ├── PengajuanIzin.jsx   # Dipakai mode superadmin & kepala
             ├── Rekapitulasi.jsx
+            ├── PengaduanKepala.jsx # Persetujuan pengaduan absen pulang (kepala unit)
             └── LaporanBulanan.jsx # Laporan presensi bulanan per pegawai
 ```
 
@@ -366,7 +377,8 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 | **Aksi admin** | Persetujuan perangkat, koreksi presensi, dan keputusan Dinas & Sakit / Cuti hanya lewat RPC `SECURITY DEFINER` yang memeriksa `is_superadmin()` |
 | **Administrasi unit** | Kepala unit hanya dapat membaca data pegawai unit yang dikelolanya, mengatur jadwal shift unit, dan mencatat pengajuan unit; tidak dapat menyetujui. Satu kepala boleh mengelola beberapa unit dan memilih unit aktif di header |
 | **Izin read-only** | Tidak ada policy insert/update/delete pada `izin_cuti`; pegawai hanya melihat barisnya sendiri dan tidak dapat mengajukan sendiri |
-| **Dokumen** | Bucket privat `dokumen-izin`; hanya JPG/PNG maks. 1 MB; path wajib diawali `grup_id` dan diverifikasi RPC |
+| **Dokumen** | Bucket privat `dokumen-izin`; hanya JPG/PNG maks. 1 MB; path izin diawali `grup_id` dan path pengaduan diawali `pengaduan/<user_id>`; keduanya diverifikasi RPC |
+| **Pengaduan presensi** | Hanya untuk presensi yang sudah masuk tetapi belum pulang, maksimal 7 hari, alasan min. 10 karakter, dan **foto bukti wajib**; satu pengaduan menunggu per presensi; persetujuan hanya oleh kepala unit yang mengelola unit pegawai (bukan pengaduan sendiri), Super Admin baca-saja |
 | **Audit trail** | Koreksi presensi wajib alasan (min. 5 karakter) dan mencatat admin, nilai lama/baru, serta waktu |
 | **Bilah progres** | Bilah tipis biru muda di atas layar saat navigasi menu, login, logout, dan muat ulang profil |
 | **Logo aplikasi** | Logo resmi RSUD AMI (`src/assets/logo-rsud-ami.png`) di halaman login, header pegawai, sidebar Super Admin/kepala ruangan, favicon tab, dan apple-touch-icon |
@@ -391,8 +403,20 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
    pulang pada dini hari berikutnya **sampai 2 jam setelah shift berakhir**
    (mis. selesai 07.30 → maksimal 09.30); sistem mencari
    baris presensi yang masih terbuka dari hari sebelumnya. Bila batas terlewat,
-   presensi yang belum ditutup diselesaikan lewat **Koreksi Presensi**.
+   presensi yang belum ditutup diselesaikan lewat **Koreksi Presensi** atau
+   **Pengaduan Presensi** kepada kepala unit (maksimal 7 hari, foto bukti wajib).
 7. Koordinat, jarak, akurasi, dan `device_token` tercatat untuk audit.
+
+### Pengaduan absen pulang
+
+Pegawai membuka menu **Pengaduan** (`/pengaduan`) untuk melaporkan presensi yang
+sudah memiliki jam masuk tetapi belum jam pulang. Pengaduan wajib menyertakan
+jam pulang seharusnya, alasan (min. 10 karakter), dan **foto bukti JPG/PNG**
+(maks. 1 MB, dikompres otomatis), dalam **7 hari** sejak tanggal presensi. Kepala
+unit meninjau di portal kepala (**Pengaduan Presensi**) dan dapat menyesuaikan jam
+pulang sebelum menyetujui; penolakan wajib catatan. Persetujuan mengisi
+`presensi.jam_pulang` dan mengubah status menjadi **Koreksi**. Super Admin hanya
+melihat riwayat di **Koreksi Presensi → Riwayat Pengaduan**.
 
 ## 7. Portal Super Admin (Fase 2–10)
 
@@ -410,7 +434,7 @@ Akses: login dengan akun ber-role `superadmin`, lalu buka `/superadmin-portal`.
 | **Jadwal Shift** | Grid jadwal per grup, isi cepat, salin pola bulan lalu, template/impor Excel (.xlsx), simpan otomatis per sel, dan tampilan daftar di HP |
 | **Hari Libur** | Input manual hari libur nasional/cuti bersama per tahun |
 | **Pengaturan Presensi** | Aktivasi Alfa otomatis dan proses Alfa manual. Mode transisi sudah dihapus |
-| **Koreksi Presensi** | Ubah jam/status dengan **alasan wajib** + audit trail permanen |
+| **Koreksi Presensi** | Ubah jam/status dengan **alasan wajib** + audit trail permanen. Tab **Riwayat Pengaduan** menampilkan riwayat pengaduan absen pulang (baca-saja) |
 | **Dinas & Sakit** | Catat Sakit (1 pegawai) atau Dinas Luar (1–4 pegawai/grup), dokumen wajib, setujui/tolak per grup; catatan Super Admin langsung disetujui |
 | **Cuti** | Catat Cuti (1 pegawai), dokumen opsional, setujui/tolak; catatan Super Admin langsung disetujui |
 | **Rekapitulasi** | Rekap bulanan per unit (ringkasan/detail), ekspor CSV, dan cetak PDF A4 |
