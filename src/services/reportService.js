@@ -62,7 +62,7 @@ export async function ambilLaporanBulanan({ periode, unit }) {
       : semuaPegawai.filter((p) => p.unit_kerja === unit)
 
   if (pegawai.length === 0) {
-    return { pegawai: [], presensi: [], alasanIzin: {}, mulai, selesai }
+    return { pegawai: [], presensi: [], alasanIzin: {}, jadwal: {}, tukar: [], mulai, selesai }
   }
 
   const idPegawai = pegawai.map((p) => p.id)
@@ -80,9 +80,72 @@ export async function ambilLaporanBulanan({ periode, unit }) {
 
   const presensi = await ambilSemuaHalaman(buatKueri)
 
-  const alasanIzin = await ambilAlasanIzin(idPegawai, mulai, selesai)
+  const [alasanIzin, jadwal, tukar] = await Promise.all([
+    ambilAlasanIzin(idPegawai, mulai, selesai),
+    ambilJadwalPeta(idPegawai, mulai, selesai),
+    ambilTukarBulan(idPegawai, mulai, selesai),
+  ])
 
-  return { pegawai, presensi, alasanIzin, mulai, selesai }
+  return { pegawai, presensi, alasanIzin, jadwal, tukar, mulai, selesai }
+}
+
+/** Peta "user_id|tanggal" → ringkasan shift terjadwal. */
+async function ambilJadwalPeta(idPegawai, mulai, selesai) {
+  const buatKueri = () =>
+    supabase
+      .from('jadwal_shift')
+      .select('user_id, tanggal, shift_master ( nama_shift, jam_mulai, jam_selesai )')
+      .in('user_id', idPegawai)
+      .gte('tanggal', mulai)
+      .lte('tanggal', selesai)
+      .order('tanggal', { ascending: true })
+
+  let data
+  try {
+    data = await ambilSemuaHalaman(buatKueri)
+  } catch {
+    return {}
+  }
+
+  const peta = {}
+  for (const baris of data ?? []) {
+    peta[`${baris.user_id}|${baris.tanggal}`] = baris.shift_master ?? null
+  }
+  return peta
+}
+
+/** Daftar kejadian tukar shift yang melibatkan pegawai terpilih pada bulan itu. */
+async function ambilTukarBulan(idPegawai, mulai, selesai) {
+  const buatKueri = () =>
+    supabase
+      .from('tukar_shift')
+      .select(
+        [
+          'id, tanggal, pegawai_a, pegawai_b, alasan, dibuat_oleh',
+          'orang_a:pegawai!tukar_shift_pegawai_a_fkey ( nama )',
+          'orang_b:pegawai!tukar_shift_pegawai_b_fkey ( nama )',
+          'pencatat:pegawai!tukar_shift_dibuat_oleh_fkey ( nama )',
+          'sa_lama:shift_master!tukar_shift_shift_a_lama_fkey ( nama_shift )',
+          'sb_lama:shift_master!tukar_shift_shift_b_lama_fkey ( nama_shift )',
+          'sa_baru:shift_master!tukar_shift_shift_a_baru_fkey ( nama_shift )',
+          'sb_baru:shift_master!tukar_shift_shift_b_baru_fkey ( nama_shift )',
+        ].join(', '),
+      )
+      .gte('tanggal', mulai)
+      .lte('tanggal', selesai)
+      .order('tanggal', { ascending: true })
+
+  let data
+  try {
+    data = await ambilSemuaHalaman(buatKueri)
+  } catch {
+    return []
+  }
+
+  const kumpulan = new Set(idPegawai)
+  return (data ?? []).filter(
+    (baris) => kumpulan.has(baris.pegawai_a) || kumpulan.has(baris.pegawai_b),
+  )
 }
 
 /** Peta "user_id|tanggal" → alasan izin yang disetujui (opsional, tidak fatal). */

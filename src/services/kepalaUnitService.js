@@ -16,6 +16,15 @@ export async function ambilDaftarKepalaUnit() {
   return Array.isArray(data) ? data : []
 }
 
+/** Nama tanda tangan kepala unit untuk satu unit (pegawai.nama / nama_kepala). */
+export async function ambilNamaKepalaUnit(unit) {
+  const { data, error } = await supabase.rpc('nama_kepala_unit', {
+    p_unit: unit,
+  })
+  if (error) throw error
+  return String(data ?? '').trim()
+}
+
 /** Daftar akun auth bertanda kepala ASN yang belum masuk tabel pegawai. */
 export async function ambilAkunKepalaAsn() {
   const { data, error } = await supabase.rpc('daftar_akun_kepala_asn')

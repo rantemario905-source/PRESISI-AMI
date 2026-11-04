@@ -108,6 +108,21 @@ export async function hapusJadwalSel(userId, tanggal) {
   if (error) throw error
 }
 
+/**
+ * Tukar jadwal shift dua pegawai pada satu tanggal.
+ * Server menukar kedua baris `jadwal_shift` secara atomik dan mencatat audit.
+ */
+export async function tukarShift({ pegawaiA, pegawaiB, tanggal, alasan }) {
+  const { data, error } = await supabase.rpc('tukar_shift', {
+    p_pegawai_a: pegawaiA,
+    p_pegawai_b: pegawaiB,
+    p_tanggal: tanggal,
+    p_alasan: alasan ?? null,
+  })
+  if (error) throw error
+  return data
+}
+
 /** Simpan banyak baris jadwal sekaligus (dipakai untuk salin pola). */
 export async function simpanJadwalBanyak(baris) {
   if (!baris?.length) return 0
@@ -119,7 +134,7 @@ export async function simpanJadwalBanyak(baris) {
 }
 
 /**
- * Impor perubahan jadwal dari template CSV/XLSX.
+ * Impor perubahan jadwal dari template Excel (.xlsx).
  * Server memvalidasi ulang unit, tanggal, dan shift.
  */
 export async function imporJadwalShift({ unitKerja, periode, baris }) {

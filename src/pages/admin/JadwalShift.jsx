@@ -18,12 +18,13 @@ import {
   hapusJadwalSel,
   imporJadwalShift,
   simpanJadwalBanyak,
-  simpanJadwalMassal,
   simpanJadwalSel,
+  tukarShift,
 } from '../../services/shiftService.js'
 import { ambilSemuaPegawai } from '../../services/pegawaiService.js'
 import { ambilGrupShift } from '../../services/groupShiftService.js'
 import { ambilHariLiburRentang } from '../../services/hariLiburService.js'
+import { ambilNamaKepalaUnit } from '../../services/kepalaUnitService.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 import {
   akhirBulan,
@@ -41,11 +42,12 @@ import {
   hitungPerubahanTemplate,
   namaFileTemplate,
   unduhLaporanErrorJadwal,
-  unduhTemplateCsv,
   unduhTemplateXlsx,
 } from '../../utils/templateJadwal.js'
+import { susunMatriksJadwal } from '../../utils/jadwalCetak.js'
 import { Alert, Badge, Button, Modal, Spinner } from '../../components/ui/index.js'
 import KepalaHalaman from '../../components/admin/KepalaHalaman.jsx'
+import LembarJadwal from '../../components/laporan/LembarJadwal.jsx'
 
 const HARI = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
 
@@ -125,16 +127,6 @@ export default function JadwalShift({ mode = 'admin' }) {
   const [menyalin, setMenyalin] = useState(false)
 
   const [pegawaiMobileId, setPegawaiMobileId] = useState('')
-  const [modalCepat, setModalCepat] = useState(false)
-  const [menyimpanCepat, setMenyimpanCepat] = useState(false)
-  const [galatCepat, setGalatCepat] = useState(null)
-  const [formCepat, setFormCepat] = useState({
-    shiftId: '',
-    mode: 'grup',
-    pegawaiId: '',
-    mulai: `${periodeBulanIni()}-01`,
-    selesai: akhirBulan(periodeBulanIni()),
-  })
 
   const [modalTemplate, setModalTemplate] = useState(false)
   const [memuatTemplate, setMemuatTemplate] = useState(false)
@@ -144,6 +136,18 @@ export default function JadwalShift({ mode = 'admin' }) {
   const [galatTemplate, setGalatTemplate] = useState(null)
   const [namaFileImpor, setNamaFileImpor] = useState('')
   const fileTemplateRef = useRef(null)
+
+  const [modalTukar, setModalTukar] = useState(false)
+  const [menyimpanTukar, setMenyimpanTukar] = useState(false)
+  const [galatTukar, setGalatTukar] = useState(null)
+  const [formTukar, setFormTukar] = useState({
+    tanggal: hariIni(),
+    pegawaiA: '',
+    pegawaiB: '',
+    alasan: '',
+  })
+  const [waktuCetak, setWaktuCetak] = useState(() => new Date().toISOString())
+  const [namaKepala, setNamaKepala] = useState('')
 
   const muatAwal = useCallback(async () => {
     setMemuat(true)
@@ -284,6 +288,11 @@ export default function JadwalShift({ mode = 'admin' }) {
     [pegawaiGrup],
   )
 
+  const matriksJadwal = useMemo(
+    () => susunMatriksJadwal({ pegawai: pegawaiGrup, jadwal, periode }),
+    [pegawaiGrup, jadwal, periode],
+  )
+
   const pegawaiMobile = pegawaiGrup.find((p) => p.id === pegawaiMobileId)
   const periodeMasaDepan = !modeKepala || periode >= periodeBulanIni()
 
@@ -325,6 +334,62 @@ export default function JadwalShift({ mode = 'admin' }) {
       return 'Tanggal sebelum hari ini hanya dapat diubah Super Admin.'
     }
     return undefined
+  }
+
+  function bukaTukar() {
+    setGalatTukar(null)
+    setFormTukar({
+      tanggal: hariIni(),
+      pegawaiA: pegawaiGrup[0]?.id ?? '',
+      pegawaiB: pegawaiGrup[1]?.id ?? '',
+      alasan: '',
+    })
+    setModalTukar(true)
+  }
+
+  function tutupTukar() {
+    if (menyimpanTukar) return
+    setModalTukar(false)
+  }
+
+  async function simpanTukar() {
+    const { tanggal, pegawaiA, pegawaiB, alasan } = formTukar
+    if (!tanggal || !pegawaiA || !pegawaiB || pegawaiA === pegawaiB) {
+      setGalatTukar('Pilih tanggal dan dua pegawai yang berbeda.')
+      return
+    }
+    if (modeKepala && tanggal < hariIni()) {
+      setGalatTukar('Tanggal sebelum hari ini hanya dapat ditukar Super Admin.')
+      return
+    }
+    setMenyimpanTukar(true)
+    setGalatTukar(null)
+    setGalat(null)
+    setPesan(null)
+    try {
+      await tukarShift({ pegawaiA, pegawaiB, tanggal, alasan })
+      setModalTukar(false)
+      setPesan('Jadwal shift berhasil ditukar.')
+      await muatJadwal()
+    } catch (err) {
+      setGalatTukar(err.message || 'Gagal menukar jadwal shift.')
+    } finally {
+      setMenyimpanTukar(false)
+    }
+  }
+
+  async function cetakJadwal() {
+    if (!pegawaiGrup.length) return
+    let kepala = modeKepala ? profil?.nama ?? '' : ''
+    try {
+      const nama = await ambilNamaKepalaUnit(grupNama)
+      if (nama) kepala = nama
+    } catch {
+      // Fallback: nama profil untuk kepala, titik-titik untuk Super Admin.
+    }
+    setNamaKepala(kepala)
+    setWaktuCetak(new Date().toISOString())
+    window.setTimeout(() => window.print(), 80)
   }
 
   function bukaSel(p, tanggal) {
@@ -489,79 +554,6 @@ export default function JadwalShift({ mode = 'admin' }) {
     }
   }
 
-  function bukaCepat() {
-    if (modeKepala && periode < periodeBulanIni()) {
-      setGalat('Jadwal bulan yang sudah lewat hanya dapat diubah Super Admin.')
-      return
-    }
-    const bulan = periodeValid(periode) ? periode : periodeBulanIni()
-    let mulai = `${bulan}-01`
-    if (modeKepala) {
-      const hari = hariIni()
-      if (hari > akhirBulan(bulan)) {
-        setGalat(
-          'Tidak ada tanggal tersisa di bulan ini. Pilih bulan berikutnya untuk mengisi jadwal.',
-        )
-        return
-      }
-      // Bulan berjalan mulai hari ini; bulan berikutnya mulai tanggal 1.
-      mulai = hari > `${bulan}-01` ? hari : `${bulan}-01`
-    }
-    setFormCepat({
-      shiftId: master[0]?.id ?? '',
-      mode: 'grup',
-      pegawaiId: pegawaiGrup[0]?.id ?? '',
-      mulai,
-      selesai: akhirBulan(bulan),
-    })
-    setGalatCepat(null)
-    setModalCepat(true)
-  }
-
-  async function simpanCepat(event) {
-    event.preventDefault()
-    setMenyimpanCepat(true)
-    setGalatCepat(null)
-    try {
-      if (!formCepat.shiftId) throw new Error('Pilih shift terlebih dahulu.')
-      if (!formCepat.mulai || !formCepat.selesai) {
-        throw new Error('Lengkapi rentang tanggal.')
-      }
-      if (modeKepala && formCepat.mulai < hariIni()) {
-        throw new Error(
-          'Untuk kepala ruangan, tanggal mulai minimal hari ini. Tanggal lampau hanya dapat diubah Super Admin.',
-        )
-      }
-      if (formCepat.selesai < formCepat.mulai) {
-        throw new Error('Tanggal selesai tidak boleh sebelum tanggal mulai.')
-      }
-
-      const userIds =
-        formCepat.mode === 'grup'
-          ? pegawaiGrup.map((p) => p.id)
-          : [formCepat.pegawaiId]
-
-      if (!userIds.length || !userIds[0]) {
-        throw new Error('Pilih pegawai/grup tujuan.')
-      }
-
-      const jumlah = await simpanJadwalMassal({
-        userIds,
-        shiftId: formCepat.shiftId,
-        mulai: formCepat.mulai,
-        selesai: formCepat.selesai,
-      })
-
-      setModalCepat(false)
-      setPesan(`${jumlah} baris jadwal berhasil disimpan.`)
-      await muatJadwal()
-    } catch (err) {
-      setGalatCepat(err.message || 'Gagal menyimpan jadwal.')
-    } finally {
-      setMenyimpanCepat(false)
-    }
-  }
-
   function bukaModalTemplate() {
     if (!bisaTemplate) {
       setGalat(alasanTemplate() || 'Template belum dapat digunakan.')
@@ -582,7 +574,7 @@ export default function JadwalShift({ mode = 'admin' }) {
     setNamaFileImpor('')
   }
 
-  async function unduhTemplate(format) {
+  async function unduhTemplate() {
     if (!bisaTemplate) {
       setGalatTemplate(alasanTemplate() || 'Template belum dapat digunakan.')
       return
@@ -598,10 +590,9 @@ export default function JadwalShift({ mode = 'admin' }) {
         jadwalMap,
         master,
       })
-      if (format === 'xlsx') await unduhTemplateXlsx(data)
-      else unduhTemplateCsv(data)
+      await unduhTemplateXlsx(data)
       setPesan(
-        `Template ${format === 'xlsx' ? 'Excel' : 'CSV'} ${grupNama} ${namaBulan(periode)} berhasil diunduh.`,
+        `Template Excel ${grupNama} ${namaBulan(periode)} berhasil diunduh.`,
       )
     } catch (err) {
       setGalatTemplate(err.message || 'Gagal mengunduh template.')
@@ -704,40 +695,46 @@ export default function JadwalShift({ mode = 'admin' }) {
     fileTemplateRef.current?.click()
   }
 
-  const jumlahHariCepat = daftarTanggal(
-    formCepat.mulai,
-    formCepat.selesai,
-  ).length
-  const jumlahPegawaiCepat =
-    formCepat.mode === 'grup'
-      ? pegawaiGrup.length
-      : formCepat.pegawaiId
-        ? 1
-        : 0
-
   return (
     <>
+      <style>{`@media print { @page { size: 330mm 215mm; margin: 8mm; } }`}</style>
+
+      <div className="tanpa-cetak">
       <KepalaHalaman
         judul="Jadwal Shift"
         deskripsi={
           modeKepala
             ? 'Atur jadwal shift unit Anda untuk tanggal hari ini dan seterusnya. Setiap perubahan sel langsung tersimpan.'
-            : 'Atur jadwal pegawai shift per grup. Klik sel untuk mengubah satu tanggal, atau gunakan Template & Impor/Isi Cepat/Salin Bulan Lalu.'
+            : 'Atur jadwal pegawai shift per grup. Klik sel untuk mengubah satu tanggal, atau gunakan Template & Impor/Salin Bulan Lalu.'
         }
         aksi={
-          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center">
+<div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center">
             <Button
-              variant="sekunder"
+              variant="templat"
               size="sm"
               className="w-full sm:w-auto"
               onClick={bukaModalTemplate}
               disabled={!bisaTemplate || memuatTemplate || membacaTemplate}
               title={!bisaTemplate ? alasanTemplate() : undefined}
             >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4 shrink-0"
+                aria-hidden="true"
+              >
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <path d="M14 2v6h6" />
+                <path d="M12 12v6m0 0-2.5-2.5M12 18l2.5-2.5" />
+              </svg>
               Template &amp; Impor
             </Button>
             <Button
-              variant="sekunder"
+              variant="salin"
               size="sm"
               className="w-full sm:w-auto"
               onClick={salinPola}
@@ -748,20 +745,70 @@ export default function JadwalShift({ mode = 'admin' }) {
                 !periodeMasaDepan
               }
             >
-              {menyalin ? 'Menyalin…' : 'Salin Bulan Lalu'}
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4 shrink-0"
+                aria-hidden="true"
+              >
+                <rect x="8" y="8" width="12" height="12" rx="2" />
+                <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+              </svg>
+              {menyalin ? 'Menyalin...' : 'Salin Bulan Lalu'}
+            </Button>
+            <Button
+              variant="tukar"
+              size="sm"
+              className="w-full sm:w-auto"
+              onClick={bukaTukar}
+              disabled={memuatJadwal || pegawaiGrup.length < 2 || !grupNama}
+              title={
+                pegawaiGrup.length < 2
+                  ? 'Butuh minimal dua pegawai shift di unit ini.'
+                  : undefined
+              }
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4 shrink-0"
+                aria-hidden="true"
+              >
+                <path d="M7 7h11l-3-3" />
+                <path d="M17 17H6l3 3" />
+              </svg>
+              Tukar Shift
             </Button>
             <Button
               variant="utama"
               size="sm"
               className="w-full sm:w-auto"
-              onClick={bukaCepat}
-              disabled={
-                memuat ||
-                !master.length ||
-                !periodeMasaDepan
-              }
+              onClick={cetakJadwal}
+              disabled={memuatJadwal || pegawaiGrup.length === 0 || !grupNama}
             >
-              Isi Cepat
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4 shrink-0"
+                aria-hidden="true"
+              >
+                <path d="M6 9V3h12v6" />
+                <path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" />
+                <rect x="6" y="14" width="12" height="8" rx="1" />
+              </svg>
+              Cetak Jadwal
             </Button>
           </div>
         }
@@ -1222,161 +1269,7 @@ export default function JadwalShift({ mode = 'admin' }) {
         )}
       </Modal>
 
-      {/* Modal isi cepat */}
-      <Modal
-        terbuka={modalCepat}
-        onTutup={() => setModalCepat(false)}
-        judul="Isi Cepat Jadwal Shift"
-      >
-        <form onSubmit={simpanCepat} className="space-y-4">
-          {galatCepat && (
-            <Alert variant="bahaya" title="Gagal Menyimpan">
-              {galatCepat}
-            </Alert>
-          )}
-
-          <div>
-            <label className="label-input" htmlFor="cepat-shift">
-              Shift
-            </label>
-            <select
-              id="cepat-shift"
-              className="input-dasar"
-              value={formCepat.shiftId}
-              onChange={(e) =>
-                setFormCepat((l) => ({ ...l, shiftId: e.target.value }))
-              }
-              required
-            >
-              <option value="">— pilih shift —</option>
-              {master.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.nama_shift} ({jamPendek(s.jam_mulai)}–{jamPendek(s.jam_selesai)})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid gap-2 sm:grid-cols-2">
-            <label
-              className={`flex min-h-[44px] cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold ${
-                formCepat.mode === 'grup'
-                  ? 'border-sky-500 bg-sky-50 text-sky-700'
-                  : 'border-slate-300 bg-white text-slate-600'
-              }`}
-            >
-              <input
-                type="radio"
-                name="mode-cepat"
-                value="grup"
-                className="h-4 w-4 accent-sky-600"
-                checked={formCepat.mode === 'grup'}
-                onChange={(e) =>
-                  setFormCepat((l) => ({ ...l, mode: e.target.value }))
-                }
-              />
-              Semua pegawai shift di grup
-            </label>
-            <label
-              className={`flex min-h-[44px] cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold ${
-                formCepat.mode === 'pegawai'
-                  ? 'border-sky-500 bg-sky-50 text-sky-700'
-                  : 'border-slate-300 bg-white text-slate-600'
-              }`}
-            >
-              <input
-                type="radio"
-                name="mode-cepat"
-                value="pegawai"
-                className="h-4 w-4 accent-sky-600"
-                checked={formCepat.mode === 'pegawai'}
-                onChange={(e) =>
-                  setFormCepat((l) => ({ ...l, mode: e.target.value }))
-                }
-              />
-              Satu pegawai
-            </label>
-          </div>
-
-          {formCepat.mode === 'pegawai' && (
-            <div>
-              <label className="label-input" htmlFor="cepat-pegawai">
-                Pegawai
-              </label>
-              <select
-                id="cepat-pegawai"
-                className="input-dasar"
-                value={formCepat.pegawaiId}
-                onChange={(e) =>
-                  setFormCepat((l) => ({ ...l, pegawaiId: e.target.value }))
-                }
-                required
-              >
-                <option value="">— pilih pegawai —</option>
-                {pegawaiGrup.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.nama}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <label className="label-input" htmlFor="cepat-mulai">
-                Tanggal Mulai
-              </label>
-              <input
-                id="cepat-mulai"
-                type="date"
-                className="input-dasar"
-                value={formCepat.mulai}
-                onChange={(e) =>
-                  setFormCepat((l) => ({ ...l, mulai: e.target.value }))
-                }
-                required
-              />
-            </div>
-            <div>
-              <label className="label-input" htmlFor="cepat-selesai">
-                Tanggal Selesai
-              </label>
-              <input
-                id="cepat-selesai"
-                type="date"
-                className="input-dasar"
-                value={formCepat.selesai}
-                onChange={(e) =>
-                  setFormCepat((l) => ({ ...l, selesai: e.target.value }))
-                }
-                required
-              />
-            </div>
-          </div>
-
-          <p className="rounded-xl bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-500">
-            {jumlahHariCepat} hari × {jumlahPegawaiCepat} pegawai ={' '}
-            <b className="text-slate-700">
-              {jumlahHariCepat * jumlahPegawaiCepat} baris
-            </b>
-            . Jadwal pada tanggal yang sama akan ditimpa. Isi Cepat mengisi semua
-            tanggal pada rentang, termasuk akhir pekan; gunakan Salin Bulan Lalu
-            untuk pola bergilir.
-          </p>
-
-          <div className="aksi-modal">
-            <Button variant="sekunder" onClick={() => setModalCepat(false)}>
-              Batal
-            </Button>
-            <Button type="submit" disabled={menyimpanCepat}>
-              {menyimpanCepat ? 'Menyimpan…' : 'Simpan Jadwal'}
-            </Button>
-          </div>
-        </form>
-      </Modal>
-
-      {/* Modal template & impor */}
+{/* Modal template & impor */}
       <Modal
         terbuka={modalTemplate}
         onTutup={tutupModalTemplate}
@@ -1387,7 +1280,7 @@ export default function JadwalShift({ mode = 'admin' }) {
           <input
             ref={fileTemplateRef}
             type="file"
-            accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             className="sr-only"
             tabIndex={-1}
             onChange={bacaFileTemplate}
@@ -1404,37 +1297,26 @@ export default function JadwalShift({ mode = 'admin' }) {
               <div className="rounded-xl border border-sky-200 bg-sky-50 px-3.5 py-3 text-[13px] leading-relaxed text-sky-900">
                 <p className="font-bold">Cara memakai template</p>
                 <ol className="mt-1 list-decimal space-y-1 pl-4">
-                  <li>Unduh template CSV atau Excel untuk unit dan bulan ini.</li>
+                  <li>Unduh template Excel untuk unit dan bulan ini.</li>
                   <li>Isi setiap sel tanggal dengan nama shift, atau LIBUR.</li>
                   <li>Simpan file, lalu pilih file di bawah untuk melihat preview.</li>
                   <li>Periksa perubahan, lalu tekan Impor.</li>
                 </ol>
               </div>
 
-              <div className="grid gap-2 sm:grid-cols-2">
-                <Button
-                  variant="sekunder"
-                  className="w-full"
-                  onClick={() => unduhTemplate('csv')}
-                  disabled={memuatTemplate || membacaTemplate}
-                >
-                  {memuatTemplate ? 'Menyiapkan…' : 'Unduh CSV'}
-                </Button>
-                <Button
-                  variant="sekunder"
-                  className="w-full"
-                  onClick={() => unduhTemplate('xlsx')}
-                  disabled={memuatTemplate || membacaTemplate}
-                >
-                  {memuatTemplate ? 'Menyiapkan…' : 'Unduh Excel (.xlsx)'}
-                </Button>
-              </div>
+              <Button
+                variant="sekunder"
+                className="w-full sm:w-auto"
+                onClick={unduhTemplate}
+                disabled={memuatTemplate || membacaTemplate}
+              >
+                {memuatTemplate ? 'Menyiapkan…' : 'Unduh Excel (.xlsx)'}
+              </Button>
 
               <p className="text-xs leading-relaxed text-slate-500">
                 Template berisi {pegawaiGrup.length} pegawai shift dan{' '}
-                {tanggalTemplate.length} tanggal yang dapat diubah. File CSV
-                memakai UTF-8 dan pemisah titik koma agar cocok dengan Excel
-                Indonesia.
+                {tanggalTemplate.length} tanggal yang dapat diubah, dengan sheet
+                Jadwal dan Petunjuk.
               </p>
 
               <div className="border-t border-slate-200 pt-4">
@@ -1442,7 +1324,7 @@ export default function JadwalShift({ mode = 'admin' }) {
                   Sudah diisi?
                 </p>
                 <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                  Pilih file CSV atau XLSX. Ukuran maksimal{' '}
+                  Pilih file Excel (.xlsx). Ukuran maksimal{' '}
                   {BATAS_UKURAN_TEMPLATE / (1024 * 1024)} MB. File dibaca di
                   perangkat Anda; isinya tidak diunggah ke Storage.
                 </p>
@@ -1452,7 +1334,7 @@ export default function JadwalShift({ mode = 'admin' }) {
                   onClick={() => fileTemplateRef.current?.click()}
                   disabled={membacaTemplate || memuatTemplate}
                 >
-                  {membacaTemplate ? 'Membaca file…' : 'Pilih File CSV / Excel'}
+                  {membacaTemplate ? 'Membaca file…' : 'Pilih File Excel'}
                 </Button>
               </div>
 
@@ -1573,7 +1455,11 @@ export default function JadwalShift({ mode = 'admin' }) {
                     onClick={() =>
                       unduhLaporanErrorJadwal(
                         hasilTemplate.errors,
-                        namaFileTemplate(grupNama, periode, 'error.csv'),
+                        namaFileTemplate(grupNama, periode, 'error.xlsx'),
+                      ).catch((err) =>
+                        setGalatTemplate(
+                          err.message || 'Gagal mengunduh laporan error.',
+                        ),
                       )
                     }
                     disabled={mengimporTemplate}
@@ -1605,6 +1491,131 @@ export default function JadwalShift({ mode = 'admin' }) {
           )}
         </div>
       </Modal>
+
+      {/* Modal tukar shift */}
+      <Modal terbuka={modalTukar} onTutup={tutupTukar} judul="Tukar Shift">
+        <div className="space-y-4">
+          <p className="text-xs leading-relaxed text-slate-500">
+            Pilih tanggal dan dua pegawai shift. Jadwal keduanya saling ditukar
+            dan tercatat untuk audit pada laporan bulanan.
+          </p>
+
+          {galatTukar && (
+            <Alert variant="bahaya" title="Gagal Menukar">
+              {galatTukar}
+            </Alert>
+          )}
+
+          <div>
+            <label className="label-input" htmlFor="tukar-tanggal">
+              Tanggal
+            </label>
+            <input
+              id="tukar-tanggal"
+              type="date"
+              className="input-dasar"
+              value={formTukar.tanggal}
+              onChange={(e) =>
+                setFormTukar((f) => ({ ...f, tanggal: e.target.value }))
+              }
+            />
+          </div>
+
+          <div>
+            <label className="label-input" htmlFor="tukar-a">
+              Pegawai 1
+            </label>
+            <select
+              id="tukar-a"
+              className="input-dasar"
+              value={formTukar.pegawaiA}
+              onChange={(e) =>
+                setFormTukar((f) => ({ ...f, pegawaiA: e.target.value }))
+              }
+            >
+              <option value="">Pilih pegawai</option>
+              {pegawaiGrup.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nama}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="label-input" htmlFor="tukar-b">
+              Pegawai 2
+            </label>
+            <select
+              id="tukar-b"
+              className="input-dasar"
+              value={formTukar.pegawaiB}
+              onChange={(e) =>
+                setFormTukar((f) => ({ ...f, pegawaiB: e.target.value }))
+              }
+            >
+              <option value="">Pilih pegawai</option>
+              {pegawaiGrup.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nama}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {formTukar.pegawaiA && formTukar.pegawaiB && (
+            <p className="rounded-xl bg-sky-50 px-3 py-2 text-xs leading-relaxed text-sky-900">
+              {pegawaiMap.get(formTukar.pegawaiA)?.nama ?? 'Pegawai 1'}:{' '}
+              <b>
+                {jadwalMap.get(`${formTukar.pegawaiA}|${formTukar.tanggal}`)
+                  ?.shift_master?.nama_shift ?? 'tidak ada jadwal'}
+              </b>
+              {' · '}
+              {pegawaiMap.get(formTukar.pegawaiB)?.nama ?? 'Pegawai 2'}:{' '}
+              <b>
+                {jadwalMap.get(`${formTukar.pegawaiB}|${formTukar.tanggal}`)
+                  ?.shift_master?.nama_shift ?? 'tidak ada jadwal'}
+              </b>
+            </p>
+          )}
+
+          <div>
+            <label className="label-input" htmlFor="tukar-alasan">
+              Alasan (opsional)
+            </label>
+            <textarea
+              id="tukar-alasan"
+              className="input-dasar"
+              rows={2}
+              value={formTukar.alasan}
+              onChange={(e) =>
+                setFormTukar((f) => ({ ...f, alasan: e.target.value }))
+              }
+              placeholder="Contoh: keperluan keluarga"
+            />
+          </div>
+
+          <div className="aksi-modal">
+            <Button variant="sekunder" onClick={tutupTukar} disabled={menyimpanTukar}>
+              Batal
+            </Button>
+            <Button variant="utama" onClick={simpanTukar} disabled={menyimpanTukar}>
+              {menyimpanTukar ? 'Menyimpan...' : 'Tukar Shift'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+      </div>
+
+      <div className="hanya-cetak">
+        <LembarJadwal
+          unit={grupNama}
+          periode={periode}
+          matriks={matriksJadwal}
+          namaKepala={namaKepala}
+          waktuCetak={waktuCetak}
+        />
+      </div>
     </>
   )
 }

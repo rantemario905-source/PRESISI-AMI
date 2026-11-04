@@ -10,11 +10,11 @@ dan pemisahan hak akses antara **Pegawai** dan **Super Admin**.
 > device binding, halaman absensi pegawai, Portal Super Admin, administrasi
 > Dinas & Sakit / Cuti, **jadwal shift per grup yang langsung tersimpan,
 > pengelolaan jadwal oleh kepala unit, hari libur, deteksi keterlambatan,
-> Alfa otomatis**, **impor jadwal CSV/XLSX**, **satu perangkat aktif per
+> Alfa otomatis**, **impor jadwal Excel (.xlsx)**, **satu perangkat aktif per
 > pegawai**, **jendela waktu absensi**, **hapus grup shift kosong**, **kepala
 > unit multi-unit dan kepala ASN tanpa baris pegawai**, **jam kerja
-> reguler khusus per unit**, serta **pengecualian radius untuk pegawai
-> tertentu**.
+> reguler khusus per unit**, **pengecualian radius untuk pegawai
+> tertentu**, serta **tukar shift teraudit dan cetak jadwal shift (F4 landscape)**.
 
 > **Dokumentasi audit:** progres pekerjaan tercatat di [`progress.md`](progress.md)
 > dan aturan kerja agen serta log instruksi user di [`AGENTS.md`](AGENTS.md).
@@ -76,7 +76,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 | 11 | `supabase/migrations/11_kepala_ruangan.sql` | **Fase 5**: RPC pengaturan nama, unit kerja, dan kepala ruangan dari Data Pegawai |
 | 12 | `supabase/migrations/12_pola_kerja_jadwal_alfa.sql` | **Fase 6**: grup shift, pola kerja, jam reguler, hari libur, keterlambatan, dan Alfa otomatis |
 | 13 | `supabase/migrations/13_kepala_jadwal_final.sql` | **Fase 7**: hapus mode transisi, kepala ruangan kelola jadwal unit, audit jadwal, dan finalisasi bulanan (finalisasi dihapus oleh migrasi 15) |
-| 14 | `supabase/migrations/14_impor_jadwal_shift.sql` | Impor massal jadwal shift dari template CSV/XLSX dengan validasi ulang di server |
+| 14 | `supabase/migrations/14_impor_jadwal_shift.sql` | Impor massal jadwal shift dari template Excel (.xlsx) dengan validasi ulang di server |
 | 15 | `supabase/migrations/15_hapus_finalisasi_jadwal.sql` | Hapus finalisasi bulanan; kepala ruangan dapat mengubah jadwal mulai hari ini |
 | 16 | `supabase/migrations/16_satu_perangkat.sql` | Satu perangkat aktif per pegawai; data perangkat uji dikosongkan |
 | 17 | `supabase/migrations/17_batas_waktu_absen.sql` | Batas waktu absen: masuk 20 menit sebelum jam masuk, pulang 1 menit setelah jam pulang (digantikan migrasi 25 dan 26) |
@@ -94,6 +94,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 | 29 | `supabase/migrations/29_toleransi_terlambat_dan_jam_pulang.sql` | Toleransi keterlambatan: dihitung per menit penuh (08.00.59 = 0 menit, 08.01 = 1 menit). Absen pulang dibuka tepat pada jam pulang (16.30 sudah bisa) dan tetap ditutup 2 jam setelahnya |
 | 30 | `supabase/migrations/30_hitung_ulang_menit_terlambat.sql` | Hitung ulang `menit_terlambat` data lama sejak go-live 1 November 2026 memakai aturan menit penuh; hanya baris ber-`jam_masuk`, idempoten, tidak mengubah data lain |
 | 31 | `supabase/migrations/31_auto_setujui_superadmin.sql` | Pengajuan Sakit/Dinas Luar/Cuti yang dicatat atau diubah Super Admin langsung berstatus `disetujui` dan presensi terkait ditandai; pengajuan kepala ruangan tetap `menunggu` |
+| 32 | `supabase/migrations/32_tukar_shift.sql` | Tukar shift teraudit: tabel `tukar_shift` + RPC `tukar_shift()` yang menukar dua baris `jadwal_shift` secara atomik dan mencatat riwayat (shift asal/pengganti, alasan, pelaku) untuk laporan bulanan |
 
 > Bila database sudah pernah dijalankan sampai file 08, jalankan **file 09** untuk
 > mengaktifkan alur Dinas & Sakit / Cuti, **file 11** untuk pengaturan kepala
@@ -110,7 +111,8 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > pengecualian radius pegawai tertentu, **file 29** untuk toleransi
 > keterlambatan serta jam pulang tepat waktu, **file 30** untuk menghitung
 > ulang menit terlambat data lama sejak go-live, dan **file 31** untuk
-> persetujuan otomatis pengajuan yang dicatat Super Admin.
+> persetujuan otomatis pengajuan yang dicatat Super Admin, serta **file 32**
+> untuk tukar shift teraudit (riwayat tukar + laporan bulanan).
 > File 10 hanya berisi RPC perubahan role yang tidak dipakai UI, jadi boleh
 > dilewati. Jalankan migrasi secara bertahap - jangan mengulang file lama bila
 > tidak diperlukan.
@@ -127,7 +129,8 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > **`supabase/verifikasi_24.sql`**, **`supabase/verifikasi_25.sql`**,
 > **`supabase/verifikasi_26.sql`**, **`supabase/verifikasi_27.sql`**,
 > **`supabase/verifikasi_28.sql`**, **`supabase/verifikasi_29.sql`**,
-> **`supabase/verifikasi_30.sql`**, dan **`supabase/verifikasi_31.sql`** setelah
+> **`supabase/verifikasi_30.sql`**, **`supabase/verifikasi_31.sql`**, dan
+> **`supabase/verifikasi_32.sql`** setelah
 > migrasi terkait. Seluruh nilai
 > pemeriksaan harus `true`; bila ada yang `false`, jangan lanjutkan pemakaian.
 > `verifikasi_13.sql` dan `verifikasi_14.sql` hanya berlaku sebelum migrasi 15;
@@ -158,6 +161,9 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > Admin langsung disetujui dan presensi terkait ditandai. Pengajuan yang
 > dicatat kepala ruangan tetap menunggu persetujuan Super Admin. Jalankan
 > `verifikasi_31.sql` setelahnya.
+> Migrasi 32 wajib dijalankan agar **Tukar Shift** di menu Jadwal Shift bekerja
+> (menukar jadwal dua pegawai + mencatat riwayat untuk laporan bulanan). Jalankan
+> `verifikasi_32.sql` setelahnya.
 > Bila muncul `function public.is_superadmin() does not exist`, jalankan versi
 > terbaru migrasi 19 — file ini membuat ulang fungsi inti tersebut sekaligus
 > memeriksa keberadaan tabel `pegawai`/`presensi`.
@@ -165,7 +171,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 **B. Sekaligus**
 
 Salin seluruh isi `supabase/schema.sql`, tempel, lalu **Run**.
-Isinya identik dengan gabungan seluruh 31 file migrasi di atas (termasuk migrasi 15-31).
+Isinya identik dengan gabungan seluruh 32 file migrasi di atas (termasuk migrasi 15-32).
 
 **C. Membuat akun pegawai**
 
@@ -264,6 +270,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 │   ├── verifikasi_29.sql       # Pemeriksaan toleransi terlambat & jam pulang
 │   ├── verifikasi_30.sql       # Pemeriksaan hitung ulang menit terlambat
 │   ├── verifikasi_31.sql       # Pemeriksaan persetujuan otomatis Super Admin
+│   ├── verifikasi_32.sql       # Pemeriksaan tukar shift teraudit
 │   └── jadwal_alfa.sql         # Opsional: jadwal pg_cron untuk Alfa
 ├── scripts/
 │   ├── impor-akun.mjs          # Impor akun massal via Supabase Admin API
@@ -284,7 +291,8 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
     │   ├── deviceHelper.js     # UUID device_token di localStorage
     │   ├── format.js           # Format tanggal/jam WITA, periode, jarak
     │   ├── csv.js              # Ekspor CSV (kompatibel Excel)
-    │   ├── templateJadwal.js   # Template + parser impor jadwal CSV/XLSX
+    │   ├── templateJadwal.js   # Template + parser impor jadwal Excel (.xlsx)
+    │   ├── jadwalCetak.js      # Matriks + warna shift untuk cetak jadwal
     │   ├── dokumenIzin.js      # Validasi + kompresi JPG/PNG maks. 1 MB
     │   ├── izin.js             # Pengelompokan grup Dinas & label jenis
     │   └── status.js           # Pemetaan status → warna badge
@@ -399,7 +407,7 @@ Akses: login dengan akun ber-role `superadmin`, lalu buka `/superadmin-portal`.
 | **Grup Shift** | Master grup/unit dan seksi; rename otomatis memperbarui unit seluruh pegawai |
 | **Master Shift** | CRUD pola jam shift (Pagi/Siang/Malam) |
 | **Jam Kerja Unit** | Atur jam kerja reguler khusus per unit (7 hari + libur); unit tanpa pengaturan memakai jam global |
-| **Jadwal Shift** | Grid jadwal per grup, isi cepat, salin pola bulan lalu, template/impor CSV & XLSX, simpan otomatis per sel, dan tampilan daftar di HP |
+| **Jadwal Shift** | Grid jadwal per grup, isi cepat, salin pola bulan lalu, template/impor Excel (.xlsx), simpan otomatis per sel, dan tampilan daftar di HP |
 | **Hari Libur** | Input manual hari libur nasional/cuti bersama per tahun |
 | **Pengaturan Presensi** | Aktivasi Alfa otomatis dan proses Alfa manual. Mode transisi sudah dihapus |
 | **Koreksi Presensi** | Ubah jam/status dengan **alasan wajib** + audit trail permanen |
@@ -456,7 +464,7 @@ Akses: login dengan akun ber-role `superadmin`, lalu buka `/superadmin-portal`.
   tanggal hari ini dan setelahnya; jadwal bulan lampau hanya dapat dikoreksi
   Super Admin.
 - **Template & Impor.** Tombol **Template & Impor** mengunduh grid jadwal
-  `user_id; nama; unit_kerja; 1..31` dalam **CSV** atau **XLSX** (sheet Jadwal
+  `user_id; nama; unit_kerja; 1..31` dalam **Excel (.xlsx)** (sheet Jadwal
   dan Petunjuk). File berisi jadwal yang sudah ada, hanya pegawai shift pada unit
   tersebut, dan hanya tanggal yang boleh diubah menurut peran. Setelah diisi,
   file dipilih kembali untuk **preview** perubahan sebelum impor. Sel kosong atau
@@ -464,11 +472,10 @@ Akses: login dengan akun ber-role `superadmin`, lalu buka `/superadmin-portal`.
   membatalkan seluruh perubahan. File dibaca di browser (maks. 2 MB) dan tidak
   diunggah ke Storage; server tetap memvalidasi ulang unit, peran, pola kerja,
   shift, tanggal, dan duplikat melalui RPC `impor_jadwal_shift`.
-  Pustaka XLSX dimuat hanya saat diperlukan; CSV tetap tanpa dependensi tambahan.
+  Impor hanya menerima file Excel (.xlsx); pustaka XLSX dimuat saat diperlukan.
   Impor mengikuti batas tanggal peran: kepala unit boleh mengimpor tanggal
-  hari ini dan setelahnya, tetapi bukan tanggal lampau. Pengeditan sel manual,
-  **Isi Cepat**, dan **Salin Bulan Lalu** tetap tersedia tanpa harus mengimpor
-  file.
+  hari ini dan setelahnya, tetapi bukan tanggal lampau. Pengeditan sel manual
+  dan **Salin Bulan Lalu** tetap tersedia tanpa harus mengimpor file.
 - **Alfa otomatis** awalnya **nonaktif**. Isi *Alfa berlaku mulai*, aktifkan,
   lalu simpan. Alfa hanya dibuat untuk pegawai reguler pada hari kerja atau
   pegawai shift yang dijadwalkan, setelah jam kerja berakhir — bukan pada pukul
@@ -513,7 +520,7 @@ ruangan tidak dapat menghapus dokumen yang masih tertaut ke pengajuan; file yati
 | Menu | Fungsi |
 |---|---|
 | **Absensi** (`/`) | Absen hadir/pulang dengan geofencing + device binding (akun kepala non-ASN tetap absen seperti biasa; kepala ASN tidak memiliki jadwal absen) |
-| **Jadwal Shift** (`/kepala-ruangan/jadwal-shift`) | Atur jadwal shift unit yang dikelola mulai hari ini, unduh/impor template CSV/XLSX; tanpa akses unit lain atau tanggal lampau |
+| **Jadwal Shift** (`/kepala-ruangan/jadwal-shift`) | Atur jadwal shift unit yang dikelola mulai hari ini, unduh/impor template Excel (.xlsx); tanpa akses unit lain atau tanggal lampau |
 | **Dinas & Sakit / Cuti** (`/kepala-ruangan/dinas-sakit`, `/kepala-ruangan/cuti`) | Catat/ubah pengajuan unit yang dikelola; tanpa akses data pegawai di luar unit, rekap unit, atau persetujuan |
 | **Laporan Bulanan** (`/kepala-ruangan/laporan`) | Cetak laporan presensi bulanan per pegawai di unit yang dikelola (PDF A4 portrait) |
 | **Dinas & Cuti** (`/izin-saya`) | Riwayat **baca-saja** Dinas, Sakit & Cuti milik sendiri + lihat dokumen |

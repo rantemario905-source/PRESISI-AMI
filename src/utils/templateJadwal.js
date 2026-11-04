@@ -1,6 +1,6 @@
 /**
  * ==========================================================================
- * Template jadwal shift (CSV & Excel)
+ * Template jadwal shift (Excel .xlsx)
  * --------------------------------------------------------------------------
  * Template berisi seluruh pegawai shift pada satu unit/bulan. Jadwal yang
  * sudah ada ikut diisi. Sel kosong atau "LIBUR" berarti jadwal dihapus.
@@ -10,7 +10,6 @@
  * ==========================================================================
  */
 import { formatTanggalRingkas, namaBulan } from './format.js'
-import { unduhCsv } from './csv.js'
 
 export const VERSI_TEMPLATE_JADWAL = 1
 export const BATAS_UKURAN_TEMPLATE = 2 * 1024 * 1024
@@ -37,23 +36,6 @@ function angkaHari(nilai) {
   }
   const angka = Number(teks(nilai))
   return Number.isInteger(angka) && angka >= 1 && angka <= 31 ? angka : null
-}
-
-function amankanSel(nilai) {
-  const isi = teks(nilai)
-  if (!isi) return ''
-  // Cegah teks dari data pengguna dieksekusi sebagai formula saat dibuka
-  // di Excel. UUID, angka, dan nama shift normal tidak terpengaruh.
-  return /^[=+\-@\t\r\n]/.test(isi) ? `'${isi}` : isi
-}
-
-function csvBaris(nilai) {
-  return nilai
-    .map((sel) => {
-      const isi = amankanSel(sel)
-      return /[";\n\r]/.test(isi) ? `"${isi.replace(/"/g, '""')}"` : isi
-    })
-    .join(';')
 }
 
 function unduhBlob(blob, namaFile) {
@@ -108,7 +90,7 @@ function daftarPetunjuk(data) {
     '2. Tulis LIBUR atau kosongkan sel bila pegawai libur/tidak dijadwalkan.',
     '3. Jangan mengubah kolom user_id, nama, unit_kerja, dan nomor tanggal.',
     '4. Jangan menambah atau menghapus baris pegawai. Unduh ulang template bila ada pegawai baru.',
-    '5. Setelah selesai, simpan file dan impor kembali melalui tombol Template & Impor.',
+    '5. Setelah selesai, simpan file dan impor kembali melalui tombol Template & Impor. Hanya file Excel (.xlsx) yang dapat diimpor.',
     '6. Impor bersifat semua-atau-tidak-sama-sekali. Jika ada satu kesalahan, tidak ada jadwal yang diubah.',
   ]
 }
@@ -162,26 +144,6 @@ export function namaFileTemplate(unitKerja, periode, ekstensi) {
     .replace(/^-+|-+$/g, '')
     .toLowerCase()
   return `jadwal-shift_${unitAman || 'unit'}_${periode}.${ekstensi}`
-}
-
-/** Unduh template CSV (UTF-8 BOM, pemisah titik koma). */
-export function unduhTemplateCsv(data) {
-  const baris = [
-    ...barisMeta(data).map((teksBaris) => csvBaris([teksBaris])),
-    csvBaris(barisHeader(data)),
-    ...data.baris.map((item) =>
-      csvBaris([
-        item.user_id,
-        item.nama,
-        item.unit_kerja,
-        ...item.nilai,
-      ]),
-    ),
-  ]
-  const blob = new Blob([`\uFEFF${baris.join('\r\n')}\r\n`], {
-    type: 'text/csv;charset=utf-8;',
-  })
-  unduhBlob(blob, namaFileTemplate(data.unitKerja, data.periode, 'csv'))
 }
 
 /** Unduh template XLSX dengan sheet Jadwal dan Petunjuk. */
@@ -242,72 +204,6 @@ export async function unduhTemplateXlsx(data) {
 
 /* ------------------------------ Pembacaan ------------------------------- */
 
-function deteksiPemisah(teksCsv) {
-  const baris = teksCsv.split(/\r?\n/).slice(0, 30)
-  const contoh =
-    baris.find((item) => /^"?user_id"?\s*[;,\t]/i.test(item.trim())) ?? ''
-  const langsung = contoh.trim().match(/^"?user_id"?\s*([;,\t])/i)
-  if (langsung) return langsung[1]
-
-  const pilihan = [
-    [';', (contoh.match(/;/g) ?? []).length],
-    [',', (contoh.match(/,/g) ?? []).length],
-    ['\t', (contoh.match(/\t/g) ?? []).length],
-  ].sort((a, b) => b[1] - a[1])
-  return pilihan[0][1] > 0 ? pilihan[0][0] : ';'
-}
-
-/** Parser CSV sederhana yang mendukung tanda kutip dan baris multiline. */
-export function parseCsv(teksCsv) {
-  const isi = String(teksCsv ?? '').replace(/^\uFEFF/, '')
-  const pemisah = deteksiPemisah(isi)
-  const hasil = []
-  let baris = []
-  let sel = ''
-  let dalamKutip = false
-
-  for (let i = 0; i < isi.length; i += 1) {
-    const karakter = isi[i]
-    if (dalamKutip) {
-      if (karakter === '"') {
-        if (isi[i + 1] === '"') {
-          sel += '"'
-          i += 1
-        } else {
-          dalamKutip = false
-        }
-      } else {
-        sel += karakter
-      }
-    } else if (karakter === '"') {
-      dalamKutip = true
-    } else if (karakter === pemisah) {
-      baris.push(sel)
-      sel = ''
-    } else if (karakter === '\n') {
-      baris.push(sel)
-      hasil.push(baris)
-      baris = []
-      sel = ''
-    } else if (karakter !== '\r') {
-      sel += karakter
-    }
-  }
-
-  if (sel !== '' || baris.length) {
-    baris.push(sel)
-    hasil.push(baris)
-  }
-
-  while (
-    hasil.length &&
-    hasil[hasil.length - 1].every((nilai) => teks(nilai) === '')
-  ) {
-    hasil.pop()
-  }
-  return hasil
-}
-
 function ambilMeta(rows, label) {
   const pola = new RegExp(`^${label}\\s*:\\s*(.+)$`, 'i')
   for (const row of rows) {
@@ -344,7 +240,7 @@ function bacaXlsx(file) {
 }
 
 /**
- * Membaca CSV/XLSX dan mengembalikan baris aksi serta error per baris.
+ * Membaca XLSX dan mengembalikan baris aksi serta error per baris.
  * @param {File} file
  * @param {{
  *   unitKerja: string,
@@ -365,21 +261,19 @@ export async function bacaTemplateJadwal(file, konteks) {
   }
 
   const nama = kunci(file.name)
+  if (!nama.endsWith('.xlsx')) {
+    throw new Error('Format file harus Excel (.xlsx).')
+  }
+
   let rows
-  if (nama.endsWith('.csv')) {
-    rows = parseCsv(await file.text())
-  } else if (nama.endsWith('.xlsx')) {
-    try {
-      rows = await bacaXlsx(file)
-    } catch (err) {
-      if (String(err?.message ?? '').includes('sheet')) throw err
-      throw new Error(
-        'File Excel tidak dapat dibaca. Pastikan file tidak rusak dan berformat .xlsx.',
-        { cause: err },
-      )
-    }
-  } else {
-    throw new Error('Format file harus CSV (.csv) atau Excel (.xlsx).')
+  try {
+    rows = await bacaXlsx(file)
+  } catch (err) {
+    if (String(err?.message ?? '').includes('sheet')) throw err
+    throw new Error(
+      'File Excel tidak dapat dibaca. Pastikan file tidak rusak dan berformat .xlsx.',
+      { cause: err },
+    )
   }
 
   if (rows.length > BATAS_BARIS_IMPOR + 100) {
@@ -393,7 +287,7 @@ function hasilError(errors, meta = {}) {
   return { baris: [], errors, meta }
 }
 
-/** Memproses baris mentah (dari CSV maupun XLSX). */
+/** Memproses baris mentah dari Excel. */
 export function parseTemplateRows(rows, konteks) {
   const data = rows.map((row) => (Array.isArray(row) ? row : []))
   const errors = []
@@ -688,11 +582,32 @@ export function hitungPerubahanTemplate(baris, konteks) {
   }
 }
 
-/** Unduh laporan error hasil pembacaan template. */
-export function unduhLaporanErrorJadwal(errors, namaFile = 'error-jadwal.csv') {
-  unduhCsv(namaFile, errors, [
-    { label: 'Baris', nilai: 'baris' },
-    { label: 'Tanggal', nilai: 'tanggal' },
-    { label: 'Pesan', nilai: 'pesan' },
+/** Unduh laporan error hasil pembacaan template (Excel .xlsx). */
+export async function unduhLaporanErrorJadwal(
+  errors,
+  namaFile = 'error-jadwal.xlsx',
+) {
+  const { default: writeExcelFile } = await import(
+    'write-excel-file/universal'
+  )
+  const header = ['Baris', 'Tanggal', 'Pesan'].map((value) => ({
+    value,
+    fontWeight: 'bold',
+    backgroundColor: '#E2E8F0',
+    borderColor: '#CBD5E1',
+    borderStyle: 'thin',
+  }))
+  const isi = (errors ?? []).map((baris) => [
+    { value: Number(baris.baris) || 0, align: 'center' },
+    { value: baris.tanggal ?? '', align: 'center' },
+    { value: baris.pesan ?? '' },
   ])
+  const blob = await writeExcelFile([
+    {
+      data: [header, ...isi],
+      sheet: 'Error',
+      columns: [{ width: 8 }, { width: 18 }, { width: 80 }],
+    },
+  ]).toBlob()
+  unduhBlob(blob, namaFile)
 }

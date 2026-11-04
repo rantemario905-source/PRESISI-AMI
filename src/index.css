@@ -147,6 +147,8 @@
 }
 
 .lembar-laporan {
+  display: flex;
+  flex-direction: column;
   flex: none;
   box-sizing: border-box;
   width: 210mm;
@@ -277,6 +279,7 @@
 
 .tabel-laporan {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: 8.2pt;
   line-height: 1.15;
@@ -332,11 +335,51 @@
   display: flex;
   justify-content: space-between;
   gap: 4mm;
-  margin-top: 4mm;
+  margin-top: auto;
   padding-top: 1.5mm;
   border-top: 0.5pt solid #9ca3af;
   font-size: 8pt;
   color: #374151;
+  break-inside: avoid;
+}
+
+/* =========================================================================
+   Riwayat tukar shift pada laporan presensi bulanan
+   ========================================================================= */
+.blok-tukar {
+  margin-top: 3mm;
+  break-inside: avoid;
+}
+
+.judul-tukar {
+  margin: 0 0 1.5mm;
+  font-size: 9.5pt;
+  font-weight: 700;
+}
+
+.tabel-tukar {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8pt;
+  line-height: 1.15;
+}
+
+.tabel-tukar th,
+.tabel-tukar td {
+  padding: 0.7mm 1.3mm;
+  border: 0.6pt solid #000;
+  vertical-align: top;
+  word-break: break-word;
+}
+
+.tabel-tukar thead th {
+  background: #f3f4f6;
+  font-weight: 700;
+  text-align: center;
+}
+
+.tabel-tukar .tengah {
+  text-align: center;
 }
 
 /* =========================================================================
@@ -361,7 +404,7 @@
 
   .lembar-laporan {
     width: auto;
-    min-height: 0;
+    min-height: calc(297mm - 25mm);
     margin: 0;
     padding: 0;
     box-shadow: none;
@@ -418,5 +461,153 @@
     padding: 0 !important;
     color: inherit !important;
     font-weight: 600;
+  }
+}
+
+/* =========================================================================
+   Cetak jadwal shift (F4 landscape, warna Pagi/Siang/Malam)
+   ========================================================================= */
+.hanya-cetak {
+  display: none;
+}
+
+.lembar-jadwal {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 330mm;
+  min-height: 215mm;
+  padding: 8mm 10mm;
+  background: #fff;
+  color: #000;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 8pt;
+  line-height: 1.25;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.tabel-jadwal {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 7pt;
+  line-height: 1.05;
+}
+
+.tabel-jadwal th,
+.tabel-jadwal td {
+  padding: 0.6mm 0.5mm;
+  border: 0.5pt solid #000;
+  text-align: center;
+  word-break: break-word;
+}
+
+.tabel-jadwal thead th {
+  background: #f3f4f6;
+  font-weight: 700;
+}
+
+.tabel-jadwal .kolom-no {
+  width: 7mm;
+}
+
+.tabel-jadwal .kolom-nama {
+  width: 58mm;
+}
+
+.tabel-jadwal .nama-pegawai,
+.tabel-jadwal .kosong {
+  text-align: left;
+  font-weight: 600;
+}
+
+.tabel-jadwal .kosong {
+  padding: 6mm 2mm;
+  text-align: center;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.tgl-nomor {
+  display: block;
+  font-weight: 700;
+}
+
+.tgl-hari {
+  display: block;
+  font-size: 5.5pt;
+  font-weight: 400;
+  color: #374151;
+}
+
+.sel-shift {
+  font-weight: 700;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.sel-pagi {
+  background: #bae6fd;
+}
+
+.sel-siang {
+  background: #fde68a;
+}
+
+.sel-malam {
+  background: #c7d2fe;
+}
+
+.sel-lain {
+  background: #e5e7eb;
+}
+
+.legenda-jadwal {
+  display: flex;
+  gap: 6mm;
+  margin: 2mm 0 0;
+  font-size: 8pt;
+}
+
+.legenda-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.5mm;
+}
+
+.legenda-warna {
+  display: inline-block;
+  width: 4mm;
+  height: 4mm;
+  border: 0.5pt solid #000;
+}
+
+.ttd-jadwal {
+  margin-top: 4mm;
+}
+
+.ttd-jadwal .ttd-ruang {
+  height: 10mm;
+}
+
+@media print {
+  .hanya-cetak {
+    display: block;
+  }
+
+  .lembar-jadwal {
+    width: auto;
+    min-height: calc(215mm - 17mm);
+    margin: 0;
+    padding: 0;
+  }
+
+  .tabel-jadwal thead {
+    display: table-header-group;
+  }
+
+  .tabel-jadwal tr {
+    break-inside: avoid;
   }
 }

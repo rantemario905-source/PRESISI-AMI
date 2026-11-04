@@ -5,6 +5,12 @@ const VARIASI = {
   sekunder:
     'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 active:bg-slate-100',
   lembut: 'bg-sky-50 text-sky-700 hover:bg-sky-100 active:bg-sky-200',
+  templat:
+    'bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 active:bg-indigo-200',
+  salin:
+    'bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-100 active:bg-teal-200',
+  tukar:
+    'bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100 active:bg-violet-200',
   bahaya: 'bg-red-600 hover:bg-red-700 active:bg-red-800 text-white shadow-sm',
   bahayaLembut: 'bg-red-50 text-red-700 hover:bg-red-100 active:bg-red-200',
 }

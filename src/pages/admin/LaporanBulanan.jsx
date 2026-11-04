@@ -18,7 +18,7 @@ import { Alert, Button, Spinner, TombolMuatUlang } from '../../components/ui/ind
 import KepalaHalaman from '../../components/admin/KepalaHalaman.jsx'
 import LembarLaporan from '../../components/laporan/LembarLaporan.jsx'
 
-const DATA_KOSONG = { pegawai: [], presensi: [], alasanIzin: {} }
+const DATA_KOSONG = { pegawai: [], presensi: [], alasanIzin: {}, jadwal: {}, tukar: [] }
 
 export default function LaporanBulanan({ mode = 'superadmin' }) {
   const { profil } = useAuth()
@@ -232,15 +232,15 @@ export default function LaporanBulanan({ mode = 'superadmin' }) {
         </div>
       ) : (
         <div className="area-laporan">
-          {daftarCetak.map((p, indeks) => (
+          {daftarCetak.map((p) => (
             <LembarLaporan
               key={p.id}
               pegawai={p}
               presensi={petaPresensi.get(p.id) ?? []}
               alasanIzin={data.alasanIzin}
+              jadwal={data.jadwal}
+              tukar={data.tukar}
               periode={periode}
-              halaman={indeks + 1}
-              totalHalaman={daftarCetak.length}
               waktuCetak={waktuCetak}
             />
           ))}

@@ -54,3 +54,34 @@ export function ringkasKehadiran(daftar = []) {
 export function labelPolaKerja(polaKerja) {
   return polaKerja === 'reguler' ? 'Reguler' : 'Shift'
 }
+
+/** Ringkasan shift terjadwal untuk kolom laporan, mis. "Pagi 07:30–14:30". */
+export function labelShift(shift) {
+  if (!shift) return '—'
+  const nama = shift.nama_shift ?? '—'
+  const jam = (nilai) => String(nilai ?? '').slice(0, 5)
+  if (!shift.jam_mulai) return nama
+  return `${nama} ${jam(shift.jam_mulai)}–${jam(shift.jam_selesai)}`
+}
+
+/**
+ * Ringkas kejadian tukar shift dari sudut pandang satu pegawai.
+ * @returns {{ id: string, tanggal: string, rekan: string, asal: string, baru: string, alasan: string, pencatat: string }[]}
+ */
+export function ringkasTukar(daftar = [], pegawaiId) {
+  return (daftar ?? [])
+    .filter((b) => b.pegawai_a === pegawaiId || b.pegawai_b === pegawaiId)
+    .map((b) => {
+      const sebagaiA = b.pegawai_a === pegawaiId
+      return {
+        id: b.id,
+        tanggal: b.tanggal,
+        rekan: (sebagaiA ? b.orang_b?.nama : b.orang_a?.nama) ?? '—',
+        asal: (sebagaiA ? b.sa_lama?.nama_shift : b.sb_lama?.nama_shift) ?? '—',
+        baru: (sebagaiA ? b.sa_baru?.nama_shift : b.sb_baru?.nama_shift) ?? '—',
+        alasan: b.alasan ?? '',
+        pencatat: b.pencatat?.nama ?? '—',
+      }
+    })
+    .sort((a, b) => String(a.tanggal).localeCompare(String(b.tanggal)))
+}

@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-04 13:42 WITA (commit & push perapian UI & ACC otomatis) |
+| Terakhir diperbarui | 2026-11-04 16:22 WITA (cetak jadwal UGD jadi satu halaman) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -219,11 +219,27 @@ terkait langsung ditandai; pengajuan kepala ruangan tetap `menunggu`.
 Supabase dan lulus (laporan user 2026-11-04 13:42), sehingga pengajuan Super
 Admin langsung `disetujui`.
 
+Pekerjaan terbaru (2026-11-04 14:31 WITA, belum di-commit): **tukar shift
+teraudit dan cetak jadwal shift**. Ditambahkan tombol **Tukar Shift** di menu
+Jadwal Shift (kepala unit/Super Admin): modal memilih tanggal + dua pegawai,
+server menukar dua baris `jadwal_shift` secara atomik lewat RPC `tukar_shift`
+dan mencatat riwayat ke tabel baru `tukar_shift`. Laporan bulanan per pegawai
+kini punya kolom **Shift** (shift terjadwal) dan blok **Riwayat Tukar Shift**
+(tanggal, rekan, shift asal→pengganti, alasan, dicatat oleh); keterangan baris
+tukar otomatis berisi “Tukar dengan &lt;nama&gt;”. Ditambahkan pula tombol
+**Cetak Jadwal** di menu Jadwal Shift: lembar **F4 landscape** berwarna per
+shift (Pagi sky, Siang amber, Malam indigo) dengan kop instansi dan tanda
+tangan **Kepala Ruangan** (nama saja). Migrasi **32** (`32_tukar_shift.sql`) +
+`verifikasi_32.sql` **sudah dijalankan dan lulus** (laporan user 2026-11-04),
+sehingga **Tukar Shift** dan riwayatnya aktif di server. `npm run lint`
+bersih, `npm test` **62/62**, dan `npm run build` lulus **16,38 dtk** (uji
+lanjutan 14,14 dtk).
+
 | Aspek | Status | Bukti |
 |---|---|---|
-| Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–30 | `src/`, `supabase/migrations/01–30` |
+| Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–32 | `src/`, `supabase/migrations/01–32` |
 | Commit Git | **Perapian UI & ACC otomatis Super Admin (migrasi 31)** — commit terbaru; sebelumnya **`17d8efb`** — ketahanan halaman, toleransi keterlambatan, jam pulang tepat waktu, migrasi 29–30; **paginasi data** — `22c2bab`, **B-8/B-9** — `42cb317` | `git log` |
-| Perubahan lokal | **Bersih setelah commit perapian UI & ACC otomatis Super Admin** | `git status` |
+| Perubahan lokal | **Ada perubahan belum di-commit** — tukar shift teraudit & cetak jadwal F4 landscape (migrasi 32) setelah commit perapian UI | `git status` |
 | Migrasi DB 01–18 | **Sudah dijalankan** — verifikasi 09–18 lulus | laporan user 2026-10-30 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
@@ -238,6 +254,8 @@ Admin langsung `disetujui`.
 | Migrasi DB 29 | **Sudah dijalankan** (laporan user 2026-11-04) — toleransi keterlambatan per menit penuh dan jam pulang tepat waktu; verifikasi 29 dijalankan user | `supabase/migrations/29_toleransi_terlambat_dan_jam_pulang.sql`, `verifikasi_29.sql` |
 | Migrasi DB 30 | **Sudah dijalankan** (laporan user 2026-11-04) — `menit_terlambat` data lama sejak 1 November 2026 sudah dihitung ulang | `supabase/migrations/30_hitung_ulang_menit_terlambat.sql`, `verifikasi_30.sql` |
 | Migrasi DB 31 | **Sudah dijalankan**; `verifikasi_31.sql` lulus (laporan user 2026-11-04) — pengajuan Sakit/Dinas Luar/Cuti yang dicatat atau diubah Super Admin langsung `disetujui` dan presensi ditandai; pengajuan kepala ruangan tetap `menunggu` | `supabase/migrations/31_auto_setujui_superadmin.sql`, `verifikasi_31.sql` |
+| Migrasi DB 32 | **Sudah dijalankan**; `verifikasi_32.sql` lulus (laporan user 2026-11-04) — tabel `tukar_shift`, RPC `tukar_shift()`, dan RLS aktif; **Tukar Shift** + riwayat tukar di laporan berfungsi | `supabase/migrations/32_tukar_shift.sql`, `verifikasi_32.sql` |
+| Migrasi DB 32 | **Belum dijalankan** — tabel `tukar_shift` + RPC `tukar_shift()` untuk mencatat tukar shift; tanpa migrasi ini tombol Tukar Shift menampilkan error dan laporan tidak memuat riwayat tukar (tetap aman karena query gagal ditangani) | `supabase/migrations/32_tukar_shift.sql`, `verifikasi_32.sql` |
 | Data uji | **Sudah dibersihkan ulang setelah uji** — transaksi dihapus, 92 pegawai/grup/master shift dipertahankan | `supabase/cleanup_data_uji.sql`, laporan user 2026-10-30 23:01 |
 | Data operasional | **Lengkap** — jadwal dinas dan pemetaan pegawai sudah diisi | laporan user 2026-10-30 23:04 |
 | Go-live | **Sudah berjalan sejak Minggu, 1 November 2026** — pegawai absen masuk dan pulang; absen akhir pekan hanya untuk pegawai shift yang dijadwalkan | laporan user 2026-11-01 17:58 |
@@ -255,7 +273,7 @@ Admin langsung `disetujui`.
 | Pengecualian radius pegawai tertentu | **Aktif** — flag `pegawai.bebas_radius` per pegawai (Super Admin); pegawai tersebut tetap pegawai reguler biasa dan hanya berbeda karena boleh absen di mana saja. `submit_presensi` tetap mencatat jarak dan hanya melewati penolakan radius bila flag aktif; validasi lain tidak berubah; opsi `abaikanRadius` hanya untuk tampilan | migrasi 28, `verifikasi_28.sql`, `geofencing.js`, `PanelAbsen.jsx`, `DataPegawai.jsx`, `pegawaiService.js` |
 | Koreksi presensi shift malam | **Ada di kode & sudah di-commit `089b4e7`** — jam pulang otomatis digeser ke H+1 bila tidak lebih lambat dari jam masuk; timestamp asli dipertahankan bila jam tidak diubah; form menampilkan pratinjau tanggal/jam dan penanda H+1 | `src/utils/koreksiPresensi.js`, `src/components/admin/FormKoreksiPresensi.jsx`, `tests/koreksiPresensi.test.js` |
 | Ketahanan halaman (anti white screen) | **Ada di kode (belum di-commit)** — ErrorBoundary root/rute/halaman portal, muat ulang otomatis sekali saat chunk gagal (`?perbarui` + guard 30 detik), listener `vite:preloadError`, fallback statis di `index.html`, formatter tanggal aman untuk nilai rusak, `localStorage` kepala diamankan | `src/components/ErrorBoundary.jsx`, `src/utils/pemulihanHalaman.js`, `src/main.jsx`, `src/App.jsx`, `PortalAdminLayout.jsx`, `PortalKepalaLayout.jsx`, `index.html`, `format.js` |
-| Keamanan ekspor CSV | **Ada di kode & di-commit** — sel string berawalan `=`, `+`, `-`, `@`, tab, CR, atau LF diberi apostrof sebelum escaping; template jadwal memakai aturan yang sama | `src/utils/csv.js`, `src/utils/templateJadwal.js` |
+| Keamanan ekspor CSV | **Ada di kode & di-commit** — sel string berawalan `=`, `+`, `-`, `@`, tab, CR, atau LF diberi apostrof sebelum escaping (ekspor Rekapitulasi) | `src/utils/csv.js` |
 | Buka dokumen izin | **Ada di kode & di-commit** — tab dokumen memutus `window.opener` dan memakai `location.replace` agar tidak membuka halaman Supabase dengan konteks pembuka | `src/pages/IzinSaya.jsx`, `src/pages/admin/PengajuanIzin.jsx` |
 | Hapus grup kosong | **Ada di kode** — semua grup 0 pegawai; "Belum ditentukan" (akun sistem) disembunyikan bila kosong | migrasi 18, `GrupShift.jsx` |
 | Bilah progres | **Ada di kode** — bilah biru muda di atas layar saat navigasi, login, logout, dan muat ulang profil | `ProgressContext.jsx`, `BilahProgres.jsx`, `PengamatRute.jsx` |
@@ -271,7 +289,7 @@ Admin langsung `disetujui`.
 | Penanda tangan laporan | **Ada di kode** — Kasubbag Tata Usaha, Suriami, SKM., M.Kes, NIP. 197312302007012011 untuk semua pegawai | `src/config/constants.js`, `BlokTandaTangan.jsx` |
 | Menu kepala ASN | **Ada di kode** — “Kembali ke Absensi” (sidebar) dan tab Absensi (navigasi bawah HP) disembunyikan bila `sumber_akun = kepala_asn` | `PortalKepalaLayout.jsx`, `SidebarKepala.jsx` |
 | Dinas Luar lintas unit | **Ada di kode** — kepala unit dapat memilih pegawai lintas unit untuk Dinas Luar; Sakit/Cuti tetap per unit; pembuat grup membaca grup + dokumennya selama menjabat; akses dicabut otomatis saat jabatan berakhir; kepala ASN dapat mencatat (FK ke `auth.users`) | migrasi 23, `PengajuanIzin.jsx`, `leaveService.js`, `pegawaiService.js`, `verifikasi_23.sql` |
-| Lint/unit test | **Tersedia** — ESLint (`npm run lint`) bersih dan **54 uji** `node:test` (`npm test`) lulus; B-8/B-9 di commit `42cb317`, uji paginasi/template di commit `22c2bab`, uji koreksi H+1, pemulihan halaman, kalender, dan varian warna di working tree | `eslint.config.js`, `tests/`, `package.json`, `.github/workflows/deploy.yml` |
+| Lint/unit test | **Tersedia** — ESLint (`npm run lint`) bersih dan **62 uji** `node:test` (`npm test`) lulus; B-8/B-9 di commit `42cb317`, uji paginasi/template di commit `22c2bab`, uji koreksi H+1, pemulihan halaman, kalender, varian warna, laporan, dan cetak jadwal di working tree | `eslint.config.js`, `tests/`, `package.json`, `.github/workflows/deploy.yml` |
 | Paginasi data | **Ada di kode & di-commit `22c2bab`** — helper halaman 500; jadwal shift dibatasi unit aktif; rekap/laporan, koreksi, dan daftar izin memakai paginasi; parser template menolak header tak dikenal; uji manual user 2026-10-31 lulus (tanggal 1–2 muncul) | `src/utils/paginasi.js`, `shiftService.js`, `reportService.js`, `correctionService.js`, `leaveService.js`, `templateJadwal.js` |
 | Alfa otomatis | **Aktif mulai 1 November 2026** — diaktifkan lewat Pengaturan Presensi; **pg_cron 1.6.4 aktif** dan job `presisi-alfa-otomatis` terdaftar/aktif tiap 15 menit; menunggu pembentukan Alfa pertama (1 November 2026 hari Minggu, sehingga Alfa reguler diperkirakan muncul Senin 2 November) | migrasi 12/27, `PengaturanPresensi.jsx`, `supabase/jadwal_alfa.sql`, laporan user 2026-10-30 |
 | Deploy GitHub Pages | **Aktif** — `https://presisiami.my.id/` live dengan base `/`; `www` redirect ke domain utama; Enforce HTTPS aktif, HTTP apex/`www` **301** ke HTTPS (diverifikasi 2026-10-30) | workflow run `40439173719` sukses |
@@ -430,6 +448,169 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-04 16:22 WITA — Cetak jadwal UGD jadi satu halaman
+
+- **Perubahan:** jadwal shift unit UGD tercetak 2 halaman karena kolom nama
+  42 mm membuat nama panjang turun ke baris kedua sehingga tinggi tabel
+  melewati area F4. Disesuaikan di `src/index.css`:
+  - kolom **Nama Pegawai** 58 mm, kolom **No** 7 mm (tanggal tetap ±8 mm);
+  - font tabel 7 pt, `line-height` 1.05, padding sel 0.6 × 0.5 mm, hari 5,5 pt;
+  - legenda 2 mm, `.ttd-jadwal` 4 mm dan ruang tanda tangan 10 mm.
+  Footer tetap menempel dasar kertas lewat flex kolom `.lembar-jadwal`.
+  Perkiraan kapasitas ±29 baris dalam satu halaman F4 landscape.
+- **File:** `src/index.css`, `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **63/63** lulus;
+  `npm run build` lulus **7,68 dtk**. Belum diverifikasi cetak manual di
+  perangkat.
+- **Catatan/risiko:** bila driver printer memakai margin lebih lebar dan
+  masih 2 halaman, opsi cadangan mengecilkan margin `@page` dari 8 mm ke 6 mm.
+
+### 2026-11-04 16:15 WITA — Nama tanda tangan cetak jadwal memakai nama kepala unit
+
+- **Perubahan:** cetak jadwal menampilkan `agushidayat` (nama akun) untuk kepala
+  **ASN**, padahal field **Nama untuk Tanda Tangan** sudah berisi
+  `Ns. Agus Hidayat, S.Tr.Kep`. `cetakJadwal()` di `JadwalShift.jsx` tidak lagi
+  memakai `profil.nama` / `daftar_kepala_unit().nama`, melainkan RPC yang sudah
+  ada `public.nama_kepala_unit(unit)` — mengembalikan `pegawai.nama` untuk kepala
+  non-ASN dan `kepala_unit.nama_kepala` untuk kepala ASN. Berlaku untuk kepala
+  yang mencetak sendiri maupun Super Admin, dan per unit (kepala multi-unit).
+- **File:** `src/services/kepalaUnitService.js` (`ambilNamaKepalaUnit`),
+  `src/pages/admin/JadwalShift.jsx`, `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **63/63** lulus;
+  `npm run build` lulus **11,79 dtk**. Tidak ada migrasi DB/data.
+- **Catatan/risiko:** kepala non-ASN tetap memakai `pegawai.nama` apa adanya
+  (opsi A, sesuai keputusan user). Perlu cek manual di akun kepala ASN. Belum
+  di-commit.
+
+### 2026-11-04 15:55 WITA — Footer jadwal dipatok & impor jadwal hanya Excel
+
+- **Perubahan:**
+  - Footer **Cetak Jadwal** (`.footer-laporan` di `LembarJadwal`) kini menempel
+    di dasar kertas: `.lembar-jadwal` menjadi flex kolom dan tinggi cetak
+    `calc(215mm - 17mm)` (F4 215 mm dikurangi margin `@page` 8 mm atas/bawah).
+  - **CSV dihapus dari Jadwal Shift.** Template hanya Excel `.xlsx`; tombol
+    **Unduh CSV** dihapus, input hanya menerima `.xlsx`, dan file `.csv`
+    ditolak dengan pesan *"Format file harus Excel (.xlsx)."*.
+    `unduhTemplateCsv()`, `parseCsv()`, `deteksiPemisah()`, dan `csvBaris()`
+    dihapus dari `templateJadwal.js` (tidak dipakai lagi).
+  - **Laporan error impor** kini juga Excel `.xlsx` (sheet `Error`, kolom
+    Baris/Tanggal/Pesan) lewat `unduhLaporanErrorJadwal()`.
+  - Teks arahan pada modal **Template & Impor** dan sheet **Petunjuk** di
+    template diperbarui: hanya Excel (.xlsx).
+- **File:** `src/index.css`, `src/utils/templateJadwal.js`,
+  `src/pages/admin/JadwalShift.jsx`, `tests/templateJadwal.test.js`,
+  `src/services/shiftService.js`, `supabase/schema.sql` (komentar),
+  `README.md`, `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **63/63** lulus (uji baru:
+  impor menolak `.csv`); `npm run build` lulus **11,08 dtk**.
+- **Catatan/risiko:** migrasi 14 dan `verifikasi_14.sql` tidak diubah karena
+  historis dan sudah dijalankan; RPC server tetap sama. Cetak jadwal & impor
+  Excel perlu dicek manual di perangkat. Belum di-commit.
+
+### 2026-11-04 15:35 WITA — Seimbangkan lebar kolom tabel laporan
+
+- **Perubahan:** setelah kolom Shift dihilangkan untuk pegawai Reguler,
+  kolom **Keterangan** memuai (42%) dan menghimpit **Terlambat** sampai
+  pecah "Terlamb at". `.tabel-laporan` kini memakai `table-layout: fixed`
+  agar lebar `colgroup` dipatuhi. Proporsi baru:
+  - **Reguler (7 kolom):** 6 / 21 / 12 / 12 / 11 / 10 / 28 (%).
+  - **Shift (8 kolom):** 5 / 18 / 16 / 10 / 10 / 10 / 10 / 21 (%).
+- **File:** `src/components/laporan/LembarLaporan.jsx`, `src/index.css`,
+  `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **62/62** lulus;
+  `npm run build` lulus **15,76 dtk**.
+- **Catatan/risiko:** tetap perlu cek visual/cetak pada perangkat; angka
+  proporsi dapat digeser ±1–2% bila masih terasa sempit. Belum di-commit.
+
+### 2026-11-04 15:29 WITA — Footer laporan dipatok & kolom Shift khusus pegawai shift
+
+- **Perubahan:** footer laporan (`Dicetak melalui PRESISI-AMI, <tanggal>`)
+  dipatok permanen di dasar kertas, baik pada pratinjau layar maupun cetak,
+  dengan `.lembar-laporan` dijadikan flex kolom (`margin-top: auto` pada
+  footer). Teks **Halaman X dari Y** dihapus beserta prop `halaman`/
+  `totalHalaman`. Kolom **Shift** pada laporan bulanan kini hanya dirender
+  untuk pegawai berpola **Shift** (`pegawai.pola_kerja !== 'reguler'`);
+  pegawai **Reguler** memakai tabel 7 kolom tanpa kolom Shift (lebar kolom
+  Keterangan melebar). Blok **Riwayat Tukar Shift** tetap hanya muncul bila
+  ada tukar.
+- **File:** `src/components/laporan/LembarLaporan.jsx`,
+  `src/pages/admin/LaporanBulanan.jsx`, `src/index.css`, `progress.md`,
+  `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **62/62** lulus;
+  `npm run build` lulus **14,43 dtk**.
+- **Catatan/risiko:** tinggi minimum cetak memakai
+  `calc(297mm - 25mm)` agar footer menempel dasar A4 tanpa memicu halaman
+  kosong; bila satu laporan tumpah ke halaman kedua, footer mengikuti halaman
+  terakhir. Belum di-commit sesuai alur Git.
+
+### 2026-11-04 15:08 WITA — Migrasi 32 & verifikasi 32 berhasil dijalankan
+
+- **Perubahan:** user melaporkan `supabase/migrations/32_tukar_shift.sql` dan
+  `supabase/verifikasi_32.sql` sudah dijalankan dan **sukses** di Supabase.
+  Tabel `tukar_shift`, RPC `tukar_shift()`, dan RLS-nya kini aktif, sehingga
+  tombol **Tukar Shift** dan riwayat tukar di laporan bulanan berfungsi.
+  Status Terkini, tabel migrasi, dan backlog B-36 diperbarui. Tidak ada
+  perubahan kode.
+- **File:** `progress.md`, `AGENTS.md`, `README.md` (status).
+- **Verifikasi:** laporan user 2026-11-04; verifikasi kode terakhir tetap
+  `npm run lint` bersih, `npm test` **62/62**, `npm run build` lulus.
+- **Catatan/risiko:** sisa pekerjaan hanya **uji manual** tukar shift & cetak
+  jadwal F4 landscape (B-37), lalu commit/push menunggu perintah user.
+
+### 2026-11-04 15:01 WITA — Lanjutan pasca forceclose: audit tukar shift & cetak jadwal
+
+- **Perubahan:** melanjutkan pekerjaan terakhir (I-102/I-103) setelah sesi
+  terputus. Diperiksa seluruh bagian yang seharusnya ada dan ternyata sudah
+  lengkap di working tree: migrasi **32** + `verifikasi_32.sql` + sinkron
+  `schema.sql`, RPC `tukar_shift()` di `shiftService.js`, modal **Tukar Shift**
+  di `JadwalShift.jsx`, tombol **Cetak Jadwal** + `LembarJadwal.jsx` +
+  `utils/jadwalCetak.js` + gaya cetak F4 landscape di `index.css`, kolom
+  **Shift** & blok **Riwayat Tukar** di laporan bulanan (`reportService.js`,
+  `LembarLaporan.jsx`, `utils/laporan.js`), uji `jadwalCetak.test.js` dan
+  `laporan.test.js`, serta README/AGENTS/progress. Tidak ada yang tertinggal.
+- **File:** tidak ada perubahan kode baru; hanya pembaruan dokumen audit ini.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **62/62** lulus;
+  `npm run build` lulus **14,14 dtk**. Migrasi 32 **belum dijalankan** di
+  Supabase.
+- **Catatan/risiko:** fitur Tukar Shift dan Cetak Jadwal baru aktif setelah
+  `supabase/migrations/32_tukar_shift.sql` dan `supabase/verifikasi_32.sql`
+  dijalankan di project Supabase yang benar. Belum di-commit/di-push sesuai
+  alur Git (menunggu perintah user).
+
+### 2026-11-04 14:31 WITA — Tukar shift teraudit & cetak jadwal shift
+- **Perubahan:** menindaklanjuti kebutuhan audit tukar shift pegawai pola
+  kerja shift. Ditambahkan tabel `tukar_shift` (satu baris = satu kejadian,
+  satu tanggal, dua pegawai, shift asal/pengganti, alasan, pelaku) dan RPC
+  `tukar_shift()` yang mengunci dua baris `jadwal_shift` (`for update`),
+  menukar `shift_id`, lalu menulis catatan audit secara atomik. Kepala unit
+  hanya untuk unit yang dikelola pada tanggal hari ini/setelahnya; Super Admin
+  bebas termasuk tanggal lampau. RLS baca untuk Super Admin, kepala unit, dan
+  pegawai yang terlibat; tulis hanya lewat RPC.
+  - UI: tombol **Tukar Shift** di menu Jadwal Shift dengan modal tanggal +
+    dua pegawai + alasan opsional, serta pratinjau shift saat ini.
+  - Laporan bulanan per pegawai: kolom **Shift** (shift terjadwal) + blok
+    **Riwayat Tukar Shift**; keterangan baris berisi “Tukar dengan <nama>”.
+  - Tombol **Cetak Jadwal** di menu Jadwal Shift: lembar F4 landscape, warna
+    per shift (Pagi sky, Siang amber, Malam indigo), kop instansi, dan tanda
+    tangan Kepala Ruangan (nama saja, tanpa NIP).
+- **File:** `supabase/migrations/32_tukar_shift.sql` (baru),
+  `supabase/verifikasi_32.sql` (baru), `supabase/schema.sql`,
+  `src/services/shiftService.js`, `src/services/reportService.js`,
+  `src/utils/jadwalCetak.js` (baru), `src/utils/laporan.js`,
+  `src/components/laporan/LembarJadwal.jsx` (baru),
+  `src/components/laporan/LembarLaporan.jsx`,
+  `src/pages/admin/JadwalShift.jsx`, `src/pages/admin/LaporanBulanan.jsx`,
+  `src/index.css`, `tests/jadwalCetak.test.js` (baru),
+  `tests/laporan.test.js` (baru), `README.md`, `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **62/62** lulus;
+  `npm run build` lulus **16,38 dtk** (JadwalShift 45,68 kB). Migrasi 32 dan
+  `verifikasi_32.sql` **belum dijalankan** di Supabase.
+- **Catatan/risiko:** sebelum migrasi 32 dijalankan, tombol Tukar Shift akan
+  menampilkan error dari server dan blok riwayat tukar kosong; laporan tetap
+  aman karena query `tukar_shift`/`jadwal_shift` gagal ditangani (fallback
+  kosong). Tukar untuk tanggal lampau tidak menghapus Alfa yang sudah
+  terbentuk; catat tukar sebelum shift selesai.
 
 ### 2026-11-04 11:46 WITA — Perapian UI & ACC otomatis Super Admin
 - **Perubahan:** melanjutkan pekerjaan I-100 yang terhenti karena limit usage.
@@ -2087,6 +2268,8 @@ dan `verifikasi_18` untuk hapus grup kosong.
 | B-33 | ~~Migrasi 30 (backfill menit terlambat) belum dijalankan~~ | - | **Selesai:** dijalankan user 2026-11-04; `menit_terlambat` data sejak 1 November 2026 sudah dihitung ulang |
 | B-34 | ~~Migrasi 31 (ACC otomatis Super Admin) dan verifikasi 31 belum dijalankan~~ | - | **Selesai:** migrasi 31 dan `verifikasi_31.sql` dijalankan dan lulus (laporan user 2026-11-04); ACC otomatis Super Admin aktif |
 | B-35 | Uji manual komponen UI baru (muat ulang, filter nama, pemilih periode, warna jenis) | Belum ada bukti uji di perangkat | Uji tombol Muat ulang, filter nama di Verifikasi/Koreksi, pemilih periode di form Cuti/Dinas-Sakit, dan warna badge Sakit/Cuti/Dinas Luar di HP dan desktop |
+| B-36 | ~~Migrasi 32 (tukar shift) dan verifikasi 32 belum dijalankan~~ | - | **Selesai:** migrasi 32 dan `verifikasi_32.sql` dijalankan dan lulus (laporan user 2026-11-04); server menyimpan riwayat tukar shift |
+| B-37 | Uji manual tukar shift, laporan, & cetak jadwal F4 landscape | Belum ada bukti uji di perangkat | Tukar dua pegawai shift → pastikan jadwal bertukar dan laporan bulanan memuat kolom Shift + blok Riwayat Tukar; laporan pegawai **Reguler** tanpa kolom Shift; footer `Dicetak melalui PRESISI-AMI` menempel dasar kertas dan tanpa teks Halaman; cetak jadwal → periksa F4 landscape, footer di dasar, warna Pagi/Siang/Malam, dan tanda tangan Kepala Ruangan **bergelar** (ASN dari `nama_kepala`, non-ASN dari `pegawai.nama`), baik dicetak kepala itu sendiri maupun Super Admin; impor jadwal → hanya `.xlsx` (file `.csv` ditolak) dan laporan error terunduh sebagai `.xlsx` |
 | B-4 | ~~`npm run build` belum dijalankan~~ | — | **Selesai:** lulus 2026-10-25 12:24 |
 | B-5 | ~~README menyebut Fase 1–7 saja~~ | — | **Selesai:** diperbarui ke Fase 1–8 + impor |
 | B-6 | ~~`verifikasi_10.sql` tidak ada di diagram README~~ | — | **Selesai:** ditambahkan ke struktur |

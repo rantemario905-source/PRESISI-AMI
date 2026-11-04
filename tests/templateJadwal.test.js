@@ -1,6 +1,9 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { parseTemplateRows } from '../src/utils/templateJadwal.js'
+import {
+  bacaTemplateJadwal,
+  parseTemplateRows,
+} from '../src/utils/templateJadwal.js'
 
 function uuid(nomor) {
   return `00000000-0000-4000-8000-${String(nomor).padStart(12, '0')}`
@@ -85,5 +88,12 @@ test('header tanggal tidak dikenali dilaporkan sebagai error', () => {
 
   assert.ok(
     hasil.errors.some((error) => error.pesan.includes('Kolom "1-Nov" tidak dikenali')),
+  )
+})
+
+test('impor jadwal menolak file CSV, hanya menerima Excel', async () => {
+  await assert.rejects(
+    bacaTemplateJadwal({ name: 'jadwal.csv', size: 10 }, buatKonteks(1)),
+    /Format file harus Excel \(\.xlsx\)/,
   )
 })
