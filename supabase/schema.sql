@@ -9093,6 +9093,7 @@ set search_path = public
 as $$
 declare
   v_uid uuid := auth.uid();
+  v_super boolean := public.is_superadmin();
   v_q public.pengaduan_presensi%rowtype;
   v_p public.presensi%rowtype;
   v_unit text;
@@ -9103,8 +9104,8 @@ begin
     raise exception 'Silakan login terlebih dahulu.';
   end if;
 
-  if not public.is_kepala_ruangan() then
-    raise exception 'Hanya Kepala Unit yang dapat memutuskan pengaduan.';
+  if not (v_super or public.is_kepala_ruangan()) then
+    raise exception 'Hanya Kepala Unit atau Super Admin yang dapat memutuskan pengaduan.';
   end if;
 
   select * into v_q
@@ -9124,12 +9125,14 @@ begin
     raise exception 'Anda tidak dapat menyetujui pengaduan sendiri.';
   end if;
 
-  select unit_kerja into v_unit
-    from public.pegawai
-   where id = v_q.user_id;
+  if not v_super then
+    select unit_kerja into v_unit
+      from public.pegawai
+     where id = v_q.user_id;
 
-  if not public.bisa_kelola_unit(v_unit) then
-    raise exception 'Anda tidak mengelola unit pegawai pengadu.';
+    if not public.bisa_kelola_unit(v_unit) then
+      raise exception 'Anda tidak mengelola unit pegawai pengadu.';
+    end if;
   end if;
 
   select * into v_p

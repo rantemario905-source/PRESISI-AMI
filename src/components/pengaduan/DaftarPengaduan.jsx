@@ -1,6 +1,6 @@
 /**
  * Daftar pengaduan presensi. Dipakai pegawai (riwayat), kepala unit
- * (persetujuan), dan Super Admin (riwayat baca-saja).
+ * (persetujuan), dan Super Admin (persetujuan).
  */
 import {
   formatJam,

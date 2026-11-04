@@ -47,6 +47,20 @@ export function bukaAbsenMasuk(jadwal) {
   return new Date(mulai.getTime() - MENIT_AWAL_ABSEN_MASUK * 60_000)
 }
 
+/**
+ * Batas akhir tombol Absen Masuk: tepat pada jam selesai jadwal (server
+ * menolak absen masuk setelah jam kerja berakhir). Shift lintas hari
+ * dihitung pada tanggal selesainya.
+ */
+export function tutupAbsenMasuk(jadwal) {
+  if (!jadwal?.terjadwal || jadwal.boleh_absen === false) return null
+  return keWaktu(
+    jadwal.tanggal,
+    jadwal.jam_selesai,
+    jadwalLintasHari(jadwal) ? 1 : 0,
+  )
+}
+
 /** Waktu tombol Absen Pulang dibuka, atau null bila tidak ada jadwal. */
 export function bukaAbsenPulang(jadwal) {
   if (!jadwal?.terjadwal || jadwal.boleh_absen === false) return null

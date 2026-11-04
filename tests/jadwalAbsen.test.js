@@ -6,6 +6,7 @@ import {
   formatJamBuka,
   formatJamJadwal,
   jadwalLintasHari,
+  tutupAbsenMasuk,
   tutupAbsenPulang,
 } from '../src/utils/jadwalAbsen.js'
 
@@ -29,6 +30,13 @@ test('absensi reguler: masuk 1 jam sebelum, pulang 16.30 sampai 18.30', () => {
   assert.equal(bukaAbsenMasuk(reguler).toISOString(), '2026-10-29T23:00:00.000Z')
   assert.equal(bukaAbsenPulang(reguler).toISOString(), '2026-10-30T08:30:00.000Z')
   assert.equal(tutupAbsenPulang(reguler).toISOString(), '2026-10-30T10:30:00.000Z')
+})
+
+test('absen masuk ditutup tepat pada jam selesai jadwal', () => {
+  assert.equal(tutupAbsenMasuk(reguler).toISOString(), '2026-10-30T08:30:00.000Z')
+  assert.equal(tutupAbsenMasuk(malam).toISOString(), '2026-10-31T00:00:00.000Z')
+  assert.equal(tutupAbsenMasuk({ terjadwal: false }), null)
+  assert.equal(tutupAbsenMasuk({ terjadwal: true, boleh_absen: false }), null)
 })
 
 test('shift malam: jadwal lintas hari dihitung pada tanggal selesai', () => {

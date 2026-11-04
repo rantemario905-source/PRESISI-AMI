@@ -3,8 +3,8 @@
  * Pegawai - Pengaduan Presensi (absen pulang terlewat)
  * --------------------------------------------------------------------------
  * Pegawai mengajukan pengaduan untuk presensi yang sudah masuk tetapi belum
- * memiliki jam pulang (maksimal 7 hari). Foto bukti wajib. Kepala unit yang
- * menyetujui, Super Admin hanya melihat riwayat.
+ * memiliki jam pulang (maksimal 7 hari). Foto bukti wajib. Kepala unit atau
+ * Super Admin yang menyetujui.
  * ==========================================================================
  */
 import { useCallback, useEffect, useState } from 'react'

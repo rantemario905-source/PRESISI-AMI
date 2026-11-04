@@ -23,6 +23,7 @@ import {
   bukaAbsenPulang,
   formatJamBuka,
   formatJamJadwal,
+  tutupAbsenMasuk,
   tutupAbsenPulang,
 } from '../utils/jadwalAbsen.js'
 import Alert from './ui/Alert.jsx'
@@ -150,8 +151,14 @@ export default function PanelAbsen({
 
   const jadwalMasuk = malamKemarinAktif ? jadwalKemarin : jadwal
   const bukaMasuk = bukaAbsenMasuk(jadwalMasuk)
+  const batasMasuk = tutupAbsenMasuk(jadwalMasuk)
   const masukBelumDibuka =
     !sudahMasuk && Boolean(bukaMasuk) && sekarang < bukaMasuk.getTime()
+  const masukTerlewat =
+    !sudahMasuk &&
+    !sudahPulang &&
+    Boolean(batasMasuk) &&
+    sekarang >= batasMasuk.getTime()
 
   const jadwalPulang =
     presensiAktif?.tanggal && presensiAktif.tanggal === jadwalKemarin?.tanggal
@@ -168,7 +175,10 @@ export default function PanelAbsen({
     sekarang >= batasPulang.getTime()
 
   const terkunciMasuk =
-    perangkatTerkunci || (jadwalTerkunci && !malamKemarinAktif) || masukBelumDibuka
+    perangkatTerkunci ||
+    (jadwalTerkunci && !malamKemarinAktif) ||
+    masukBelumDibuka ||
+    masukTerlewat
   const terkunciPulang = perangkatTerkunci || pulangBelumDibuka || pulangTerlewat
 
   const isLibur = Boolean(
@@ -322,9 +332,11 @@ export default function PanelAbsen({
               ? `Shift malam ${formatTanggalRingkas(
                   jadwalKemarin.tanggal,
                 )} masih berlangsung. Absen masuk dicatat untuk tanggal tersebut.`
-              : bebasRadius
-                ? 'Absen bisa dilakukan dari luar area rumah sakit.'
-                : 'Absen hanya bisa dilakukan di dalam area rumah sakit.'}
+              : masukTerlewat
+                ? 'Jam kerja sudah berakhir. Hubungi Kepala Unit/IT bila perlu koreksi.'
+                : bebasRadius
+                  ? 'Absen bisa dilakukan dari luar area rumah sakit.'
+                  : 'Absen hanya bisa dilakukan di dalam area rumah sakit.'}
         </p>
 
         {jadwalTerkunci && !sudahMasuk && !malamKemarinAktif && (
@@ -385,6 +397,13 @@ export default function PanelAbsen({
           </Alert>
         )}
 
+        {masukTerlewat && !jadwalTerkunci && (
+          <Alert variant="peringatan" title="Absen Masuk Ditutup" className="mb-4">
+            Jam kerja berakhir pukul <b>{formatJamBuka(batasMasuk)} WITA</b>. Hubungi
+            Kepala Unit/IT bila perlu koreksi.
+          </Alert>
+        )}
+
         {pulangBelumDibuka && (
           <Alert variant="info" title="Absen Pulang Belum Dibuka" className="mb-4">
             Absen pulang dibuka pukul <b>{formatJamBuka(bukaPulang)} WITA</b>, tepat pada jam
@@ -416,6 +435,10 @@ export default function PanelAbsen({
             ) : sudahMasuk ? (
               <>
                 <IkonCentang /> Sudah Absen Hadir
+              </>
+            ) : masukTerlewat ? (
+              <>
+                <IkonMasuk /> Absen Masuk Ditutup
               </>
             ) : masukBelumDibuka ? (
               <>

@@ -7,6 +7,7 @@
  * ==========================================================================
  */
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useAuth } from '../../context/AuthContext.jsx'
 import { ambilAuditKoreksi, ambilPresensiPeriode } from '../../services/correctionService.js'
 import {
   ambilDaftarPengaduan,
@@ -32,6 +33,7 @@ import KepalaHalaman from '../../components/admin/KepalaHalaman.jsx'
 import DaftarPresensiKoreksi from '../../components/admin/DaftarPresensiKoreksi.jsx'
 import FormKoreksiPresensi from '../../components/admin/FormKoreksiPresensi.jsx'
 import DaftarPengaduan from '../../components/pengaduan/DaftarPengaduan.jsx'
+import ModalPutusanPengaduan from '../../components/pengaduan/ModalPutusanPengaduan.jsx'
 
 const TAB = [
   { nilai: 'data', label: 'Data Presensi' },
@@ -40,6 +42,7 @@ const TAB = [
 ]
 
 export default function KoreksiPresensi() {
+  const { profil } = useAuth()
   const [tab, setTab] = useState('data')
   const [periode, setPeriode] = useState(periodeBulanIni())
   const [unit, setUnit] = useState('semua')
@@ -55,6 +58,7 @@ export default function KoreksiPresensi() {
   const [cari, setCari] = useState('')
 
   const [pilih, setPilih] = useState(null)
+  const [pilihPengaduan, setPilihPengaduan] = useState(null)
 
   const daftarTersaring = useMemo(() => {
     const kata = cari.trim().toLowerCase()
@@ -118,6 +122,12 @@ export default function KoreksiPresensi() {
       if (jendela) jendela.close()
       setGalat(err.message || 'Gagal membuka foto bukti.')
     }
+  }
+
+  const selesaiPengaduan = (pesanBaru) => {
+    setPilihPengaduan(null)
+    setPesan(pesanBaru)
+    muatPengaduan()
   }
 
   const muat = useCallback(async () => {
@@ -336,8 +346,8 @@ export default function KoreksiPresensi() {
           </div>
 
           <Alert variant="info" className="mb-4">
-            Persetujuan pengaduan dilakukan oleh Kepala Unit. Super Admin hanya
-            dapat melihat riwayat.
+            Super Admin dapat menyetujui atau menolak pengaduan. Pengaduan milik sendiri
+            tetap tidak dapat diputuskan.
           </Alert>
 
           <section className="rounded-2xl border border-slate-200 bg-white shadow-kartu">
@@ -348,12 +358,23 @@ export default function KoreksiPresensi() {
             ) : (
               <DaftarPengaduan
                 daftar={pengaduanTersaring}
+                bolehPutuskan
+                idSaya={profil?.id}
+                onPutuskan={setPilihPengaduan}
                 onLihatFoto={lihatFotoPengaduan}
                 pesanKosong="Belum ada pengaduan pada filter ini."
               />
             )}
           </section>
         </>
+      )}
+
+      {pilihPengaduan && (
+        <ModalPutusanPengaduan
+          baris={pilihPengaduan}
+          onTutup={() => setPilihPengaduan(null)}
+          onSelesai={selesaiPengaduan}
+        />
       )}
 
       {tab === 'audit' && (

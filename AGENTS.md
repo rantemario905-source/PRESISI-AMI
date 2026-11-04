@@ -252,6 +252,10 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-112 | 2026-11-04 17:35 | "migrasi 33 sudah saya jalankan uji, b-35 juga sudah, b-26 alfa otomatis sudah jalan" | Mencatat konfirmasi migrasi **33** + `verifikasi_33.sql` sudah dijalankan dan diuji, **B-35** selesai, dan **B-26** Alfa otomatis sudah berjalan; memperbarui Status Terkini, backlog (B-26/B-35/B-38/B-39 selesai), dan Log Kronologis. Tidak ada perubahan kode | selesai; commit `c1e56f7` + push | 2026-11-04 17:35 — Konfirmasi migrasi 33, B-26, B-35, B-38, B-39 |
 | I-113 | 2026-11-04 (WITA) | "cek statsu pekerjaan terkahir yang terhenti akrena forceclose dan lanjutkan tanpa ada yang terlewat" | Memeriksa `git status`/reflog/objek dangling, isi `progress.md` + backlog, dan kelengkapan migrasi 01–33 serta `verifikasi_*.sql`. Working tree bersih; pekerjaan terakhir (**Pengaduan Presensi**, migrasi 33) sudah di-commit `c1e56f7` dan dokumen `3718cb1`. Menjalankan ulang `npm run lint`, `npm test` **67/67**, `npm run build` lulus **10,68 dtk**. Tidak ada pekerjaan kode yang tertinggal; sisa hanya uji manual B-28/B-29/B-30/B-31/B-37 | selesai (verifikasi) | 2026-11-04 — Cek status pasca forceclose |
 | I-114 | 2026-11-04 (WITA) | "apakah kamu bisa mengecek dan memperbarui ui atau text yang ai slop di aplikasi saya ini" + "kerjakan pastikan tidak ada bug dan eror" + jawaban: emoji libur **1 per pesan**, deskripsi halaman **pendek 1 baris**, cakupan **pegawai + admin**, istilah **Kepala Unit + Anda** | Membersihkan teks UI bergaya AI slop: sapaan dobel di Dashboard, peringatan perangkat duplikat di PanelAbsen, emoji libur berlebih, filler di KartuShift, teks developer `.env` di Login, deskripsi dokumentasi 13 halaman admin dipendekkan 1 baris, pengulangan penjelasan Alfa di Pengaturan Presensi, Alert duplikat di Pengajuan Izin, label `v2.0`, serta penyeragaman "Kepala Ruangan" → "Kepala Unit" dan "Kamu" → "Anda". Tanpa perubahan logika/DB | selesai (kode) | 2026-11-04 — Pembersihan teks UI |
+| I-115 | 2026-11-04 (WITA) | "kenapa tombol absen hadir masih menyala ... harusnya ketika pegawai sudah tidak absen masuk sampai jam pulang tombol absen masuk itu tidak aktif ... dan juga kita buat agar, super admin bisa acc pengaduan pegawai" + jawaban: tutup **tepat jam pulang**, Super Admin tidak melakukan pengaduan, hapus baris 30 Okt setelah dicek, ACC di **tab Riwayat Pengaduan** | Menutup tombol Absen Masuk pada jam selesai jadwal (klien; server sudah menolak), menambah `tutupAbsenMasuk()` + uji; migrasi **34** agar `putuskan_pengaduan_presensi` mengizinkan Super Admin (tetap tanpa ACC sendiri), sinkron `schema.sql` + `verifikasi_34.sql`; mengaktifkan ACC/Tolak di tab **Riwayat Pengaduan** (`KoreksiPresensi.jsx`) | selesai (kode); migrasi 34 belum dijalankan | 2026-11-04 — Tutup absen masuk & ACC pengaduan Super Admin |
+| I-116 | 2026-11-04 (WITA) | "lanjutkan pekerjaan yang sempat terhenti karena limit usage, cari tau pekerjaan terakhirnya sampai mana dan lanjutkan, jangan sampai ad ayang terlewat, dan pastikan tidak ada bug dan eror" | Melanjutkan I-115: kode sudah lengkap, sisa hanya teks dokumen yang masih menyebut Super Admin "baca-saja" pada pengaduan; disinkronkan di `DaftarPengaduan.jsx`, `Pengaduan.jsx`, README, AGENTS, dan `progress.md` (Status Terkini, tabel migrasi 33/34, commit terbaru, jumlah uji 68, backlog B-40/B-41) | selesai (dokumen); migrasi 34 belum dijalankan | 2026-11-04 20:05 — Lanjutan pasca limit |
+| I-117 | 2026-11-04 (WITA) | "sudah saya run migrasi 34" | Mencatat migrasi **34** sudah dijalankan di Supabase (ACC pengaduan oleh Super Admin aktif); memperbarui Status Terkini, tabel migrasi 34, tabel verifikasi, backlog B-40, dan Log Kronologis. Tidak ada perubahan kode. Sisa: `verifikasi_34.sql` dan uji manual ACC Super Admin/B-41 | selesai (dokumen) | 2026-11-04 20:15 — Migrasi 34 dijalankan |
+| I-118 | 2026-11-04 (WITA) | "ui tombolnya masih sederhana, buat agar bisa dibedakan dengan logo dan warna" | `TabBar` diberi ikon garis + warna per kategori (Data Presensi sky, Audit Trail amber, Riwayat Pengaduan violet, Menunggu amber, Disetujui emerald, Ditolak rose, Dibatalkan/Semua slate, Dinas & Sakit rose, Cuti teal) dengan alias `pending/approved/rejected`; lint bersih, `npm test` 68/68, build lulus 9,41 dtk | selesai (kode); belum di-commit | 2026-11-04 20:45 — Tab berwarna & berikon |
 
 ---
 
@@ -460,14 +464,17 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   memutuskan di `/kepala-ruangan/pengaduan` (jam pulang boleh disesuaikan;
   penolakan wajib catatan; tidak boleh menyetujui pengaduan sendiri). Persetujuan
   mengisi `presensi.jam_pulang`, status **Koreksi**, dan `alasan_koreksi`; Super
-  Admin hanya melihat riwayat di **Koreksi Presensi → Riwayat Pengaduan**. Tabel
+  Admin juga dapat memutuskan di **Koreksi Presensi → Riwayat Pengaduan**
+  (migrasi **34**, tanpa ACC pengaduan sendiri). Tabel
   `pengaduan_presensi` + RPC `ajukan_pengaduan_presensi`,
   `putuskan_pengaduan_presensi`, `daftar_pengaduan_presensi`,
   `validasi_dokumen_pengaduan` ada di migrasi **33** (+ `verifikasi_33.sql`,
   sinkron `schema.sql`); foto memakai bucket privat `dokumen-izin` prefix
   `pengaduan/<user_id>/`. Verifikasi lokal: lint bersih, `npm test` **67/67**,
   `npm run build` lulus 7,47 dtk. **Migrasi 33 dan `verifikasi_33.sql` sudah
-  dijalankan dan diuji** (laporan user 2026-11-04 17:35). Pada laporan yang sama
+  dijalankan dan diuji** (laporan user 2026-11-04 17:35), dan **migrasi 34 sudah
+  dijalankan** (laporan user 2026-11-04) sehingga Super Admin dapat memutuskan
+  pengaduan; `verifikasi_34.sql` belum dikonfirmasi. Pada laporan yang sama
   user juga mengonfirmasi **B-35** (uji komponen UI baru) dan **B-26** (Alfa
   otomatis pertama) sudah berjalan.
 - Timezone aplikasi: `Asia/Makassar` (WITA, UTC+8).
