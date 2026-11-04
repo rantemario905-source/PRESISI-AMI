@@ -51,7 +51,7 @@ bersih, `npm test` **67/67**, `npm run build` lulus **7,47 dtk**. **Migrasi 33
 dan `verifikasi_33.sql` sudah dijalankan serta diuji** (laporan user
 2026-11-04 17:35). Pada laporan yang sama user juga mengonfirmasi **B-35**
 (komponen UI baru) dan **B-26** (Alfa otomatis pertama) sudah berjalan.
-Perubahan kode masih **ditahan di working tree** (belum di-commit).
+  Perubahan kode sudah **di-commit `c1e56f7`** dan di-push ke `origin/main`.
 
 **Ringkasan:** seluruh fitur inti (Fase 1–8 + penyempurnaan UI navigasi) sudah ada
 di kode, live di GitHub Pages, dan **login, verifikasi perangkat, serta absensi
@@ -472,12 +472,14 @@ dan `verifikasi_18` untuk hapus grup kosong.
   (Alfa otomatis) sudah berjalan. Tidak ada perubahan kode; hanya pembaruan
   dokumen audit.
 - **File:** `progress.md`, `AGENTS.md`.
-- **Verifikasi:** klaim user 2026-11-04 17:35; tidak ada perintah verifikasi kode
-  yang dijalankan ulang pada sesi ini.
-- **Catatan/risiko:** seluruh pekerjaan **Pengaduan Presensi** dan tukar shift
-  masih **ditahan di working tree** (belum di-commit) menunggu perintah user.
-  Sisa uji manual: B-37 (tukar shift, laporan, cetak jadwal F4), B-28 (bebas
-  radius), dan B-29 (akurasi GPS, ditahan).
+- **Verifikasi:** klaim user 2026-11-04 17:35; `npm run lint` bersih,
+  `npm test` **67/67**, `npm run build` lulus **6,95 dtk** (percobaan pertama
+  kehabisan memori Node; diulang dengan `NODE_OPTIONS=--max-old-space-size=4096`).
+  Commit `c1e56f7` dan push ke `origin/main`.
+- **Catatan/risiko:** pekerjaan **Pengaduan Presensi** sudah di-commit
+  `c1e56f7` dan di-push ke `origin/main`. Sisa uji manual: B-37 (tukar shift,
+  laporan, cetak jadwal F4), B-28 (bebas radius), dan B-29 (akurasi GPS,
+  ditahan).
 
 ### 2026-11-04 17:12 WITA — Pengaduan absen pulang (migrasi 33)
 
