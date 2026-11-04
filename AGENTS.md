@@ -259,7 +259,7 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 
 | I-119 | 2026-11-04 (WITA) | "commit dan push" | Memverifikasi `npm run lint` (bersih), `npm test` 68/68, `npm run build` (lulus 7,60 dtk); memastikan staged diff tanpa rahasia; commit `07f340e` (tutup absen masuk tepat jam selesai, ACC pengaduan Super Admin + migrasi 34 & verifikasi 34, TabBar berwarna & berikon, sinkronisasi dokumen) lalu push ke `origin/main` (`a9279f9..07f340e`) | selesai | 2026-11-04 21:00 — Commit & push tutup absen masuk |
 
-| I-120 | 2026-11-04 (WITA) | "harusnya notifikasinya bukan seperti ini ... ketika jam absen masuk sudah lewat yang artinya saya sudah alfa, tidak perlu penjelasan absen masuk ditutup, ubah menjadi penjelasan kamu alfa di hari ini, gunakan bahasa yang tidak ai slop" + "ya untuk alfa ubah gradasi jadi merah" + jawaban: **Anda tanpa saran koreksi** | `PanelAbsen` memakai judul/deskripsi/label **"Alfa Hari Ini"**, gradasi header merah (rose), Alert "Absen Masuk Ditutup" dihapus; logika & server tidak berubah | selesai (kode); belum di-commit | 2026-11-04 21:30 — Notifikasi Alfa |
+| I-120 | 2026-11-04 (WITA) | "harusnya notifikasinya bukan seperti ini ... ketika jam absen masuk sudah lewat yang artinya saya sudah alfa, tidak perlu penjelasan absen masuk ditutup, ubah menjadi penjelasan kamu alfa di hari ini, gunakan bahasa yang tidak ai slop" + "ya untuk alfa ubah gradasi jadi merah" + jawaban: **Anda tanpa saran koreksi** | `PanelAbsen` memakai judul/deskripsi/label **"Alfa Hari Ini"**, gradasi header merah (rose), Alert "Absen Masuk Ditutup" dihapus; logika & server tidak berubah | selesai (kode); commit `0d3a902` + push 2026-11-04 | 2026-11-04 21:30 — Notifikasi Alfa |
 
 ---
 

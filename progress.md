@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-04 21:30 WITA (notifikasi Alfa merah) |
+| Terakhir diperbarui | 2026-11-04 21:35 WITA (commit & push notifikasi Alfa) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,7 +37,8 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-04 21:30):** **notifikasi Alfa** — saat jam absen
+**Pekerjaan terbaru (2026-11-04 21:35):** **commit & push** `0d3a902` —
+notifikasi Alfa saat absen masuk terlewat. Sebelumnya pada 21:30: saat jam absen
 masuk terlewat, panel tidak lagi menjelaskan teknis "Absen Masuk Ditutup". Judul,
 deskripsi, dan label tombol kini **"Alfa Hari Ini"** / "Anda tercatat Alfa hari
 ini." dengan gradasi header **merah** (rose). Alert teknis dihapus. Verifikasi
@@ -510,6 +511,16 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-04 21:35 WITA — Commit & push notifikasi Alfa
+
+- **Perubahan:** memverifikasi ulang (`npm run lint` bersih, `npm test` **68/68**,
+  `npm run build` lulus **7,77 dtk**), memastikan staged diff tanpa rahasia, lalu
+  commit `0d3a902` "PRESISI AMI: notifikasi Alfa saat absen masuk terlewat" dan
+  push ke `origin/main` (`22c9415..0d3a902`).
+- **File:** 3 file (`PanelAbsen.jsx`, `progress.md`, `AGENTS.md`).
+- **Verifikasi:** `git status -sb` bersih (`main...origin/main`).
+- **Catatan/risiko:** deploy GitHub Pages otomatis; uji visual di perangkat belum.
 
 ### 2026-11-04 21:30 WITA — Notifikasi Alfa menggantikan "Absen Masuk Ditutup"
 
