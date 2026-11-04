@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-04 20:45 WITA (tab berwarna & berikon) |
+| Terakhir diperbarui | 2026-11-04 21:00 WITA (commit & push tab berwarna) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,7 +37,13 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-04 20:45):** **tab berwarna & berikon** — `TabBar`
+**Pekerjaan terbaru (2026-11-04 21:00):** **commit & push** `07f340e` —
+tutup absen masuk tepat jam selesai, ACC pengaduan Super Admin (migrasi 34),
+tab berwarna & berikon, serta sinkronisasi dokumen. Verifikasi sebelum commit:
+`npm run lint` bersih, `npm test` **68/68**, `npm run build` lulus **7,60 dtk**.
+GitHub Actions otomatis build + deploy ke `presisiami.my.id`.
+
+**Pekerjaan sebelumnya (2026-11-04 20:45):** **tab berwarna & berikon** — `TabBar`
 kini otomatis memberi ikon dan warna per kategori (Data Presensi sky, Audit Trail
 amber, Riwayat Pengaduan violet, Menunggu amber, Disetujui emerald, Ditolak rose,
 Dibatalkan slate, Dinas & Sakit rose, Cuti teal) sehingga mudah dibedakan.
@@ -497,6 +503,21 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-04 21:00 WITA — Commit & push tutup absen masuk + ACC pengaduan
+
+- **Perubahan:** memverifikasi ulang (`npm run lint` bersih, `npm test` **68/68**,
+  `npm run build` lulus **7,60 dtk**), memastikan staged diff tanpa rahasia, lalu
+  commit `07f340e` "PRESISI AMI: tutup absen masuk, ACC pengaduan Super Admin,
+  tab berwarna" dan push ke `origin/main` (`a9279f9..07f340e`). Isi commit:
+  tutup tombol Absen Masuk pada jam selesai jadwal (klien), migrasi 34 + verifikasi 34
+  untuk ACC pengaduan Super Admin, `TabBar` berwarna & berikon, serta sinkronisasi
+  dokumen audit.
+- **File:** 13 file (11 modifikasi + 2 baru: migrasi 34 & `verifikasi_34.sql`).
+- **Verifikasi:** lint/test/build lulus sebelum commit; `git status -sb` bersih
+  (`main...origin/main`).
+- **Catatan/risiko:** deploy GitHub Pages berjalan otomatis; uji manual perangkat
+  untuk B-40 (ACC Super Admin) dan B-41 (tombol Absen Masuk nonaktif) masih belum.
 
 ### 2026-11-04 20:45 WITA — Tab berwarna & berikon
 
