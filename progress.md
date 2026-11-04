@@ -46,8 +46,8 @@ satu baris, pengulangan penjelasan Alfa di Pengaturan Presensi dikompres, Alert
 duplikat di Pengajuan Izin dihapus, label `v2.0` dihapus, serta istilah
 **Kepala Ruangan → Kepala Unit** dan **Kamu → Anda** diseragamkan. Tanpa
 perubahan logika, DB, atau teks resmi laporan bulanan. Verifikasi: `npm run lint`
-bersih, `npm test` **67/67**, `npm run build` lulus **12,33 dtk**. Perubahan
-ditahan lokal (belum di-commit).
+bersih, `npm test` **67/67**, `npm run build` lulus **12,33 dtk**. Di-commit
+`fe2d0e6` dan di-push ke `origin/main`.
 
 **Pekerjaan sebelumnya (2026-11-04 17:12):** **Pengaduan Presensi** (absen pulang
 terlewat) untuk semua pola kerja: pegawai mengajukan lewat `/pengaduan` dengan
