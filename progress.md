@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-04 11:22 WITA (konfirmasi backfill menit terlambat) |
+| Terakhir diperbarui | 2026-11-04 11:24 WITA (commit & push) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -205,8 +205,8 @@ migrasi 30 **sudah dijalankan dan berhasil** (laporan user 2026-11-04 11:22).
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–30 | `src/`, `supabase/migrations/01–30` |
-| Commit Git | **Paginasi data** — `22c2bab` (jadwal 1–2 November, rekap/laporan, koreksi, izin, uji template); sebelumnya **B-8/B-9** — `42cb317`; dokumen audit `5b9ac5e`; **fitur sebelumnya** — `1fec429` | `git log` |
-| Perubahan lokal | **Ada yang belum di-commit** — ketahanan halaman (anti white screen) + toleransi keterlambatan & jam pulang tepat waktu; HEAD `089b4e7` | `git status` |
+| Commit Git | **`17d8efb`** — ketahanan halaman, toleransi keterlambatan, jam pulang tepat waktu, migrasi 29–30; sebelumnya **paginasi data** — `22c2bab`, **B-8/B-9** — `42cb317` | `git log` |
+| Perubahan lokal | **Bersih setelah commit `17d8efb`** | `git status` |
 | Migrasi DB 01–18 | **Sudah dijalankan** — verifikasi 09–18 lulus | laporan user 2026-10-30 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
@@ -412,6 +412,17 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-04 11:24 WITA — Commit & push ketahanan halaman + toleransi terlambat
+- **Perubahan:** memverifikasi lalu meng-commit seluruh pekerjaan yang tertahan:
+  anti white screen, toleransi keterlambatan per menit penuh, jam pulang tepat
+  waktu, migrasi 29–30, verifikasi 29–30, uji, README, dan dokumen audit.
+  Commit `17d8efb` di-push ke `origin/main`.
+- **File:** 22 file (lihat `git show --stat 17d8efb`).
+- **Verifikasi:** `npm run lint` bersih; `npm test` **46/46** lulus;
+  `npm run build` lulus **7,12 dtk** (293 modul). Push `089b4e7..17d8efb`.
+- **Catatan/risiko:** migrasi 29 dan 30 sudah dijalankan user; tidak ada
+  migrasi baru yang tertunda. Deploy GitHub Pages berjalan otomatis dari push.
 
 ### 2026-11-04 11:22 WITA — Migrasi 30 berhasil dijalankan
 - **Perubahan:** mencatat konfirmasi user bahwa migrasi **30**
