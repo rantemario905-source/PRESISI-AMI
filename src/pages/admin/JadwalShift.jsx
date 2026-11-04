@@ -408,7 +408,7 @@ export default function JadwalShift({ mode = 'admin' }) {
     if (!bolehUbahTanggal(tanggal)) {
       const teks =
         alasanTerkunci(tanggal) ||
-        'Tanggal ini tidak dapat diubah dari portal kepala ruangan.'
+        'Tanggal ini tidak dapat diubah dari portal Kepala Unit.'
       setGalat(teks)
       setGalatModal(teks)
       return
@@ -702,11 +702,7 @@ export default function JadwalShift({ mode = 'admin' }) {
       <div className="tanpa-cetak">
       <KepalaHalaman
         judul="Jadwal Shift"
-        deskripsi={
-          modeKepala
-            ? 'Atur jadwal shift unit Anda untuk tanggal hari ini dan seterusnya. Setiap perubahan sel langsung tersimpan.'
-            : 'Atur jadwal pegawai shift per grup. Klik sel untuk mengubah satu tanggal, atau gunakan Template & Impor/Salin Bulan Lalu.'
-        }
+        deskripsi="Atur jadwal shift per grup."
         aksi={
 <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center">
             <Button

@@ -125,7 +125,7 @@ export default function Rekapitulasi() {
       <div className="tanpa-cetak">
         <KepalaHalaman
           judul="Rekapitulasi & Cetak Laporan"
-          deskripsi="Laporan absensi bulanan per unit kerja, termasuk rekap keterlambatan."
+          deskripsi="Rekap absensi bulanan per unit."
         />
 
         {galat && (

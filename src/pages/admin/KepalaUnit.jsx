@@ -213,7 +213,7 @@ export default function KepalaUnit() {
     <>
       <KepalaHalaman
         judul="Kepala Unit"
-        deskripsi="Tetapkan kepala untuk setiap unit. Satu unit hanya memiliki satu kepala; satu kepala boleh mengelola beberapa unit. Kepala ASN tidak dihitung sebagai pegawai."
+        deskripsi="Tetapkan kepala untuk setiap unit."
       />
 
       {pesan && (

@@ -99,7 +99,7 @@ export default function PengaduanKepala() {
     <>
       <KepalaHalaman
         judul="Pengaduan Presensi"
-        deskripsi="Tinjau pengaduan absen pulang pegawai di unit yang Anda kelola."
+        deskripsi="Tinjau pengaduan absen pulang unit Anda."
       />
 
       {pesan && (

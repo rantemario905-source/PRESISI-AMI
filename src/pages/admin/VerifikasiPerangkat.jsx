@@ -151,7 +151,7 @@ export default function VerifikasiPerangkat() {
     <>
       <KepalaHalaman
         judul="Verifikasi & Reset Perangkat"
-        deskripsi="Setiap pegawai hanya boleh memiliki satu perangkat aktif. Untuk mengganti perangkat, reset perangkat lama terlebih dahulu, lalu pegawai mengajukan dari perangkat baru."
+        deskripsi="Setujui atau reset perangkat pegawai."
       />
 
       {pesan && (

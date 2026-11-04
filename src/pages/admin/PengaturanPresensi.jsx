@@ -100,7 +100,7 @@ export default function PengaturanPresensi() {
       setHasilAlfa(
         jumlah > 0
           ? `${jumlah} data Alfa baru dibuat.`
-          : 'Tidak ada data Alfa baru. Pastikan Alfa otomatis aktif dan jam kerja sudah berakhir.',
+          : 'Tidak ada data Alfa baru.',
       )
       await muat()
     } catch (err) {
@@ -114,7 +114,7 @@ export default function PengaturanPresensi() {
     <>
       <KepalaHalaman
         judul="Pengaturan Presensi"
-        deskripsi="Atur kapan Alfa otomatis dijalankan dan lengkapi persiapan jadwal."
+        deskripsi="Atur pembuatan Alfa otomatis."
         aksi={
           <TombolMuatUlang onClick={muat} memuat={memuat} />
         }
@@ -143,9 +143,7 @@ export default function PengaturanPresensi() {
                 <div>
                   <h2 className="text-sm font-bold text-slate-800">Jadwal shift wajib</h2>
                   <p className="mt-0.5 text-[11px] leading-relaxed text-slate-600 sm:text-xs">
-                    Tidak ada mode transisi. Pegawai shift yang belum dijadwalkan
-                    tidak dapat absen dan tidak akan dibuatkan Alfa. Pastikan
-                    jadwal sudah lengkap sebelum periode berjalan.
+                    Pegawai shift wajib punya jadwal sebelum absen.
                   </p>
                 </div>
                 <Badge variant="info">Terkunci</Badge>
@@ -165,8 +163,7 @@ export default function PengaturanPresensi() {
                   <div>
                     <h2 className="text-sm font-bold text-slate-800">Alfa Otomatis</h2>
                     <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500 sm:text-xs">
-                      Alfa dibuat setelah jam kerja pegawai berakhir, termasuk
-                      shift malam setelah jam shiftnya berakhir keesokan harinya.
+                      Alfa dibuat setelah jam kerja pegawai berakhir.
                     </p>
                   </div>
                   <Badge variant={pengaturan.alfaOtomatis ? 'sukses' : 'netral'}>
@@ -191,8 +188,7 @@ export default function PengaturanPresensi() {
                       Aktifkan pembuatan Alfa otomatis
                     </span>
                     <span className="mt-0.5 block text-[11px] leading-relaxed text-slate-500">
-                      Gunakan tanggal mulai agar presensi sebelum masa penerapan tidak
-                      ikut ditandai Alfa.
+                      Presensi sebelum tanggal mulai tidak ditandai Alfa.
                     </span>
                   </span>
                 </label>
@@ -211,8 +207,7 @@ export default function PengaturanPresensi() {
                     }
                   />
                   <p className="mt-1 text-[11px] text-slate-400">
-                    Wajib diisi sebelum Alfa diaktifkan. Tanggal sebelum ini tidak
-                    akan ditandai Alfa.
+                    Wajib diisi sebelum Alfa diaktifkan.
                   </p>
                 </div>
               </section>
@@ -233,13 +228,12 @@ export default function PengaturanPresensi() {
           <section className="h-fit rounded-2xl border border-slate-200 bg-white p-4 shadow-kartu sm:p-5">
             <h2 className="text-sm font-bold text-slate-800">Jalankan Alfa Manual</h2>
             <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500 sm:text-xs">
-              Berguna untuk mengisi data yang terlewat. Proses hanya berjalan bila
-              Alfa otomatis aktif dan tanggal sudah melewati jam kerja.
+              Isi data Alfa yang terlewat.
             </p>
 
             {!pengaturan.alfaOtomatis && (
               <Alert variant="peringatan" className="mt-3">
-                Aktifkan “Alfa otomatis” lalu simpan sebelum menjalankan proses manual.
+                Aktifkan Alfa otomatis lalu simpan.
               </Alert>
             )}
 
@@ -283,12 +277,11 @@ export default function PengaturanPresensi() {
                 Agar berjalan otomatis
               </p>
               <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
-                Aktifkan Supabase Cron, lalu jalankan file{' '}
+                Jalankan file{' '}
                 <code className="rounded bg-white px-1 py-0.5 text-[10px] text-slate-700 ring-1 ring-slate-200">
                   supabase/jadwal_alfa.sql
-                </code>
-                . Cron memanggil fungsi setiap 15 menit dan tidak akan menggandakan
-                data Alfa.
+                </code>{' '}
+                melalui Supabase Cron setiap 15 menit.
               </p>
             </div>
           </section>

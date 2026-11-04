@@ -47,7 +47,7 @@ export default function MenuKepala({ unitKerja }) {
           id="judul-menu-kepala"
           className="text-[13px] font-extrabold leading-snug text-slate-900 sm:text-sm"
         >
-          Portal Kepala Ruangan
+          Portal Kepala Unit
         </h2>
         <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500 sm:text-xs">
           Jadwal shift, dinas &amp; sakit, dan cuti unit {unitKerja || 'Anda'}.

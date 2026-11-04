@@ -59,7 +59,7 @@ export default function KartuShift({ jadwal }) {
             </p>
           )}
           <p className="mt-1.5 text-[12px] leading-relaxed text-slate-500">
-            Absensi tidak diperlukan pada hari ini.
+            Tidak perlu absen hari ini.
           </p>
         </div>
       ) : terjadwal ? (
@@ -81,11 +81,9 @@ export default function KartuShift({ jadwal }) {
               </p>
             </div>
           </div>
-          {pola !== 'reguler' && (
+          {pola !== 'reguler' && jadwal?.jam_selesai <= jadwal?.jam_mulai && (
             <p className="mt-2.5 text-[12px] leading-relaxed text-slate-500">
-              {jadwal?.jam_selesai <= jadwal?.jam_mulai
-                ? 'Shift malam berakhir pada pagi hari berikutnya.'
-                : 'Absensi mengikuti jadwal shift yang ditetapkan.'}
+              Shift malam berakhir pada pagi hari berikutnya.
             </p>
           )}
           {namaLibur && (
@@ -101,7 +99,7 @@ export default function KartuShift({ jadwal }) {
           </p>
           <p className="mt-1 text-[12px] leading-relaxed text-slate-500">
             {jadwal?.pesan_jadwal ||
-              'Hubungi Kepala Ruangan atau Super Admin untuk penjadwalan shift.'}
+              'Hubungi Kepala Unit atau Super Admin untuk penjadwalan shift.'}
           </p>
         </div>
       )}

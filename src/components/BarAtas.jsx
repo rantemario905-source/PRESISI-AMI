@@ -66,7 +66,7 @@ export default function BarAtas({ onKeluar }) {
               nama={profil?.nama}
               peran={
                 apakahKepalaRuangan
-                  ? 'Kepala Ruangan'
+                  ? 'Kepala Unit'
                   : profil?.role === 'superadmin'
                     ? 'Super Admin'
                     : 'Pegawai'

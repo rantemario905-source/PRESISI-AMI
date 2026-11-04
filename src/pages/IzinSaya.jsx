@@ -94,7 +94,7 @@ export default function IzinSaya() {
             Dinas, Sakit &amp; Cuti Saya
           </h1>
           <p className="mt-0.5 text-[13px] leading-relaxed text-slate-500 sm:text-sm">
-            Riwayat ini dicatat oleh kepala ruangan atau Super Admin. Halaman bersifat baca saja.
+            Dicatat oleh Kepala Unit atau Super Admin. Halaman bersifat baca saja.
           </p>
         </div>
 
@@ -141,7 +141,7 @@ export default function IzinSaya() {
             <div className="px-4 py-12 text-center">
               <p className="text-sm font-semibold text-slate-600">Belum ada pengajuan</p>
               <p className="mt-1 text-xs text-slate-400">
-                Hubungi kepala ruangan atau Super Admin bila ada ketidakhadiran yang perlu dicatat.
+                Hubungi Kepala Unit atau Super Admin bila ada ketidakhadiran yang perlu dicatat.
               </p>
             </div>
           ) : (

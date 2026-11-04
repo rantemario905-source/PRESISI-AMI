@@ -92,7 +92,6 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
   const unitKepala = adalahKepala
     ? konteksKepala?.unitAktif || profil?.unit_kerja || ''
     : ''
-  const labelUnit = unitDikelola.length > 1 ? 'yang Anda kelola' : unitKepala || 'Anda'
   const jenisTersedia = kategori === 'cuti' ? ['Cuti'] : ['Sakit', 'Dinas Luar']
   const judulKategori = kategori === 'cuti' ? 'Cuti' : 'Dinas & Sakit'
 
@@ -463,10 +462,8 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
         judul={adalahKepala ? `${judulKategori} Unit Saya` : `Pengajuan ${judulKategori}`}
         deskripsi={
           adalahKepala
-            ? kategori === 'dinas-sakit'
-              ? `Catat Sakit dan Dinas Luar untuk unit ${labelUnit}; Dinas Luar boleh melibatkan pegawai lintas unit. Persetujuan dilakukan Super Admin.`
-              : `Catat dan kelola cuti untuk pegawai di unit ${labelUnit}. Persetujuan dilakukan Super Admin.`
-            : `Catat ${judulKategori.toLowerCase()} atas nama pegawai; pengajuan baru langsung disetujui. Pengajuan kepala unit dapat disetujui atau ditolak di sini.`
+            ? `Pengajuan izin unit ${unitKepala || 'Anda'}.`
+            : 'Catat dan kelola pengajuan izin pegawai.'
         }
       />
 
@@ -483,14 +480,8 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
 
       {adalahKepala && (
         <Alert variant="info" className="mb-4">
-          Anda dapat mencatat dan mengubah pengajuan yang masih <strong>Menunggu</strong>. Tombol
-          setujui/tolak hanya tersedia untuk Super Admin.
-          {kategori === 'dinas-sakit' && (
-            <span className="mt-1 block">
-              Dinas Luar boleh melibatkan pegawai lintas unit; Sakit hanya untuk pegawai unit yang
-              Anda kelola.
-            </span>
-          )}
+          Pengajuan berstatus <strong>Menunggu</strong> dapat diubah. Persetujuan hanya oleh
+          Super Admin.
         </Alert>
       )}
 

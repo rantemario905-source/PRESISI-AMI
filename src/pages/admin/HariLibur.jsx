@@ -97,7 +97,7 @@ export default function HariLibur() {
     <>
       <KepalaHalaman
         judul="Hari Libur"
-        deskripsi="Input hari libur nasional/cuti bersama. Absensi pegawai reguler dikunci pada tanggal ini; pegawai shift tetap mengikuti jadwal."
+        deskripsi="Hari libur nasional dan cuti bersama."
       />
 
       {pesan && (

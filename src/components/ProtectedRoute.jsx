@@ -54,8 +54,7 @@ export default function ProtectedRoute({ peran, kepalaRuangan = false, children 
             {galat || 'Profil pegawai tidak ditemukan. Hubungi Admin IT.'}
           </Alert>
           <p className="mt-3 text-[13px] leading-relaxed text-slate-600">
-            Periksa koneksi internet dan pastikan seluruh migrasi database sudah dijalankan.
-            Setelah itu tekan <strong>Coba lagi</strong>.
+            Periksa koneksi internet, lalu tekan <strong>Coba lagi</strong>.
           </p>
           <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button variant="sekunder" onClick={() => keluar()}>

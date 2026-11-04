@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-04 17:35 WITA (migrasi 33, B-26, B-35, B-38, B-39 selesai) |
+| Terakhir diperbarui | 2026-11-04 18:40 WITA (pembersihan teks UI AI slop) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,7 +37,19 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-04 17:12):** **Pengaduan Presensi** (absen pulang
+**Pekerjaan terbaru (2026-11-04 18:40):** **pembersihan teks UI bergaya AI slop**
+di portal pegawai dan admin. Sapaan dobel Dashboard dihapus, peringatan perangkat
+yang tampil dua kali diringkas ke satu kartu, emoji pesan libur dibatasi satu per
+pesan, filler di KartuShift/PanelAbsen dihapus, teks developer `.env` di Login
+hanya tampil saat mode pengembangan, deskripsi 13 halaman admin dipendekkan jadi
+satu baris, pengulangan penjelasan Alfa di Pengaturan Presensi dikompres, Alert
+duplikat di Pengajuan Izin dihapus, label `v2.0` dihapus, serta istilah
+**Kepala Ruangan → Kepala Unit** dan **Kamu → Anda** diseragamkan. Tanpa
+perubahan logika, DB, atau teks resmi laporan bulanan. Verifikasi: `npm run lint`
+bersih, `npm test` **67/67**, `npm run build` lulus **12,33 dtk**. Perubahan
+ditahan lokal (belum di-commit).
+
+**Pekerjaan sebelumnya (2026-11-04 17:12):** **Pengaduan Presensi** (absen pulang
 terlewat) untuk semua pola kerja: pegawai mengajukan lewat `/pengaduan` dengan
 jam pulang, alasan min. 10 karakter, dan **foto bukti wajib** (JPG/PNG maks.
 1 MB) dalam **7 hari**; kepala unit menyetujui/menolak di
@@ -464,6 +476,54 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-04 18:40 WITA — Pembersihan teks UI AI slop
+
+- **Perubahan:** membersihkan teks UI yang bertele-tele/duplikatif di portal
+  pegawai dan admin. Rincian: sapaan "Selamat datang" + "Halo" di Dashboard
+  disisakan satu; peringatan perangkat yang tampil di `PanelAbsen` dan
+  `KartuStatusPerangkat` diringkas ke kartu status; emoji pesan libur dibatasi
+  satu per pesan; filler `KartuShift`/`PanelAbsen` dihapus; teks developer
+  `.env` di Login hanya tampil saat `import.meta.env.DEV` (produksi: "Aplikasi
+  belum dikonfigurasi. Hubungi Admin IT."); deskripsi 13 halaman admin
+  dipendekkan menjadi satu baris; pengulangan penjelasan Alfa di Pengaturan
+  Presensi dikompres; Alert duplikat di Pengajuan Izin dihapus; label `v2.0`
+  dihapus; "Kepala Ruangan" → "Kepala Unit" dan "Kamu" → "Anda" diseragamkan
+  (termasuk tanda tangan cetak jadwal). Tanpa perubahan logika, DB, atau teks
+  resmi laporan bulanan.
+- **File:** `src/pages/Dashboard.jsx`, `src/components/PanelAbsen.jsx`,
+  `src/components/kartu/{KartuShift,KartuStatusPerangkat,KartuProfil}.jsx`,
+  `src/pages/Login.jsx`, `src/components/pengaduan/FormPengaduan.jsx`,
+  `src/pages/{Pengaduan,IzinSaya,RiwayatSaya}.jsx`,
+  `src/pages/admin/{DataPegawai,GrupShift,HariLibur,JadwalShift,JamKerjaUnit,KepalaUnit,KoreksiPresensi,LaporanBulanan,MasterShift,PengaduanKepala,PengajuanIzin,PengaturanPresensi,Rekapitulasi,VerifikasiPerangkat}.jsx`,
+  `src/components/layout/{SidebarAdmin,SidebarKepala,PortalKepalaLayout}.jsx`,
+  `src/components/{BarAtas,MenuKepala,ProtectedRoute}.jsx`,
+  `src/components/laporan/LembarJadwal.jsx`, `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **67/67** lulus;
+  `npm run build` lulus **12,33 dtk**. Grep residu: tidak ada deskripsi
+  halaman >70 karakter, tidak ada "Kamu"/"v2.0"/"Kepala Ruangan" pada teks UI
+  (hanya komentar kode).
+- **Catatan/risiko:** perubahan hanya teks; alur absensi, validasi server,
+  laporan, dan migrasi tidak berubah. Perlu uji tampilan manual singkat di HP
+  dan desktop sebelum commit.
+
+### 2026-11-04 18:20 WITA — Cek status pasca forceclose
+
+- **Perubahan:** memeriksa status pekerjaan terakhir setelah forceclose lewat
+  `git status`/`git reflog`/`git fsck --lost-found`, entri `progress.md`,
+  backlog, serta kelengkapan migrasi `01`–`33` dan `verifikasi_*.sql`. Tidak
+  ditemukan pekerjaan kode yang tertinggal: working tree bersih dan seluruh
+  pekerjaan terakhir (**Pengaduan Presensi**, migrasi 33) sudah di-commit
+  `c1e56f7`, diikuti sinkronisasi dokumen audit `3718cb1` dan push ke
+  `origin/main`. Satu objek dangling yang ditemukan adalah `progress.md` versi
+  lama (2026-10-29), bukan pekerjaan hilang. Tidak ada perubahan kode.
+- **File:** `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih, `npm test` **67/67** lulus,
+  `npm run build` lulus **10,68 dtk**. Migrasi `01`–`33` lengkap; verifikasi
+  `09`–`33` lengkap.
+- **Catatan/risiko:** sisa pekerjaan hanya **uji manual**: B-28 (bebas radius),
+  B-29 (akurasi GPS, ditahan), B-30 (koreksi shift malam H+1), B-31 (fallback
+  white screen setelah deploy), B-37 (tukar shift, laporan, cetak jadwal F4).
 
 ### 2026-11-04 17:35 WITA — Konfirmasi migrasi 33, B-26, B-35, B-38, B-39
 

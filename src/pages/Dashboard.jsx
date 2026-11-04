@@ -118,9 +118,6 @@ export default function Dashboard() {
             {inisialNama(profil.nama)}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-sky-700 sm:text-[11px]">
-              Selamat datang
-            </p>
             <h1 className="text-base font-extrabold leading-snug text-slate-900 sm:text-xl">
               Halo, {profil.nama}
             </h1>

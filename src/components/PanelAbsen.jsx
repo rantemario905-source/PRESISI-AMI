@@ -178,20 +178,19 @@ export default function PanelAbsen({
       jadwal?.alasan === 'hari_libur'
   )
 
-  let judulLibur = 'Hari Ini Libur 🌟'
-  let pesanLibur = 'Hari ini libur, istirahatlah yang cukup! ✨'
+  let judulLibur = 'Libur Hari Ini 🌟'
+  let pesanLibur = 'Tidak perlu absen hari ini.'
   if (jadwal?.alasan === 'akhir_pekan') {
-    judulLibur = 'Nikmati Akhir Pekan Anda! 🌴'
-    pesanLibur =
-      'Hari ini akhir pekan — libur. Istirahatlah yang cukup dan nikmati waktu bersama keluarga! ☕'
+    judulLibur = 'Akhir Pekan 🌴'
+    pesanLibur = 'Hari ini libur. Selamat beristirahat.'
   } else if (jadwal?.alasan === 'hari_libur') {
     judulLibur = 'Hari Libur Nasional 🎉'
-    pesanLibur = `${
-      jadwal?.nama_hari_libur ? `Hari libur "${jadwal.nama_hari_libur}".` : 'Hari libur.'
-    } Istirahatlah yang cukup! 🛋️`
+    pesanLibur = jadwal?.nama_hari_libur
+      ? `Hari libur "${jadwal.nama_hari_libur}".`
+      : 'Hari ini libur nasional.'
   } else if (jadwal?.libur || jadwal?.alasan === 'libur_jadwal') {
-    judulLibur = 'Jadwal Libur Hari Ini 🌟'
-    pesanLibur = 'Hari ini jadwal Anda libur. Istirahatlah yang cukup! ✨'
+    judulLibur = 'Libur Hari Ini 🌟'
+    pesanLibur = 'Tidak ada jadwal kerja hari ini.'
   } else if (jadwal?.pesan_jadwal) {
     pesanLibur = jadwal.pesan_jadwal
   }
@@ -313,37 +312,20 @@ export default function PanelAbsen({
         <p className="mb-4 text-[13px] leading-relaxed text-slate-500 sm:text-sm">
           {sudahMasuk
             ? sudahPulang
-              ? 'Absensi hari ini sudah lengkap. Terima kasih.'
+              ? 'Absensi hari ini sudah lengkap.'
               : shiftMalamTerbuka
-                ? `Anda masih memiliki presensi terbuka dari ${formatTanggalRingkas(
+                ? `Presensi ${formatTanggalRingkas(
                     presensiAktif.tanggal,
-                  )}. Silakan absen pulang setelah shift selesai.`
-                : 'Jangan lupa absen pulang sebelum meninggalkan area rumah sakit.'
+                  )} belum ditutup. Absen pulang setelah shift selesai.`
+                : 'Absen pulang sebelum meninggalkan area rumah sakit.'
             : malamKemarinAktif
-              ? `Shift malam yang dimulai ${formatTanggalRingkas(
+              ? `Shift malam ${formatTanggalRingkas(
                   jadwalKemarin.tanggal,
-                )} masih berlangsung. Absen masuk akan dicatat untuk tanggal tersebut.`
+                )} masih berlangsung. Absen masuk dicatat untuk tanggal tersebut.`
               : bebasRadius
-                ? 'Anda dapat melakukan absensi dari luar area rumah sakit. Jam kerja tetap berlaku.'
-                : 'Pastikan Anda berada di dalam area rumah sakit sebelum menekan tombol absen.'}
+                ? 'Absen bisa dilakukan dari luar area rumah sakit.'
+                : 'Absen hanya bisa dilakukan di dalam area rumah sakit.'}
         </p>
-
-        {perangkatTerkunci && (
-          <Alert variant="peringatan" title="Tombol Absen Terkunci" className="mb-4">
-            {statusPerangkat === 'terikat_perangkat_lain' ? (
-              <>
-                <p>Kamu Menggunakan Perangkat/Browser Yang berbeda dengan yang terdaftar.</p>
-                <p className="mt-1 text-[11px] font-medium opacity-85">
-                  Reset Perangkat Hub Tim IT
-                </p>
-              </>
-            ) : statusPerangkat === 'pending_perangkat_lain' ? (
-              'Pengajuan perangkat lain sedang menunggu persetujuan Admin IT.'
-            ) : (
-              'Hanya perangkat yang sudah disetujui Admin IT yang dapat melakukan absensi.'
-            )}
-          </Alert>
-        )}
 
         {jadwalTerkunci && !sudahMasuk && !malamKemarinAktif && (
           <Alert
@@ -479,7 +461,7 @@ export default function PanelAbsen({
 
         {!sudahMasuk && !terkunciMasuk && (
           <p className="mt-2.5 text-center text-[11px] text-slate-400">
-            Tombol absen pulang aktif setelah Anda absen hadir.
+            Absen pulang aktif setelah absen hadir.
           </p>
         )}
 
@@ -495,7 +477,7 @@ export default function PanelAbsen({
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
             <path d="M9 12l2 2 4-4" />
           </svg>
-          Lokasi GPS dan perangkat divalidasi ulang oleh server.
+          Lokasi dan perangkat diverifikasi otomatis.
         </p>
       </div>
     </section>

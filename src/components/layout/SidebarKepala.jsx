@@ -76,7 +76,7 @@ export default function SidebarKepala({ terbuka, onTutup, tampilkanAbsensi = tru
         className={`tanpa-cetak safe-atas fixed inset-y-0 left-0 z-50 flex w-[min(18rem,85vw)] flex-col border-r border-slate-200 bg-white shadow-2xl transition-transform duration-200 lg:w-64 lg:translate-x-0 lg:shadow-none ${
           terbuka ? 'translate-x-0' : '-translate-x-full'
         }`}
-        aria-label="Menu Kepala Ruangan"
+        aria-label="Menu Kepala Unit"
       >
         <div className="flex min-h-16 items-center gap-3 border-b border-slate-200 px-4 sm:px-5">
           <LogoRSUD className="h-10 w-10 shrink-0 drop-shadow-sm" />
@@ -157,7 +157,7 @@ export default function SidebarKepala({ terbuka, onTutup, tampilkanAbsensi = tru
 
         <div className="border-t border-slate-200 px-5 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
           <p className="text-[11px] font-semibold text-slate-500">PRESISI AMI</p>
-          <p className="text-[11px] text-slate-400">Portal Kepala Ruangan · v2.0</p>
+          <p className="text-[11px] text-slate-400">Portal Kepala Unit</p>
         </div>
       </aside>
     </>

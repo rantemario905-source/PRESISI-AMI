@@ -115,8 +115,7 @@ export default function FormPengaduan({ presensi, userId, onBatal, onSelesai }) 
           required
         />
         <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
-          Isi jam saat Anda benar-benar selesai bertugas. Untuk shift malam,
-          tanggal pulang otomatis dihitung H+1.
+          Jam saat Anda selesai bertugas. Shift malam otomatis dihitung H+1.
         </p>
       </div>
 
@@ -134,7 +133,7 @@ export default function FormPengaduan({ presensi, userId, onBatal, onSelesai }) 
           required
         />
         <p className="mt-1 text-[11px] text-slate-500">
-          Minimal 10 karakter. Jelaskan alasan Anda tidak dapat absen pulang.
+          Minimal 10 karakter.
         </p>
       </div>
 

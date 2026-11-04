@@ -28,7 +28,7 @@ export default function PortalKepalaLayout() {
   const [menuTerbuka, setMenuTerbuka] = useState(false)
   const { profil, keluar } = useAuth()
   const { pathname } = useLocation()
-  const judul = JUDUL_HALAMAN[pathname] ?? 'Portal Kepala Ruangan'
+  const judul = JUDUL_HALAMAN[pathname] ?? 'Portal Kepala Unit'
   const kepalaAsn = profil?.sumber_akun === 'kepala_asn'
   const menuBawah = useMemo(
     () =>
@@ -159,7 +159,7 @@ export default function PortalKepalaLayout() {
             </div>
 
             <div className="flex shrink-0 items-center">
-              <MenuAkun nama={profil?.nama} peran="Kepala Ruangan" onKeluar={keluar} />
+              <MenuAkun nama={profil?.nama} peran="Kepala Unit" onKeluar={keluar} />
             </div>
           </div>
         </header>
@@ -189,7 +189,7 @@ export default function PortalKepalaLayout() {
         </footer>
       </div>
 
-      <NavigasiBawah menu={menuBawah} label="Navigasi portal kepala ruangan" />
+      <NavigasiBawah menu={menuBawah} label="Navigasi portal Kepala Unit" />
     </div>
   )
 }

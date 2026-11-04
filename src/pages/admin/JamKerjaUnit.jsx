@@ -135,7 +135,7 @@ export default function JamKerjaUnit() {
     <>
       <KepalaHalaman
         judul="Jam Kerja Unit"
-        deskripsi="Atur jam kerja reguler khusus per unit. Unit yang tidak diatur di sini otomatis memakai jam kerja global. Pegawai pola Shift tetap mengikuti jadwal shift."
+        deskripsi="Jam kerja reguler khusus per unit."
       />
 
       {pesan && (

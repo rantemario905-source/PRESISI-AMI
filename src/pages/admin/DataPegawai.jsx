@@ -126,7 +126,7 @@ export default function DataPegawai() {
     <>
       <KepalaHalaman
         judul="Data Pegawai"
-        deskripsi="Kelola nama, grup/unit, pola kerja (Reguler/Shift), dan pengecualian radius pegawai non-ASN. Penugasan kepala unit diatur di menu Kepala Unit. Akun Super Admin tidak ditampilkan."
+        deskripsi="Kelola data pegawai non-ASN."
       />
 
       {pesan && (
@@ -227,7 +227,7 @@ export default function DataPegawai() {
                       </div>
                       <div className="flex shrink-0 flex-wrap justify-end gap-1">
                         <Badge variant={baris.kepala_ruangan ? 'peringatan' : 'netral'}>
-                          {baris.kepala_ruangan ? 'Kepala Ruangan' : 'Pegawai'}
+                          {baris.kepala_ruangan ? 'Kepala Unit' : 'Pegawai'}
                         </Badge>
                         <Badge variant={baris.pola_kerja === 'reguler' ? 'info' : 'netral'}>
                           {baris.pola_kerja === 'reguler' ? 'Reguler' : 'Shift'}
@@ -299,7 +299,7 @@ export default function DataPegawai() {
                         </td>
                         <td className="px-5 py-3">
                           <Badge variant={baris.kepala_ruangan ? 'peringatan' : 'netral'}>
-                            {baris.kepala_ruangan ? 'Kepala Ruangan' : 'Pegawai'}
+                            {baris.kepala_ruangan ? 'Kepala Unit' : 'Pegawai'}
                           </Badge>
                         </td>
                         <td className="px-5 py-3">

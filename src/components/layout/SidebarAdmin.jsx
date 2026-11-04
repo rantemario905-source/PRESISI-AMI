@@ -308,7 +308,7 @@ export default function SidebarAdmin({ terbuka, onTutup }) {
 
         <div className="border-t border-slate-200 px-5 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
           <p className="text-[11px] font-semibold text-slate-500">PRESISI AMI</p>
-          <p className="text-[11px] text-slate-400">Portal Super Admin · v2.0</p>
+          <p className="text-[11px] text-slate-400">Portal Super Admin</p>
         </div>
       </aside>
     </>

@@ -128,7 +128,7 @@ export default function Pengaduan() {
                   Presensi Bisa Diadukan
                 </h2>
                 <p className="text-[11px] text-slate-500 sm:text-xs">
-                  Presensi dengan jam masuk tetapi belum ada jam pulang.
+                  Belum ada jam pulang.
                 </p>
               </div>
 

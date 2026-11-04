@@ -79,7 +79,7 @@ export default function RiwayatSaya() {
               Riwayat &amp; Rekap Presensi
             </h1>
             <p className="mt-0.5 text-[13px] leading-relaxed text-slate-500 sm:text-sm">
-              Ringkasan kehadiran Anda pada {namaBulan(periode)}.
+              Ringkasan kehadiran {namaBulan(periode)}.
             </p>
           </div>
           <div className="w-full sm:w-auto">

@@ -18,7 +18,7 @@ export default function KartuProfil({ profil }) {
             {profil?.role === 'superadmin'
               ? 'Super Admin'
               : profil?.kepala_ruangan
-                ? 'Kepala Ruangan'
+                ? 'Kepala Unit'
                 : 'Pegawai Non-ASN'}
           </Badge>
         </div>

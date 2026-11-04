@@ -81,7 +81,7 @@ export default function LembarJadwal({
 
       <div className="ttd-laporan ttd-jadwal">
         <p>Muara Badak, {formatTanggalPanjang(waktuCetak)}</p>
-        <p>Kepala Ruangan,</p>
+        <p>Kepala Unit,</p>
         <div className="ttd-ruang" aria-hidden="true" />
         <p className="ttd-nama">{namaKepala || '............................'}</p>
       </div>

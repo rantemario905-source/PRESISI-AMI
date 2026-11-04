@@ -112,19 +112,19 @@ export default function Login() {
 
         {/* Kartu login */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-kartu sm:p-6">
-          <h2 className="text-lg font-bold text-slate-800">Masuk ke Akun Anda</h2>
-          <p className="mb-5 mt-1 text-[13px] leading-relaxed text-slate-500 sm:text-sm">
-            Gunakan email terdaftar untuk mengakses sistem presensi.
-          </p>
+          <h2 className="mb-5 text-lg font-bold text-slate-800">Masuk ke Akun Anda</h2>
 
           {!konfigurasiLengkap && (
             <Alert variant="peringatan" title="Konfigurasi Belum Lengkap" className="mb-4">
-              File <code className="font-mono text-xs">.env</code> belum diisi. Salin{' '}
-              <code className="font-mono text-xs">.env.example</code> menjadi{' '}
-              <code className="font-mono text-xs">.env</code>, lalu isi{' '}
-              <code className="font-mono text-xs">VITE_SUPABASE_URL</code> dan{' '}
-              <code className="font-mono text-xs">VITE_SUPABASE_ANON_KEY</code>, kemudian jalankan
-              ulang aplikasi.
+              {import.meta.env.DEV ? (
+                <>
+                  Isi <code className="font-mono text-xs">VITE_SUPABASE_URL</code> dan{' '}
+                  <code className="font-mono text-xs">VITE_SUPABASE_ANON_KEY</code> pada{' '}
+                  <code className="font-mono text-xs">.env</code>, lalu jalankan ulang aplikasi.
+                </>
+              ) : (
+                'Aplikasi belum dikonfigurasi. Hubungi Admin IT.'
+              )}
             </Alert>
           )}
 

@@ -112,11 +112,7 @@ export default function LaporanBulanan({ mode = 'superadmin' }) {
       <div className="tanpa-cetak">
         <KepalaHalaman
           judul="Laporan Bulanan Pegawai"
-          deskripsi={
-            modeKepala
-              ? 'Cetak laporan presensi bulanan setiap pegawai di unit kerja Anda dalam bentuk PDF.'
-              : 'Cetak laporan presensi bulanan setiap pegawai per unit kerja dalam bentuk PDF.'
-          }
+          deskripsi="Cetak laporan presensi bulanan per pegawai."
         />
 
         {galat && (

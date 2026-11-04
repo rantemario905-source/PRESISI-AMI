@@ -175,7 +175,7 @@ export default function GrupShift() {
     <>
       <KepalaHalaman
         judul="Grup Shift"
-        deskripsi="Kelola grup/unit dan seksinya. Rename grup otomatis memperbarui unit pegawai tanpa memutus jadwal. Grup sistem “Belum ditentukan” hanya tampil jika berisi pegawai."
+        deskripsi="Kelola grup unit dan anggotanya."
       />
 
       {pesan && (

@@ -108,7 +108,7 @@ export default function MasterShift() {
     <>
       <KepalaHalaman
         judul="Master Shift"
-        deskripsi="Daftar pola jam shift yang dapat dipakai pada Jadwal Shift. Shift yang melewati tengah malam (contoh Malam 21.30–07.30) didukung absen pulang lintas hari."
+        deskripsi="Pola jam shift yang tersedia."
       />
 
       {pesan && (

@@ -180,7 +180,7 @@ export default function KoreksiPresensi() {
     <>
       <KepalaHalaman
         judul="Koreksi Presensi & Audit Trail"
-        deskripsi="Perbaiki data presensi dengan alasan wajib — seluruh perubahan terekam."
+        deskripsi="Perbaiki data presensi dengan alasan wajib."
       />
 
       {pesan && (
