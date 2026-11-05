@@ -268,6 +268,7 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-126 | 2026-11-05 13:48 | "data testing sebelum golive masih ada, apakah bisa dihapus semua data testing itu, karena data asli golive itu di tanggal 1 november sebelum itu cuma testing" | Membuat `supabase/hapus_data_testing.sql`: menghapus transaksi bertanggal **sebelum 1 November 2026** (presensi, koreksi, pengaduan, izin, jadwal shift, tukar shift) dan mempertahankan data sejak go-live, akun pegawai, grup, master shift, jam kerja, hari libur, pengaturan, serta perangkat terdaftar. Transaksional + query verifikasi; foto bukti storage tidak ikut (blok opsional). README + dokumen audit diperbarui. Skrip **belum dijalankan** | selesai (skrip); belum dijalankan; belum di-commit | 2026-11-05 13:48 — Skrip hapus data testing sebelum go-live |
 | I-127 | 2026-11-05 14:06 | "sudha saya jalankan datanya sudah hilang tapi kenapa di pengaduan masih ada" + "kerjkan" | Mencatat `hapus_data_testing.sql` sudah dijalankan dan data go-live utuh (verifikasi user). Menjelaskan bahwa 29–30 Oktober bukan sisa data, melainkan kandidat baru dari `kandidat_pengaduan_presensi()` karena tanggal itu tidak punya baris presensi setelah pembersihan. Menambahkan **migrasi 37** + `verifikasi_37.sql`: kandidat, pengajuan, dan keputusan pengaduan dibatasi sejak **1 November 2026**; kandidat koreksi 2–3 November (data go-live) tetap tampil. Sinkron `schema.sql`; README + dokumen audit diperbarui. Lint bersih, `npm test` 70/70, build lulus 10,46 dtk | selesai (kode); migrasi 37 belum dijalankan; belum di-commit | 2026-11-05 14:06 — Batasi pengaduan sebelum go-live |
 | I-128 | 2026-11-05 14:13 | "sudah saya jalankan dan sudah hilang" | Mencatat migrasi **37** sudah dijalankan di Supabase dan kandidat pengaduan sebelum 1 November 2026 (29–30 Oktober) sudah hilang; kandidat data go-live tetap tampil. Memperbarui Status Terkini, tabel migrasi 37, dan Log Kronologis. Tidak ada perubahan kode | selesai (dokumen); `verifikasi_37.sql` belum dikonfirmasi; belum di-commit | 2026-11-05 14:13 — Migrasi 37 dijalankan |
+| I-129 | 2026-11-05 14:29 | "commit dan push" | Memverifikasi ulang `npm run lint` (bersih), `npm test` **70/70**, `npm run build` (lulus **11,01 dtk**); memastikan staged diff tanpa rahasia; commit `c14ea34` (pengaduan absen masuk/pulang, koreksi jam masuk, batas pengaduan sejak go-live, skrip hapus data testing, alasan koreksi laporan, perapian UI; migrasi 35–37 + verifikasi 35–37) lalu push ke `origin/main` (`5672fa0..c14ea34`) | selesai | 2026-11-05 14:29 — Commit & push pengaduan masuk/pulang + koreksi jam masuk |
 
 ---
 
@@ -296,6 +297,10 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   2026-10-27 10:36. Koordinat terbaru
   `-0.23805651650343132, 117.41442516465149` sudah di-commit dan migrasi 21
   **sudah dijalankan di Supabase** (klaim user 2026-10-27 10:39). Commit terbaru
+  **`c14ea34`** (pengaduan absen masuk/pulang, koreksi jam masuk, batas pengaduan
+  sejak go-live, skrip `hapus_data_testing.sql`, alasan koreksi laporan, perapian
+  UI pengaduan; migrasi 35–37) di-push 2026-11-05; sebelumnya `5672fa0` dan
+  `0d3a902` (sinkronisasi dokumen & notifikasi Alfa). Commit
   `c1e56f7` (pengaduan absen pulang, migrasi 33) di-push 2026-11-04; sebelumnya
   `de0a389` (tukar shift teraudit, laporan bulanan, cetak jadwal) dan
   `35d28c8` (perapian UI & persetujuan otomatis Super Admin) di-push

@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-05 14:13 WITA (migrasi 37 dijalankan; kandidat sebelum go-live hilang) |
+| Terakhir diperbarui | 2026-11-05 14:29 WITA (commit & push pengaduan masuk/pulang + koreksi jam masuk) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,7 +37,14 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-05 14:13):** **migrasi 37 dijalankan** — user
+**Pekerjaan terbaru (2026-11-05 14:29):** **commit & push** `c14ea34` —
+pengaduan absen masuk/pulang, koreksi jam masuk, batas pengaduan sejak go-live,
+skrip pembersihan data testing, alasan koreksi di laporan bulanan, dan perapian
+UI pengaduan. Verifikasi sebelum commit: `npm run lint` bersih, `npm test`
+**70/70**, `npm run build` lulus **11,01 dtk**. GitHub Actions otomatis
+build + deploy ke `presisiami.my.id`.
+
+**Pekerjaan sebelumnya (2026-11-05 14:13):** **migrasi 37 dijalankan** — user
 menjalankan `37_batasi_pengaduan_sebelum_golive.sql` dan kandidat pengaduan
 sebelum 1 November 2026 (29–30 Oktober) **sudah hilang** dari halaman Pengaduan;
 kandidat data go-live (2–3 November) tetap tampil. Tidak ada perubahan kode.
@@ -374,8 +381,8 @@ lanjutan 14,14 dtk).
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–37 | `src/`, `supabase/migrations/01–37` |
-| Commit Git | **`a9279f9`** — sinkronisasi dokumen audit; sebelumnya `c1e56f7` pengaduan absen pulang (migrasi 33), `de0a389` tukar shift (migrasi 32), `35d28c8` perapian UI & ACC otomatis (migrasi 31), `17d8efb` ketahanan halaman & toleransi terlambat (migrasi 29–30) | `git log` |
-| Perubahan lokal | **Ada perubahan belum di-commit** — pengaduan multi-jenis (migrasi 35), koreksi jam masuk (migrasi 36), batas pengaduan sebelum go-live (migrasi 37), alasan koreksi di laporan bulanan, dan perapian panel/halaman pengaduan | `git status` |
+| Commit Git | **`c14ea34`** — pengaduan absen masuk/pulang, koreksi jam masuk, batas go-live, pembersihan data uji; sebelumnya `5672fa0` sinkronisasi dokumen audit, `0d3a902` notifikasi Alfa, `a9279f9` pengaduan absen pulang (migrasi 33) | `git log` |
+| Perubahan lokal | **Bersih** — semua perubahan sudah di-commit dan di-push (`main...origin/main`) | `git status` |
 | Migrasi DB 01–18 | **Sudah dijalankan** — verifikasi 09–18 lulus | laporan user 2026-10-30 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
@@ -413,7 +420,7 @@ lanjutan 14,14 dtk).
 | Jam kerja per unit | **Ada di kode** — override jam reguler per unit dengan fallback global; ADMISI RAWAT JALAN 07.00–15.00 Senin–Jumat; menu Super Admin; tampilan jam di akun pegawai sudah diuji dan berubah | migrasi 27, `JamKerjaUnit.jsx`, `jamKerjaService.js`, `jadwal_kerja`, `proses_alfa_otomatis` |
 | Pengecualian radius pegawai tertentu | **Aktif** — flag `pegawai.bebas_radius` per pegawai (Super Admin); pegawai tersebut tetap pegawai reguler biasa dan hanya berbeda karena boleh absen di mana saja. `submit_presensi` tetap mencatat jarak dan hanya melewati penolakan radius bila flag aktif; validasi lain tidak berubah; opsi `abaikanRadius` hanya untuk tampilan | migrasi 28, `verifikasi_28.sql`, `geofencing.js`, `PanelAbsen.jsx`, `DataPegawai.jsx`, `pegawaiService.js` |
 | Koreksi presensi shift malam | **Ada di kode & sudah di-commit `089b4e7`** — jam pulang otomatis digeser ke H+1 bila tidak lebih lambat dari jam masuk; timestamp asli dipertahankan bila jam tidak diubah; form menampilkan pratinjau tanggal/jam dan penanda H+1 | `src/utils/koreksiPresensi.js`, `src/components/admin/FormKoreksiPresensi.jsx`, `tests/koreksiPresensi.test.js` |
-| Ketahanan halaman (anti white screen) | **Ada di kode (belum di-commit)** — ErrorBoundary root/rute/halaman portal, muat ulang otomatis sekali saat chunk gagal (`?perbarui` + guard 30 detik), listener `vite:preloadError`, fallback statis di `index.html`, formatter tanggal aman untuk nilai rusak, `localStorage` kepala diamankan | `src/components/ErrorBoundary.jsx`, `src/utils/pemulihanHalaman.js`, `src/main.jsx`, `src/App.jsx`, `PortalAdminLayout.jsx`, `PortalKepalaLayout.jsx`, `index.html`, `format.js` |
+| Ketahanan halaman (anti white screen) | **Ada di kode & sudah di-commit `17d8efb`** — ErrorBoundary root/rute/halaman portal, muat ulang otomatis sekali saat chunk gagal (`?perbarui` + guard 30 detik), listener `vite:preloadError`, fallback statis di `index.html`, formatter tanggal aman untuk nilai rusak, `localStorage` kepala diamankan | `src/components/ErrorBoundary.jsx`, `src/utils/pemulihanHalaman.js`, `src/main.jsx`, `src/App.jsx`, `PortalAdminLayout.jsx`, `PortalKepalaLayout.jsx`, `index.html`, `format.js` |
 | Keamanan ekspor CSV | **Ada di kode & di-commit** — sel string berawalan `=`, `+`, `-`, `@`, tab, CR, atau LF diberi apostrof sebelum escaping (ekspor Rekapitulasi) | `src/utils/csv.js` |
 | Buka dokumen izin | **Ada di kode & di-commit** — tab dokumen memutus `window.opener` dan memakai `location.replace` agar tidak membuka halaman Supabase dengan konteks pembuka | `src/pages/IzinSaya.jsx`, `src/pages/admin/PengajuanIzin.jsx` |
 | Hapus grup kosong | **Ada di kode** — semua grup 0 pegawai; "Belum ditentukan" (akun sistem) disembunyikan bila kosong | migrasi 18, `GrupShift.jsx` |
@@ -430,7 +437,7 @@ lanjutan 14,14 dtk).
 | Penanda tangan laporan | **Ada di kode** — Kasubbag Tata Usaha, Suriami, SKM., M.Kes, NIP. 197312302007012011 untuk semua pegawai | `src/config/constants.js`, `BlokTandaTangan.jsx` |
 | Menu kepala ASN | **Ada di kode** — “Kembali ke Absensi” (sidebar) dan tab Absensi (navigasi bawah HP) disembunyikan bila `sumber_akun = kepala_asn` | `PortalKepalaLayout.jsx`, `SidebarKepala.jsx` |
 | Dinas Luar lintas unit | **Ada di kode** — kepala unit dapat memilih pegawai lintas unit untuk Dinas Luar; Sakit/Cuti tetap per unit; pembuat grup membaca grup + dokumennya selama menjabat; akses dicabut otomatis saat jabatan berakhir; kepala ASN dapat mencatat (FK ke `auth.users`) | migrasi 23, `PengajuanIzin.jsx`, `leaveService.js`, `pegawaiService.js`, `verifikasi_23.sql` |
-| Lint/unit test | **Tersedia** — ESLint (`npm run lint`) bersih dan **68 uji** `node:test` (`npm test`) lulus; B-8/B-9 di commit `42cb317`, uji paginasi/template di `22c2bab`, uji koreksi H+1, pemulihan halaman, kalender, varian warna, laporan, cetak jadwal, dan tutup absen masuk di working tree | `eslint.config.js`, `tests/`, `package.json`, `.github/workflows/deploy.yml` |
+| Lint/unit test | **Tersedia** — ESLint (`npm run lint`) bersih dan **70 uji** `node:test` (`npm test`) lulus; B-8/B-9 di commit `42cb317`, uji paginasi/template di `22c2bab`, serta uji koreksi H+1, pemulihan halaman, kalender, varian warna, laporan, cetak jadwal, dan tutup absen masuk sudah di-commit | `eslint.config.js`, `tests/`, `package.json`, `.github/workflows/deploy.yml` |
 | Paginasi data | **Ada di kode & di-commit `22c2bab`** — helper halaman 500; jadwal shift dibatasi unit aktif; rekap/laporan, koreksi, dan daftar izin memakai paginasi; parser template menolak header tak dikenal; uji manual user 2026-10-31 lulus (tanggal 1–2 muncul) | `src/utils/paginasi.js`, `shiftService.js`, `reportService.js`, `correctionService.js`, `leaveService.js`, `templateJadwal.js` |
 | Alfa otomatis | **Aktif mulai 1 November 2026** — diaktifkan lewat Pengaturan Presensi; **pg_cron 1.6.4 aktif** dan job `presisi-alfa-otomatis` terdaftar/aktif tiap 15 menit; menunggu pembentukan Alfa pertama (1 November 2026 hari Minggu, sehingga Alfa reguler diperkirakan muncul Senin 2 November) | migrasi 12/27, `PengaturanPresensi.jsx`, `supabase/jadwal_alfa.sql`, laporan user 2026-10-30 |
 | Deploy GitHub Pages | **Aktif** — `https://presisiami.my.id/` live dengan base `/`; `www` redirect ke domain utama; Enforce HTTPS aktif, HTTP apex/`www` **301** ke HTTPS (diverifikasi 2026-10-30) | workflow run `40439173719` sukses |
@@ -589,6 +596,23 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-05 14:29 WITA — Commit & push pengaduan masuk/pulang + koreksi jam masuk
+
+- **Perubahan:** memverifikasi ulang (`npm run lint` bersih, `npm test` **70/70**,
+  `npm run build` lulus **11,01 dtk**), memastikan staged diff tanpa rahasia,
+  lalu commit `c14ea34` "PRESISI AMI: pengaduan absen masuk/pulang, koreksi jam
+  masuk, dan pembersihan data uji" dan push ke `origin/main`
+  (`5672fa0..c14ea34`). Isi commit: pengaduan multi-jenis, koreksi jam masuk,
+  batas pengaduan sejak 1 November 2026, skrip `hapus_data_testing.sql`, alasan
+  koreksi di laporan bulanan, perapian UI pengaduan, migrasi 35–37, verifikasi
+  35–37, serta dokumen audit.
+- **File:** 23 file (16 modifikasi + 7 baru).
+- **Verifikasi:** lint/test/build lulus sebelum commit; `git status` bersih
+  setelah push (`main...origin/main`).
+- **Catatan/risiko:** deploy GitHub Pages berjalan otomatis. `verifikasi_36.sql`
+  dan `verifikasi_37.sql` belum dikonfirmasi dijalankan; uji perangkat untuk
+  koreksi jam masuk belum dicatat.
 
 ### 2026-11-05 14:13 WITA — Migrasi 37 dijalankan
 
