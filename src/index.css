@@ -359,6 +359,7 @@
 
 .tabel-tukar {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: 8pt;
   line-height: 1.15;

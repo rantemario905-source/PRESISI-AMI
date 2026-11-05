@@ -5,6 +5,7 @@
 import { memo } from 'react'
 import { formatJam, formatTanggalRingkas } from '../../utils/format.js'
 import { varianStatusKehadiran } from '../../utils/status.js'
+import { bersihkanAlasanKoreksi } from '../../utils/laporan.js'
 import { Badge, Button } from '../ui/index.js'
 
 const jamSingkat = (iso) => (iso ? formatJam(iso).replace(' WITA', '') : '—')
@@ -59,7 +60,7 @@ function DaftarPresensiKoreksi({ daftar, onKoreksi }) {
             {baris.dikoreksi_oleh && (
               <p className="mt-2 rounded-lg bg-amber-50 px-2.5 py-2 text-[11px] leading-relaxed text-amber-800">
                 <span className="font-semibold">Dikoreksi:</span>{' '}
-                {baris.alasan_koreksi}
+                {bersihkanAlasanKoreksi(baris.alasan_koreksi)}
               </p>
             )}
 
@@ -123,7 +124,7 @@ function DaftarPresensiKoreksi({ daftar, onKoreksi }) {
                 <td className="max-w-[240px] px-5 py-3 text-xs text-slate-500">
                   {baris.dikoreksi_oleh ? (
                     <span className="font-semibold text-amber-700">
-                      Dikoreksi: {baris.alasan_koreksi}
+                      Dikoreksi: {bersihkanAlasanKoreksi(baris.alasan_koreksi)}
                     </span>
                   ) : (
                     '—'

@@ -15,24 +15,46 @@ export const STATUS_KEHADIRAN = [
 
 export const STATUS_BERALASAN = ['Sakit', 'Cuti', 'Dinas Luar']
 
+const AWALAN_PERSETUJUAN = [
+  /^Pengaduan(?: absen masuk)? disetujui oleh [^:]*:\s*/i,
+  /^Koreksi jam masuk disetujui oleh [^:]*:\s*/i,
+]
+
 /**
- * Isi kolom "Keterangan" laporan bulanan. Alasan koreksi diprioritaskan agar
- * jejak pembetulan (termasuk hasil pengaduan) tetap terbaca di laporan.
+ * Buang awalan jejak persetujuan dan catatan admin pada `alasan_koreksi`
+ * agar yang tersisa hanya alasan aslinya. Dipakai di layar riwayat & admin.
+ */
+export function bersihkanAlasanKoreksi(nilai) {
+  let hasil = String(nilai ?? '').trim()
+  if (!hasil) return ''
+
+  for (const pola of AWALAN_PERSETUJUAN) {
+    if (pola.test(hasil)) {
+      hasil = hasil.replace(pola, '')
+      break
+    }
+  }
+
+  const batas = hasil.indexOf(' | ')
+  if (batas >= 0) hasil = hasil.slice(0, batas)
+
+  return hasil.trim()
+}
+
+/**
+ * Isi kolom "Keterangan" laporan bulanan. Hanya Sakit/Cuti/Dinas Luar dan
+ * pengaduan yang disetujui yang dicantumkan. Koreksi manual Super Admin,
+ * Alfa, dan tukar shift tidak ditampilkan.
  */
 export function keteranganPresensi(
   baris,
-  { alasanIzin = {}, rekanTukar = new Map() } = {},
+  { alasanIzin = {}, alasanPengaduan = {} } = {},
 ) {
-  const koreksi = String(baris.alasan_koreksi ?? '').trim()
-  if (koreksi) return koreksi
-  if (baris.status_kehadiran === 'Alfa') return 'Alfa'
+  const kunci = `${baris.user_id}|${baris.tanggal}`
   if (STATUS_BERALASAN.includes(baris.status_kehadiran)) {
-    return alasanIzin[`${baris.user_id}|${baris.tanggal}`] || '—'
+    return alasanIzin[kunci] || '—'
   }
-  if (rekanTukar.has(baris.tanggal)) {
-    return `Tukar dengan ${rekanTukar.get(baris.tanggal)}`
-  }
-  return '—'
+  return alasanPengaduan[kunci] || '—'
 }
 
 /** Kelompokkan baris presensi berdasarkan user_id. */
@@ -86,7 +108,7 @@ export function labelShift(shift) {
 
 /**
  * Ringkas kejadian tukar shift dari sudut pandang satu pegawai.
- * @returns {{ id: string, tanggal: string, rekan: string, asal: string, baru: string, alasan: string, pencatat: string }[]}
+ * @returns {{ id: string, tanggal: string, rekan: string, asal: string, baru: string, alasan: string }[]}
  */
 export function ringkasTukar(daftar = [], pegawaiId) {
   return (daftar ?? [])
@@ -100,7 +122,6 @@ export function ringkasTukar(daftar = [], pegawaiId) {
         asal: (sebagaiA ? b.sa_lama?.nama_shift : b.sb_lama?.nama_shift) ?? '—',
         baru: (sebagaiA ? b.sa_baru?.nama_shift : b.sb_baru?.nama_shift) ?? '—',
         alasan: b.alasan ?? '',
-        pencatat: b.pencatat?.nama ?? '—',
       }
     })
     .sort((a, b) => String(a.tanggal).localeCompare(String(b.tanggal)))

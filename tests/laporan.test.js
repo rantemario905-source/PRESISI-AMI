@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {
+  bersihkanAlasanKoreksi,
   keteranganPresensi,
   ringkasKehadiran,
   labelShift,
@@ -48,44 +49,71 @@ test('ringkasTukar membaca sudut pandang pegawai', () => {
   assert.deepEqual(ringkasTukar(tukar, 'c'), [])
 })
 
-test('keteranganPresensi memprioritaskan alasan koreksi', () => {
-  assert.equal(
-    keteranganPresensi({
-      status_kehadiran: 'Koreksi',
-      alasan_koreksi: 'Lupa absen pulang karena pergantian shift.',
-    }),
-    'Lupa absen pulang karena pergantian shift.',
-  )
-  assert.equal(
-    keteranganPresensi({
-      status_kehadiran: 'Hadir',
-      alasan_koreksi: 'Pengaduan disetujui oleh Kepala Unit: lupa absen masuk.',
-    }),
-    'Pengaduan disetujui oleh Kepala Unit: lupa absen masuk.',
-  )
-})
-
-test('keteranganPresensi memakai alasan izin, Alfa, tukar, dan fallback', () => {
+test('keteranganPresensi hanya izin dan pengaduan, bukan koreksi manual', () => {
   assert.equal(
     keteranganPresensi(
-      { user_id: 'u1', tanggal: '2026-11-04', status_kehadiran: 'Sakit' },
-      { alasanIzin: { 'u1|2026-11-04': 'Demam' } },
+      { user_id: 'u1', tanggal: '2026-11-03', status_kehadiran: 'Sakit' },
+      { alasanIzin: { 'u1|2026-11-03': 'Demam' } },
     ),
     'Demam',
   )
-  assert.equal(keteranganPresensi({ status_kehadiran: 'Alfa' }), 'Alfa')
+  assert.equal(
+    keteranganPresensi(
+      { user_id: 'u1', tanggal: '2026-11-04', status_kehadiran: 'Koreksi' },
+      { alasanPengaduan: { 'u1|2026-11-04': 'Lupa absen pulang' } },
+    ),
+    'Lupa absen pulang',
+  )
+  assert.equal(
+    keteranganPresensi(
+      { user_id: 'u1', tanggal: '2026-11-05', status_kehadiran: 'Hadir' },
+      { alasanPengaduan: { 'u1|2026-11-05': 'Lupa absen masuk' } },
+    ),
+    'Lupa absen masuk',
+  )
+})
+
+test('keteranganPresensi tidak memakai koreksi manual, Alfa, atau tukar', () => {
+  assert.equal(
+    keteranganPresensi({
+      status_kehadiran: 'Hadir',
+      alasan_koreksi: 'Izin Ke BANK BPD',
+    }),
+    '—',
+  )
+  assert.equal(keteranganPresensi({ status_kehadiran: 'Alfa' }), '—')
   assert.equal(
     keteranganPresensi(
       { tanggal: '2026-11-05', status_kehadiran: 'Hadir' },
       { rekanTukar: new Map([['2026-11-05', 'Budi']]) },
     ),
-    'Tukar dengan Budi',
-  )
-  assert.equal(keteranganPresensi({ status_kehadiran: 'Hadir' }), '—')
-  assert.equal(
-    keteranganPresensi({ status_kehadiran: 'Koreksi', alasan_koreksi: '   ' }),
     '—',
   )
+  assert.equal(keteranganPresensi({ status_kehadiran: 'Hadir' }), '—')
+})
+
+test('bersihkanAlasanKoreksi membuang awalan persetujuan dan catatan', () => {
+  assert.equal(
+    bersihkanAlasanKoreksi('Pengaduan disetujui oleh Kepala Unit: Lupa absen'),
+    'Lupa absen',
+  )
+  assert.equal(
+    bersihkanAlasanKoreksi(
+      'Pengaduan absen masuk disetujui oleh presisiadmin: HP mati',
+    ),
+    'HP mati',
+  )
+  assert.equal(
+    bersihkanAlasanKoreksi('Koreksi jam masuk disetujui oleh Suriami: Datang 07.50'),
+    'Datang 07.50',
+  )
+  assert.equal(
+    bersihkanAlasanKoreksi('Pengaduan disetujui oleh Kepala Unit: Lupa | disetujui'),
+    'Lupa',
+  )
+  assert.equal(bersihkanAlasanKoreksi('Izin Ke BANK BPD'), 'Izin Ke BANK BPD')
+  assert.equal(bersihkanAlasanKoreksi('   '), '')
+  assert.equal(bersihkanAlasanKoreksi(null), '')
 })
 
 test('ringkasKehadiran menghitung status dan keterlambatan', () => {

@@ -18,7 +18,14 @@ import { Alert, Button, Spinner, TombolMuatUlang } from '../../components/ui/ind
 import KepalaHalaman from '../../components/admin/KepalaHalaman.jsx'
 import LembarLaporan from '../../components/laporan/LembarLaporan.jsx'
 
-const DATA_KOSONG = { pegawai: [], presensi: [], alasanIzin: {}, jadwal: {}, tukar: [] }
+const DATA_KOSONG = {
+  pegawai: [],
+  presensi: [],
+  alasanIzin: {},
+  alasanPengaduan: {},
+  jadwal: {},
+  tukar: [],
+}
 
 export default function LaporanBulanan({ mode = 'superadmin' }) {
   const { profil } = useAuth()
@@ -234,6 +241,7 @@ export default function LaporanBulanan({ mode = 'superadmin' }) {
               pegawai={p}
               presensi={petaPresensi.get(p.id) ?? []}
               alasanIzin={data.alasanIzin}
+              alasanPengaduan={data.alasanPengaduan}
               jadwal={data.jadwal}
               tukar={data.tukar}
               periode={periode}

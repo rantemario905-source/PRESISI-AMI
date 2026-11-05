@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-05 14:29 WITA (commit & push pengaduan masuk/pulang + koreksi jam masuk) |
+| Terakhir diperbarui | 2026-11-05 15:09 WITA (kolom Dicatat Oleh di riwayat tukar dihapus) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,7 +37,25 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-05 14:29):** **commit & push** `c14ea34` —
+**Pekerjaan terbaru (2026-11-05 15:09):** **kolom "Dicatat Oleh" di Riwayat Tukar
+Shift dihapus** pada laporan bulanan; kolom **Alasan** dilebarkan (38%) dengan
+`table-layout: fixed` dan proporsi kolom tetap. Data `pencatat` juga tidak lagi
+di-query/diringkas. Verifikasi: `npm run lint` bersih, `npm test` **71/71**,
+`npm run build` lulus **9,85 dtk**.
+
+**Pekerjaan sebelumnya (2026-11-05 14:59):** **keterangan laporan hanya izin &
+pengaduan**. Kolom **Keterangan** Laporan Presensi Bulanan kini hanya memuat
+alasan **Sakit/Cuti/Dinas Luar** dan **pengaduan yang disetujui** (diambil dari
+`pengaduan_presensi.alasan`, tanpa awalan "disetujui oleh …"). Koreksi manual
+Super Admin, label **Alfa**, dan **tukar shift** tidak lagi tampil di Keterangan
+(riwayat tukar tetap punya blok sendiri). Penyebab keluhan: baris "Izin Ke BANK
+BPD" berstatus `Hadir` berasal dari koreksi manual, bukan izin. Layar **Riwayat
+Saya** dan **Koreksi Presensi** tetap menampilkan alasan koreksi, tetapi awalan
+persetujuan dan catatan admin dibersihkan lewat `bersihkanAlasanKoreksi()`.
+Tanpa migrasi DB. Verifikasi: `npm run lint` bersih, `npm test` **71/71**,
+`npm run build` lulus **9,99 dtk**.
+
+**Pekerjaan sebelumnya (2026-11-05 14:29):** **commit & push** `c14ea34` —
 pengaduan absen masuk/pulang, koreksi jam masuk, batas pengaduan sejak go-live,
 skrip pembersihan data testing, alasan koreksi di laporan bulanan, dan perapian
 UI pengaduan. Verifikasi sebelum commit: `npm run lint` bersih, `npm test`
@@ -410,7 +428,7 @@ lanjutan 14,14 dtk).
 | Koordinat RSUD AMI | **Ada di kode** — `-0.23805651650343132, 117.41442516465149` di klien dan schema | `src/config/constants.js`, `supabase/schema.sql`, migrasi 21 |
 | Radius absensi | **Aktif 50 meter** — klien (`MAX_RADIUS_METERS`) dan server (migrasi 24 sudah dijalankan) | `src/config/constants.js`, `supabase/migrations/24_radius_50_meter.sql` |
 | Skrip `supabase/verifikasi_*.sql` | **Verifikasi 09–35 dijalankan user** (34–35 laporan 2026-11-05); `verifikasi_36.sql` dan `verifikasi_37.sql` belum dikonfirmasi | laporan user 2026-11-05; `supabase/verifikasi_37.sql` |
-| Build produksi | **Lulus** — base `/` **11,01 dtk** (verifikasi ulang 2026-11-05); sebelumnya 10,46 dtk (batas pengaduan sebelum go-live), 9,34 dtk (koreksi jam masuk) | `npm run build` 2026-11-05 |
+| Build produksi | **Lulus** — base `/` **9,85 dtk** (kolom Dicatat Oleh dihapus); sebelumnya 9,99 dtk (keterangan laporan), 11,01 dtk (verifikasi ulang) | `npm run build` 2026-11-05 |
 | Dependensi frontend | **Diperbarui & di-commit** — Vite 7.3.7, `@vitejs/plugin-react` 5.2.0, React Router 7.18.5; Node CI 22; lockfile sinkron; `npm audit` 0 kerentanan | `package.json`, `package-lock.json`, `.github/workflows/deploy.yml` |
 | Header keamanan (CSP) | **Ada di kode & di-commit** — CSP produksi via `<meta>`: `script-src 'self'`, `connect-src` self + `*.supabase.co`, `frame-src 'none'`, `form-action 'self'`, `object-src 'none'`, `base-uri 'self'`; meta referrer; hanya saat build. Uji headless: script inline diblokir, halaman render | `vite.config.js`, `index.html` |
 | Batas GitHub Pages | **Enforce HTTPS aktif & terverifikasi** (2026-10-30 10:06 WITA): HTTP apex dan `www` **301** ke HTTPS/apex. Namun HSTS, `X-Frame-Options`/`frame-ancestors`, `X-Content-Type-Options`, dan `Permissions-Policy` tetap belum aktif karena memerlukan header HTTP; Cloudflare/proxy opsional | `curl -I` HTTP/HTTPS apex & `www`, 2026-10-30 |
@@ -437,7 +455,7 @@ lanjutan 14,14 dtk).
 | Penanda tangan laporan | **Ada di kode** — Kasubbag Tata Usaha, Suriami, SKM., M.Kes, NIP. 197312302007012011 untuk semua pegawai | `src/config/constants.js`, `BlokTandaTangan.jsx` |
 | Menu kepala ASN | **Ada di kode** — “Kembali ke Absensi” (sidebar) dan tab Absensi (navigasi bawah HP) disembunyikan bila `sumber_akun = kepala_asn` | `PortalKepalaLayout.jsx`, `SidebarKepala.jsx` |
 | Dinas Luar lintas unit | **Ada di kode** — kepala unit dapat memilih pegawai lintas unit untuk Dinas Luar; Sakit/Cuti tetap per unit; pembuat grup membaca grup + dokumennya selama menjabat; akses dicabut otomatis saat jabatan berakhir; kepala ASN dapat mencatat (FK ke `auth.users`) | migrasi 23, `PengajuanIzin.jsx`, `leaveService.js`, `pegawaiService.js`, `verifikasi_23.sql` |
-| Lint/unit test | **Tersedia** — ESLint (`npm run lint`) bersih dan **70 uji** `node:test` (`npm test`) lulus; B-8/B-9 di commit `42cb317`, uji paginasi/template di `22c2bab`, serta uji koreksi H+1, pemulihan halaman, kalender, varian warna, laporan, cetak jadwal, dan tutup absen masuk sudah di-commit | `eslint.config.js`, `tests/`, `package.json`, `.github/workflows/deploy.yml` |
+| Lint/unit test | **Tersedia** — ESLint (`npm run lint`) bersih dan **71 uji** `node:test` (`npm test`) lulus | `eslint.config.js`, `tests/`, `package.json`, `.github/workflows/deploy.yml` |
 | Paginasi data | **Ada di kode & di-commit `22c2bab`** — helper halaman 500; jadwal shift dibatasi unit aktif; rekap/laporan, koreksi, dan daftar izin memakai paginasi; parser template menolak header tak dikenal; uji manual user 2026-10-31 lulus (tanggal 1–2 muncul) | `src/utils/paginasi.js`, `shiftService.js`, `reportService.js`, `correctionService.js`, `leaveService.js`, `templateJadwal.js` |
 | Alfa otomatis | **Aktif mulai 1 November 2026** — diaktifkan lewat Pengaturan Presensi; **pg_cron 1.6.4 aktif** dan job `presisi-alfa-otomatis` terdaftar/aktif tiap 15 menit; menunggu pembentukan Alfa pertama (1 November 2026 hari Minggu, sehingga Alfa reguler diperkirakan muncul Senin 2 November) | migrasi 12/27, `PengaturanPresensi.jsx`, `supabase/jadwal_alfa.sql`, laporan user 2026-10-30 |
 | Deploy GitHub Pages | **Aktif** — `https://presisiami.my.id/` live dengan base `/`; `www` redirect ke domain utama; Enforce HTTPS aktif, HTTP apex/`www` **301** ke HTTPS (diverifikasi 2026-10-30) | workflow run `40439173719` sukses |
@@ -596,6 +614,42 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-05 15:09 WITA — Kolom "Dicatat Oleh" di riwayat tukar dihapus
+
+- **Perubahan:** pada blok **Riwayat Tukar Shift** di laporan bulanan, kolom
+  **Dicatat Oleh** dihapus dan kolom **Alasan** dilebarkan (38%). Tabel memakai
+  `table-layout: fixed` dengan `<colgroup>` proporsi tetap agar lebar konsisten.
+  Data `pencatat` tidak lagi di-query (`reportService`) maupun diringkas
+  (`ringkasTukar`), sehingga payload lebih ringan.
+- **File:** `src/components/laporan/LembarLaporan.jsx`, `src/utils/laporan.js`,
+  `src/services/reportService.js`, `src/index.css`, `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **71/71** lulus;
+  `npm run build` lulus **9,85 dtk**.
+- **Catatan/risiko:** tanpa perubahan DB. Data pencatat tetap tersimpan di tabel
+  `tukar_shift`; hanya tidak ditampilkan di laporan.
+
+### 2026-11-05 14:59 WITA — Keterangan laporan hanya izin & pengaduan
+
+- **Perubahan:** kolom **Keterangan** laporan bulanan kini hanya berisi alasan
+  **Sakit/Cuti/Dinas Luar** (dari `izin_cuti`) dan **pengaduan yang disetujui**
+  (dari `pengaduan_presensi.alasan`). Alasan tidak lagi diambil dari
+  `presensi.alasan_koreksi`, sehingga **koreksi manual Super Admin** (mis.
+  "Izin Ke BANK BPD" pada status `Hadir`), label **Alfa**, dan **tukar shift**
+  tidak tampil di Keterangan. Riwayat tukar tetap punya blok sendiri. Awalan
+  "Pengaduan/Koreksi jam masuk disetujui oleh …: " dan catatan admin juga
+  dibersihkan di layar **Riwayat Saya** dan **Koreksi Presensi** lewat
+  `bersihkanAlasanKoreksi()`, agar yang tampil hanya alasan asli.
+- **File:** `src/utils/laporan.js`, `src/services/reportService.js`,
+  `src/components/laporan/LembarLaporan.jsx`, `src/pages/admin/LaporanBulanan.jsx`,
+  `src/pages/RiwayatSaya.jsx`, `src/components/admin/DaftarPresensiKoreksi.jsx`,
+  `tests/laporan.test.js`, `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **71/71** lulus (uji baru
+  `bersihkanAlasanKoreksi` dan aturan Keterangan); `npm run build` lulus
+  **9,99 dtk**.
+- **Catatan/risiko:** tanpa perubahan DB/migrasi. Pengaduan yang disetujui
+  menampilkan alasan asli pegawai; bila ada pengaduan masuk dan pulang pada
+  tanggal yang sama, alasannya digabung dengan ` · `. Perlu uji cetak manual.
 
 ### 2026-11-05 14:29 WITA — Commit & push pengaduan masuk/pulang + koreksi jam masuk
 

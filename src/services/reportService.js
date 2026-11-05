@@ -62,7 +62,16 @@ export async function ambilLaporanBulanan({ periode, unit }) {
       : semuaPegawai.filter((p) => p.unit_kerja === unit)
 
   if (pegawai.length === 0) {
-    return { pegawai: [], presensi: [], alasanIzin: {}, jadwal: {}, tukar: [], mulai, selesai }
+    return {
+      pegawai: [],
+      presensi: [],
+      alasanIzin: {},
+      alasanPengaduan: {},
+      jadwal: {},
+      tukar: [],
+      mulai,
+      selesai,
+    }
   }
 
   const idPegawai = pegawai.map((p) => p.id)
@@ -70,7 +79,7 @@ export async function ambilLaporanBulanan({ periode, unit }) {
     supabase
       .from('presensi')
       .select(
-        'id, user_id, tanggal, jam_masuk, jam_pulang, status_kehadiran, menit_terlambat, alasan_koreksi',
+        'id, user_id, tanggal, jam_masuk, jam_pulang, status_kehadiran, menit_terlambat',
       )
       .in('user_id', idPegawai)
       .gte('tanggal', mulai)
@@ -80,13 +89,56 @@ export async function ambilLaporanBulanan({ periode, unit }) {
 
   const presensi = await ambilSemuaHalaman(buatKueri)
 
-  const [alasanIzin, jadwal, tukar] = await Promise.all([
+  const [alasanIzin, alasanPengaduan, jadwal, tukar] = await Promise.all([
     ambilAlasanIzin(idPegawai, mulai, selesai),
+    ambilAlasanPengaduan(idPegawai, mulai, selesai),
     ambilJadwalPeta(idPegawai, mulai, selesai),
     ambilTukarBulan(idPegawai, mulai, selesai),
   ])
 
-  return { pegawai, presensi, alasanIzin, jadwal, tukar, mulai, selesai }
+  return {
+    pegawai,
+    presensi,
+    alasanIzin,
+    alasanPengaduan,
+    jadwal,
+    tukar,
+    mulai,
+    selesai,
+  }
+}
+
+/** Peta "user_id|tanggal" → alasan pengaduan yang disetujui (opsional). */
+async function ambilAlasanPengaduan(idPegawai, mulai, selesai) {
+  const buatKueri = () =>
+    supabase
+      .from('pengaduan_presensi')
+      .select('user_id, tanggal, alasan, dibuat_pada')
+      .in('user_id', idPegawai)
+      .eq('status', 'disetujui')
+      .gte('tanggal', mulai)
+      .lte('tanggal', selesai)
+      .order('dibuat_pada', { ascending: true })
+
+  let data
+  try {
+    data = await ambilSemuaHalaman(buatKueri)
+  } catch {
+    return {}
+  }
+
+  const peta = {}
+  for (const baris of data ?? []) {
+    const kunci = `${baris.user_id}|${baris.tanggal}`
+    const alasan = String(baris.alasan ?? '').trim()
+    if (!alasan) continue
+    if (!peta[kunci]) {
+      peta[kunci] = alasan
+    } else if (!peta[kunci].includes(alasan)) {
+      peta[kunci] = `${peta[kunci]} · ${alasan}`
+    }
+  }
+  return peta
 }
 
 /** Peta "user_id|tanggal" → ringkasan shift terjadwal. */
@@ -121,10 +173,9 @@ async function ambilTukarBulan(idPegawai, mulai, selesai) {
       .from('tukar_shift')
       .select(
         [
-          'id, tanggal, pegawai_a, pegawai_b, alasan, dibuat_oleh',
+          'id, tanggal, pegawai_a, pegawai_b, alasan',
           'orang_a:pegawai!tukar_shift_pegawai_a_fkey ( nama )',
           'orang_b:pegawai!tukar_shift_pegawai_b_fkey ( nama )',
-          'pencatat:pegawai!tukar_shift_dibuat_oleh_fkey ( nama )',
           'sa_lama:shift_master!tukar_shift_shift_a_lama_fkey ( nama_shift )',
           'sb_lama:shift_master!tukar_shift_shift_b_lama_fkey ( nama_shift )',
           'sa_baru:shift_master!tukar_shift_shift_a_baru_fkey ( nama_shift )',

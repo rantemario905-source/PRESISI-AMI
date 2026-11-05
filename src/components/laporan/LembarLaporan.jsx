@@ -21,6 +21,7 @@ export default function LembarLaporan({
   pegawai,
   presensi = [],
   alasanIzin = {},
+  alasanPengaduan = {},
   jadwal = {},
   tukar = [],
   periode,
@@ -29,8 +30,8 @@ export default function LembarLaporan({
   const ringkasan = ringkasKehadiran(presensi)
   const polaShift = pegawai.pola_kerja !== 'reguler'
   const tukarPegawai = ringkasTukar(tukar, pegawai.id)
-  const rekanTukar = new Map(tukarPegawai.map((t) => [t.tanggal, t.rekan]))
-  const keterangan = (baris) => keteranganPresensi(baris, { alasanIzin, rekanTukar })
+  const keterangan = (baris) =>
+    keteranganPresensi(baris, { alasanIzin, alasanPengaduan })
 
   return (
     <article className="lembar-laporan">
@@ -143,6 +144,14 @@ export default function LembarLaporan({
         <div className="blok-tukar">
           <p className="judul-tukar">Riwayat Tukar Shift Bulan Ini</p>
           <table className="tabel-tukar">
+            <colgroup>
+              <col style={{ width: '5%' }} />
+              <col style={{ width: '13%' }} />
+              <col style={{ width: '21%' }} />
+              <col style={{ width: '11%' }} />
+              <col style={{ width: '12%' }} />
+              <col style={{ width: '38%' }} />
+            </colgroup>
             <thead>
               <tr>
                 <th>No</th>
@@ -151,7 +160,6 @@ export default function LembarLaporan({
                 <th>Shift Asal</th>
                 <th>Shift Pengganti</th>
                 <th>Alasan</th>
-                <th>Dicatat Oleh</th>
               </tr>
             </thead>
             <tbody>
@@ -163,7 +171,6 @@ export default function LembarLaporan({
                   <td className="tengah">{t.asal}</td>
                   <td className="tengah">{t.baru}</td>
                   <td>{t.alasan || '—'}</td>
-                  <td>{t.pencatat}</td>
                 </tr>
               ))}
             </tbody>

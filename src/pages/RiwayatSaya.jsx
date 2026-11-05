@@ -17,6 +17,7 @@ import {
   periodeBulanIni,
 } from '../utils/format.js'
 import { varianStatusKehadiran } from '../utils/status.js'
+import { bersihkanAlasanKoreksi } from '../utils/laporan.js'
 import { Alert, Badge, Spinner, TombolMuatUlang } from '../components/ui/index.js'
 import BarAtas from '../components/BarAtas.jsx'
 
@@ -194,7 +195,8 @@ export default function RiwayatSaya() {
 
                     {baris.alasan_koreksi && (
                       <p className="mt-2 rounded-lg bg-amber-50 px-2.5 py-2 text-[11px] leading-relaxed text-amber-800">
-                        <span className="font-semibold">Koreksi:</span> {baris.alasan_koreksi}
+                        <span className="font-semibold">Koreksi:</span>{' '}
+                        {bersihkanAlasanKoreksi(baris.alasan_koreksi)}
                       </p>
                     )}
                   </article>
@@ -243,7 +245,7 @@ export default function RiwayatSaya() {
                           </Badge>
                         </td>
                         <td className="max-w-[220px] px-5 py-3 text-xs text-slate-500">
-                          {baris.alasan_koreksi || '—'}
+                          {bersihkanAlasanKoreksi(baris.alasan_koreksi) || '—'}
                         </td>
                       </tr>
                     ))}
