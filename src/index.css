@@ -359,10 +359,25 @@
 
 .tabel-tukar {
   width: 100%;
-  table-layout: fixed;
+  table-layout: auto;
   border-collapse: collapse;
   font-size: 8pt;
   line-height: 1.15;
+}
+
+.tabel-tukar .kolom-no {
+  width: 6%;
+}
+
+.tabel-tukar .kolom-tanggal,
+.tabel-tukar .kolom-rekan,
+.tabel-tukar .kolom-shift,
+.tabel-tukar .kolom-pengganti {
+  white-space: nowrap;
+}
+
+.tabel-tukar .kolom-alasan {
+  width: 18%;
 }
 
 .tabel-tukar th,

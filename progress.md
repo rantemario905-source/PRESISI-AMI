@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-05 15:09 WITA (kolom Dicatat Oleh di riwayat tukar dihapus) |
+| Terakhir diperbarui | 2026-11-05 16:18 WITA (verifikasi 36–37 dikonfirmasi; dokumen disinkronkan) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,7 +37,28 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-05 15:09):** **kolom "Dicatat Oleh" di Riwayat Tukar
+**Pekerjaan terbaru (2026-11-05 16:18):** **verifikasi 36–37 dikonfirmasi dan
+dokumen disinkronkan**. User menyatakan `verifikasi_36.sql` dan
+`verifikasi_37.sql` sudah dijalankan. `README.md` (pohon migrasi 01–37 +
+verifikasi 34–37 + `hapus_data_testing.sql`), `AGENTS.md` (fakta pengaduan
+multi-jenis, koreksi jam masuk, keterangan laporan), dan `progress.md` (status
+laporan & migrasi) diperbarui. Sisa parameter `rekanTukar`/`pencatat` yang tidak
+terpakai di `tests/laporan.test.js` dibersihkan. Verifikasi: `npm run lint`
+bersih, `npm test` **71/71**, `npm run build` lulus **16,32 dtk**.
+
+**Pekerjaan sebelumnya (2026-11-05 15:29):** **judul "Riwayat Tukar Shift Bulan Ini"
+disederhanakan menjadi "Riwayat Tukar Shift"** pada laporan bulanan. Verifikasi:
+`npm run lint` bersih, `npm test` **71/71**, `npm run build` lulus **7,88 dtk**.
+
+**Pekerjaan sebelumnya (2026-11-05 15:25):** **lebar kolom Riwayat Tukar Shift
+disesuaikan**. Akibat `table-layout: fixed` + kolom Alasan 38%, nama rekan tukar
+terpotong ke banyak baris. Tabel kembali ke `table-layout: auto`; kolom
+**Tanggal, Rekan Tukar, Shift Asal, Shift Pengganti** memakai `white-space: nowrap`
+sehingga nama tetap **satu baris** selebar namanya, dan **Alasan** dibatasi 18%
+agar tidak mendominasi. Verifikasi: `npm run lint` bersih, `npm test` **71/71**,
+`npm run build` lulus **11,64 dtk**.
+
+**Pekerjaan sebelumnya (2026-11-05 15:09):** **kolom "Dicatat Oleh" di Riwayat Tukar
 Shift dihapus** pada laporan bulanan; kolom **Alasan** dilebarkan (38%) dengan
 `table-layout: fixed` dan proporsi kolom tetap. Data `pencatat` juga tidak lagi
 di-query/diringkas. Verifikasi: `npm run lint` bersih, `npm test` **71/71**,
@@ -419,16 +440,16 @@ lanjutan 14,14 dtk).
 | Migrasi DB 33 | **Sudah dijalankan**; `verifikasi_33.sql` lulus (laporan user 2026-11-04) — tabel `pengaduan_presensi`, RPC pengaduan, dan RLS aktif | `supabase/migrations/33_pengaduan_presensi.sql`, `verifikasi_33.sql` |
 | Migrasi DB 34 | **Sudah dijalankan** (laporan user 2026-11-04) — Super Admin dapat menyetujui/menolak pengaduan; `verifikasi_34.sql` lulus (laporan user 2026-11-05) | `supabase/migrations/34_superadmin_putuskan_pengaduan.sql`, `verifikasi_34.sql` |
 | Migrasi DB 35 | **Sudah dijalankan** (laporan user 2026-11-05) — pengaduan absen masuk + pulang aktif | `supabase/migrations/35_pengaduan_masuk.sql`, `verifikasi_35.sql` |
-| Migrasi DB 36 | **Sudah dijalankan (inferred)** — baris "Koreksi jam masuk" tampil di UI Pengaduan, yang hanya mungkin bila fungsi migrasi 36 aktif | `supabase/migrations/36_koreksi_jam_masuk.sql`, `verifikasi_36.sql` |
-| Migrasi DB 37 | **Sudah dijalankan** (laporan user 2026-11-05) — kandidat pengaduan sebelum 1 November 2026 hilang; kandidat go-live tetap tampil | `supabase/migrations/37_batasi_pengaduan_sebelum_golive.sql`, `verifikasi_37.sql` |
+| Migrasi DB 36 | **Sudah dijalankan** — koreksi jam masuk aktif; `verifikasi_36.sql` lulus (laporan user 2026-11-05) | `supabase/migrations/36_koreksi_jam_masuk.sql`, `verifikasi_36.sql` |
+| Migrasi DB 37 | **Sudah dijalankan** — kandidat pengaduan sebelum 1 November 2026 hilang; `verifikasi_37.sql` lulus (laporan user 2026-11-05) | `supabase/migrations/37_batasi_pengaduan_sebelum_golive.sql`, `verifikasi_37.sql` |
 | Data uji | **Sudah dibersihkan ulang setelah uji** — transaksi dihapus, 92 pegawai/grup/master shift dipertahankan | `supabase/cleanup_data_uji.sql`, laporan user 2026-10-30 23:01 |
 | Data testing sebelum go-live | **Sudah dijalankan** (laporan user 2026-11-05) — transaksi sebelum 1 November 2026 terhapus; data go-live utuh | `supabase/hapus_data_testing.sql` |
 | Data operasional | **Lengkap** — jadwal dinas dan pemetaan pegawai sudah diisi | laporan user 2026-10-30 23:04 |
 | Go-live | **Sudah berjalan sejak Minggu, 1 November 2026** — pegawai absen masuk dan pulang; absen akhir pekan hanya untuk pegawai shift yang dijadwalkan | laporan user 2026-11-01 17:58 |
 | Koordinat RSUD AMI | **Ada di kode** — `-0.23805651650343132, 117.41442516465149` di klien dan schema | `src/config/constants.js`, `supabase/schema.sql`, migrasi 21 |
 | Radius absensi | **Aktif 50 meter** — klien (`MAX_RADIUS_METERS`) dan server (migrasi 24 sudah dijalankan) | `src/config/constants.js`, `supabase/migrations/24_radius_50_meter.sql` |
-| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 09–35 dijalankan user** (34–35 laporan 2026-11-05); `verifikasi_36.sql` dan `verifikasi_37.sql` belum dikonfirmasi | laporan user 2026-11-05; `supabase/verifikasi_37.sql` |
-| Build produksi | **Lulus** — base `/` **9,85 dtk** (kolom Dicatat Oleh dihapus); sebelumnya 9,99 dtk (keterangan laporan), 11,01 dtk (verifikasi ulang) | `npm run build` 2026-11-05 |
+| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 09–37 dijalankan user** (34–37 laporan 2026-11-05) | laporan user 2026-11-05 |
+| Build produksi | **Lulus** — base `/` **16,32 dtk** (sinkronisasi dokumen); sebelumnya 7,88 dtk (judul riwayat tukar), 11,64 dtk (lebar kolom) | `npm run build` 2026-11-05 |
 | Dependensi frontend | **Diperbarui & di-commit** — Vite 7.3.7, `@vitejs/plugin-react` 5.2.0, React Router 7.18.5; Node CI 22; lockfile sinkron; `npm audit` 0 kerentanan | `package.json`, `package-lock.json`, `.github/workflows/deploy.yml` |
 | Header keamanan (CSP) | **Ada di kode & di-commit** — CSP produksi via `<meta>`: `script-src 'self'`, `connect-src` self + `*.supabase.co`, `frame-src 'none'`, `form-action 'self'`, `object-src 'none'`, `base-uri 'self'`; meta referrer; hanya saat build. Uji headless: script inline diblokir, halaman render | `vite.config.js`, `index.html` |
 | Batas GitHub Pages | **Enforce HTTPS aktif & terverifikasi** (2026-10-30 10:06 WITA): HTTP apex dan `www` **301** ke HTTPS/apex. Namun HSTS, `X-Frame-Options`/`frame-ancestors`, `X-Content-Type-Options`, dan `Permissions-Policy` tetap belum aktif karena memerlukan header HTTP; Cloudflare/proxy opsional | `curl -I` HTTP/HTTPS apex & `www`, 2026-10-30 |
@@ -451,7 +472,7 @@ lanjutan 14,14 dtk).
 | Latar Dashboard | **Ada di kode** — gradasi biru muda transparan pada seluruh halaman portal Super Admin dan Kepala Ruangan | `PortalAdminLayout.jsx`, `PortalKepalaLayout.jsx` |
 | Aksi halaman | **Ada di kode** — tombol aksi kembali di kanan; aksi spesifik dipindah ke header kartu daftar, kartu Tambah Hari Libur (Tahun), baris tab Koreksi/Verifikasi, dan atas kotak filter Rekapitulasi | `KepalaHalaman.jsx`, `TabBar.jsx`, `DataPegawai.jsx`, `GrupShift.jsx`, `MasterShift.jsx`, `HariLibur.jsx`, `KoreksiPresensi.jsx`, `VerifikasiPerangkat.jsx`, `PengajuanIzin.jsx`, `Rekapitulasi.jsx` |
 | Subtitle topbar | **Ada di kode** — portal Super Admin tanpa subtitle; portal Kepala Ruangan hanya nama unit kerja | `PortalAdminLayout.jsx`, `PortalKepalaLayout.jsx` |
-| Laporan bulanan per pegawai | **Ada di kode** — Super Admin pilih unit, kepala unit memakai unit aktif (bisa berganti jika multi-unit); satu pegawai atau semua pegawai unit; kop dua logo satu baris (tinggi 20 mm), identitas grid 2x2 dengan nilai setelah titik dua, tabel harian, ringkasan tanpa `Izin`, Keterangan Sakit/Cuti/Dinas Luar/Alfa, penanda tangan tetap Kasubbag Tata Usaha (Suriami, SKM., M.Kes; NIP. 197312302007012011), footer bertanggal tanpa jam; cetak PDF A4 portrait | migrasi 19 & 22, `LaporanBulanan.jsx`, `reportService.js`, `utils/laporan.js`, `components/laporan/*`, `index.css` |
+| Laporan bulanan per pegawai | **Ada di kode** — Super Admin pilih unit, kepala unit memakai unit aktif (bisa berganti jika multi-unit); satu pegawai atau semua pegawai unit; kop dua logo satu baris (tinggi 20 mm), identitas grid 2x2 dengan nilai setelah titik dua, tabel harian, ringkasan tanpa `Izin`, Keterangan hanya Sakit/Cuti/Dinas Luar dan pengaduan disetujui, penanda tangan tetap Kasubbag Tata Usaha (Suriami, SKM., M.Kes; NIP. 197312302007012011), footer bertanggal tanpa jam; cetak PDF A4 portrait | migrasi 19 & 22, `LaporanBulanan.jsx`, `reportService.js`, `utils/laporan.js`, `components/laporan/*`, `index.css` |
 | Penanda tangan laporan | **Ada di kode** — Kasubbag Tata Usaha, Suriami, SKM., M.Kes, NIP. 197312302007012011 untuk semua pegawai | `src/config/constants.js`, `BlokTandaTangan.jsx` |
 | Menu kepala ASN | **Ada di kode** — “Kembali ke Absensi” (sidebar) dan tab Absensi (navigasi bawah HP) disembunyikan bila `sumber_akun = kepala_asn` | `PortalKepalaLayout.jsx`, `SidebarKepala.jsx` |
 | Dinas Luar lintas unit | **Ada di kode** — kepala unit dapat memilih pegawai lintas unit untuk Dinas Luar; Sakit/Cuti tetap per unit; pembuat grup membaca grup + dokumennya selama menjabat; akses dicabut otomatis saat jabatan berakhir; kepala ASN dapat mencatat (FK ke `auth.users`) | migrasi 23, `PengajuanIzin.jsx`, `leaveService.js`, `pegawaiService.js`, `verifikasi_23.sql` |
@@ -614,6 +635,45 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-05 16:18 WITA — Verifikasi 36–37 dikonfirmasi & dokumen disinkronkan
+
+- **Perubahan:** user mengonfirmasi `verifikasi_36.sql` dan `verifikasi_37.sql`
+  sudah dijalankan (semua pemeriksaan lulus). Dokumen audit disinkronkan:
+  `README.md` memuat pohon `migrations/ 01–37`, `verifikasi_34..37.sql`, dan
+  `hapus_data_testing.sql`; `AGENTS.md` memuat fakta pengaduan multi-jenis,
+  koreksi jam masuk, dan aturan Keterangan laporan; `progress.md` memperbarui
+  status laporan bulanan (Keterangan tanpa Alfa), migrasi 36/37, dan tabel
+  verifikasi. Fixtur `pencatat` yang tidak terpakai dihapus dari uji.
+- **File:** `README.md`, `AGENTS.md`, `progress.md`, `tests/laporan.test.js`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **71/71** lulus;
+  `npm run build` lulus **16,32 dtk**.
+- **Catatan/risiko:** tanpa perubahan kode aplikasi maupun DB.
+
+### 2026-11-05 15:29 WITA — Judul riwayat tukar disederhanakan
+
+- **Perubahan:** judul blok **"Riwayat Tukar Shift Bulan Ini"** pada laporan
+  bulanan disederhanakan menjadi **"Riwayat Tukar Shift"**.
+- **File:** `src/components/laporan/LembarLaporan.jsx`, `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **71/71** lulus;
+  `npm run build` lulus **7,88 dtk**.
+- **Catatan/risiko:** hanya teks; tidak ada perubahan DB/logika.
+
+### 2026-11-05 15:25 WITA — Lebar kolom Riwayat Tukar Shift disesuaikan
+
+- **Perubahan:** memperbaiki tampilan blok **Riwayat Tukar Shift** pada laporan
+  bulanan. Setelah kolom "Dicatat Oleh" dihapus, `table-layout: fixed` + kolom
+  Alasan 38% membuat nama rekan tukar terpotong menjadi banyak baris. Tabel
+  dikembalikan ke `table-layout: auto`; kolom **Tanggal**, **Rekan Tukar**,
+  **Shift Asal**, dan **Shift Pengganti** memakai `white-space: nowrap` sehingga
+  nama tampil satu baris selebar namanya, sedangkan **Alasan** dibatasi 18%
+  agar tidak terlalu lebar.
+- **File:** `src/components/laporan/LembarLaporan.jsx`, `src/index.css`,
+  `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **71/71** lulus;
+  `npm run build` lulus **11,64 dtk**.
+- **Catatan/risiko:** tanpa perubahan DB. Nama yang sangat panjang bisa membuat
+  tabel melebar; teks alasan panjang akan membungkus di kolomnya.
 
 ### 2026-11-05 15:09 WITA — Kolom "Dicatat Oleh" di riwayat tukar dihapus
 

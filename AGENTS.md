@@ -271,6 +271,9 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-129 | 2026-11-05 14:29 | "commit dan push" | Memverifikasi ulang `npm run lint` (bersih), `npm test` **70/70**, `npm run build` (lulus **11,01 dtk**); memastikan staged diff tanpa rahasia; commit `c14ea34` (pengaduan absen masuk/pulang, koreksi jam masuk, batas pengaduan sejak go-live, skrip hapus data testing, alasan koreksi laporan, perapian UI; migrasi 35–37 + verifikasi 35–37) lalu push ke `origin/main` (`5672fa0..c14ea34`) | selesai | 2026-11-05 14:29 — Commit & push pengaduan masuk/pulang + koreksi jam masuk |
 | I-130 | 2026-11-05 14:59 | "pada pengaduan, tidak perlu mencantumkan pengaduan disetujui oleh, cukup isi keterangannya saja" + "dan tambahan apakah bisa ketengan itu hanya tampil untuk dinas luar, cuti, sakit, dan pengaduan , pada koreksi presensi yang dilakukan super admin tidak perlu ditampilkan keteranagnnya karena statusnya masih terhitung hadir..." + "kerjakan pastikan tidak ada bug dan eror pada sistem" | Kolom **Keterangan** laporan bulanan kini hanya memuat alasan **Sakit/Cuti/Dinas Luar** (dari `izin_cuti`) dan **pengaduan disetujui** (dari `pengaduan_presensi.alasan`), tanpa awalan "disetujui oleh …". Koreksi manual Super Admin, label Alfa, dan tukar shift tidak lagi tampil di Keterangan. Tambah `bersihkanAlasanKoreksi()` dan pakai di Riwayat Saya & Koreksi Presensi (alasan manual tetap tampil, awalan/catatan dibersihkan). Lint bersih, `npm test` **71/71**, build lulus **9,99 dtk** | selesai (kode); belum di-commit | 2026-11-05 14:59 — Keterangan laporan hanya izin & pengaduan |
 | I-131 | 2026-11-05 15:09 | "riwayat tukar shift dicatat oleh kolomnya dihilangkan saja, jadi kolom alasan jadi lebih lebar" + "kerjakan sekarang" | Menghapus kolom **Dicatat Oleh** pada blok Riwayat Tukar Shift laporan bulanan dan melebarkan kolom **Alasan** (38%) dengan `table-layout: fixed` + `<colgroup>`; data `pencatat` tidak lagi di-query/diringkas. Lint bersih, `npm test` **71/71**, build lulus **9,85 dtk** | selesai (kode); belum di-commit | 2026-11-05 15:09 — Kolom Dicatat Oleh dihapus |
+| I-132 | 2026-11-05 15:25 | "kenapa jadi seperti ini, pastikan nama rekan tukar menjadi 1 baris saja, kolom alasan terlalu besar, jadi kolom nama itu menyesuaikan panjang dari nama setiap pegawai" | Mengembalikan `.tabel-tukar` ke `table-layout: auto`; kolom Tanggal/Rekan Tukar/Shift Asal/Shift Pengganti `white-space: nowrap` agar nama **satu baris**, kolom **Alasan** dibatasi 18%. Lint bersih, `npm test` **71/71**, build lulus **11,64 dtk** | selesai (kode); belum di-commit | 2026-11-05 15:25 — Lebar kolom riwayat tukar |
+| I-133 | 2026-11-05 15:29 | "Riwayat Tukar Shift Bulan Ini ganti menjadi riwayat tukar shift" | Mengganti judul blok laporan bulanan dari "Riwayat Tukar Shift Bulan Ini" menjadi **"Riwayat Tukar Shift"**. Lint bersih, `npm test` **71/71**, build lulus **7,88 dtk** | selesai (kode); belum di-commit | 2026-11-05 15:29 — Judul riwayat tukar disederhanakan |
+| I-134 | 2026-11-05 16:18 | "lanjutkan keputusan question di atas sesuai kesepakatan kita" (rapikan dokumen + commit & push; `verifikasi_36.sql` dan `verifikasi_37.sql` sudah dijalankan) | Menyinkronkan `README.md` (pohon migrasi 01–37, verifikasi 34–37, `hapus_data_testing.sql`), `AGENTS.md` (fakta pengaduan multi-jenis/koreksi jam masuk/keterangan laporan), dan `progress.md` (status laporan, migrasi 36–37, verifikasi). Membersihkan fixtur uji yang tidak terpakai. Lint bersih, `npm test` **71/71**, build lulus **16,32 dtk** | selesai (dokumen & uji); siap commit & push | 2026-11-05 16:18 — Sinkronisasi dokumen & konfirmasi verifikasi 36–37 |
 
 ---
 
@@ -493,8 +496,28 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   `npm run build` lulus 7,47 dtk. **Migrasi 33 dan `verifikasi_33.sql` sudah
   dijalankan dan diuji** (laporan user 2026-11-04 17:35), dan **migrasi 34 sudah
   dijalankan** (laporan user 2026-11-04) sehingga Super Admin dapat memutuskan
-  pengaduan; `verifikasi_34.sql` belum dikonfirmasi. Pada laporan yang sama
-  user juga mengonfirmasi **B-35** (uji komponen UI baru) dan **B-26** (Alfa
-  otomatis pertama) sudah berjalan.
+  pengaduan; `verifikasi_34.sql` lulus (laporan user 2026-11-05). Pada laporan
+  yang sama user juga mengonfirmasi **B-35** (uji komponen UI baru) dan **B-26**
+  (Alfa otomatis pertama) sudah berjalan. *(Diperluas menjadi absen masuk +
+  pulang dan koreksi jam masuk lewat migrasi 35–37; lihat butir berikutnya.)*
+- **Pengaduan multi-jenis & koreksi jam masuk (2026-11-05):** pengaduan mencakup
+  **absen masuk** dan **absen pulang** dalam satu alur (migrasi **35**), dapat
+  **mengoreksi jam masuk** yang sudah tercatat hanya ke jam lebih awal dengan
+  jendela 60 menit sebelum jam masuk (migrasi **36**), dan dibatasi sejak
+  **1 November 2026** agar tanggal lama tanpa baris presensi tidak muncul lagi
+  (migrasi **37**). `kandidat_pengaduan_presensi()` menghasilkan daftar kandidat;
+  persetujuan absen masuk mengisi/membuat `jam_masuk`, menghitung
+  `menit_terlambat`, dan menandai `Hadir` (koreksi jam → `Koreksi`). Foto bukti
+  wajib, maks. 7 hari, tidak boleh memutuskan pengaduan sendiri. Kode klien:
+  `Pengaduan.jsx`, `FormPengaduan.jsx`, `DaftarPengaduan.jsx`,
+  `ModalPutusanPengaduan.jsx`, `pengaduanService.js`. Migrasi 35–37 dan
+  `verifikasi_33..37.sql` **sudah dijalankan** (laporan user 2026-11-05).
+- **Keterangan laporan bulanan (2026-11-05):** kolom **Keterangan** hanya memuat
+  alasan **Sakit/Cuti/Dinas Luar** (dari `izin_cuti`) dan **pengaduan disetujui**
+  (dari `pengaduan_presensi.alasan`), tanpa awalan "disetujui oleh …". Koreksi
+  manual Super Admin, label Alfa, dan tukar shift tidak ditampilkan. Riwayat
+  tukar shift punya blok sendiri tanpa kolom "Dicatat Oleh". Helper:
+  `keteranganPresensi()` dan `bersihkanAlasanKoreksi()` di
+  `src/utils/laporan.js`.
 - Timezone aplikasi: `Asia/Makassar` (WITA, UTC+8).
 - `dist/` dan `.env` sudah diabaikan Git.

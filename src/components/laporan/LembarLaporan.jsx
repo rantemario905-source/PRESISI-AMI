@@ -142,35 +142,27 @@ export default function LembarLaporan({
 
       {tukarPegawai.length > 0 && (
         <div className="blok-tukar">
-          <p className="judul-tukar">Riwayat Tukar Shift Bulan Ini</p>
+          <p className="judul-tukar">Riwayat Tukar Shift</p>
           <table className="tabel-tukar">
-            <colgroup>
-              <col style={{ width: '5%' }} />
-              <col style={{ width: '13%' }} />
-              <col style={{ width: '21%' }} />
-              <col style={{ width: '11%' }} />
-              <col style={{ width: '12%' }} />
-              <col style={{ width: '38%' }} />
-            </colgroup>
             <thead>
               <tr>
-                <th>No</th>
-                <th>Tanggal</th>
-                <th>Rekan Tukar</th>
-                <th>Shift Asal</th>
-                <th>Shift Pengganti</th>
-                <th>Alasan</th>
+                <th className="kolom-no">No</th>
+                <th className="kolom-tanggal">Tanggal</th>
+                <th className="kolom-rekan">Rekan Tukar</th>
+                <th className="kolom-shift">Shift Asal</th>
+                <th className="kolom-pengganti">Shift Pengganti</th>
+                <th className="kolom-alasan">Alasan</th>
               </tr>
             </thead>
             <tbody>
               {tukarPegawai.map((t, indeks) => (
                 <tr key={t.id}>
                   <td className="tengah">{indeks + 1}</td>
-                  <td>{formatTanggalHari(t.tanggal)}</td>
-                  <td>{t.rekan}</td>
+                  <td className="kolom-tanggal">{formatTanggalHari(t.tanggal)}</td>
+                  <td className="kolom-rekan">{t.rekan}</td>
                   <td className="tengah">{t.asal}</td>
                   <td className="tengah">{t.baru}</td>
-                  <td>{t.alasan || '—'}</td>
+                  <td className="kolom-alasan">{t.alasan || '—'}</td>
                 </tr>
               ))}
             </tbody>

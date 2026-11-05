@@ -27,7 +27,6 @@ test('ringkasTukar membaca sudut pandang pegawai', () => {
       alasan: 'keluarga',
       orang_a: { nama: 'Andi' },
       orang_b: { nama: 'Budi' },
-      pencatat: { nama: 'Kepala' },
       sa_lama: { nama_shift: 'Pagi' },
       sb_lama: { nama_shift: 'Malam' },
       sa_baru: { nama_shift: 'Malam' },

@@ -279,7 +279,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 ├── index.html
 ├── supabase/
 │   ├── schema.sql              # Skema DB + RLS + RPC (instalasi sekali jalan)
-│   ├── migrations/             # 01–27, dijalankan bertahap
+│   ├── migrations/             # 01–37, dijalankan bertahap
 │   ├── verifikasi_09.sql       # Pemeriksaan fitur Dinas & Sakit / Cuti
 │   ├── verifikasi_10.sql       # Pemeriksaan RPC perubahan role (opsional)
 │   ├── verifikasi_11.sql       # Pemeriksaan pengaturan kepala ruangan
@@ -304,7 +304,12 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 │   ├── verifikasi_30.sql       # Pemeriksaan hitung ulang menit terlambat
 │   ├── verifikasi_31.sql       # Pemeriksaan persetujuan otomatis Super Admin
 │   ├── verifikasi_32.sql       # Pemeriksaan tukar shift teraudit
-│   ├── verifikasi_33.sql       # Pemeriksaan pengaduan absen pulang
+│   ├── verifikasi_33.sql       # Pemeriksaan pengaduan presensi
+│   ├── verifikasi_34.sql       # Pemeriksaan Super Admin memutuskan pengaduan
+│   ├── verifikasi_35.sql       # Pemeriksaan pengaduan absen masuk + pulang
+│   ├── verifikasi_36.sql       # Pemeriksaan koreksi jam masuk
+│   ├── verifikasi_37.sql       # Pemeriksaan batas pengaduan sejak go-live
+│   ├── hapus_data_testing.sql  # Hapus transaksi sebelum 1 November 2026
 │   └── jadwal_alfa.sql         # Opsional: jadwal pg_cron untuk Alfa
 ├── scripts/
 │   ├── impor-akun.mjs          # Impor akun massal via Supabase Admin API
