@@ -45,6 +45,10 @@ begin
   get diagnostics v_hapus = row_count;
   raise notice 'koreksi_presensi dihapus: %', v_hapus;
 
+  delete from public.pengaduan_presensi;
+  get diagnostics v_hapus = row_count;
+  raise notice 'pengaduan_presensi dihapus: %', v_hapus;
+
   delete from public.presensi;
   get diagnostics v_hapus = row_count;
   raise notice 'presensi dihapus: %', v_hapus;
@@ -96,6 +100,8 @@ commit;
 select 'presensi'          as tabel, count(*) as jumlah from public.presensi
 union all
 select 'koreksi_presensi', count(*) from public.koreksi_presensi
+union all
+select 'pengaduan_presensi', count(*) from public.pengaduan_presensi
 union all
 select 'izin_cuti',        count(*) from public.izin_cuti
 union all

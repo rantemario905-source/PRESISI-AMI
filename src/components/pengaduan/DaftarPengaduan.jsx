@@ -48,27 +48,63 @@ export default function DaftarPengaduan({
             </div>
 
             <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-slate-600 sm:max-w-md">
-              <p>
-                Masuk:{' '}
-                <b className="font-semibold">
-                  {baris.jam_masuk ? formatJam(baris.jam_masuk) : '—'}
-                </b>
+              <p className="col-span-2 font-semibold text-slate-700">
+                {baris.jenis === 'masuk'
+                  ? 'Pengaduan absen masuk'
+                  : 'Pengaduan absen pulang'}
               </p>
-              <p>
-                Diajukan:{' '}
-                <b className="font-semibold">
-                  {baris.jam_pulang_diajukan
-                    ? formatJam(baris.jam_pulang_diajukan)
-                    : '—'}
-                </b>
-              </p>
-              {baris.jam_pulang_disetujui && (
-                <p className="col-span-2">
-                  Disetujui:{' '}
-                  <b className="font-semibold">
-                    {formatJam(baris.jam_pulang_disetujui)}
-                  </b>
-                </p>
+              {baris.jenis === 'masuk' ? (
+                <>
+                  <p>
+                    Diajukan:{' '}
+                    <b className="font-semibold">
+                      {baris.jam_masuk_diajukan
+                        ? formatJam(baris.jam_masuk_diajukan)
+                        : '—'}
+                    </b>
+                  </p>
+                  {baris.jam_masuk && (
+                    <p className="col-span-2">
+                      Tercatat:{' '}
+                      <b className="font-semibold">
+                        {formatJam(baris.jam_masuk)}
+                      </b>
+                    </p>
+                  )}
+                  {baris.jam_masuk_disetujui && (
+                    <p className="col-span-2">
+                      Disetujui:{' '}
+                      <b className="font-semibold">
+                        {formatJam(baris.jam_masuk_disetujui)}
+                      </b>
+                    </p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p>
+                    Masuk:{' '}
+                    <b className="font-semibold">
+                      {baris.jam_masuk ? formatJam(baris.jam_masuk) : '—'}
+                    </b>
+                  </p>
+                  <p>
+                    Diajukan:{' '}
+                    <b className="font-semibold">
+                      {baris.jam_pulang_diajukan
+                        ? formatJam(baris.jam_pulang_diajukan)
+                        : '—'}
+                    </b>
+                  </p>
+                  {baris.jam_pulang_disetujui && (
+                    <p className="col-span-2">
+                      Disetujui:{' '}
+                      <b className="font-semibold">
+                        {formatJam(baris.jam_pulang_disetujui)}
+                      </b>
+                    </p>
+                  )}
+                </>
               )}
             </div>
 

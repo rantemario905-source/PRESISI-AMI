@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {
+  keteranganPresensi,
   ringkasKehadiran,
   labelShift,
   ringkasTukar,
@@ -45,6 +46,46 @@ test('ringkasTukar membaca sudut pandang pegawai', () => {
   assert.equal(sudutB[0].baru, 'Pagi')
 
   assert.deepEqual(ringkasTukar(tukar, 'c'), [])
+})
+
+test('keteranganPresensi memprioritaskan alasan koreksi', () => {
+  assert.equal(
+    keteranganPresensi({
+      status_kehadiran: 'Koreksi',
+      alasan_koreksi: 'Lupa absen pulang karena pergantian shift.',
+    }),
+    'Lupa absen pulang karena pergantian shift.',
+  )
+  assert.equal(
+    keteranganPresensi({
+      status_kehadiran: 'Hadir',
+      alasan_koreksi: 'Pengaduan disetujui oleh Kepala Unit: lupa absen masuk.',
+    }),
+    'Pengaduan disetujui oleh Kepala Unit: lupa absen masuk.',
+  )
+})
+
+test('keteranganPresensi memakai alasan izin, Alfa, tukar, dan fallback', () => {
+  assert.equal(
+    keteranganPresensi(
+      { user_id: 'u1', tanggal: '2026-11-04', status_kehadiran: 'Sakit' },
+      { alasanIzin: { 'u1|2026-11-04': 'Demam' } },
+    ),
+    'Demam',
+  )
+  assert.equal(keteranganPresensi({ status_kehadiran: 'Alfa' }), 'Alfa')
+  assert.equal(
+    keteranganPresensi(
+      { tanggal: '2026-11-05', status_kehadiran: 'Hadir' },
+      { rekanTukar: new Map([['2026-11-05', 'Budi']]) },
+    ),
+    'Tukar dengan Budi',
+  )
+  assert.equal(keteranganPresensi({ status_kehadiran: 'Hadir' }), '—')
+  assert.equal(
+    keteranganPresensi({ status_kehadiran: 'Koreksi', alasan_koreksi: '   ' }),
+    '—',
+  )
 })
 
 test('ringkasKehadiran menghitung status dan keterlambatan', () => {

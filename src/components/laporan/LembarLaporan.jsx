@@ -7,8 +7,8 @@ import {
   namaBulan,
 } from '../../utils/format.js'
 import {
-  STATUS_BERALASAN,
   STATUS_KEHADIRAN,
+  keteranganPresensi,
   labelPolaKerja,
   labelShift,
   ringkasKehadiran,
@@ -30,16 +30,7 @@ export default function LembarLaporan({
   const polaShift = pegawai.pola_kerja !== 'reguler'
   const tukarPegawai = ringkasTukar(tukar, pegawai.id)
   const rekanTukar = new Map(tukarPegawai.map((t) => [t.tanggal, t.rekan]))
-  const keterangan = (baris) => {
-    if (baris.status_kehadiran === 'Alfa') return 'Alfa'
-    if (STATUS_BERALASAN.includes(baris.status_kehadiran)) {
-      return alasanIzin[`${baris.user_id}|${baris.tanggal}`] || '—'
-    }
-    if (rekanTukar.has(baris.tanggal)) {
-      return `Tukar dengan ${rekanTukar.get(baris.tanggal)}`
-    }
-    return '—'
-  }
+  const keterangan = (baris) => keteranganPresensi(baris, { alasanIzin, rekanTukar })
 
   return (
     <article className="lembar-laporan">

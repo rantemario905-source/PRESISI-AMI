@@ -12,42 +12,13 @@ import {
   buatIdGrup,
   siapkanDokumenIzin,
 } from '../utils/dokumenIzin.js'
-import { hariIni } from '../utils/format.js'
-import { batasAwalPengaduan } from '../utils/pengaduan.js'
-
 const BUCKET = 'dokumen-izin'
 
-/** Presensi milik pegawai yang masih bisa diadukan. */
-export async function ambilPresensiBisaDiadukan(userId) {
-  const batas = batasAwalPengaduan(hariIni())
-  if (!userId || !batas) return []
-
-  const { data, error } = await supabase
-    .from('presensi')
-    .select('id, user_id, tanggal, jam_masuk, jam_pulang, status_kehadiran')
-    .eq('user_id', userId)
-    .is('jam_pulang', null)
-    .not('jam_masuk', 'is', null)
-    .in('status_kehadiran', ['Hadir', 'Koreksi'])
-    .gte('tanggal', batas)
-    .lte('tanggal', hariIni())
-    .order('tanggal', { ascending: false })
-
+/** Tanggal/presensi yang masih bisa diadukan (absen masuk & pulang). */
+export async function ambilKandidatPengaduan() {
+  const { data, error } = await supabase.rpc('kandidat_pengaduan_presensi')
   if (error) throw error
-
-  const { data: menunggu, error: galatMenunggu } = await supabase
-    .from('pengaduan_presensi')
-    .select('presensi_id')
-    .eq('user_id', userId)
-    .eq('status', 'menunggu')
-
-  if (galatMenunggu) throw galatMenunggu
-
-  const setMenunggu = new Set((menunggu ?? []).map((baris) => baris.presensi_id))
-  return (data ?? []).map((baris) => ({
-    ...baris,
-    pengaduanMenunggu: setMenunggu.has(baris.id),
-  }))
+  return Array.isArray(data) ? data : []
 }
 
 /** Riwayat pengaduan milik pegawai yang sedang login. */
@@ -71,14 +42,16 @@ export async function ambilDaftarPengaduan({ unit = 'semua', status = 'semua' } 
 
 /** Kirim pengaduan (foto wajib sudah diunggah lebih dulu). */
 export async function ajukanPengaduan({
-  presensiId,
-  jamPulang,
+  jenis,
+  tanggal,
+  jam,
   alasan,
   dokumenPath,
 }) {
   const { data, error } = await supabase.rpc('ajukan_pengaduan_presensi', {
-    p_presensi_id: presensiId,
-    p_jam_pulang: jamPulang,
+    p_jenis: jenis,
+    p_tanggal: tanggal,
+    p_jam: jam,
     p_alasan: alasan,
     p_dokumen_path: dokumenPath,
   })
@@ -90,12 +63,14 @@ export async function ajukanPengaduan({
 export async function putuskanPengaduan({
   id,
   setuju,
+  jamMasuk = null,
   jamPulang = null,
   catatan = null,
 }) {
   const { data, error } = await supabase.rpc('putuskan_pengaduan_presensi', {
     p_id: id,
     p_setuju: setuju,
+    p_jam_masuk: jamMasuk,
     p_jam_pulang: jamPulang,
     p_catatan: catatan,
   })

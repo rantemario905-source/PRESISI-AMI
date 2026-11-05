@@ -1,11 +1,13 @@
 /**
- * Form pengaduan absen pulang. Foto bukti wajib dan dikompres sebelum unggah.
+ * Form pengaduan absen masuk / pulang. Foto bukti wajib dan dikompres
+ * sebelum unggah.
  */
 import { useEffect, useState } from 'react'
 import {
   formatJam,
   formatJamInput,
   formatTanggalRingkas,
+  gabungTanggalJam,
 } from '../../utils/format.js'
 import { susunWaktuPengaduan } from '../../utils/pengaduan.js'
 import {
@@ -15,8 +17,14 @@ import {
 } from '../../services/pengaduanService.js'
 import { Alert, Button } from '../ui/index.js'
 
+const jamPendek = (nilai) => (nilai ? String(nilai).slice(0, 5) : '—')
+
 export default function FormPengaduan({ presensi, userId, onBatal, onSelesai }) {
-  const [jamPulang, setJamPulang] = useState('')
+  const jenisMasuk = presensi.jenis === 'masuk'
+  const koreksiMasuk = jenisMasuk && Boolean(presensi.jam_masuk)
+  const labelJam = jenisMasuk ? 'Jam masuk' : 'Jam pulang'
+  const jamTercatat = koreksiMasuk ? formatJamInput(presensi.jam_masuk) : ''
+  const [jam, setJam] = useState('')
   const [alasan, setAlasan] = useState('')
   const [berkas, setBerkas] = useState(null)
   const [pratinjau, setPratinjau] = useState('')
@@ -37,8 +45,16 @@ export default function FormPengaduan({ presensi, userId, onBatal, onSelesai }) 
     event.preventDefault()
     setGalat(null)
 
-    if (!jamPulang) {
-      setGalat('Jam pulang wajib diisi.')
+    if (!jam) {
+      setGalat(`${labelJam} wajib diisi.`)
+      return
+    }
+    if (koreksiMasuk && jam >= jamTercatat) {
+      setGalat(
+        `Jam masuk harus lebih awal dari jam tercatat (${formatJam(
+          presensi.jam_masuk,
+        )}).`,
+      )
       return
     }
     if (alasan.trim().length < 10) {
@@ -50,18 +66,20 @@ export default function FormPengaduan({ presensi, userId, onBatal, onSelesai }) 
       return
     }
 
-    const { jamPulangIso } = susunWaktuPengaduan({
-      tanggal: presensi.tanggal,
-      jamMasuk: formatJamInput(presensi.jam_masuk),
-      jamPulang,
-    })
+    const jamIso = jenisMasuk
+      ? gabungTanggalJam(presensi.tanggal, jam)
+      : susunWaktuPengaduan({
+          tanggal: presensi.tanggal,
+          jamMasuk: formatJamInput(presensi.jam_masuk),
+          jamPulang: jam,
+        }).jamPulangIso
 
-    if (!jamPulangIso) {
-      setGalat('Jam pulang tidak valid.')
+    if (!jamIso) {
+      setGalat(`${labelJam} tidak valid.`)
       return
     }
-    if (new Date(jamPulangIso).getTime() > Date.now()) {
-      setGalat('Jam pulang tidak boleh melewati waktu sekarang.')
+    if (new Date(jamIso).getTime() > Date.now()) {
+      setGalat(`${labelJam} tidak boleh melewati waktu sekarang.`)
       return
     }
 
@@ -71,12 +89,19 @@ export default function FormPengaduan({ presensi, userId, onBatal, onSelesai }) 
       const unggah = await unggahDokumenPengaduan({ userId, file: berkas })
       path = unggah.path
       await ajukanPengaduan({
-        presensiId: presensi.id,
-        jamPulang: jamPulangIso,
+        jenis: presensi.jenis,
+        tanggal: presensi.tanggal,
+        jam: jamIso,
         alasan: alasan.trim(),
         dokumenPath: path,
       })
-      onSelesai?.('Pengaduan terkirim dan menunggu persetujuan Kepala Unit.')
+      onSelesai?.(
+        jenisMasuk
+          ? koreksiMasuk
+            ? 'Pengaduan koreksi jam masuk terkirim dan menunggu persetujuan Kepala Unit.'
+            : 'Pengaduan absen masuk terkirim dan menunggu persetujuan Kepala Unit.'
+          : 'Pengaduan absen pulang terkirim dan menunggu persetujuan Kepala Unit.',
+      )
     } catch (err) {
       if (path) await hapusDokumenPengaduan(path)
       setGalat(err.message || 'Gagal mengirim pengaduan.')
@@ -97,25 +122,38 @@ export default function FormPengaduan({ presensi, userId, onBatal, onSelesai }) 
           {formatTanggalRingkas(presensi.tanggal)}
         </p>
         <p className="mt-0.5 text-xs text-slate-500">
-          Jam masuk {formatJam(presensi.jam_masuk)}
-          {presensi.status_kehadiran ? ` · ${presensi.status_kehadiran}` : ''}
+          {jenisMasuk
+            ? koreksiMasuk
+              ? `Koreksi jam masuk · tercatat ${formatJam(presensi.jam_masuk)}`
+              : `Absen masuk · ${presensi.nama_shift ?? 'Reguler'} ${jamPendek(
+                  presensi.jam_mulai,
+                )}–${jamPendek(presensi.jam_selesai)}`
+            : `Absen pulang · masuk ${formatJam(presensi.jam_masuk)}${
+                presensi.status_kehadiran ? ` · ${presensi.status_kehadiran}` : ''
+              }`}
         </p>
       </div>
 
       <div>
-        <label className="label-input" htmlFor="pengaduan-jam-pulang">
-          Jam Pulang Seharusnya
+        <label className="label-input" htmlFor="pengaduan-jam">
+          {jenisMasuk ? 'Jam Masuk Sebenarnya' : 'Jam Pulang Seharusnya'}
         </label>
         <input
-          id="pengaduan-jam-pulang"
+          id="pengaduan-jam"
           type="time"
           className="input-dasar"
-          value={jamPulang}
-          onChange={(event) => setJamPulang(event.target.value)}
+          value={jam}
+          onChange={(event) => setJam(event.target.value)}
           required
         />
-        <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
-          Jam saat Anda selesai bertugas. Shift malam otomatis dihitung H+1.
+        <p className="mt-1 text-[11px] text-slate-500">
+          {jenisMasuk
+            ? koreksiMasuk
+              ? `Harus lebih awal dari jam tercatat (${formatJam(
+                  presensi.jam_masuk,
+                )}).`
+              : 'Isi jam saat Anda benar-benar masuk.'
+            : 'Waktu Anda selesai bertugas. Shift malam dihitung H+1.'}
         </p>
       </div>
 
@@ -138,30 +176,53 @@ export default function FormPengaduan({ presensi, userId, onBatal, onSelesai }) 
       </div>
 
       <div>
-        <label className="label-input" htmlFor="pengaduan-foto">
-          Foto Bukti (wajib)
+        <span className="label-input">Foto Bukti (wajib)</span>
+        <label
+          htmlFor="pengaduan-foto"
+          className="flex min-h-[44px] cursor-pointer items-center justify-between gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-600 transition-colors hover:border-sky-400 hover:bg-sky-50"
+        >
+          <span className="flex min-w-0 items-center gap-2">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-5 w-5 shrink-0 text-slate-400"
+              aria-hidden="true"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="9" cy="9" r="2" />
+              <path d="M21 15l-5-5L5 21" />
+            </svg>
+            <span className="truncate">{berkas ? berkas.name : 'Pilih foto'}</span>
+          </span>
+          <span className="shrink-0 text-xs font-semibold text-sky-700">
+            {berkas ? 'Ganti' : 'Pilih'}
+          </span>
         </label>
         <input
           id="pengaduan-foto"
           type="file"
           accept="image/jpeg,image/png"
-          className="input-dasar"
+          className="sr-only"
           onChange={(event) => setBerkas(event.target.files?.[0] ?? null)}
           required
         />
-        <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
-          JPG/PNG, otomatis dikompres hingga maksimal 1 MB.
+        <p className="mt-1 text-[11px] text-slate-500">
+          JPG/PNG, otomatis dikompres hingga maks. 1 MB.
         </p>
         {pratinjau && (
           <img
             src={pratinjau}
             alt="Pratinjau foto bukti"
-            className="mt-2 max-h-44 rounded-xl border border-slate-200 object-contain"
+            className="mt-2 max-h-44 w-full rounded-xl border border-slate-200 object-contain"
           />
         )}
       </div>
 
-      <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:justify-end">
+      <div className="aksi-modal">
         <Button
           type="button"
           variant="sekunder"
@@ -171,7 +232,7 @@ export default function FormPengaduan({ presensi, userId, onBatal, onSelesai }) 
           Batal
         </Button>
         <Button type="submit" disabled={menyimpan}>
-          {menyimpan ? 'Mengirim…' : 'Kirim Pengaduan'}
+          {menyimpan ? 'Mengirim...' : 'Kirim Pengaduan'}
         </Button>
       </div>
     </form>

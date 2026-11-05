@@ -11,8 +11,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
 import {
   ambilDokumenPengaduanUrl,
+  ambilKandidatPengaduan,
   ambilPengaduanSaya,
-  ambilPresensiBisaDiadukan,
 } from '../services/pengaduanService.js'
 import {
   formatJam,
@@ -21,7 +21,6 @@ import {
 import { BATAS_HARI_PENGADUAN } from '../utils/pengaduan.js'
 import {
   Alert,
-  Badge,
   Button,
   Modal,
   Spinner,
@@ -31,9 +30,11 @@ import BarAtas from '../components/BarAtas.jsx'
 import FormPengaduan from '../components/pengaduan/FormPengaduan.jsx'
 import DaftarPengaduan from '../components/pengaduan/DaftarPengaduan.jsx'
 
+const jamPendek = (nilai) => (nilai ? String(nilai).slice(0, 5) : '—')
+
 export default function Pengaduan() {
   const { profil, keluar } = useAuth()
-  const [presensi, setPresensi] = useState([])
+  const [kandidat, setKandidat] = useState([])
   const [riwayat, setRiwayat] = useState([])
   const [memuat, setMemuat] = useState(true)
   const [galat, setGalat] = useState(null)
@@ -45,10 +46,10 @@ export default function Pengaduan() {
     setMemuat(true)
     try {
       const [bisa, aduan] = await Promise.all([
-        ambilPresensiBisaDiadukan(profil.id),
+        ambilKandidatPengaduan(),
         ambilPengaduanSaya(),
       ])
-      setPresensi(bisa)
+      setKandidat(bisa)
       setRiwayat(aduan)
       setGalat(null)
     } catch (err) {
@@ -98,8 +99,8 @@ export default function Pengaduan() {
               Pengaduan Presensi
             </h1>
             <p className="mt-0.5 text-[13px] leading-relaxed text-slate-500 sm:text-sm">
-              Laporkan absen pulang yang terlewat, maksimal {BATAS_HARI_PENGADUAN}{' '}
-              hari setelah tanggal presensi.
+              Laporkan absen yang terlewat atau jam masuk yang perlu dikoreksi
+              (maks. {BATAS_HARI_PENGADUAN} hari).
             </p>
           </div>
           <TombolMuatUlang onClick={muat} memuat={memuat} />
@@ -128,37 +129,46 @@ export default function Pengaduan() {
                   Presensi Bisa Diadukan
                 </h2>
                 <p className="text-[11px] text-slate-500 sm:text-xs">
-                  Belum ada jam pulang.
+                  Absen yang belum tercatat atau perlu dikoreksi.
                 </p>
               </div>
 
-              {presensi.length === 0 ? (
+              {kandidat.length === 0 ? (
                 <div className="px-4 py-10 text-center text-sm text-slate-500">
                   Tidak ada presensi yang perlu diadukan saat ini.
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100">
-                  {presensi.map((baris) => (
+                  {kandidat.map((baris) => (
                     <div
-                      key={baris.id}
-                      className="flex flex-col gap-2 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+                      key={`${baris.jenis}-${baris.tanggal}`}
+                      className="flex items-center justify-between gap-3 px-4 py-3.5 sm:px-5"
                     >
                       <div className="min-w-0">
                         <p className="text-[13px] font-bold text-slate-800">
                           {formatTanggalRingkas(baris.tanggal)}
                         </p>
-                        <p className="mt-0.5 text-[11px] text-slate-500">
-                          Masuk {formatJam(baris.jam_masuk)} ·{' '}
-                          {baris.status_kehadiran}
+                        <p className="mt-0.5 truncate text-[11px] text-slate-500">
+                          {baris.jenis === 'masuk'
+                            ? baris.jam_masuk
+                              ? `Koreksi jam masuk · tercatat ${formatJam(
+                                  baris.jam_masuk,
+                                )}`
+                              : `Absen masuk · ${
+                                  baris.nama_shift ?? 'Reguler'
+                                } ${jamPendek(baris.jam_mulai)}–${jamPendek(
+                                  baris.jam_selesai,
+                                )}`
+                            : `Absen pulang · masuk ${formatJam(baris.jam_masuk)}`}
                         </p>
                       </div>
-                      {baris.pengaduanMenunggu ? (
-                        <Badge variant="peringatan">Menunggu persetujuan</Badge>
-                      ) : (
-                        <Button size="sm" onClick={() => setPilih(baris)}>
-                          Ajukan Pengaduan
-                        </Button>
-                      )}
+                      <Button
+                        size="sm"
+                        className="shrink-0"
+                        onClick={() => setPilih(baris)}
+                      >
+                        Ajukan
+                      </Button>
                     </div>
                   ))}
                 </div>

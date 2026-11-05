@@ -15,6 +15,26 @@ export const STATUS_KEHADIRAN = [
 
 export const STATUS_BERALASAN = ['Sakit', 'Cuti', 'Dinas Luar']
 
+/**
+ * Isi kolom "Keterangan" laporan bulanan. Alasan koreksi diprioritaskan agar
+ * jejak pembetulan (termasuk hasil pengaduan) tetap terbaca di laporan.
+ */
+export function keteranganPresensi(
+  baris,
+  { alasanIzin = {}, rekanTukar = new Map() } = {},
+) {
+  const koreksi = String(baris.alasan_koreksi ?? '').trim()
+  if (koreksi) return koreksi
+  if (baris.status_kehadiran === 'Alfa') return 'Alfa'
+  if (STATUS_BERALASAN.includes(baris.status_kehadiran)) {
+    return alasanIzin[`${baris.user_id}|${baris.tanggal}`] || '—'
+  }
+  if (rekanTukar.has(baris.tanggal)) {
+    return `Tukar dengan ${rekanTukar.get(baris.tanggal)}`
+  }
+  return '—'
+}
+
 /** Kelompokkan baris presensi berdasarkan user_id. */
 export function kelompokkanPresensi(daftar = []) {
   const peta = new Map()

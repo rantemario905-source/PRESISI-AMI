@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-04 21:35 WITA (commit & push notifikasi Alfa) |
+| Terakhir diperbarui | 2026-11-05 14:13 WITA (migrasi 37 dijalankan; kandidat sebelum go-live hilang) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,7 +37,81 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-04 21:35):** **commit & push** `0d3a902` —
+**Pekerjaan terbaru (2026-11-05 14:13):** **migrasi 37 dijalankan** — user
+menjalankan `37_batasi_pengaduan_sebelum_golive.sql` dan kandidat pengaduan
+sebelum 1 November 2026 (29–30 Oktober) **sudah hilang** dari halaman Pengaduan;
+kandidat data go-live (2–3 November) tetap tampil. Tidak ada perubahan kode.
+Sisa: `verifikasi_37.sql` belum dikonfirmasi, dan semua perubahan belum
+di-commit.
+
+**Pekerjaan sebelumnya (2026-11-05 14:06):** **batasi pengaduan sebelum go-live** —
+migrasi **37** mengganti `kandidat_pengaduan_presensi()`,
+`ajukan_pengaduan_presensi()`, dan `putuskan_pengaduan_presensi()` agar hanya
+memproses tanggal sejak **1 November 2026**. Ini memperbaiki tampilan Pengaduan
+yang masih menampilkan 29–30 Oktober: hari kerja lama itu tidak punya baris
+presensi setelah data testing dihapus, sehingga generator kandidat
+menganggapnya "belum absen masuk". Data go-live (2–3 November) tetap tampil.
+`verifikasi_37.sql` dibuat; **migrasi 37 belum dijalankan**. Verifikasi lokal:
+lint bersih, `npm test` **70/70**, `npm run build` lulus **10,46 dtk**.
+
+**Pekerjaan sebelumnya (2026-11-05 13:48):** **skrip hapus data testing sebelum
+go-live** — `supabase/hapus_data_testing.sql` menghapus transaksi bertanggal
+**sebelum 1 November 2026** (presensi, koreksi, pengaduan, izin, jadwal shift,
+tukar shift) dan mempertahankan seluruh data sejak **1 November 2026**, akun
+pegawai, grup, master shift, jam kerja, hari libur, pengaturan, serta perangkat
+terdaftar. **Belum dijalankan** di Supabase. Tidak ada perubahan kode aplikasi.
+
+**Pekerjaan sebelumnya (2026-11-05 13:42):** **koreksi jam masuk lewat pengaduan** —
+jenis pengaduan `masuk` kini juga menangani jam masuk yang **sudah tercatat**
+(mis. absen 08.30 padahal datang 07.50). Migrasi **36** mengganti fungsi
+`ajukan_pengaduan_presensi`, `putuskan_pengaduan_presensi`, dan
+`kandidat_pengaduan_presensi`: jendela validasi disamakan dengan tombol absen
+(**60 menit sebelum jam masuk** s/d jam selesai), koreksi hanya boleh ke jam
+**lebih awal**, status hasil koreksi `Koreksi`, dan `menit_terlambat` dihitung
+ulang. UI menandai baris **"Koreksi jam masuk · tercatat HH:MM"** dan memberi
+validasi/penjelasan di form serta modal putusan. `verifikasi_36.sql` dibuat;
+**migrasi 36 belum dijalankan** di Supabase. Verifikasi lokal: lint bersih,
+`npm test` **70/70**, `npm run build` lulus **9,34 dtk**.
+
+**Pekerjaan sebelumnya (2026-11-05 13:13):** **pengaduan multi-jenis (absen masuk +
+pulang)** — Fase 1. `pengaduan_presensi` kini punya `jenis` (`masuk`/`pulang`),
+`presensi_id` boleh kosong, dan kolom `jam_masuk_diajukan/disetujui`. RPC
+`ajukan_pengaduan_presensi` (5 parameter baru), `putuskan_pengaduan_presensi`
+(menambah `p_jam_masuk`), dan `kandidat_pengaduan_presensi()` (7 hari terakhir)
+ditambahkan; `daftar_pengaduan_presensi` memuat jenis dan join presensi lewat
+`(user_id, tanggal)`. Persetujuan absen masuk mengisi/membuat jam masuk,
+menghitung `menit_terlambat`, dan menandai `Hadir` dengan jejak koreksi. UI
+pengaduan (pegawai & kepala unit), form, daftar, modal putusan, dan tombol
+**Ajukan Pengaduan** di Panel Absen saat Alfa ikut disesuaikan. Migrasi **35** +
+`verifikasi_35.sql` dibuat; **belum dijalankan** di Supabase. Verifikasi lokal:
+`npm run lint` bersih, `npm test` **70/70**, `npm run build` lulus **8,38 dtk**.
+
+**Pekerjaan sebelumnya (2026-11-05 12:39):** **alasan koreksi di laporan bulanan** —
+kolom **Keterangan** pada Laporan Presensi Bulanan kini menampilkan `presensi.alasan_koreksi`
+untuk semua baris yang pernah dikoreksi (termasuk status `Hadir` hasil pengaduan),
+menggantikan `—`. Alasan ditampilkan penuh (membungkus di kolom). Logika dipindah
+ke `keteranganPresensi()` di `utils/laporan.js` dan diuji. Ini mengembalikan sebagian
+keputusan I-047 khusus untuk alasan koreksi. Tanpa migrasi DB. Verifikasi:
+`npm run lint` bersih, `npm test` **70/70**, `npm run build` lulus **9,13 dtk**.
+
+**Pekerjaan sebelumnya (2026-11-05 12:05):** **perapian panel lupa absen pulang & halaman
+pengaduan**. `PanelAbsen` kini menampilkan satu Alert **"Lupa Absen Pulang"** dengan
+tombol Ajukan Pengaduan blok penuh (menggantikan dua Alert panjang bertumpuk);
+teks alert "Absen Masuk/Pulang Belum Dibuka" dipersingkat. Halaman `/pengaduan`
+meringkas deskripsi, menata baris presensi satu baris (tombol **Ajukan** ringkas
+di kanan), dan memakai pemilih foto bergaya (dropzone) pada form. Tanpa ubah
+logika/server. Verifikasi: `npm run lint` bersih, `npm test` **68/68**,
+`npm run build` lulus **9,43 dtk**.
+
+**Pekerjaan sebelumnya (2026-11-05 11:23):** **konfirmasi uji manual pasca go-live** —
+user menyatakan `verifikasi_34.sql` sudah dijalankan, tombol Absen Masuk nonaktif
+sudah berjalan, pegawai Bebas Radius sudah berjalan, kasus GPS meleset dianggap
+kesalahan perangkat pengguna (tidak diungkit lagi), fallback white screen setelah
+deploy sudah aman, serta tukar shift + laporan + cetak F4 sudah aman. Dengan ini
+seluruh item backlog uji manual (B-28, B-29, B-30, B-31, B-37, B-40, B-41)
+ditutup. Tidak ada perubahan kode; dokumen audit ditahan di working tree.
+
+**Pekerjaan sebelumnya (2026-11-04 21:35):** **commit & push** `0d3a902` —
 notifikasi Alfa saat absen masuk terlewat. Sebelumnya pada 21:30: saat jam absen
 masuk terlewat, panel tidak lagi menjelaskan teknis "Absen Masuk Ditutup". Judul,
 deskripsi, dan label tombol kini **"Alfa Hari Ini"** / "Anda tercatat Alfa hari
@@ -299,9 +373,9 @@ lanjutan 14,14 dtk).
 
 | Aspek | Status | Bukti |
 |---|---|---|
-| Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–34 | `src/`, `supabase/migrations/01–34` |
+| Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15–37 | `src/`, `supabase/migrations/01–37` |
 | Commit Git | **`a9279f9`** — sinkronisasi dokumen audit; sebelumnya `c1e56f7` pengaduan absen pulang (migrasi 33), `de0a389` tukar shift (migrasi 32), `35d28c8` perapian UI & ACC otomatis (migrasi 31), `17d8efb` ketahanan halaman & toleransi terlambat (migrasi 29–30) | `git log` |
-| Perubahan lokal | **Ada perubahan belum di-commit** — tutup absen masuk tepat jam selesai + ACC pengaduan Super Admin (migrasi 34) | `git status` |
+| Perubahan lokal | **Ada perubahan belum di-commit** — pengaduan multi-jenis (migrasi 35), koreksi jam masuk (migrasi 36), batas pengaduan sebelum go-live (migrasi 37), alasan koreksi di laporan bulanan, dan perapian panel/halaman pengaduan | `git status` |
 | Migrasi DB 01–18 | **Sudah dijalankan** — verifikasi 09–18 lulus | laporan user 2026-10-30 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
@@ -318,14 +392,18 @@ lanjutan 14,14 dtk).
 | Migrasi DB 31 | **Sudah dijalankan**; `verifikasi_31.sql` lulus (laporan user 2026-11-04) — pengajuan Sakit/Dinas Luar/Cuti yang dicatat atau diubah Super Admin langsung `disetujui` dan presensi ditandai; pengajuan kepala ruangan tetap `menunggu` | `supabase/migrations/31_auto_setujui_superadmin.sql`, `verifikasi_31.sql` |
 | Migrasi DB 32 | **Sudah dijalankan**; `verifikasi_32.sql` lulus (laporan user 2026-11-04) — tabel `tukar_shift`, RPC `tukar_shift()`, dan RLS aktif; **Tukar Shift** + riwayat tukar di laporan berfungsi | `supabase/migrations/32_tukar_shift.sql`, `verifikasi_32.sql` |
 | Migrasi DB 33 | **Sudah dijalankan**; `verifikasi_33.sql` lulus (laporan user 2026-11-04) — tabel `pengaduan_presensi`, RPC pengaduan, dan RLS aktif | `supabase/migrations/33_pengaduan_presensi.sql`, `verifikasi_33.sql` |
-| Migrasi DB 34 | **Sudah dijalankan** (laporan user 2026-11-04) — Super Admin dapat menyetujui/menolak pengaduan; `verifikasi_34.sql` belum dikonfirmasi | `supabase/migrations/34_superadmin_putuskan_pengaduan.sql`, `verifikasi_34.sql` |
+| Migrasi DB 34 | **Sudah dijalankan** (laporan user 2026-11-04) — Super Admin dapat menyetujui/menolak pengaduan; `verifikasi_34.sql` lulus (laporan user 2026-11-05) | `supabase/migrations/34_superadmin_putuskan_pengaduan.sql`, `verifikasi_34.sql` |
+| Migrasi DB 35 | **Sudah dijalankan** (laporan user 2026-11-05) — pengaduan absen masuk + pulang aktif | `supabase/migrations/35_pengaduan_masuk.sql`, `verifikasi_35.sql` |
+| Migrasi DB 36 | **Sudah dijalankan (inferred)** — baris "Koreksi jam masuk" tampil di UI Pengaduan, yang hanya mungkin bila fungsi migrasi 36 aktif | `supabase/migrations/36_koreksi_jam_masuk.sql`, `verifikasi_36.sql` |
+| Migrasi DB 37 | **Sudah dijalankan** (laporan user 2026-11-05) — kandidat pengaduan sebelum 1 November 2026 hilang; kandidat go-live tetap tampil | `supabase/migrations/37_batasi_pengaduan_sebelum_golive.sql`, `verifikasi_37.sql` |
 | Data uji | **Sudah dibersihkan ulang setelah uji** — transaksi dihapus, 92 pegawai/grup/master shift dipertahankan | `supabase/cleanup_data_uji.sql`, laporan user 2026-10-30 23:01 |
+| Data testing sebelum go-live | **Sudah dijalankan** (laporan user 2026-11-05) — transaksi sebelum 1 November 2026 terhapus; data go-live utuh | `supabase/hapus_data_testing.sql` |
 | Data operasional | **Lengkap** — jadwal dinas dan pemetaan pegawai sudah diisi | laporan user 2026-10-30 23:04 |
 | Go-live | **Sudah berjalan sejak Minggu, 1 November 2026** — pegawai absen masuk dan pulang; absen akhir pekan hanya untuk pegawai shift yang dijadwalkan | laporan user 2026-11-01 17:58 |
 | Koordinat RSUD AMI | **Ada di kode** — `-0.23805651650343132, 117.41442516465149` di klien dan schema | `src/config/constants.js`, `supabase/schema.sql`, migrasi 21 |
 | Radius absensi | **Aktif 50 meter** — klien (`MAX_RADIUS_METERS`) dan server (migrasi 24 sudah dijalankan) | `src/config/constants.js`, `supabase/migrations/24_radius_50_meter.sql` |
-| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 09–33 dijalankan user** (29–33 laporan 2026-11-04); migrasi 34 dijalankan, verifikasi 34 belum dikonfirmasi | laporan user 2026-11-04; `supabase/verifikasi_34.sql` |
-| Build produksi | **Lulus** — base `/` **9,65 dtk** (perapian UI & komponen baru); sebelumnya 8,95 dtk (toleransi terlambat & jam pulang), 7,78/14,87 dtk (ketahanan halaman), 8,46/8,69 dtk (bebas radius) | `npm run build` 2026-11-04 |
+| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 09–35 dijalankan user** (34–35 laporan 2026-11-05); `verifikasi_36.sql` dan `verifikasi_37.sql` belum dikonfirmasi | laporan user 2026-11-05; `supabase/verifikasi_37.sql` |
+| Build produksi | **Lulus** — base `/` **11,01 dtk** (verifikasi ulang 2026-11-05); sebelumnya 10,46 dtk (batas pengaduan sebelum go-live), 9,34 dtk (koreksi jam masuk) | `npm run build` 2026-11-05 |
 | Dependensi frontend | **Diperbarui & di-commit** — Vite 7.3.7, `@vitejs/plugin-react` 5.2.0, React Router 7.18.5; Node CI 22; lockfile sinkron; `npm audit` 0 kerentanan | `package.json`, `package-lock.json`, `.github/workflows/deploy.yml` |
 | Header keamanan (CSP) | **Ada di kode & di-commit** — CSP produksi via `<meta>`: `script-src 'self'`, `connect-src` self + `*.supabase.co`, `frame-src 'none'`, `form-action 'self'`, `object-src 'none'`, `base-uri 'self'`; meta referrer; hanya saat build. Uji headless: script inline diblokir, halaman render | `vite.config.js`, `index.html` |
 | Batas GitHub Pages | **Enforce HTTPS aktif & terverifikasi** (2026-10-30 10:06 WITA): HTTP apex dan `www` **301** ke HTTPS/apex. Namun HSTS, `X-Frame-Options`/`frame-ancestors`, `X-Content-Type-Options`, dan `Permissions-Policy` tetap belum aktif karena memerlukan header HTTP; Cloudflare/proxy opsional | `curl -I` HTTP/HTTPS apex & `www`, 2026-10-30 |
@@ -511,6 +589,169 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-05 14:13 WITA — Migrasi 37 dijalankan
+
+- **Perubahan:** user menjalankan `supabase/migrations/37_batasi_pengaduan_sebelum_golive.sql`
+  di Supabase. Kandidat pengaduan sebelum **1 November 2026** (29–30 Oktober)
+  hilang dari halaman **Pengaduan**; kandidat data go-live (2–3 November) tetap
+  tampil. Tidak ada perubahan kode.
+- **File:** `progress.md`, `AGENTS.md`.
+- **Verifikasi:** konfirmasi user (2026-11-05); `npm run lint`, `npm test` 70/70,
+  dan `npm run build` tetap berlaku dari pekerjaan sebelumnya.
+- **Catatan/risiko:** `verifikasi_37.sql` belum dikonfirmasi dijalankan. Semua
+  perubahan di working tree masih **belum di-commit**.
+
+### 2026-11-05 14:06 WITA — Batasi pengaduan sebelum go-live
+
+- **Perubahan:** menambahkan migrasi **37** yang mengganti tiga fungsi pengaduan
+  agar hanya berlaku untuk tanggal sejak go-live **1 November 2026**:
+  `kandidat_pengaduan_presensi()` melewati tanggal sebelum batas (menghilangkan
+  29–30 Oktober), `ajukan_pengaduan_presensi()` menolak pengajuan sebelum batas,
+  dan `putuskan_pengaduan_presensi()` menolak memproses pengaduan lama. Penyebab
+  tampilan 29–30 Oktober bukan sisa data: setelah penghapusan, tanggal itu tidak
+  punya baris presensi sehingga dianggap kandidat "belum absen masuk". Kandidat
+  koreksi jam masuk 2–3 November (data go-live) tetap tampil sesuai keputusan.
+- **File:** `supabase/migrations/37_batasi_pengaduan_sebelum_golive.sql`,
+  `supabase/verifikasi_37.sql`, `supabase/schema.sql`, `README.md`,
+  `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **70/70** lulus;
+  `npm run build` lulus **10,46 dtk**.
+- **Catatan/risiko:** migrasi **37** dan `verifikasi_37.sql` **belum dijalankan**.
+  Tanpa migrasi ini kandidat 29–30 Oktober masih muncul sampai tanggal itu keluar
+  dari jendela 7 hari. Tanpa perubahan klien.
+
+### 2026-11-05 13:48 WITA — Skrip hapus data testing sebelum go-live
+
+- **Perubahan:** menambahkan `supabase/hapus_data_testing.sql` untuk menghapus
+  **hanya** transaksi bertanggal sebelum **1 November 2026** (cutover go-live):
+  `pengaduan_presensi`, `koreksi_presensi` (audit milik presensi lama),
+  `presensi`, `izin_cuti` yang seluruh rentangnya sebelum cutover,
+  `jadwal_shift`, dan `tukar_shift`. Data sejak 1 November 2026, akun pegawai,
+  grup/unit, master shift, jam kerja, hari libur, pengaturan presensi, dan
+  perangkat terdaftar **dipertahankan** (pegawai tidak perlu daftar ulang).
+  Skrip transaksional, menampilkan jumlah terhapus, dan menyertakan query
+  verifikasi (hitungan sebelum cutover harus 0). Foto bukti di bucket
+  `dokumen-izin` tidak ikut terhapus; blok opsional disediakan (dikomentari).
+- **File:** `supabase/hapus_data_testing.sql`, `README.md`, `progress.md`,
+  `AGENTS.md`.
+- **Verifikasi:** tidak ada perubahan kode; `npm run lint`, `npm test` (70/70),
+  dan `npm run build` tetap berlaku dari pekerjaan sebelumnya. Skrip SQL **belum
+  dijalankan**.
+- **Catatan/risiko:** jalankan di luar jam operasional dan **backup** dulu.
+  Skrip tidak menghapus pegawai/grup/master; jika `cleanup_data_uji.sql` pernah
+  dipakai, skrip ini tetap aman dijalankan. Data uji bertanggal ≥ 1 November
+  2026 (jika ada) tidak terhapus.
+
+### 2026-11-05 13:42 WITA — Koreksi jam masuk lewat pengaduan
+
+- **Perubahan:** pengaduan jenis `masuk` kini juga dapat **mengoreksi jam masuk
+  yang sudah tercatat** (mis. datang 07.50 tetapi baru bisa absen 08.30).
+  Migrasi **36** mengganti tiga fungsi: (1) jendela validasi jam masuk disamakan
+  dengan tombol absen — dibuka **60 menit sebelum jam masuk** sampai jam selesai
+  (termasuk H+1 shift malam), sehingga jam 07.50 untuk jadwal 08.00 diterima;
+  (2) `ajukan` hanya menerima koreksi bila presensi berstatus `Hadir`, belum
+  pernah dikoreksi, dan jam yang diajukan **lebih awal** dari jam tercatat;
+  (3) persetujuan mengganti jam masuk, menghitung ulang `menit_terlambat`,
+  mengubah status menjadi `Koreksi`, dan menyimpan jejak koreksi;
+  (4) `kandidat` menampilkan baris koreksi untuk presensi yang saat ini
+  terlambat (`menit_terlambat > 0`) dan belum dikoreksi. UI: label
+  **"Koreksi jam masuk · tercatat HH:MM"**, helper/validasi di form dan modal
+  putusan, serta baris **"Tercatat"** di riwayat.
+- **File:** `supabase/migrations/36_koreksi_jam_masuk.sql`,
+  `supabase/verifikasi_36.sql`, `supabase/schema.sql`,
+  `src/pages/Pengaduan.jsx`, `src/components/pengaduan/FormPengaduan.jsx`,
+  `src/components/pengaduan/ModalPutusanPengaduan.jsx`,
+  `src/components/pengaduan/DaftarPengaduan.jsx`, `README.md`, `progress.md`,
+  `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **70/70** lulus;
+  `npm run build` lulus **9,34 dtk**.
+- **Catatan/risiko:** migrasi **36** dan `verifikasi_36.sql` **belum dijalankan**
+  di Supabase. Koreksi hanya ke arah lebih awal; pengaduan yang sudah pernah
+  dikoreksi ditolak. Tidak ada perubahan tabel/kolom. Belum ada uji perangkat.
+
+### 2026-11-05 13:13 WITA — Pengaduan multi-jenis: absen masuk + pulang
+
+- **Perubahan:** memperluas pengaduan presensi agar mencakup **absen masuk** dan
+  **absen pulang** (Fase 1). Skema `pengaduan_presensi`: kolom `jenis`
+  (`masuk`/`pulang`, baris lama otomatis `pulang`), `presensi_id` dan
+  `jam_pulang_diajukan` boleh kosong, tambah `jam_masuk_diajukan`/`jam_masuk_disetujui`,
+  serta index tunggu per `(user_id, tanggal, jenis)`. RPC: `ajukan_pengaduan_presensi`
+  kini menerima `jenis/tanggal/jam`; `putuskan_pengaduan_presensi` menambah
+  `p_jam_masuk` (Kepala Unit/Super Admin, tetap tidak boleh memutuskan sendiri);
+  RPC baru `kandidat_pengaduan_presensi()` mengembalikan tanggal 7 hari terakhir
+  yang bisa diadukan; `daftar_pengaduan_presensi()` memuat jenis dan join presensi
+  lewat `(user_id, tanggal)`. Persetujuan absen masuk mengisi/membuat baris
+  presensi (`Hadir`), menghitung `menit_terlambat` dari jadwal, dan menyimpan
+  jejak koreksi. Klien: service, halaman pengaduan, form (jam masuk/pulang),
+  daftar, modal putusan, dan tombol **Ajukan Pengaduan** di Panel Absen saat Alfa.
+- **File:** `supabase/migrations/35_pengaduan_masuk.sql`, `supabase/verifikasi_35.sql`,
+  `supabase/schema.sql`, `supabase/cleanup_data_uji.sql`,
+  `src/services/pengaduanService.js`, `src/pages/Pengaduan.jsx`,
+  `src/components/pengaduan/FormPengaduan.jsx`,
+  `src/components/pengaduan/DaftarPengaduan.jsx`,
+  `src/components/pengaduan/ModalPutusanPengaduan.jsx`,
+  `src/components/PanelAbsen.jsx`, `src/pages/admin/PengaduanKepala.jsx`,
+  `README.md`, `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **70/70** lulus;
+  `npm run build` lulus **8,38 dtk**.
+- **Catatan/risiko:** migrasi **35** dan `verifikasi_35.sql` **belum dijalankan**
+  di Supabase; sebelum itu fitur absen masuk tidak berfungsi (RPC lama sudah
+  diganti). Wajib foto bukti + persetujuan Kepala Unit; jam harus di dalam jendela
+  jadwal dan maksimal 7 hari. Belum ada uji perangkat.
+
+### 2026-11-05 12:39 WITA — Alasan koreksi di laporan bulanan
+
+- **Perubahan:** kolom **Keterangan** pada Laporan Presensi Bulanan kini menampilkan
+  alasan koreksi (`presensi.alasan_koreksi`) untuk semua baris yang pernah dikoreksi,
+  termasuk baris berstatus `Hadir` hasil pengaduan, menggantikan tanda `—`. Alasan
+  ditampilkan penuh dan membungkus di kolom. Logika keterangan dipindahkan dari
+  komponen ke `keteranganPresensi()` agar teruji. Prioritas: alasan koreksi → Alfa →
+  alasan izin (Sakit/Cuti/Dinas Luar) → tukar shift → `—`. Ini mengembalikan sebagian
+  keputusan I-047 yang sebelumnya menghapus alasan koreksi dari laporan.
+- **File:** `src/services/reportService.js`, `src/utils/laporan.js`,
+  `src/components/laporan/LembarLaporan.jsx`, `tests/laporan.test.js`,
+  `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **70/70** lulus (2 uji baru untuk
+  `keteranganPresensi`); `npm run build` lulus **9,13 dtk**.
+- **Catatan/risiko:** tanpa perubahan DB/RPC. Alasan pengaduan yang panjang
+  (mis. "Pengaduan disetujui oleh …: …") akan membungkus beberapa baris; belum diuji
+  cetak manual di perangkat.
+
+### 2026-11-05 12:05 WITA — Perapian panel lupa absen pulang & halaman pengaduan
+
+- **Perubahan:** merapikan tampilan `PanelAbsen` dan halaman `/pengaduan`. (1) Dua
+  Alert panjang untuk lupa absen pulang ("Presensi Kemarin Belum Ditutup" dan
+  "Batas Absen Pulang Terlewat") digabung menjadi satu Alert **"Lupa Absen Pulang"**
+  dengan satu kalimat dan tombol **Ajukan Pengaduan** blok penuh. (2) Alert
+  "Absen Pulang Belum Dibuka" disembunyikan saat alert lupa tampil dan teksnya
+  dipersingkat; "Absen Masuk Belum Dibuka" juga dipersingkat. (3) Deskripsi panel
+  tidak lagi menampilkan kalimat "Absen pulang sebelum meninggalkan area..." saat
+  batas pulang terlewat. (4) Halaman pengaduan: deskripsi dipersingkat, baris
+  presensi ditata satu baris dengan tombol **Ajukan** ringkas, badge menunggu
+  disingkat. (5) Form pengaduan memakai pemilih foto bergaya (dropzone) menggantikan
+  input file bawaan, helper text dipersingkat, dan baris aksi memakai `.aksi-modal`.
+- **File:** `src/components/PanelAbsen.jsx`, `src/pages/Pengaduan.jsx`,
+  `src/components/pengaduan/FormPengaduan.jsx`, `progress.md`, `AGENTS.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **68/68** lulus;
+  `npm run build` lulus **9,43 dtk**.
+- **Catatan/risiko:** hanya tampilan; tidak ada perubahan logika, RPC, atau DB.
+  Uji visual di perangkat belum dilakukan.
+
+### 2026-11-05 11:23 WITA — Konfirmasi uji manual pasca go-live
+
+- **Perubahan:** user mengonfirmasi seluruh sisa uji manual pasca go-live:
+  `verifikasi_34.sql` lulus; tombol **Absen Masuk** nonaktif setelah jam selesai
+  jadwal berjalan; pegawai **Bebas Radius** dapat absen di luar area berjalan;
+  kasus GPS meleset dianggap kesalahan perangkat pengguna (tidak diungkit lagi,
+  B-29 ditutup); fallback **white screen** setelah deploy aman; serta **tukar
+  shift**, laporan bulanan, dan **cetak F4 landscape** aman. Tidak ada perubahan
+  kode.
+- **File:** `progress.md`, `AGENTS.md`.
+- **Verifikasi:** konfirmasi manual user (2026-11-05); verifikasi lokal terakhir
+  tetap berlaku (lint bersih, `npm test` **68/68**, build lulus).
+- **Catatan/risiko:** tidak ada sisa item backlog uji manual; dokumen ditahan di
+  working tree sampai perintah commit/push.
 
 ### 2026-11-04 21:35 WITA — Commit & push notifikasi Alfa
 
@@ -2534,10 +2775,10 @@ dan `verifikasi_18` untuk hapus grup kosong.
 | B-26 | ~~Verifikasi pembentukan Alfa otomatis pertama setelah go-live~~ | - | **Selesai:** Alfa otomatis sudah berjalan (laporan user 2026-11-04 17:35) |
 | B-25 | ~~Uji manual jadwal 1.064 baris setelah paginasi~~ | - | **Selesai:** user memastikan seluruh tanggal termasuk 1–2 November muncul (2026-10-31 12:53) |
 | B-27 | ~~Migrasi 28 dan verifikasi 28 belum dijalankan~~ | - | **Selesai:** migrasi 28 dijalankan dan `verifikasi_28.sql` lulus (laporan user 2026-11-02); flag **Bebas Radius** aktif di server |
-| B-28 | Uji manual pegawai bebas radius dan pegawai biasa setelah migrasi 28 | Belum ada bukti uji di perangkat | Uji satu pegawai bebas radius absen dari luar area pada jam reguler dan satu pegawai biasa tetap ditolak di luar 50 m |
-| B-29 | Kasus GPS meleset 130 m di gedung utama (pesan klien) | Pegawai di dalam area bisa ditolak; sebaliknya lokasi luar bisa lolos | Ditahan atas keputusan user 2026-11-02. Opsi: sampling GPS beberapa detik, perketat akurasi (20–25 m), tampilkan akurasi pada pesan, dan/atau audit percobaan gagal; perlu keputusan batas akurasi |
-| B-30 | Uji manual koreksi presensi shift malam H+1 | Belum ada bukti uji di UI | Koreksi presensi shift malam (mis. masuk 20.31, pulang 08.00), lalu pastikan jam pulang tersimpan pada tanggal H+1 dan pratinjau menampilkan penanda H+1 |
-| B-31 | Uji manual fallback white screen setelah deploy | Perbaikan belum aktif di produksi sampai di-push/deploy | Setelah deploy, buka aplikasi, biarkan tab lama, lalu buka menu; pastikan muncul pemulihan/muat ulang otomatis, bukan layar putih. Uji juga di HP user yang melaporkan |
+| B-28 | ~~Uji manual pegawai bebas radius dan pegawai biasa setelah migrasi 28~~ | - | **Selesai:** pegawai Bebas Radius sudah dapat absen di luar area (laporan user 2026-11-05) |
+| B-29 | ~~Kasus GPS meleset 130 m di gedung utama (pesan klien)~~ | - | **Ditutup:** dianggap kesalahan perangkat pengguna, tidak diungkit lagi (keputusan user 2026-11-05) |
+| B-30 | ~~Uji manual koreksi presensi shift malam H+1~~ | - | **Selesai:** dinyatakan aman (laporan user 2026-11-05) |
+| B-31 | ~~Uji manual fallback white screen setelah deploy~~ | - | **Selesai:** fallback white screen setelah deploy sudah aman (laporan user 2026-11-05) |
 | B-32 | ~~Migrasi 29 dan verifikasi 29 belum dijalankan~~ | - | **Selesai:** dijalankan user 2026-11-04; aturan baru aktif di server |
 | B-33 | ~~Migrasi 30 (backfill menit terlambat) belum dijalankan~~ | - | **Selesai:** dijalankan user 2026-11-04; `menit_terlambat` data sejak 1 November 2026 sudah dihitung ulang |
 | B-34 | ~~Migrasi 31 (ACC otomatis Super Admin) dan verifikasi 31 belum dijalankan~~ | - | **Selesai:** migrasi 31 dan `verifikasi_31.sql` dijalankan dan lulus (laporan user 2026-11-04); ACC otomatis Super Admin aktif |
@@ -2545,9 +2786,9 @@ dan `verifikasi_18` untuk hapus grup kosong.
 | B-36 | ~~Migrasi 32 (tukar shift) dan verifikasi 32 belum dijalankan~~ | - | **Selesai:** migrasi 32 dan `verifikasi_32.sql` dijalankan dan lulus (laporan user 2026-11-04); server menyimpan riwayat tukar shift |
 | B-38 | ~~Migrasi 33 (pengaduan presensi) dan `verifikasi_33.sql` belum dijalankan~~ | - | **Selesai:** dijalankan user 2026-11-04 17:35 |
 | B-39 | ~~Uji manual pengaduan absen pulang~~ | - | **Selesai:** diuji user 2026-11-04 17:35 |
-| B-40 | ~~Migrasi 34 (Super Admin memutuskan pengaduan) belum dijalankan~~ | - | **Sebagian selesai:** migrasi 34 dijalankan user 2026-11-04; **`verifikasi_34.sql` belum dikonfirmasi** dan uji Super Admin menyetujui/menolak pengaduan di **Koreksi Presensi → Riwayat Pengaduan** belum dilakukan |
-| B-41 | Uji manual tombol Absen Masuk nonaktif setelah jam selesai jadwal | Belum ada bukti uji di perangkat | Buka Panel Absen melewati jam selesai tanpa absen masuk → tombol mati, muncul Alert "Absen Masuk Ditutup", tidak bisa absen |
-| B-37 | Uji manual tukar shift, laporan, & cetak jadwal F4 landscape | Belum ada bukti uji di perangkat | Tukar dua pegawai shift → pastikan jadwal bertukar dan laporan bulanan memuat kolom Shift + blok Riwayat Tukar; laporan pegawai **Reguler** tanpa kolom Shift; footer `Dicetak melalui PRESISI-AMI` menempel dasar kertas dan tanpa teks Halaman; cetak jadwal → periksa F4 landscape, footer di dasar, warna Pagi/Siang/Malam, dan tanda tangan Kepala Ruangan **bergelar** (ASN dari `nama_kepala`, non-ASN dari `pegawai.nama`), baik dicetak kepala itu sendiri maupun Super Admin; impor jadwal → hanya `.xlsx` (file `.csv` ditolak) dan laporan error terunduh sebagai `.xlsx` |
+| B-40 | ~~Migrasi 34 (Super Admin memutuskan pengaduan) belum dijalankan~~ | - | **Selesai:** migrasi 34 + `verifikasi_34.sql` dijalankan dan lulus (laporan user 2026-11-05) |
+| B-41 | ~~Uji manual tombol Absen Masuk nonaktif setelah jam selesai jadwal~~ | - | **Selesai:** tombol Absen Masuk nonaktif sudah berjalan (laporan user 2026-11-05) |
+| B-37 | ~~Uji manual tukar shift, laporan, & cetak jadwal F4 landscape~~ | - | **Selesai:** tukar shift, laporan, dan cetak F4 sudah aman (laporan user 2026-11-05) |
 | B-4 | ~~`npm run build` belum dijalankan~~ | — | **Selesai:** lulus 2026-10-25 12:24 |
 | B-5 | ~~README menyebut Fase 1–7 saja~~ | — | **Selesai:** diperbarui ke Fase 1–8 + impor |
 | B-6 | ~~`verifikasi_10.sql` tidak ada di diagram README~~ | — | **Selesai:** ditambahkan ke struktur |

@@ -11,10 +11,7 @@
  */
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  MAX_RADIUS_METERS,
-  MENIT_AWAL_ABSEN_MASUK,
-} from '../config/constants.js'
+import { MAX_RADIUS_METERS } from '../config/constants.js'
 import { dapatkanLokasi, periksaLokasi } from '../utils/geofencing.js'
 import { kirimPresensi } from '../services/attendanceService.js'
 import { formatJam, formatJarak, formatTanggalRingkas, hariIni } from '../utils/format.js'
@@ -22,7 +19,6 @@ import {
   bukaAbsenMasuk,
   bukaAbsenPulang,
   formatJamBuka,
-  formatJamJadwal,
   tutupAbsenMasuk,
   tutupAbsenPulang,
 } from '../utils/jadwalAbsen.js'
@@ -174,6 +170,11 @@ export default function PanelAbsen({
     Boolean(batasPulang) &&
     sekarang >= batasPulang.getTime()
 
+  const lupaPulang = kemarinTerlewat || pulangTerlewat
+  const tanggalLupaPulang = kemarinTerlewat
+    ? presensiKemarin?.tanggal
+    : presensiAktif?.tanggal
+
   const terkunciMasuk =
     perangkatTerkunci ||
     (jadwalTerkunci && !malamKemarinAktif) ||
@@ -219,6 +220,26 @@ export default function PanelAbsen({
         : masukTerlewat
           ? 'Alfa Hari Ini'
           : 'Belum absen hari ini'
+
+  const deskripsiStatus = sudahMasuk
+    ? sudahPulang
+      ? 'Absensi hari ini sudah lengkap.'
+      : shiftMalamTerbuka
+        ? `Presensi ${formatTanggalRingkas(
+            presensiAktif.tanggal,
+          )} belum ditutup. Absen pulang setelah shift selesai.`
+        : pulangTerlewat
+          ? ''
+          : 'Absen pulang sebelum meninggalkan area rumah sakit.'
+    : malamKemarinAktif
+      ? `Shift malam ${formatTanggalRingkas(
+          jadwalKemarin.tanggal,
+        )} masih berlangsung. Absen masuk dicatat untuk tanggal tersebut.`
+      : masukTerlewat
+        ? 'Anda tercatat Alfa hari ini.'
+        : bebasRadius
+          ? 'Absen bisa dilakukan dari luar area rumah sakit.'
+          : 'Absen hanya bisa dilakukan di dalam area rumah sakit.'
 
   /** Aksi absen: geolokasi → validasi → RPC server */
   async function jalankanAbsen(tipe) {
@@ -325,25 +346,20 @@ export default function PanelAbsen({
       </div>
 
       <div className="p-4 sm:p-5">
-        <p className="mb-4 text-[13px] leading-relaxed text-slate-500 sm:text-sm">
-          {sudahMasuk
-            ? sudahPulang
-              ? 'Absensi hari ini sudah lengkap.'
-              : shiftMalamTerbuka
-                ? `Presensi ${formatTanggalRingkas(
-                    presensiAktif.tanggal,
-                  )} belum ditutup. Absen pulang setelah shift selesai.`
-                : 'Absen pulang sebelum meninggalkan area rumah sakit.'
-            : malamKemarinAktif
-              ? `Shift malam ${formatTanggalRingkas(
-                  jadwalKemarin.tanggal,
-                )} masih berlangsung. Absen masuk dicatat untuk tanggal tersebut.`
-              : masukTerlewat
-                ? 'Anda tercatat Alfa hari ini.'
-                : bebasRadius
-                  ? 'Absen bisa dilakukan dari luar area rumah sakit.'
-                  : 'Absen hanya bisa dilakukan di dalam area rumah sakit.'}
-        </p>
+        {deskripsiStatus && (
+          <p className="mb-4 text-[13px] leading-relaxed text-slate-500 sm:text-sm">
+            {deskripsiStatus}
+          </p>
+        )}
+
+        {masukTerlewat && (
+          <Link
+            to="/pengaduan"
+            className="mb-4 flex min-h-[44px] w-full items-center justify-center rounded-xl bg-rose-600 px-4 text-sm font-bold text-white hover:bg-rose-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-600"
+          >
+            Ajukan Pengaduan Absen Masuk
+          </Link>
+        )}
 
         {jadwalTerkunci && !sudahMasuk && !malamKemarinAktif && (
           <Alert
@@ -365,30 +381,13 @@ export default function PanelAbsen({
           </Alert>
         )}
 
-        {kemarinTerlewat && (
-          <Alert variant="peringatan" title="Presensi Kemarin Belum Ditutup" className="mb-4">
-            Presensi tanggal {formatTanggalRingkas(presensiKemarin.tanggal)} belum memiliki
-            jam pulang. Batas absen pulang (2 jam setelah jam pulang) sudah terlewat
-            {batasPulangKemarin ? `, yaitu pukul ${formatJamBuka(batasPulangKemarin)} WITA` : ''}.
-            Ajukan pengaduan kepada Kepala Unit bila Anda tidak sempat absen pulang.
+        {lupaPulang && (
+          <Alert variant="peringatan" title="Lupa Absen Pulang" className="mb-4">
+            Presensi {formatTanggalRingkas(tanggalLupaPulang)} belum ada jam pulang.
+            Ajukan pengaduan agar dilengkapi Kepala Unit.
             <Link
               to="/pengaduan"
-              className="mt-2 inline-flex min-h-[36px] items-center rounded-lg bg-amber-700 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
-            >
-              Ajukan Pengaduan
-            </Link>
-          </Alert>
-        )}
-
-        {pulangTerlewat && (
-          <Alert variant="peringatan" title="Batas Absen Pulang Terlewat" className="mb-4">
-            Batas absen pulang untuk presensi tanggal{' '}
-            {formatTanggalRingkas(presensiAktif.tanggal)} sudah terlewat
-            {batasPulang ? `, yaitu pukul ${formatJamBuka(batasPulang)} WITA` : ''}.
-            Ajukan pengaduan kepada Kepala Unit bila Anda tidak sempat absen pulang.
-            <Link
-              to="/pengaduan"
-              className="mt-2 inline-flex min-h-[36px] items-center rounded-lg bg-amber-700 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
+              className="mt-2.5 flex min-h-[44px] w-full items-center justify-center rounded-xl bg-amber-600 px-4 text-sm font-bold text-white hover:bg-amber-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
             >
               Ajukan Pengaduan
             </Link>
@@ -397,16 +396,13 @@ export default function PanelAbsen({
 
         {masukBelumDibuka && !jadwalTerkunci && (
           <Alert variant="info" title="Absen Masuk Belum Dibuka" className="mb-4">
-            Absen masuk dibuka pukul <b>{formatJamBuka(bukaMasuk)} WITA</b> (
-            {MENIT_AWAL_ABSEN_MASUK} menit sebelum jam masuk{' '}
-            {formatJamJadwal(jadwalMasuk?.jam_mulai)}).
+            Absen masuk dibuka pukul <b>{formatJamBuka(bukaMasuk)} WITA</b>.
           </Alert>
         )}
 
-        {pulangBelumDibuka && (
+        {pulangBelumDibuka && !lupaPulang && (
           <Alert variant="info" title="Absen Pulang Belum Dibuka" className="mb-4">
-            Absen pulang dibuka pukul <b>{formatJamBuka(bukaPulang)} WITA</b>, tepat pada jam
-            pulang {formatJamJadwal(jadwalPulang?.jam_selesai)}.
+            Absen pulang dibuka pukul <b>{formatJamBuka(bukaPulang)} WITA</b>.
           </Alert>
         )}
 

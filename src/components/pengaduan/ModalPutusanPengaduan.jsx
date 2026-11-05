@@ -7,6 +7,7 @@ import {
   formatJam,
   formatJamInput,
   formatTanggalRingkas,
+  gabungTanggalJam,
 } from '../../utils/format.js'
 import { susunWaktuPengaduan } from '../../utils/pengaduan.js'
 import {
@@ -16,8 +17,13 @@ import {
 import { Alert, Button, Modal } from '../ui/index.js'
 
 export default function ModalPutusanPengaduan({ baris, onTutup, onSelesai }) {
-  const [jamPulang, setJamPulang] = useState(() =>
-    formatJamInput(baris.jam_pulang_diajukan),
+  const jenisMasuk = baris.jenis === 'masuk'
+  const koreksiMasuk = jenisMasuk && Boolean(baris.jam_masuk)
+  const jamTercatat = koreksiMasuk ? formatJamInput(baris.jam_masuk) : ''
+  const [jam, setJam] = useState(() =>
+    formatJamInput(
+      jenisMasuk ? baris.jam_masuk_diajukan : baris.jam_pulang_diajukan,
+    ),
   )
   const [catatan, setCatatan] = useState('')
   const [memproses, setMemproses] = useState(false)
@@ -47,24 +53,34 @@ export default function ModalPutusanPengaduan({ baris, onTutup, onSelesai }) {
       return
     }
 
-    let jamPulangIso = null
+    const labelJam = jenisMasuk ? 'Jam masuk' : 'Jam pulang'
+    let jamIso = null
     if (setuju) {
-      if (!jamPulang) {
-        setGalat('Jam pulang wajib diisi.')
+      if (!jam) {
+        setGalat(`${labelJam} wajib diisi.`)
         return
       }
-      const susun = susunWaktuPengaduan({
-        tanggal: baris.tanggal,
-        jamMasuk: formatJamInput(baris.jam_masuk),
-        jamPulang,
-      })
-      jamPulangIso = susun.jamPulangIso
-      if (!jamPulangIso) {
-        setGalat('Jam pulang tidak valid.')
+      if (koreksiMasuk && jam >= jamTercatat) {
+        setGalat(
+          `Jam masuk harus lebih awal dari jam tercatat (${formatJam(
+            baris.jam_masuk,
+          )}).`,
+        )
         return
       }
-      if (new Date(jamPulangIso).getTime() > Date.now()) {
-        setGalat('Jam pulang tidak boleh melewati waktu sekarang.')
+      jamIso = jenisMasuk
+        ? gabungTanggalJam(baris.tanggal, jam)
+        : susunWaktuPengaduan({
+            tanggal: baris.tanggal,
+            jamMasuk: formatJamInput(baris.jam_masuk),
+            jamPulang: jam,
+          }).jamPulangIso
+      if (!jamIso) {
+        setGalat(`${labelJam} tidak valid.`)
+        return
+      }
+      if (new Date(jamIso).getTime() > Date.now()) {
+        setGalat(`${labelJam} tidak boleh melewati waktu sekarang.`)
         return
       }
     }
@@ -74,7 +90,8 @@ export default function ModalPutusanPengaduan({ baris, onTutup, onSelesai }) {
       const hasil = await putuskanPengaduan({
         id: baris.id,
         setuju,
-        jamPulang: jamPulangIso,
+        jamMasuk: jenisMasuk ? jamIso : null,
+        jamPulang: jenisMasuk ? null : jamIso,
         catatan: catatan.trim() || null,
       })
       onSelesai?.(hasil?.pesan ?? 'Pengaduan berhasil diputuskan.')
@@ -99,8 +116,17 @@ export default function ModalPutusanPengaduan({ baris, onTutup, onSelesai }) {
             {baris.unit_kerja} · {formatTanggalRingkas(baris.tanggal)}
           </p>
           <p className="mt-1 text-xs text-slate-600">
-            Masuk {formatJam(baris.jam_masuk)} · Diajukan pulang{' '}
-            {formatJam(baris.jam_pulang_diajukan)}
+            {jenisMasuk
+              ? koreksiMasuk
+                ? `Koreksi jam masuk · tercatat ${formatJam(
+                    baris.jam_masuk,
+                  )} · diajukan ${formatJam(baris.jam_masuk_diajukan)}`
+                : `Pengaduan absen masuk · diajukan ${formatJam(
+                    baris.jam_masuk_diajukan,
+                  )}`
+              : `Pengaduan absen pulang · masuk ${formatJam(
+                  baris.jam_masuk,
+                )} · diajukan ${formatJam(baris.jam_pulang_diajukan)}`}
           </p>
         </div>
 
@@ -118,18 +144,24 @@ export default function ModalPutusanPengaduan({ baris, onTutup, onSelesai }) {
         )}
 
         <div>
-          <label className="label-input" htmlFor="putusan-jam-pulang">
-            Jam Pulang Disetujui
+          <label className="label-input" htmlFor="putusan-jam">
+            {jenisMasuk ? 'Jam Masuk Disetujui' : 'Jam Pulang Disetujui'}
           </label>
           <input
-            id="putusan-jam-pulang"
+            id="putusan-jam"
             type="time"
             className="input-dasar"
-            value={jamPulang}
-            onChange={(event) => setJamPulang(event.target.value)}
+            value={jam}
+            onChange={(event) => setJam(event.target.value)}
           />
           <p className="mt-1 text-[11px] text-slate-500">
-            Boleh disesuaikan sebelum disetujui. Shift malam otomatis H+1.
+            {jenisMasuk
+              ? koreksiMasuk
+                ? `Harus lebih awal dari jam tercatat (${formatJam(
+                    baris.jam_masuk,
+                  )}).`
+                : 'Boleh disesuaikan sebelum disetujui.'
+              : 'Boleh disesuaikan sebelum disetujui. Shift malam otomatis H+1.'}
           </p>
         </div>
 

@@ -15,7 +15,8 @@ dan pemisahan hak akses antara **Pegawai** dan **Super Admin**.
 > unit multi-unit dan kepala ASN tanpa baris pegawai**, **jam kerja
 > reguler khusus per unit**, **pengecualian radius untuk pegawai
 > tertentu**, **tukar shift teraudit dan cetak jadwal shift (F4 landscape)**,
-> serta **pengaduan absen pulang dengan foto bukti dan persetujuan kepala unit**.
+> serta **pengaduan absen masuk dan pulang dengan foto bukti dan persetujuan
+> kepala unit**.
 
 > **Dokumentasi audit:** progres pekerjaan tercatat di [`progress.md`](progress.md)
 > dan aturan kerja agen serta log instruksi user di [`AGENTS.md`](AGENTS.md).
@@ -98,6 +99,9 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 | 32 | `supabase/migrations/32_tukar_shift.sql` | Tukar shift teraudit: tabel `tukar_shift` + RPC `tukar_shift()` yang menukar dua baris `jadwal_shift` secara atomik dan mencatat riwayat (shift asal/pengganti, alasan, pelaku) untuk laporan bulanan |
 | 33 | `supabase/migrations/33_pengaduan_presensi.sql` | Pengaduan absen pulang: tabel `pengaduan_presensi` + foto bukti wajib (maks. 7 hari), persetujuan kepala unit; persetujuan mengisi `jam_pulang` dan status `Koreksi` |
 | 34 | `supabase/migrations/34_superadmin_putuskan_pengaduan.sql` | Super Admin dapat menyetujui/menolak pengaduan presensi (tanpa cek unit, tetap tidak dapat memutuskan pengaduan sendiri) |
+| 35 | `supabase/migrations/35_pengaduan_masuk.sql` | Pengaduan multi-jenis: absen masuk + pulang dalam satu alur. `presensi_id` boleh kosong, `jenis` + `jam_masuk_diajukan/disetujui`, RPC `kandidat_pengaduan_presensi()`, dan persetujuan absen masuk mengisi jam masuk serta menghitung keterlambatan |
+| 36 | `supabase/migrations/36_koreksi_jam_masuk.sql` | Koreksi jam masuk lewat pengaduan: jendela validasi disamakan dengan tombol absen (60 menit sebelum jam masuk), hanya boleh memajukan jam yang sudah tercatat, status hasil koreksi `Koreksi`, dan kandidat koreksi muncul untuk presensi yang terlambat |
+| 37 | `supabase/migrations/37_batasi_pengaduan_sebelum_golive.sql` | Pengaduan dibatasi sejak go-live **1 November 2026**: kandidat, pengajuan, dan keputusan menolak tanggal sebelum tanggal tersebut agar hari kerja lama yang presensinya sudah dihapus tidak muncul lagi |
 
 > Bila database sudah pernah dijalankan sampai file 08, jalankan **file 09** untuk
 > mengaktifkan alur Dinas & Sakit / Cuti, **file 11** untuk pengaturan kepala
@@ -116,8 +120,11 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > ulang menit terlambat data lama sejak go-live, dan **file 31** untuk
 > persetujuan otomatis pengajuan yang dicatat Super Admin, **file 32**
 > untuk tukar shift teraudit (riwayat tukar + laporan bulanan), **file 33**
-> untuk pengaduan absen pulang (foto bukti + persetujuan kepala unit), serta
-> **file 34** agar Super Admin juga dapat memutuskan pengaduan.
+> untuk pengaduan presensi (foto bukti + persetujuan kepala unit), **file 34**
+> agar Super Admin juga dapat memutuskan pengaduan, **file 35** agar pengaduan
+> mencakup absen masuk dan pulang, **file 36** agar jam masuk yang sudah
+> tercatat dapat dikoreksi lewat pengaduan, serta **file 37** agar pengaduan
+> dibatasi sejak go-live 1 November 2026.
 > File 10 hanya berisi RPC perubahan role yang tidak dipakai UI, jadi boleh
 > dilewati. Jalankan migrasi secara bertahap - jangan mengulang file lama bila
 > tidak diperlukan.
@@ -135,8 +142,9 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > **`supabase/verifikasi_26.sql`**, **`supabase/verifikasi_27.sql`**,
 > **`supabase/verifikasi_28.sql`**, **`supabase/verifikasi_29.sql`**,
 > **`supabase/verifikasi_30.sql`**, **`supabase/verifikasi_31.sql`**,
-> **`supabase/verifikasi_32.sql`**, **`supabase/verifikasi_33.sql`**, dan
-> **`supabase/verifikasi_34.sql`** setelah
+> **`supabase/verifikasi_32.sql`**, **`supabase/verifikasi_33.sql`**,
+> **`supabase/verifikasi_34.sql`**, **`supabase/verifikasi_35.sql`**,
+> **`supabase/verifikasi_36.sql`**, dan **`supabase/verifikasi_37.sql`** setelah
 > migrasi terkait. Seluruh nilai
 > pemeriksaan harus `true`; bila ada yang `false`, jangan lanjutkan pemakaian.
 > `verifikasi_13.sql` dan `verifikasi_14.sql` hanya berlaku sebelum migrasi 15;
@@ -177,6 +185,18 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > Migrasi 34 wajib dijalankan agar Super Admin dapat menyetujui/menolak
 > pengaduan di **Koreksi Presensi → Riwayat Pengaduan**. Jalankan
 > `verifikasi_34.sql` setelahnya.
+> Migrasi 35 wajib dijalankan agar **Pengaduan Presensi** mencakup **absen
+> masuk** dan **absen pulang**. Persetujuan absen masuk mengisi jam masuk,
+> menghitung `menit_terlambat` dari jadwal, dan menandai status `Hadir` dengan
+> jejak koreksi. Jalankan `verifikasi_35.sql` setelahnya.
+> Migrasi 36 wajib dijalankan agar **jam masuk yang sudah tercatat** dapat
+> dikoreksi lewat pengaduan (hanya ke jam yang lebih awal) dan agar jam
+> kedatangan lebih awal (mis. 07.50 untuk jadwal 08.00) diterima. Jalankan
+> `verifikasi_36.sql` setelahnya.
+> Migrasi 37 wajib dijalankan agar pengaduan hanya berlaku untuk tanggal sejak
+> go-live **1 November 2026**; tanpa migrasi ini hari kerja lama yang presensinya
+> sudah dihapus masih dapat muncul sebagai kandidat "absen masuk". Jalankan
+> `verifikasi_37.sql` setelahnya.
 > Bila muncul `function public.is_superadmin() does not exist`, jalankan versi
 > terbaru migrasi 19 — file ini membuat ulang fungsi inti tersebut sekaligus
 > memeriksa keberadaan tabel `pegawai`/`presensi`.
@@ -669,3 +689,10 @@ tetapi mempertahankan **92 pegawai**, grup/unit kerja, penugasan kepala unit,
 akun kepala ASN, master shift, jam kerja reguler, hari libur, serta pengaturan
 presensi. Skrip juga membatalkan transaksi bila jumlah pegawai, grup shift, atau
 master shift berubah.
+
+**Menghapus data testing setelah go-live (hanya sebelum 1 November 2026):**
+jalankan `supabase/hapus_data_testing.sql`. Skrip ini menghapus transaksi
+bertanggal sebelum **1 November 2026** (presensi, koreksi, pengaduan, izin,
+jadwal shift, tukar shift) dan **mempertahankan seluruh data sejak 1 November
+2026** serta akun pegawai, grup, master shift, jam kerja, hari libur, pengaturan,
+dan perangkat terdaftar. Backup database sebelum menjalankannya.
