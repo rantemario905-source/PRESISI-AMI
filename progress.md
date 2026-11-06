@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-06 18:22 WITA (commit & push panel absen izin) |
+| Terakhir diperbarui | 2026-11-06 18:28 WITA (ringkas teks status izin) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,7 +37,14 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-06 17:59):** **Panel Absen tidak lagi menampilkan
+**Pekerjaan terbaru (2026-11-06 18:28):** **teks status izin di Panel Absen
+diringkas**. Judul kartu cukup nama status (**Sakit/Cuti/Dinas Luar**), bukan
+“… Hari Ini”; deskripsi “Status … sudah tercatat. Tidak perlu absen hari ini.”
+dihapus; pesan **Tidak perlu absen hari ini** hanya tampil satu kali sebagai
+aksi. Verifikasi: `npm run lint` bersih, `npm test` **71/71**, `npm run build`
+lulus **8,62 dtk**. Perubahan masih lokal dan belum di-commit.
+
+**Pekerjaan sebelumnya (2026-11-06 17:59):** **Panel Absen tidak lagi menampilkan
 Alfa palsu untuk pegawai berstatus Sakit, Cuti, atau Dinas Luar**. Status final
 tersebut dibaca dari baris `presensi` hari ini yang tidak memiliki `jam_masuk`;
 panel menampilkan judul dan keterangan status, menonaktifkan tombol absen serta
@@ -668,6 +675,18 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-06 18:28 WITA — Ringkas teks status izin
+
+- **Perubahan:** judul kartu status izin `PanelAbsen` kini hanya nama status
+  (**Sakit**, bukan “Sakit Hari Ini”); deskripsi “Status … sudah tercatat. Tidak
+  perlu absen hari ini.” dihapus; pesan **Tidak perlu absen hari ini** tinggal
+  satu kali pada blok aksi.
+- **File:** `src/components/PanelAbsen.jsx`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **71/71**; `npm run build`
+  lulus **8,62 dtk**.
+- **Catatan/risiko:** perubahan hanya teks/tampilan; tanpa migrasi. Belum
+  di-commit dan belum diuji manual di perangkat.
 
 ### 2026-11-06 18:22 WITA — Commit & push panel absen izin
 

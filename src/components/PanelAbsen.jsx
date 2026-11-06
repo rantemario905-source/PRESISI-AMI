@@ -225,7 +225,7 @@ export default function PanelAbsen({
         ? 'Presensi kemarin masih terbuka'
         : 'Sudah absen masuk'
       : izinHariIni
-        ? `${statusIzin} Hari Ini`
+        ? statusIzin
         : malamKemarinAktif
           ? 'Shift malam kemarin'
           : masukTerlewat
@@ -243,7 +243,7 @@ export default function PanelAbsen({
           ? ''
           : 'Absen pulang sebelum meninggalkan area rumah sakit.'
     : izinHariIni
-      ? `Status ${statusIzin} sudah tercatat. Tidak perlu absen hari ini.`
+      ? ''
       : malamKemarinAktif
         ? `Shift malam ${formatTanggalRingkas(
             jadwalKemarin.tanggal,
