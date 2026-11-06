@@ -4,7 +4,7 @@
  * ==========================================================================
  */
 import { supabase } from '../utils/supabaseClient.js'
-import { akhirBulan, daftarTanggal } from '../utils/format.js'
+import { akhirBulan } from '../utils/format.js'
 import { ambilSemuaHalaman } from '../utils/paginasi.js'
 import { ambilSemuaPegawai } from './pegawaiService.js'
 
@@ -49,7 +49,7 @@ export async function ambilRekapBulanan({ periode, unit = 'semua' }) {
  * Kepala ruangan otomatis dibatasi RLS ke unitnya sendiri.
  *
  * @param {{ periode: string, unit: string }} params
- * @returns {Promise<{ pegawai: object[], presensi: object[], alasanIzin: Record<string, string>, mulai: string, selesai: string }>}
+ * @returns {Promise<{ pegawai: object[], presensi: object[], jadwal: Record<string, string|null>, mulai: string, selesai: string }>}
  */
 export async function ambilLaporanBulanan({ periode, unit }) {
   const mulai = `${periode}-01`
@@ -65,10 +65,7 @@ export async function ambilLaporanBulanan({ periode, unit }) {
     return {
       pegawai: [],
       presensi: [],
-      alasanIzin: {},
-      alasanPengaduan: {},
       jadwal: {},
-      tukar: [],
       mulai,
       selesai,
     }
@@ -88,66 +85,30 @@ export async function ambilLaporanBulanan({ periode, unit }) {
       .order('user_id', { ascending: true })
 
   const presensi = await ambilSemuaHalaman(buatKueri)
-
-  const [alasanIzin, alasanPengaduan, jadwal, tukar] = await Promise.all([
-    ambilAlasanIzin(idPegawai, mulai, selesai),
-    ambilAlasanPengaduan(idPegawai, mulai, selesai),
-    ambilJadwalPeta(idPegawai, mulai, selesai),
-    ambilTukarBulan(idPegawai, mulai, selesai),
-  ])
+  const jadwal = await ambilJadwalPeta(pegawai, mulai, selesai)
 
   return {
     pegawai,
     presensi,
-    alasanIzin,
-    alasanPengaduan,
     jadwal,
-    tukar,
     mulai,
     selesai,
   }
 }
 
-/** Peta "user_id|tanggal" → alasan pengaduan yang disetujui (opsional). */
-async function ambilAlasanPengaduan(idPegawai, mulai, selesai) {
-  const buatKueri = () =>
-    supabase
-      .from('pengaduan_presensi')
-      .select('user_id, tanggal, alasan, dibuat_pada')
-      .in('user_id', idPegawai)
-      .eq('status', 'disetujui')
-      .gte('tanggal', mulai)
-      .lte('tanggal', selesai)
-      .order('dibuat_pada', { ascending: true })
+/** Peta "user_id|tanggal" → nama shift terjadwal untuk pegawai pola shift. */
+async function ambilJadwalPeta(pegawai, mulai, selesai) {
+  const idPegawaiShift = pegawai
+    .filter((p) => p.pola_kerja !== 'reguler')
+    .map((p) => p.id)
 
-  let data
-  try {
-    data = await ambilSemuaHalaman(buatKueri)
-  } catch {
-    return {}
-  }
+  if (idPegawaiShift.length === 0) return {}
 
-  const peta = {}
-  for (const baris of data ?? []) {
-    const kunci = `${baris.user_id}|${baris.tanggal}`
-    const alasan = String(baris.alasan ?? '').trim()
-    if (!alasan) continue
-    if (!peta[kunci]) {
-      peta[kunci] = alasan
-    } else if (!peta[kunci].includes(alasan)) {
-      peta[kunci] = `${peta[kunci]} · ${alasan}`
-    }
-  }
-  return peta
-}
-
-/** Peta "user_id|tanggal" → ringkasan shift terjadwal. */
-async function ambilJadwalPeta(idPegawai, mulai, selesai) {
   const buatKueri = () =>
     supabase
       .from('jadwal_shift')
-      .select('user_id, tanggal, shift_master ( nama_shift, jam_mulai, jam_selesai )')
-      .in('user_id', idPegawai)
+      .select('user_id, tanggal, shift_master ( nama_shift )')
+      .in('user_id', idPegawaiShift)
       .gte('tanggal', mulai)
       .lte('tanggal', selesai)
       .order('tanggal', { ascending: true })
@@ -161,69 +122,7 @@ async function ambilJadwalPeta(idPegawai, mulai, selesai) {
 
   const peta = {}
   for (const baris of data ?? []) {
-    peta[`${baris.user_id}|${baris.tanggal}`] = baris.shift_master ?? null
-  }
-  return peta
-}
-
-/** Daftar kejadian tukar shift yang melibatkan pegawai terpilih pada bulan itu. */
-async function ambilTukarBulan(idPegawai, mulai, selesai) {
-  const buatKueri = () =>
-    supabase
-      .from('tukar_shift')
-      .select(
-        [
-          'id, tanggal, pegawai_a, pegawai_b, alasan',
-          'orang_a:pegawai!tukar_shift_pegawai_a_fkey ( nama )',
-          'orang_b:pegawai!tukar_shift_pegawai_b_fkey ( nama )',
-          'sa_lama:shift_master!tukar_shift_shift_a_lama_fkey ( nama_shift )',
-          'sb_lama:shift_master!tukar_shift_shift_b_lama_fkey ( nama_shift )',
-          'sa_baru:shift_master!tukar_shift_shift_a_baru_fkey ( nama_shift )',
-          'sb_baru:shift_master!tukar_shift_shift_b_baru_fkey ( nama_shift )',
-        ].join(', '),
-      )
-      .gte('tanggal', mulai)
-      .lte('tanggal', selesai)
-      .order('tanggal', { ascending: true })
-
-  let data
-  try {
-    data = await ambilSemuaHalaman(buatKueri)
-  } catch {
-    return []
-  }
-
-  const kumpulan = new Set(idPegawai)
-  return (data ?? []).filter(
-    (baris) => kumpulan.has(baris.pegawai_a) || kumpulan.has(baris.pegawai_b),
-  )
-}
-
-/** Peta "user_id|tanggal" → alasan izin yang disetujui (opsional, tidak fatal). */
-async function ambilAlasanIzin(idPegawai, mulai, selesai) {
-  const buatKueri = () =>
-    supabase
-      .from('izin_cuti')
-      .select('user_id, jenis, tanggal_mulai, tanggal_selesai, alasan, status')
-      .in('user_id', idPegawai)
-      .eq('status', 'disetujui')
-      .lte('tanggal_mulai', selesai)
-      .gte('tanggal_selesai', mulai)
-      .order('id', { ascending: true })
-
-  let data
-  try {
-    data = await ambilSemuaHalaman(buatKueri)
-  } catch {
-    return {}
-  }
-
-  const peta = {}
-  for (const izin of data ?? []) {
-    for (const tanggal of daftarTanggal(izin.tanggal_mulai, izin.tanggal_selesai)) {
-      if (tanggal < mulai || tanggal > selesai) continue
-      peta[`${izin.user_id}|${tanggal}`] = izin.alasan
-    }
+    peta[`${baris.user_id}|${baris.tanggal}`] = baris.shift_master?.nama_shift ?? null
   }
   return peta
 }

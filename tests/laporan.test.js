@@ -2,93 +2,15 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {
   bersihkanAlasanKoreksi,
-  keteranganPresensi,
-  ringkasKehadiran,
   labelShift,
-  ringkasTukar,
+  ringkasKehadiran,
 } from '../src/utils/laporan.js'
 
-test('labelShift menyusun nama dan jam shift', () => {
-  assert.equal(
-    labelShift({ nama_shift: 'Pagi', jam_mulai: '07:30:00', jam_selesai: '14:30:00' }),
-    'Pagi 07:30–14:30',
-  )
-  assert.equal(labelShift({ nama_shift: 'Siang' }), 'Siang')
+test('labelShift menampilkan nama shift atau tanda kosong', () => {
+  assert.equal(labelShift('Pagi'), 'Pagi')
+  assert.equal(labelShift('Malam'), 'Malam')
   assert.equal(labelShift(null), '—')
-})
-
-test('ringkasTukar membaca sudut pandang pegawai', () => {
-  const tukar = [
-    {
-      id: 't1',
-      tanggal: '2026-11-05',
-      pegawai_a: 'a',
-      pegawai_b: 'b',
-      alasan: 'keluarga',
-      orang_a: { nama: 'Andi' },
-      orang_b: { nama: 'Budi' },
-      sa_lama: { nama_shift: 'Pagi' },
-      sb_lama: { nama_shift: 'Malam' },
-      sa_baru: { nama_shift: 'Malam' },
-      sb_baru: { nama_shift: 'Pagi' },
-    },
-  ]
-
-  const sudutA = ringkasTukar(tukar, 'a')
-  assert.equal(sudutA.length, 1)
-  assert.equal(sudutA[0].rekan, 'Budi')
-  assert.equal(sudutA[0].asal, 'Pagi')
-  assert.equal(sudutA[0].baru, 'Malam')
-
-  const sudutB = ringkasTukar(tukar, 'b')
-  assert.equal(sudutB[0].rekan, 'Andi')
-  assert.equal(sudutB[0].asal, 'Malam')
-  assert.equal(sudutB[0].baru, 'Pagi')
-
-  assert.deepEqual(ringkasTukar(tukar, 'c'), [])
-})
-
-test('keteranganPresensi hanya izin dan pengaduan, bukan koreksi manual', () => {
-  assert.equal(
-    keteranganPresensi(
-      { user_id: 'u1', tanggal: '2026-11-03', status_kehadiran: 'Sakit' },
-      { alasanIzin: { 'u1|2026-11-03': 'Demam' } },
-    ),
-    'Demam',
-  )
-  assert.equal(
-    keteranganPresensi(
-      { user_id: 'u1', tanggal: '2026-11-04', status_kehadiran: 'Koreksi' },
-      { alasanPengaduan: { 'u1|2026-11-04': 'Lupa absen pulang' } },
-    ),
-    'Lupa absen pulang',
-  )
-  assert.equal(
-    keteranganPresensi(
-      { user_id: 'u1', tanggal: '2026-11-05', status_kehadiran: 'Hadir' },
-      { alasanPengaduan: { 'u1|2026-11-05': 'Lupa absen masuk' } },
-    ),
-    'Lupa absen masuk',
-  )
-})
-
-test('keteranganPresensi tidak memakai koreksi manual, Alfa, atau tukar', () => {
-  assert.equal(
-    keteranganPresensi({
-      status_kehadiran: 'Hadir',
-      alasan_koreksi: 'Izin Ke BANK BPD',
-    }),
-    '—',
-  )
-  assert.equal(keteranganPresensi({ status_kehadiran: 'Alfa' }), '—')
-  assert.equal(
-    keteranganPresensi(
-      { tanggal: '2026-11-05', status_kehadiran: 'Hadir' },
-      { rekanTukar: new Map([['2026-11-05', 'Budi']]) },
-    ),
-    '—',
-  )
-  assert.equal(keteranganPresensi({ status_kehadiran: 'Hadir' }), '—')
+  assert.equal(labelShift(''), '—')
 })
 
 test('bersihkanAlasanKoreksi membuang awalan persetujuan dan catatan', () => {

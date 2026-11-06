@@ -96,7 +96,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 | 29 | `supabase/migrations/29_toleransi_terlambat_dan_jam_pulang.sql` | Toleransi keterlambatan: dihitung per menit penuh (08.00.59 = 0 menit, 08.01 = 1 menit). Absen pulang dibuka tepat pada jam pulang (16.30 sudah bisa) dan tetap ditutup 2 jam setelahnya |
 | 30 | `supabase/migrations/30_hitung_ulang_menit_terlambat.sql` | Hitung ulang `menit_terlambat` data lama sejak go-live 1 November 2026 memakai aturan menit penuh; hanya baris ber-`jam_masuk`, idempoten, tidak mengubah data lain |
 | 31 | `supabase/migrations/31_auto_setujui_superadmin.sql` | Pengajuan Sakit/Dinas Luar/Cuti yang dicatat atau diubah Super Admin langsung berstatus `disetujui` dan presensi terkait ditandai; pengajuan kepala ruangan tetap `menunggu` |
-| 32 | `supabase/migrations/32_tukar_shift.sql` | Tukar shift teraudit: tabel `tukar_shift` + RPC `tukar_shift()` yang menukar dua baris `jadwal_shift` secara atomik dan mencatat riwayat (shift asal/pengganti, alasan, pelaku) untuk laporan bulanan |
+| 32 | `supabase/migrations/32_tukar_shift.sql` | Tukar shift teraudit: tabel `tukar_shift` + RPC `tukar_shift()` yang menukar dua baris `jadwal_shift` secara atomik dan mencatat riwayat (shift asal/pengganti, alasan, pelaku) |
 | 33 | `supabase/migrations/33_pengaduan_presensi.sql` | Pengaduan absen pulang: tabel `pengaduan_presensi` + foto bukti wajib (maks. 7 hari), persetujuan kepala unit; persetujuan mengisi `jam_pulang` dan status `Koreksi` |
 | 34 | `supabase/migrations/34_superadmin_putuskan_pengaduan.sql` | Super Admin dapat menyetujui/menolak pengaduan presensi (tanpa cek unit, tetap tidak dapat memutuskan pengaduan sendiri) |
 | 35 | `supabase/migrations/35_pengaduan_masuk.sql` | Pengaduan multi-jenis: absen masuk + pulang dalam satu alur. `presensi_id` boleh kosong, `jenis` + `jam_masuk_diajukan/disetujui`, RPC `kandidat_pengaduan_presensi()`, dan persetujuan absen masuk mengisi jam masuk serta menghitung keterlambatan |
@@ -119,7 +119,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > keterlambatan serta jam pulang tepat waktu, **file 30** untuk menghitung
 > ulang menit terlambat data lama sejak go-live, dan **file 31** untuk
 > persetujuan otomatis pengajuan yang dicatat Super Admin, **file 32**
-> untuk tukar shift teraudit (riwayat tukar + laporan bulanan), **file 33**
+> untuk tukar shift teraudit (penukaran jadwal + riwayat tukar), **file 33**
 > untuk pengaduan presensi (foto bukti + persetujuan kepala unit), **file 34**
 > agar Super Admin juga dapat memutuskan pengaduan, **file 35** agar pengaduan
 > mencakup absen masuk dan pulang, **file 36** agar jam masuk yang sudah
@@ -176,7 +176,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > dicatat kepala ruangan tetap menunggu persetujuan Super Admin. Jalankan
 > `verifikasi_31.sql` setelahnya.
 > Migrasi 32 wajib dijalankan agar **Tukar Shift** di menu Jadwal Shift bekerja
-> (menukar jadwal dua pegawai + mencatat riwayat untuk laporan bulanan). Jalankan
+> (menukar jadwal dua pegawai + mencatat riwayat tukar). Jalankan
 > `verifikasi_32.sql` setelahnya.
 > Migrasi 33 wajib dijalankan agar menu **Pengaduan Presensi** (pegawai) dan
 > **Pengaduan Presensi** (kepala unit) berfungsi. Foto bukti tetap di bucket
@@ -591,11 +591,13 @@ Semua pembatasan unit divalidasi di server lewat `unit_dikelola()`.
 sedangkan Super Admin memilih unit. Cakupan dapat berupa satu pegawai atau seluruh
 pegawai unit (satu halaman per pegawai). Lembar laporan berisi kop Pemerintah Kutai
 Kartanegara + RSUD Aji Muhammad Idris (dua logo, Times New Roman), identitas pegawai,
-tabel harian (hari/tanggal, jam masuk, jam pulang, status, terlambat, keterangan),
-ringkasan kehadiran, serta tanda tangan **Kasubbag Tata Usaha** (Suriami, SKM.,
-M.Kes; NIP. 197312302007012011) di kanan bawah untuk seluruh pegawai. Cetak
-melalui dialog browser →
-**Simpan sebagai PDF** pada ukuran A4 portrait.
+tabel harian, ringkasan kehadiran, serta tanda tangan **Kasubbag Tata Usaha**
+(Suriami, SKM., M.Kes; NIP. 197312302007012011) di kanan bawah untuk seluruh
+pegawai. Pegawai **Reguler** memakai kolom hari/tanggal, jam masuk, jam pulang,
+status, dan terlambat. Pegawai **Shift** mendapat tambahan kolom **Shift** setelah
+hari/tanggal yang berisi nama shift pada hari itu (mis. Pagi/Siang/Malam).
+Kolom **Keterangan** tidak dicetak, dan riwayat tukar shift tidak ditampilkan.
+Cetak melalui dialog browser → **Simpan sebagai PDF** pada ukuran A4 portrait.
 
 Pegawai biasa **tidak dapat mengajukan sendiri**. Pencatatan dilakukan kepala unit
 atau Super Admin; persetujuan hanya oleh Super Admin. Kepala unit dapat mencatat

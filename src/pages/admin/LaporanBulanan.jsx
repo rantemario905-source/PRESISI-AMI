@@ -21,10 +21,7 @@ import LembarLaporan from '../../components/laporan/LembarLaporan.jsx'
 const DATA_KOSONG = {
   pegawai: [],
   presensi: [],
-  alasanIzin: {},
-  alasanPengaduan: {},
   jadwal: {},
-  tukar: [],
 }
 
 export default function LaporanBulanan({ mode = 'superadmin' }) {
@@ -240,10 +237,7 @@ export default function LaporanBulanan({ mode = 'superadmin' }) {
               key={p.id}
               pegawai={p}
               presensi={petaPresensi.get(p.id) ?? []}
-              alasanIzin={data.alasanIzin}
-              alasanPengaduan={data.alasanPengaduan}
               jadwal={data.jadwal}
-              tukar={data.tukar}
               periode={periode}
               waktuCetak={waktuCetak}
             />

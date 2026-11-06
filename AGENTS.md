@@ -274,6 +274,8 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-132 | 2026-11-05 15:25 | "kenapa jadi seperti ini, pastikan nama rekan tukar menjadi 1 baris saja, kolom alasan terlalu besar, jadi kolom nama itu menyesuaikan panjang dari nama setiap pegawai" | Mengembalikan `.tabel-tukar` ke `table-layout: auto`; kolom Tanggal/Rekan Tukar/Shift Asal/Shift Pengganti `white-space: nowrap` agar nama **satu baris**, kolom **Alasan** dibatasi 18%. Lint bersih, `npm test` **71/71**, build lulus **11,64 dtk** | selesai (kode); belum di-commit | 2026-11-05 15:25 — Lebar kolom riwayat tukar |
 | I-133 | 2026-11-05 15:29 | "Riwayat Tukar Shift Bulan Ini ganti menjadi riwayat tukar shift" | Mengganti judul blok laporan bulanan dari "Riwayat Tukar Shift Bulan Ini" menjadi **"Riwayat Tukar Shift"**. Lint bersih, `npm test` **71/71**, build lulus **7,88 dtk** | selesai (kode); belum di-commit | 2026-11-05 15:29 — Judul riwayat tukar disederhanakan |
 | I-134 | 2026-11-05 16:18 | "lanjutkan keputusan question di atas sesuai kesepakatan kita" (rapikan dokumen + commit & push; `verifikasi_36.sql` dan `verifikasi_37.sql` sudah dijalankan) | Menyinkronkan `README.md` (pohon migrasi 01–37, verifikasi 34–37, `hapus_data_testing.sql`), `AGENTS.md` (fakta pengaduan multi-jenis/koreksi jam masuk/keterangan laporan), dan `progress.md` (status laporan, migrasi 36–37, verifikasi). Membersihkan fixtur uji yang tidak terpakai. Lint bersih, `npm test` **71/71**, build lulus **16,32 dtk** | selesai (dokumen & uji); siap commit & push | 2026-11-05 16:18 — Sinkronisasi dokumen & konfirmasi verifikasi 36–37 |
+| I-135 | 2026-11-06 14:29 | "lanjutkan" | Melanjutkan penghapusan blok **Riwayat Tukar Shift** dan kolom **Shift** dari Laporan Presensi Bulanan agar laporan sama untuk pegawai Reguler dan Shift. Membersihkan query `jadwal`/`tukar` di `reportService.js`, `DATA_KOSONG`/prop `LaporanBulanan.jsx`, helper `labelShift`/`ringkasTukar` + uji, serta CSS `.blok-tukar`/`.tabel-tukar`. Data `jadwal_shift` dan `tukar_shift` tetap utuh. Lint bersih, `npm test` **69/69**, build lulus **14,92 dtk** | selesai (kode & dokumen); belum di-commit | 2026-11-06 14:29 — Laporan bulanan tanpa kolom Shift & riwayat tukar |
+| I-136 | 2026-11-06 (WITA) | "kemudian kolom keterangan pada laporan bulanan dihilangkan saja jadi reguler dan shift keterangannya dihilangkan saja, dan pada pola kerja shift ditambahkan kolom shift, dimana isinya itu shift mereka dihari itu semisal arinda belan kolom shift tgl 1 itu dia pagi jadi di kolom shift itu terisi pagi sesuai pada hari itu, apakah kamu paham?" + "kerjakan, pastikan tidak ad abug dan eror" | Menghapus kolom **Keterangan** dari laporan bulanan untuk semua pola kerja dan menambahkan kolom **Shift** setelah hari/tanggal khusus pegawai **Shift**, berisi nama shift hari itu dari `jadwal_shift` (`—` bila tidak ada jadwal). `reportService.js` kembali mengambil peta jadwal dan berhenti mengambil alasan izin/pengaduan; helper `labelShift()` ditambahkan, `keteranganPresensi()` dihapus. Lint bersih, `npm test` **68/68**, build lulus **7,77 dtk** | selesai (kode & dokumen); belum di-commit | 2026-11-06 — Keterangan dihapus & kolom Shift untuk pegawai shift |
 
 ---
 
@@ -470,16 +472,20 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   Kepala unit hanya untuk unit yang dikelola pada tanggal hari ini/setelahnya;
   Super Admin bebas termasuk tanggal lampau. RLS baca: Super Admin, kepala
   unit, pegawai yang terlibat; tulis hanya lewat RPC. UI: tombol **Tukar
-  Shift** + modal di `JadwalShift.jsx`; laporan bulanan menampilkan kolom
-  **Shift** dan blok **Riwayat Tukar Shift** (`reportService.js`,
-  `LembarLaporan.jsx`, `utils/laporan.js`). Tombol **Cetak Jadwal** mencetak
+  Shift** + modal di `JadwalShift.jsx`. Laporan bulanan per pegawai tidak
+  memakai kolom **Keterangan** dan tidak menampilkan blok **Riwayat Tukar
+  Shift**; pegawai **Shift** memiliki kolom **Shift** berisi nama shift hari
+  itu (Pagi/Siang/Malam, `—` bila tidak ada jadwal), sedangkan pegawai
+  **Reguler** tanpa kolom Shift. Data tukar tetap tersimpan di `tukar_shift`
+  untuk audit. Tombol **Cetak Jadwal** mencetak
   F4 landscape berwarna (Pagi sky, Siang amber, Malam indigo) dengan kop dan
   tanda tangan Kepala Ruangan (nama saja) melalui `LembarJadwal.jsx`,
-  `utils/jadwalCetak.js`, dan gaya cetak di `index.css`. Verifikasi lokal:
-  `npm run lint` bersih, `npm test` **62/62**, `npm run build` lulus
-  **16,38 dtk**. Migrasi 32 dan `verifikasi_32.sql` **sudah dijalankan dan
-  lulus** di Supabase (laporan user 2026-11-04); Tukar Shift aktif. Sisa: uji
-  manual tukar shift & cetak jadwal F4, lalu commit/push menunggu perintah.
+  `utils/jadwalCetak.js`, dan gaya cetak di `index.css`. Verifikasi lokal
+  terbaru 2026-11-06: `npm run lint` bersih, `npm test` **68/68**, `npm run
+  build` lulus **7,77 dtk**. Migrasi 32 dan `verifikasi_32.sql` **sudah
+  dijalankan dan lulus** di Supabase (laporan user 2026-11-04); Tukar Shift
+  aktif. Sisa: uji manual tampilan laporan Reguler/Shift, lalu commit/push
+  menunggu perintah.
 - **Pengaduan presensi (2026-11-04, sudah dijalankan; commit `c1e56f7`):** pegawai yang lupa absen
   pulang mengajukan lewat `/pengaduan` (jam pulang, alasan min. 10 karakter, foto
   bukti JPG/PNG wajib ≤ 1 MB, maks. 7 hari, shift malam H+1). Kepala unit
@@ -512,12 +518,13 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   `Pengaduan.jsx`, `FormPengaduan.jsx`, `DaftarPengaduan.jsx`,
   `ModalPutusanPengaduan.jsx`, `pengaduanService.js`. Migrasi 35–37 dan
   `verifikasi_33..37.sql` **sudah dijalankan** (laporan user 2026-11-05).
-- **Keterangan laporan bulanan (2026-11-05):** kolom **Keterangan** hanya memuat
-  alasan **Sakit/Cuti/Dinas Luar** (dari `izin_cuti`) dan **pengaduan disetujui**
-  (dari `pengaduan_presensi.alasan`), tanpa awalan "disetujui oleh …". Koreksi
-  manual Super Admin, label Alfa, dan tukar shift tidak ditampilkan. Riwayat
-  tukar shift punya blok sendiri tanpa kolom "Dicatat Oleh". Helper:
-  `keteranganPresensi()` dan `bersihkanAlasanKoreksi()` di
-  `src/utils/laporan.js`.
+- **Tabel laporan bulanan (2026-11-06):** kolom **Keterangan** tidak dicetak.
+  Pegawai **Reguler** memakai kolom hari/tanggal, jam masuk, jam pulang, status,
+  dan terlambat. Pegawai **Shift** mendapat kolom **Shift** setelah hari/tanggal
+  berisi nama shift hari itu (`—` bila tidak ada jadwal). Data diambil dari
+  `jadwal_shift` sehingga mengikuti hasil Tukar Shift. Helper:
+  `labelShift()` dan `labelPolaKerja()` di `src/utils/laporan.js`;
+  `bersihkanAlasanKoreksi()` tetap dipakai di layar Riwayat Saya dan Koreksi
+  Presensi. Tidak ada migrasi DB.
 - Timezone aplikasi: `Asia/Makassar` (WITA, UTC+8).
 - `dist/` dan `.env` sudah diabaikan Git.

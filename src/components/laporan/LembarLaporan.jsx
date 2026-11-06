@@ -8,11 +8,9 @@ import {
 } from '../../utils/format.js'
 import {
   STATUS_KEHADIRAN,
-  keteranganPresensi,
   labelPolaKerja,
   labelShift,
   ringkasKehadiran,
-  ringkasTukar,
 } from '../../utils/laporan.js'
 
 const jamSingkat = (iso) => (iso ? formatJam(iso).replace(' WITA', '') : '—')
@@ -20,18 +18,15 @@ const jamSingkat = (iso) => (iso ? formatJam(iso).replace(' WITA', '') : '—')
 export default function LembarLaporan({
   pegawai,
   presensi = [],
-  alasanIzin = {},
-  alasanPengaduan = {},
   jadwal = {},
-  tukar = [],
   periode,
   waktuCetak,
 }) {
   const ringkasan = ringkasKehadiran(presensi)
   const polaShift = pegawai.pola_kerja !== 'reguler'
-  const tukarPegawai = ringkasTukar(tukar, pegawai.id)
-  const keterangan = (baris) =>
-    keteranganPresensi(baris, { alasanIzin, alasanPengaduan })
+  const jumlahKolom = polaShift ? 7 : 6
+  const shiftHari = (baris) =>
+    labelShift(jadwal[`${baris.user_id}|${baris.tanggal}`])
 
   return (
     <article className="lembar-laporan">
@@ -73,28 +68,13 @@ export default function LembarLaporan({
 
       <table className="tabel-laporan">
         <colgroup>
-          {polaShift ? (
-            <>
-              <col style={{ width: '5%' }} />
-              <col style={{ width: '18%' }} />
-              <col style={{ width: '16%' }} />
-              <col style={{ width: '10%' }} />
-              <col style={{ width: '10%' }} />
-              <col style={{ width: '10%' }} />
-              <col style={{ width: '10%' }} />
-              <col style={{ width: '21%' }} />
-            </>
-          ) : (
-            <>
-              <col style={{ width: '6%' }} />
-              <col style={{ width: '21%' }} />
-              <col style={{ width: '12%' }} />
-              <col style={{ width: '12%' }} />
-              <col style={{ width: '11%' }} />
-              <col style={{ width: '10%' }} />
-              <col style={{ width: '28%' }} />
-            </>
-          )}
+          <col style={{ width: '6%' }} />
+          <col style={{ width: polaShift ? '21%' : '26%' }} />
+          {polaShift && <col style={{ width: '14%' }} />}
+          <col style={{ width: polaShift ? '13%' : '17%' }} />
+          <col style={{ width: polaShift ? '13%' : '17%' }} />
+          <col style={{ width: polaShift ? '16%' : '17%' }} />
+          <col style={{ width: '17%' }} />
         </colgroup>
         <thead>
           <tr>
@@ -105,13 +85,12 @@ export default function LembarLaporan({
             <th>Jam Pulang</th>
             <th>Status</th>
             <th>Terlambat</th>
-            <th>Keterangan</th>
           </tr>
         </thead>
         <tbody>
           {presensi.length === 0 ? (
             <tr>
-              <td colSpan={polaShift ? 8 : 7} className="kosong">
+              <td colSpan={jumlahKolom} className="kosong">
                 Belum ada catatan presensi pada periode ini.
               </td>
             </tr>
@@ -121,9 +100,7 @@ export default function LembarLaporan({
                 <td className="tengah">{indeks + 1}</td>
                 <td>{formatTanggalHari(baris.tanggal)}</td>
                 {polaShift && (
-                  <td className="tengah">
-                    {labelShift(jadwal[`${baris.user_id}|${baris.tanggal}`])}
-                  </td>
+                  <td className="tengah">{shiftHari(baris)}</td>
                 )}
                 <td className="tengah">{jamSingkat(baris.jam_masuk)}</td>
                 <td className="tengah">{jamSingkat(baris.jam_pulang)}</td>
@@ -133,42 +110,11 @@ export default function LembarLaporan({
                     ? `${baris.menit_terlambat} mnt`
                     : '—'}
                 </td>
-                <td>{keterangan(baris)}</td>
               </tr>
             ))
           )}
         </tbody>
       </table>
-
-      {tukarPegawai.length > 0 && (
-        <div className="blok-tukar">
-          <p className="judul-tukar">Riwayat Tukar Shift</p>
-          <table className="tabel-tukar">
-            <thead>
-              <tr>
-                <th className="kolom-no">No</th>
-                <th className="kolom-tanggal">Tanggal</th>
-                <th className="kolom-rekan">Rekan Tukar</th>
-                <th className="kolom-shift">Shift Asal</th>
-                <th className="kolom-pengganti">Shift Pengganti</th>
-                <th className="kolom-alasan">Alasan</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tukarPegawai.map((t, indeks) => (
-                <tr key={t.id}>
-                  <td className="tengah">{indeks + 1}</td>
-                  <td className="kolom-tanggal">{formatTanggalHari(t.tanggal)}</td>
-                  <td className="kolom-rekan">{t.rekan}</td>
-                  <td className="tengah">{t.asal}</td>
-                  <td className="tengah">{t.baru}</td>
-                  <td className="kolom-alasan">{t.alasan || '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
 
       <BlokTandaTangan waktuCetak={waktuCetak} />
 
