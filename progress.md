@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-06 16:33 WITA (Keterangan dihapus; kolom Shift untuk pegawai shift) |
+| Terakhir diperbarui | 2026-11-06 16:57 WITA (commit & push laporan bulanan) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -46,7 +46,8 @@ kembali mengambil peta `jadwal_shift` (hanya pegawai shift) dan berhenti
 mengambil alasan izin/pengaduan; `labelShift()` ditambahkan dan
 `keteranganPresensi()` dihapus. Data `jadwal_shift`/`tukar_shift` tetap utuh.
 Verifikasi: `npm run lint` bersih, `npm test` **68/68**, `npm run build` lulus
-**7,77 dtk**.
+**7,77 dtk**. Di-commit **`f1511a2`** dan di-push ke `origin/main` 2026-11-06
+16:57.
 
 **Pekerjaan sebelumnya (2026-11-06 14:29):** **Laporan Presensi Bulanan tanpa kolom
 Shift dan tanpa blok Riwayat Tukar Shift**. Tabel laporan waktu itu sama untuk
@@ -656,6 +657,22 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-06 16:57 WITA — Commit & push laporan bulanan
+
+- **Perubahan:** memverifikasi ulang lalu meng-commit dan mem-push pekerjaan
+  laporan bulanan: blok **Riwayat Tukar Shift** dan kolom **Keterangan** dihapus,
+  kolom **Shift** ditambahkan khusus pegawai pola Shift, serta dokumentasi audit
+  disinkronkan.
+- **File:** `AGENTS.md`, `README.md`, `progress.md`,
+  `src/components/laporan/LembarLaporan.jsx`, `src/index.css`,
+  `src/pages/admin/LaporanBulanan.jsx`, `src/services/reportService.js`,
+  `src/utils/laporan.js`, `tests/laporan.test.js`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **68/68**; `npm run build`
+  lulus **11,68 dtk**. Commit `f1511a2` di-push ke `origin/main`
+  (`c531502..f1511a2`).
+- **Catatan/risiko:** uji manual cetak satu pegawai Reguler dan satu pegawai
+  Shift belum dilakukan.
 
 ### 2026-11-06 16:33 WITA — Keterangan dihapus & kolom Shift untuk pegawai shift
 
