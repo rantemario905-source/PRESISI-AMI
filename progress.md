@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-06 17:59 WITA (panel absen mengenali Sakit/Cuti/Dinas) |
+| Terakhir diperbarui | 2026-11-06 18:22 WITA (commit & push panel absen izin) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -45,7 +45,8 @@ pengaduan, dan menyembunyikan pesan radius/lokasi yang tidak relevan. Shift mala
 kemarin yang masih terbuka tetap dapat dipulangkan. Proses Alfa otomatis di
 server sudah mengecualikan status izin, sehingga perbaikan ini hanya di klien.
 Verifikasi: `npm run lint` bersih, `npm test` **71/71**, `npm run build` lulus
-**8,76 dtk**.
+**8,76 dtk**. Di-commit **`5e48fa0`** dan di-push ke `origin/main` 2026-11-06
+18:22.
 
 **Pekerjaan sebelumnya (2026-11-06 16:33):** **kolom Keterangan dihapus dan kolom
 Shift ditambahkan untuk pegawai pola Shift**. Laporan pegawai **Reguler** memakai
@@ -667,6 +668,19 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-06 18:22 WITA — Commit & push panel absen izin
+
+- **Perubahan:** memverifikasi ulang lalu meng-commit dan mem-push perbaikan
+  `PanelAbsen` agar Sakit/Cuti/Dinas Luar tidak lagi ditampilkan sebagai Alfa,
+  beserta helper `statusTanpaAbsen()`, uji, dan dokumentasi audit.
+- **File:** `AGENTS.md`, `README.md`, `progress.md`,
+  `src/components/PanelAbsen.jsx`, `src/utils/izin.js`, `tests/izin.test.js`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **71/71**; `npm run build`
+  lulus **8,76 dtk**. Commit `5e48fa0` di-push ke `origin/main`
+  (`5a3f163..5e48fa0`).
+- **Catatan/risiko:** uji manual status Sakit/Cuti/Dinas setelah jam pulang pada
+  perangkat pegawai belum dilakukan.
 
 ### 2026-11-06 17:59 WITA — Panel absen mengenali Sakit/Cuti/Dinas
 
