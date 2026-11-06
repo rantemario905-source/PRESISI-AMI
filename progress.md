@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-06 16:57 WITA (commit & push laporan bulanan) |
+| Terakhir diperbarui | 2026-11-06 17:59 WITA (panel absen mengenali Sakit/Cuti/Dinas) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,7 +37,17 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-06 16:33):** **kolom Keterangan dihapus dan kolom
+**Pekerjaan terbaru (2026-11-06 17:59):** **Panel Absen tidak lagi menampilkan
+Alfa palsu untuk pegawai berstatus Sakit, Cuti, atau Dinas Luar**. Status final
+tersebut dibaca dari baris `presensi` hari ini yang tidak memiliki `jam_masuk`;
+panel menampilkan judul dan keterangan status, menonaktifkan tombol absen serta
+pengaduan, dan menyembunyikan pesan radius/lokasi yang tidak relevan. Shift malam
+kemarin yang masih terbuka tetap dapat dipulangkan. Proses Alfa otomatis di
+server sudah mengecualikan status izin, sehingga perbaikan ini hanya di klien.
+Verifikasi: `npm run lint` bersih, `npm test` **71/71**, `npm run build` lulus
+**8,76 dtk**.
+
+**Pekerjaan sebelumnya (2026-11-06 16:33):** **kolom Keterangan dihapus dan kolom
 Shift ditambahkan untuk pegawai pola Shift**. Laporan pegawai **Reguler** memakai
 kolom No, Hari/Tanggal, Jam Masuk, Jam Pulang, Status, dan Terlambat. Pegawai
 **Shift** mendapat kolom **Shift** setelah Hari/Tanggal berisi nama shift pada
@@ -657,6 +667,23 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-06 17:59 WITA — Panel absen mengenali Sakit/Cuti/Dinas
+
+- **Perubahan:** `PanelAbsen` membaca `presensi.status_kehadiran` hari ini dan
+  tidak lagi menganggap ketiadaan `jam_masuk` sebagai Alfa bila statusnya
+  **Sakit**, **Cuti**, **Dinas Luar**, atau **Izin** lama. Panel menampilkan
+  judul `${status} Hari Ini`, keterangan bahwa tidak perlu absen, menyembunyikan
+  tombol absen/pengaduan serta badge radius dan catatan lokasi. Shift malam
+  kemarin yang masih terbuka tetap dapat dipulangkan. Alfa normal tetap tampil
+  untuk pegawai tanpa izin.
+- **File:** `src/components/PanelAbsen.jsx`, `src/utils/izin.js`,
+  `tests/izin.test.js`, `README.md`, `AGENTS.md`, `progress.md`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **71/71** lulus;
+  `npm run build` lulus **8,76 dtk**.
+- **Catatan/risiko:** tanpa migrasi DB karena `submit_presensi` dan
+  `proses_alfa_otomatis` sudah menganggap status izin final. Uji manual status
+  Sakit/Cuti/Dinas setelah jam pulang pada perangkat pegawai belum dilakukan.
 
 ### 2026-11-06 16:57 WITA — Commit & push laporan bulanan
 

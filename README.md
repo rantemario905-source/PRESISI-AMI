@@ -560,7 +560,9 @@ rentang tanggal tersebut dibuat atau ditandai sesuai jenis. Presensi yang sudah 
 jam masuk atau sudah dikoreksi Admin tidak ditimpa. Pembatalan oleh Super Admin menghapus
 penanda otomatis tersebut. Pengajuan yang **dicatat atau diubah Super Admin** langsung
 disetujui dan penanda presensi dijalankan pada saat penyimpanan; pengajuan yang dicatat
-kepala ruangan tetap menunggu persetujuan Super Admin.
+kepala ruangan tetap menunggu persetujuan Super Admin. Panel Absen pegawai membaca
+status tersebut sehingga tidak menampilkan **Alfa** atau tombol pengaduan pada hari
+Sakit/Cuti/Dinas Luar.
 
 **Aturan dokumen:** Sakit dan Dinas Luar **wajib** memiliki dokumen JPG/PNG maks. 1 MB
 saat disimpan. Cuti boleh tanpa dokumen. Satu grup Dinas Luar memakai satu dokumen

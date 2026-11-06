@@ -15,6 +15,7 @@ import { MAX_RADIUS_METERS } from '../config/constants.js'
 import { dapatkanLokasi, periksaLokasi } from '../utils/geofencing.js'
 import { kirimPresensi } from '../services/attendanceService.js'
 import { formatJam, formatJarak, formatTanggalRingkas, hariIni } from '../utils/format.js'
+import { statusTanpaAbsen } from '../utils/izin.js'
 import {
   bukaAbsenMasuk,
   bukaAbsenPulang,
@@ -138,6 +139,8 @@ export default function PanelAbsen({
   const presensiAktif = kemarinMasihBisaPulang ? presensiKemarin : presensi
   const sudahMasuk = Boolean(presensiAktif?.jam_masuk)
   const sudahPulang = Boolean(presensiAktif?.jam_pulang)
+  const statusIzin = statusTanpaAbsen(presensi)
+  const izinHariIni = Boolean(statusIzin) && presensiAktif === presensi
   const shiftMalamTerbuka =
     Boolean(presensiAktif?.tanggal) &&
     presensiAktif.tanggal !== hariIni() &&
@@ -149,10 +152,14 @@ export default function PanelAbsen({
   const bukaMasuk = bukaAbsenMasuk(jadwalMasuk)
   const batasMasuk = tutupAbsenMasuk(jadwalMasuk)
   const masukBelumDibuka =
-    !sudahMasuk && Boolean(bukaMasuk) && sekarang < bukaMasuk.getTime()
+    !sudahMasuk &&
+    !izinHariIni &&
+    Boolean(bukaMasuk) &&
+    sekarang < bukaMasuk.getTime()
   const masukTerlewat =
     !sudahMasuk &&
     !sudahPulang &&
+    !izinHariIni &&
     Boolean(batasMasuk) &&
     sekarang >= batasMasuk.getTime()
 
@@ -177,10 +184,12 @@ export default function PanelAbsen({
 
   const terkunciMasuk =
     perangkatTerkunci ||
+    izinHariIni ||
     (jadwalTerkunci && !malamKemarinAktif) ||
     masukBelumDibuka ||
     masukTerlewat
-  const terkunciPulang = perangkatTerkunci || pulangBelumDibuka || pulangTerlewat
+  const terkunciPulang =
+    perangkatTerkunci || izinHariIni || pulangBelumDibuka || pulangTerlewat
 
   const isLibur = Boolean(
     jadwal?.libur ||
@@ -215,11 +224,13 @@ export default function PanelAbsen({
       ? shiftMalamTerbuka
         ? 'Presensi kemarin masih terbuka'
         : 'Sudah absen masuk'
-      : malamKemarinAktif
-        ? 'Shift malam kemarin'
-        : masukTerlewat
-          ? 'Alfa Hari Ini'
-          : 'Belum absen hari ini'
+      : izinHariIni
+        ? `${statusIzin} Hari Ini`
+        : malamKemarinAktif
+          ? 'Shift malam kemarin'
+          : masukTerlewat
+            ? 'Alfa Hari Ini'
+            : 'Belum absen hari ini'
 
   const deskripsiStatus = sudahMasuk
     ? sudahPulang
@@ -231,15 +242,17 @@ export default function PanelAbsen({
         : pulangTerlewat
           ? ''
           : 'Absen pulang sebelum meninggalkan area rumah sakit.'
-    : malamKemarinAktif
-      ? `Shift malam ${formatTanggalRingkas(
-          jadwalKemarin.tanggal,
-        )} masih berlangsung. Absen masuk dicatat untuk tanggal tersebut.`
-      : masukTerlewat
-        ? 'Anda tercatat Alfa hari ini.'
-        : bebasRadius
-          ? 'Absen bisa dilakukan dari luar area rumah sakit.'
-          : 'Absen hanya bisa dilakukan di dalam area rumah sakit.'
+    : izinHariIni
+      ? `Status ${statusIzin} sudah tercatat. Tidak perlu absen hari ini.`
+      : malamKemarinAktif
+        ? `Shift malam ${formatTanggalRingkas(
+            jadwalKemarin.tanggal,
+          )} masih berlangsung. Absen masuk dicatat untuk tanggal tersebut.`
+        : masukTerlewat
+          ? 'Anda tercatat Alfa hari ini.'
+          : bebasRadius
+            ? 'Absen bisa dilakukan dari luar area rumah sakit.'
+            : 'Absen hanya bisa dilakukan di dalam area rumah sakit.'
 
   /** Aksi absen: geolokasi → validasi → RPC server */
   async function jalankanAbsen(tipe) {
@@ -302,7 +315,11 @@ export default function PanelAbsen({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-widest text-white/70">
-              {shiftMalamTerbuka ? 'Presensi Aktif' : 'Presensi Hari Ini'}
+              {shiftMalamTerbuka
+                ? 'Presensi Aktif'
+                : izinHariIni
+                  ? 'Status Hari Ini'
+                  : 'Presensi Hari Ini'}
             </p>
             <h3 className="mt-0.5 text-base font-extrabold leading-tight sm:text-lg">
               {judulStatus}
@@ -313,20 +330,22 @@ export default function PanelAbsen({
               </p>
             )}
           </div>
-          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold sm:text-[11px]">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="h-3.5 w-3.5"
-              aria-hidden="true"
-            >
-              <path d="M12 21s7-5.1 7-11a7 7 0 10-14 0c0 5.9 7 11 7 11z" />
-              <circle cx="12" cy="10" r="2.5" />
-            </svg>
-            {bebasRadius ? 'Bebas Radius' : `Radius ${MAX_RADIUS_METERS} m`}
-          </span>
+          {!izinHariIni && (
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold sm:text-[11px]">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="h-3.5 w-3.5"
+                aria-hidden="true"
+              >
+                <path d="M12 21s7-5.1 7-11a7 7 0 10-14 0c0 5.9 7 11 7 11z" />
+                <circle cx="12" cy="10" r="2.5" />
+              </svg>
+              {bebasRadius ? 'Bebas Radius' : `Radius ${MAX_RADIUS_METERS} m`}
+            </span>
+          )}
         </div>
 
         <div className="mt-3.5 grid grid-cols-2 gap-2">
@@ -361,7 +380,7 @@ export default function PanelAbsen({
           </Link>
         )}
 
-        {jadwalTerkunci && !sudahMasuk && !malamKemarinAktif && (
+        {jadwalTerkunci && !sudahMasuk && !malamKemarinAktif && !izinHariIni && (
           <Alert
             variant={isLibur ? 'sukses' : 'peringatan'}
             title={isLibur ? judulLibur : 'Absensi Dikunci'}
@@ -415,67 +434,73 @@ export default function PanelAbsen({
           </Alert>
         )}
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Button
-            variant="utama"
-            size="lg"
-            className="min-h-[56px] w-full text-sm font-extrabold uppercase tracking-wide"
-            disabled={terkunciMasuk || sudahMasuk || proses !== null}
-            onClick={() => jalankanAbsen('masuk')}
-          >
-            {proses === 'masuk' ? (
-              <>
-                <Spinner className="h-4 w-4" /> Memeriksa Lokasi…
-              </>
-            ) : sudahMasuk ? (
-              <>
-                <IkonCentang /> Sudah Absen Hadir
-              </>
-            ) : masukTerlewat ? (
-              <>
-                <IkonMasuk /> Alfa Hari Ini
-              </>
-            ) : masukBelumDibuka ? (
-              <>
-                <IkonMasuk /> Dibuka {formatJamBuka(bukaMasuk)}
-              </>
-            ) : (
-              <>
-                <IkonMasuk /> Absen Hadir
-              </>
-            )}
-          </Button>
+        {izinHariIni ? (
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center">
+            <p className="text-sm font-bold text-slate-700">Tidak perlu absen hari ini</p>
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Button
+              variant="utama"
+              size="lg"
+              className="min-h-[56px] w-full text-sm font-extrabold uppercase tracking-wide"
+              disabled={terkunciMasuk || sudahMasuk || proses !== null}
+              onClick={() => jalankanAbsen('masuk')}
+            >
+              {proses === 'masuk' ? (
+                <>
+                  <Spinner className="h-4 w-4" /> Memeriksa Lokasi…
+                </>
+              ) : sudahMasuk ? (
+                <>
+                  <IkonCentang /> Sudah Absen Hadir
+                </>
+              ) : masukTerlewat ? (
+                <>
+                  <IkonMasuk /> Alfa Hari Ini
+                </>
+              ) : masukBelumDibuka ? (
+                <>
+                  <IkonMasuk /> Dibuka {formatJamBuka(bukaMasuk)}
+                </>
+              ) : (
+                <>
+                  <IkonMasuk /> Absen Hadir
+                </>
+              )}
+            </Button>
 
-          <Button
-            variant="sukses"
-            size="lg"
-            className="min-h-[56px] w-full text-sm font-extrabold uppercase tracking-wide"
-            disabled={terkunciPulang || !sudahMasuk || sudahPulang || proses !== null}
-            onClick={() => jalankanAbsen('pulang')}
-          >
-            {proses === 'pulang' ? (
-              <>
-                <Spinner className="h-4 w-4" /> Memeriksa Lokasi…
-              </>
-            ) : sudahPulang ? (
-              <>
-                <IkonCentang /> Sudah Absen Pulang
-              </>
-            ) : pulangTerlewat ? (
-              <>
-                <IkonPulang /> Batas Pulang Terlewat
-              </>
-            ) : pulangBelumDibuka ? (
-              <>
-                <IkonPulang /> Dibuka {formatJamBuka(bukaPulang)}
-              </>
-            ) : (
-              <>
-                <IkonPulang /> Absen Pulang
-              </>
-            )}
-          </Button>
-        </div>
+            <Button
+              variant="sukses"
+              size="lg"
+              className="min-h-[56px] w-full text-sm font-extrabold uppercase tracking-wide"
+              disabled={terkunciPulang || !sudahMasuk || sudahPulang || proses !== null}
+              onClick={() => jalankanAbsen('pulang')}
+            >
+              {proses === 'pulang' ? (
+                <>
+                  <Spinner className="h-4 w-4" /> Memeriksa Lokasi…
+                </>
+              ) : sudahPulang ? (
+                <>
+                  <IkonCentang /> Sudah Absen Pulang
+                </>
+              ) : pulangTerlewat ? (
+                <>
+                  <IkonPulang /> Batas Pulang Terlewat
+                </>
+              ) : pulangBelumDibuka ? (
+                <>
+                  <IkonPulang /> Dibuka {formatJamBuka(bukaPulang)}
+                </>
+              ) : (
+                <>
+                  <IkonPulang /> Absen Pulang
+                </>
+              )}
+            </Button>
+          </div>
+        )}
 
         {!sudahMasuk && !terkunciMasuk && (
           <p className="mt-2.5 text-center text-[11px] text-slate-400">
@@ -483,20 +508,22 @@ export default function PanelAbsen({
           </p>
         )}
 
-        <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-[10px] leading-relaxed text-slate-400 sm:text-[11px]">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className="h-3.5 w-3.5 shrink-0"
-            aria-hidden="true"
-          >
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            <path d="M9 12l2 2 4-4" />
-          </svg>
-          Lokasi dan perangkat diverifikasi otomatis.
-        </p>
+        {!izinHariIni && (
+          <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-[10px] leading-relaxed text-slate-400 sm:text-[11px]">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="h-3.5 w-3.5 shrink-0"
+              aria-hidden="true"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <path d="M9 12l2 2 4-4" />
+            </svg>
+            Lokasi dan perangkat diverifikasi otomatis.
+          </p>
+        )}
       </div>
     </section>
   )

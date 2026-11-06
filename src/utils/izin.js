@@ -9,6 +9,19 @@
 export const JENIS_DINAS_SAKIT = ['Sakit', 'Dinas Luar']
 export const JENIS_CUTI = ['Cuti']
 
+export const STATUS_TANPA_ABSEN = ['Sakit', 'Cuti', 'Dinas Luar', 'Izin']
+
+/**
+ * Status presensi yang sudah final tanpa jam masuk (Sakit/Cuti/Dinas Luar).
+ * Mengembalikan null bila pegawai sudah punya jam masuk atau statusnya bukan
+ * status izin, sehingga panel absen tidak salah menampilkan Alfa.
+ */
+export function statusTanpaAbsen(presensi) {
+  if (!presensi || presensi.jam_masuk) return null
+  const status = presensi.status_kehadiran
+  return STATUS_TANPA_ABSEN.includes(status) ? status : null
+}
+
 export const KATEGORI = {
   'dinas-sakit': {
     label: 'Dinas & Sakit',

@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { kelompokkanIzin, ringkasanStatus } from '../src/utils/izin.js'
+import { kelompokkanIzin, ringkasanStatus, statusTanpaAbsen } from '../src/utils/izin.js'
 
 test('kelompokkanIzin menyatukan baris dengan grup_id yang sama', () => {
   const hasil = kelompokkanIzin([
@@ -60,4 +60,26 @@ test('ringkasanStatus menghitung status yang dikenal saja', () => {
     ditolak: 1,
     dibatalkan: 1,
   })
+})
+
+test('statusTanpaAbsen mengenali Sakit, Cuti, Dinas Luar, dan Izin', () => {
+  for (const status of ['Sakit', 'Cuti', 'Dinas Luar', 'Izin']) {
+    assert.equal(statusTanpaAbsen({ status_kehadiran: status, jam_masuk: null }), status)
+  }
+})
+
+test('statusTanpaAbsen mengabaikan status yang sudah punya jam masuk', () => {
+  assert.equal(
+    statusTanpaAbsen({
+      status_kehadiran: 'Sakit',
+      jam_masuk: '2026-11-06T00:30:00+08:00',
+    }),
+    null,
+  )
+})
+
+test('statusTanpaAbsen tidak menganggap Hadir atau Alfa sebagai izin', () => {
+  assert.equal(statusTanpaAbsen({ status_kehadiran: 'Hadir' }), null)
+  assert.equal(statusTanpaAbsen({ status_kehadiran: 'Alfa' }), null)
+  assert.equal(statusTanpaAbsen(null), null)
 })
