@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-06 18:28 WITA (ringkas teks status izin) |
+| Terakhir diperbarui | 2026-11-06 18:31 WITA (commit & push ringkas teks status izin) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -42,7 +42,8 @@ diringkas**. Judul kartu cukup nama status (**Sakit/Cuti/Dinas Luar**), bukan
 “… Hari Ini”; deskripsi “Status … sudah tercatat. Tidak perlu absen hari ini.”
 dihapus; pesan **Tidak perlu absen hari ini** hanya tampil satu kali sebagai
 aksi. Verifikasi: `npm run lint` bersih, `npm test` **71/71**, `npm run build`
-lulus **8,62 dtk**. Perubahan masih lokal dan belum di-commit.
+lulus **8,62 dtk**. Di-commit **`79a1368`** dan di-push ke `origin/main`
+2026-11-06 18:31.
 
 **Pekerjaan sebelumnya (2026-11-06 17:59):** **Panel Absen tidak lagi menampilkan
 Alfa palsu untuk pegawai berstatus Sakit, Cuti, atau Dinas Luar**. Status final
@@ -675,6 +676,17 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-06 18:31 WITA — Commit & push ringkas teks status izin
+
+- **Perubahan:** meng-commit dan mem-push ringkasan teks kartu status izin
+  `PanelAbsen` (judul hanya nama status, deskripsi berulang dihapus, pesan
+  “Tidak perlu absen hari ini” tinggal satu).
+- **File:** `AGENTS.md`, `progress.md`, `src/components/PanelAbsen.jsx`.
+- **Verifikasi:** `npm run lint` bersih; `npm test` **71/71**; `npm run build`
+  lulus **8,62 dtk**. Commit `79a1368` di-push ke `origin/main`
+  (`c417a4e..79a1368`).
+- **Catatan/risiko:** uji manual tampilan di perangkat pegawai belum dilakukan.
 
 ### 2026-11-06 18:28 WITA — Ringkas teks status izin
 
