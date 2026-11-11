@@ -6,7 +6,7 @@ import { NavLink } from 'react-router-dom'
 
 export const MENU_PEGAWAI = [
   { ke: '/', label: 'Absensi', akhir: true, ikon: 'absensi' },
-  { ke: '/izin-saya', label: 'Dinas & Cuti', ikon: 'izin' },
+  { ke: '/izin-saya', label: 'Izin', ikon: 'izin' },
   { ke: '/riwayat', label: 'Riwayat', ikon: 'riwayat' },
   { ke: '/pengaduan', label: 'Pengaduan', ikon: 'pengaduan' },
 ]
@@ -15,6 +15,7 @@ export const MENU_PORTAL_KEPALA = [
   { ke: '/kepala-ruangan/jadwal-shift', label: 'Jadwal', ikon: 'jadwal' },
   { ke: '/kepala-ruangan/dinas-sakit', label: 'Dinas', ikon: 'izin' },
   { ke: '/kepala-ruangan/cuti', label: 'Cuti', ikon: 'cuti' },
+  { ke: '/kepala-ruangan/izin', label: 'Izin', ikon: 'izin' },
   { ke: '/kepala-ruangan/pengaduan', label: 'Aduan', ikon: 'pengaduan' },
   { ke: '/kepala-ruangan/laporan', label: 'Laporan', ikon: 'laporan' },
   { ke: '/', label: 'Absensi', akhir: true, ikon: 'absensi' },
@@ -175,9 +176,11 @@ export default function NavigasiBawah({
     ? [...MENU_PEGAWAI, { ke: '/kepala-ruangan', label: 'Unit', ikon: 'unit' }]
     : MENU_PEGAWAI)
   const kolom =
-    daftar.length >= 6
-      ? 'grid-cols-6'
-      : daftar.length >= 5
+    daftar.length >= 7
+      ? 'grid-cols-7'
+      : daftar.length >= 6
+        ? 'grid-cols-6'
+        : daftar.length >= 5
         ? 'grid-cols-5'
         : daftar.length >= 4
           ? 'grid-cols-4'

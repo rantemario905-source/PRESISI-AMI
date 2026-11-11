@@ -102,6 +102,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 | 35 | `supabase/migrations/35_pengaduan_masuk.sql` | Pengaduan multi-jenis: absen masuk + pulang dalam satu alur. `presensi_id` boleh kosong, `jenis` + `jam_masuk_diajukan/disetujui`, RPC `kandidat_pengaduan_presensi()`, dan persetujuan absen masuk mengisi jam masuk serta menghitung keterlambatan |
 | 36 | `supabase/migrations/36_koreksi_jam_masuk.sql` | Koreksi jam masuk lewat pengaduan: jendela validasi disamakan dengan tombol absen (60 menit sebelum jam masuk), hanya boleh memajukan jam yang sudah tercatat, status hasil koreksi `Koreksi`, dan kandidat koreksi muncul untuk presensi yang terlambat |
 | 37 | `supabase/migrations/37_batasi_pengaduan_sebelum_golive.sql` | Pengaduan dibatasi sejak go-live **1 November 2026**: kandidat, pengajuan, dan keputusan menolak tanggal sebelum tanggal tersebut agar hari kerja lama yang presensinya sudah dihapus tidak muncul lagi |
+| 38 | `supabase/migrations/38_jenis_izin.sql` | Jenis **Izin** dihidupkan kembali: satu pegawai, dokumen wajib, persetujuan sama seperti Sakit/Cuti, ditolak dari absensi/Alfa/pengaduan, dan status `Izin` diterima `izin_cuti` serta `presensi` |
 
 > Bila database sudah pernah dijalankan sampai file 08, jalankan **file 09** untuk
 > mengaktifkan alur Dinas & Sakit / Cuti, **file 11** untuk pengaturan kepala
@@ -144,8 +145,8 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > **`supabase/verifikasi_30.sql`**, **`supabase/verifikasi_31.sql`**,
 > **`supabase/verifikasi_32.sql`**, **`supabase/verifikasi_33.sql`**,
 > **`supabase/verifikasi_34.sql`**, **`supabase/verifikasi_35.sql`**,
-> **`supabase/verifikasi_36.sql`**, dan **`supabase/verifikasi_37.sql`** setelah
-> migrasi terkait. Seluruh nilai
+> **`supabase/verifikasi_36.sql`**, **`supabase/verifikasi_37.sql`**, dan
+> **`supabase/verifikasi_38.sql`** setelah migrasi terkait. Seluruh nilai
 > pemeriksaan harus `true`; bila ada yang `false`, jangan lanjutkan pemakaian.
 > `verifikasi_13.sql` dan `verifikasi_14.sql` hanya berlaku sebelum migrasi 15;
 > setelah migrasi 15, gunakan `verifikasi_15.sql`, `verifikasi_16.sql`,
@@ -197,6 +198,8 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > go-live **1 November 2026**; tanpa migrasi ini hari kerja lama yang presensinya
 > sudah dihapus masih dapat muncul sebagai kandidat "absen masuk". Jalankan
 > `verifikasi_37.sql` setelahnya.
+> Migrasi 38 wajib dijalankan agar menu **Izin** dapat mencatat Izin dan laporan
+> bulanan mengenali status Izin. Jalankan `verifikasi_38.sql` setelahnya.
 > Bila muncul `function public.is_superadmin() does not exist`, jalankan versi
 > terbaru migrasi 19 — file ini membuat ulang fungsi inti tersebut sekaligus
 > memeriksa keberadaan tabel `pegawai`/`presensi`.
@@ -279,7 +282,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 ├── index.html
 ├── supabase/
 │   ├── schema.sql              # Skema DB + RLS + RPC (instalasi sekali jalan)
-│   ├── migrations/             # 01–37, dijalankan bertahap
+│   ├── migrations/             # 01–38, dijalankan bertahap
 │   ├── verifikasi_09.sql       # Pemeriksaan fitur Dinas & Sakit / Cuti
 │   ├── verifikasi_10.sql       # Pemeriksaan RPC perubahan role (opsional)
 │   ├── verifikasi_11.sql       # Pemeriksaan pengaturan kepala ruangan
@@ -309,6 +312,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 │   ├── verifikasi_35.sql       # Pemeriksaan pengaduan absen masuk + pulang
 │   ├── verifikasi_36.sql       # Pemeriksaan koreksi jam masuk
 │   ├── verifikasi_37.sql       # Pemeriksaan batas pengaduan sejak go-live
+│   ├── verifikasi_38.sql       # Pemeriksaan jenis ketidakhadiran Izin
 │   ├── hapus_data_testing.sql  # Hapus transaksi sebelum 1 November 2026
 │   └── jadwal_alfa.sql         # Opsional: jadwal pg_cron untuk Alfa
 ├── scripts/

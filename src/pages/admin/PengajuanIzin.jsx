@@ -1,14 +1,14 @@
 /**
  * ==========================================================================
- * Halaman Dinas & Sakit / Cuti
+ * Halaman Dinas & Sakit / Cuti / Izin
  * --------------------------------------------------------------------------
  * Dipakai dua mode:
  *   - mode="superadmin" → semua unit, dapat menyetujui/menolak/membatalkan.
  *   - mode="kepala"     → hanya unit sendiri, mencatat & mengubah pengajuan
  *                         yang masih menunggu. Tidak dapat menyetujui.
  *
- * Semua penyimpanan lewat RPC. Dokumen Sakit & Dinas Luar wajib diunggah
- * SEBELUM entri disimpan. Cuti boleh tanpa dokumen.
+ * Semua penyimpanan lewat RPC. Dokumen Sakit, Dinas Luar, dan Izin wajib
+ * diunggah SEBELUM entri disimpan. Cuti boleh tanpa dokumen.
  * ==========================================================================
  */
 import { useCallback, useEffect, useState } from 'react'
@@ -92,8 +92,10 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
   const unitKepala = adalahKepala
     ? konteksKepala?.unitAktif || profil?.unit_kerja || ''
     : ''
-  const jenisTersedia = kategori === 'cuti' ? ['Cuti'] : ['Sakit', 'Dinas Luar']
-  const judulKategori = kategori === 'cuti' ? 'Cuti' : 'Dinas & Sakit'
+  const jenisTersedia =
+    kategori === 'cuti' ? ['Cuti'] : kategori === 'izin' ? ['Izin'] : ['Sakit', 'Dinas Luar']
+  const judulKategori =
+    kategori === 'cuti' ? 'Cuti' : kategori === 'izin' ? 'Izin' : 'Dinas & Sakit'
 
   const [tab, setTab] = useState('semua')
   const [daftar, setDaftar] = useState([])
@@ -293,7 +295,7 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
       form.jenis !== 'Dinas Luar' &&
       !pegawaiUnitSaya.some((p) => p.id === form.singleId)
     ) {
-      setGalatForm('Sakit dan Cuti hanya untuk pegawai dari unit yang Anda kelola.')
+      setGalatForm('Sakit, Cuti, dan Izin hanya untuk pegawai dari unit yang Anda kelola.')
       return
     }
     if (form.tanggalSelesai < form.tanggalMulai) {
@@ -303,7 +305,7 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
 
     const punyaDokumen = Boolean(form.dokumenBaru || form.dokumenLama?.path)
     if (dokumenWajib(form.jenis) && !punyaDokumen) {
-      setGalatForm('Dokumen wajib diunggah untuk Sakit dan Dinas Luar.')
+      setGalatForm('Dokumen wajib diunggah untuk Sakit, Dinas Luar, dan Izin.')
       return
     }
 

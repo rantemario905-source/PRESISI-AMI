@@ -1,6 +1,6 @@
 /**
  * ==========================================================================
- * Pegawai — Riwayat Dinas & Sakit / Cuti (READ-ONLY)
+ * Pegawai — Riwayat Dinas & Sakit / Cuti / Izin (READ-ONLY)
  * --------------------------------------------------------------------------
  * Pegawai TIDAK dapat mengajukan, mengubah, atau menghapus pengajuan.
  * Pencatatan dilakukan kepala ruangan atau Super Admin. Persetujuan oleh
@@ -19,6 +19,7 @@ import BarAtas from '../components/BarAtas.jsx'
 const TAB = [
   { nilai: 'dinas-sakit', label: 'Dinas & Sakit' },
   { nilai: 'cuti', label: 'Cuti' },
+  { nilai: 'izin', label: 'Izin' },
 ]
 
 export default function IzinSaya() {
@@ -47,13 +48,11 @@ export default function IzinSaya() {
     muat()
   }, [muat])
 
-  const tersaring = useMemo(
-    () =>
-      daftar.filter((item) =>
-        tab === 'cuti' ? item.jenis === 'Cuti' : item.jenis !== 'Cuti',
-      ),
-    [daftar, tab],
-  )
+  const tersaring = useMemo(() => {
+    if (tab === 'cuti') return daftar.filter((item) => item.jenis === 'Cuti')
+    if (tab === 'izin') return daftar.filter((item) => item.jenis === 'Izin')
+    return daftar.filter((item) => !['Cuti', 'Izin'].includes(item.jenis))
+  }, [daftar, tab])
 
   const ringkasan = useMemo(
     () => ({
@@ -91,7 +90,7 @@ export default function IzinSaya() {
       >
         <div className="mb-4 sm:mb-5">
           <h1 className="text-xl font-extrabold tracking-tight text-slate-900">
-            Dinas, Sakit &amp; Cuti Saya
+            Dinas, Sakit, Cuti &amp; Izin Saya
           </h1>
           <p className="mt-0.5 text-[13px] leading-relaxed text-slate-500 sm:text-sm">
             Dicatat oleh Kepala Unit atau Super Admin. Halaman bersifat baca saja.
@@ -126,7 +125,7 @@ export default function IzinSaya() {
         <section className="rounded-2xl border border-slate-200 bg-white shadow-kartu">
           <div className="border-b border-slate-200 px-4 py-3.5 sm:px-5 sm:py-4">
             <h2 className="text-sm font-bold text-slate-800">
-              Riwayat {tab === 'cuti' ? 'Cuti' : 'Dinas & Sakit'}
+              Riwayat {tab === 'cuti' ? 'Cuti' : tab === 'izin' ? 'Izin' : 'Dinas & Sakit'}
             </h2>
             <p className="text-xs text-slate-500">
               {tersaring.length} pengajuan pada kategori ini

@@ -129,6 +129,7 @@ const GRUP_MENU = [
     items: [
       { label: 'Dinas & Sakit', ke: '/superadmin-portal/dinas-sakit', ikon: 'izin' },
       { label: 'Cuti', ke: '/superadmin-portal/cuti', ikon: 'cuti' },
+      { label: 'Izin', ke: '/superadmin-portal/izin', ikon: 'izin' },
       { label: 'Laporan Bulanan', ke: '/superadmin-portal/laporan', ikon: 'laporan' },
       { label: 'Rekapitulasi Laporan', ke: '/superadmin-portal/rekap', ikon: 'rekap' },
     ],

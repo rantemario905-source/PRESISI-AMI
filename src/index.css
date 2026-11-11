@@ -303,6 +303,15 @@
   text-align: center;
 }
 
+.tabel-laporan .status-hadir { background: #bbf7d0; }
+.tabel-laporan .status-alfa { background: #fca5a5; }
+.tabel-laporan .status-sakit { background: #fbcfe8; }
+.tabel-laporan .status-cuti { background: #99f6e4; }
+.tabel-laporan .status-dinas { background: #c4b5fd; }
+.tabel-laporan .status-izin { background: #bae6fd; }
+.tabel-laporan .status-koreksi { background: #fde68a; }
+.tabel-laporan .status-libur { background: #e2e8f0; }
+
 .tabel-laporan .kosong {
   padding: 6mm 2mm;
   text-align: center;

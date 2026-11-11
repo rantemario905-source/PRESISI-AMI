@@ -3,12 +3,15 @@
  * Helper laporan presensi bulanan per pegawai
  * ==========================================================================
  */
+import { akhirBulan, daftarTanggal } from './format.js'
+import { indeksHariSenin } from './kalender.js'
 
 export const STATUS_KEHADIRAN = [
   'Hadir',
   'Sakit',
   'Cuti',
   'Dinas Luar',
+  'Izin',
   'Alfa',
   'Koreksi',
 ]
@@ -82,4 +85,89 @@ export function labelPolaKerja(polaKerja) {
 /** Nama shift terjadwal untuk kolom laporan. */
 export function labelShift(namaShift) {
   return namaShift || '—'
+}
+
+const WARNA_STATUS_LAPORAN = {
+  Hadir: 'status-hadir',
+  Alfa: 'status-alfa',
+  Sakit: 'status-sakit',
+  Cuti: 'status-cuti',
+  'Dinas Luar': 'status-dinas',
+  Izin: 'status-izin',
+  Koreksi: 'status-koreksi',
+  Libur: 'status-libur',
+}
+
+/** Kelas warna sel status pada cetakan laporan bulanan. */
+export function kelasStatusLaporan(status) {
+  return WARNA_STATUS_LAPORAN[status] ?? ''
+}
+
+const STATUS_NYATA = new Set([
+  'Hadir',
+  'Koreksi',
+  'Sakit',
+  'Cuti',
+  'Dinas Luar',
+  'Izin',
+])
+
+function liburMingguan(jamKerja, unitKerja, isodow) {
+  const khusus = jamKerja?.unit?.[unitKerja]?.[isodow]
+  if (typeof khusus === 'boolean') return khusus
+  return Boolean(jamKerja?.global?.[isodow])
+}
+
+/**
+ * Susun satu baris untuk setiap tanggal dalam periode laporan.
+ * - Presensi nyata (Hadir/Koreksi/Sakit/Cuti/Dinas Luar/Izin) selalu ditampilkan.
+ * - Libur: akhir pekan/libur unit, hari libur nasional (pegawai reguler),
+ *   atau pegawai shift tanpa jadwal.
+ * - Hari kerja tanpa catatan dibiarkan tanpa status ("—").
+ *
+ * @returns {{ tanggal: string, nomor: number, baris: object|null, libur: boolean, namaLibur: string|null, shift: string|null }[]}
+ */
+export function susunBarisLaporan({
+  periode,
+  presensi = [],
+  jadwal = {},
+  hariLibur = {},
+  jamKerja = { global: {}, unit: {} },
+  userId,
+  unitKerja,
+  polaKerja = 'reguler',
+} = {}) {
+  const tanggal = daftarTanggal(`${periode}-01`, akhirBulan(periode))
+  if (tanggal.length === 0) return []
+
+  const petaPresensi = new Map()
+  for (const baris of presensi ?? []) {
+    if (baris?.tanggal) petaPresensi.set(String(baris.tanggal).slice(0, 10), baris)
+  }
+
+  return tanggal.map((tgl, indeks) => {
+    const baris = petaPresensi.get(tgl) ?? null
+    const shift = jadwal?.[`${userId}|${tgl}`] ?? null
+    const presensiNyata = Boolean(baris && STATUS_NYATA.has(baris.status_kehadiran))
+    const namaLibur = hariLibur?.[tgl] ?? null
+
+    let libur = false
+    if (!presensiNyata) {
+      if (polaKerja === 'reguler') {
+        const isodow = indeksHariSenin(tgl) + 1
+        libur = Boolean(namaLibur) || liburMingguan(jamKerja, unitKerja, isodow)
+      } else {
+        libur = !shift
+      }
+    }
+
+    return {
+      tanggal: tgl,
+      nomor: indeks + 1,
+      baris: libur ? null : baris,
+      libur,
+      namaLibur,
+      shift,
+    }
+  })
 }

@@ -7,6 +7,7 @@ const VARIASI = {
   sakit: 'bg-rose-100 text-rose-800',
   cuti: 'bg-teal-100 text-teal-800',
   dinas: 'bg-violet-100 text-violet-800',
+  izin: 'bg-sky-100 text-sky-800',
   netral: 'bg-slate-100 text-slate-700',
 }
 

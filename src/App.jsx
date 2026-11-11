@@ -124,6 +124,7 @@ function RuteAplikasi() {
               element={<PengajuanIzin mode="kepala" kategori="dinas-sakit" />}
             />
             <Route path="cuti" element={<PengajuanIzin mode="kepala" kategori="cuti" />} />
+            <Route path="izin" element={<PengajuanIzin mode="kepala" kategori="izin" />} />
             <Route path="pengaduan" element={<PengaduanKepala />} />
             <Route path="laporan" element={<LaporanBulanan mode="kepala" />} />
           </Route>
@@ -152,7 +153,7 @@ function RuteAplikasi() {
               element={<PengajuanIzin mode="superadmin" kategori="dinas-sakit" />}
             />
             <Route path="cuti" element={<PengajuanIzin mode="superadmin" kategori="cuti" />} />
-            <Route path="izin" element={<Navigate to="/superadmin-portal/dinas-sakit" replace />} />
+            <Route path="izin" element={<PengajuanIzin mode="superadmin" kategori="izin" />} />
             <Route path="rekap" element={<Rekapitulasi />} />
             <Route path="laporan" element={<LaporanBulanan mode="superadmin" />} />
           </Route>

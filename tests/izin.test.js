@@ -1,6 +1,11 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { kelompokkanIzin, ringkasanStatus, statusTanpaAbsen } from '../src/utils/izin.js'
+import {
+  jenisUntukKategori,
+  kelompokkanIzin,
+  ringkasanStatus,
+  statusTanpaAbsen,
+} from '../src/utils/izin.js'
 
 test('kelompokkanIzin menyatukan baris dengan grup_id yang sama', () => {
   const hasil = kelompokkanIzin([
@@ -42,6 +47,12 @@ test('kelompokkanIzin memakai id bila grup_id tidak ada', () => {
   assert.equal(hasil.length, 1)
   assert.equal(hasil[0].jumlah_anggota, 1)
   assert.deepEqual(hasil[0].anggota, [{ id: 'u-1', nama: 'Ani' }])
+})
+
+test('jenisUntukKategori memisahkan Izin dari Cuti dan Dinas & Sakit', () => {
+  assert.deepEqual(jenisUntukKategori('izin'), ['Izin'])
+  assert.deepEqual(jenisUntukKategori('cuti'), ['Cuti'])
+  assert.deepEqual(jenisUntukKategori('dinas-sakit'), ['Sakit', 'Dinas Luar'])
 })
 
 test('ringkasanStatus menghitung status yang dikenal saja', () => {

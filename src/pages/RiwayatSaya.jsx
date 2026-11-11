@@ -26,6 +26,7 @@ const STATUS = [
   { nama: 'Sakit', warna: 'border-rose-200 bg-rose-50 text-rose-800' },
   { nama: 'Cuti', warna: 'border-teal-200 bg-teal-50 text-teal-800' },
   { nama: 'Dinas Luar', warna: 'border-violet-200 bg-violet-50 text-violet-800' },
+  { nama: 'Izin', warna: 'border-sky-200 bg-sky-50 text-sky-800' },
   { nama: 'Alfa', warna: 'border-red-200 bg-red-50 text-red-800' },
   { nama: 'Koreksi', warna: 'border-amber-200 bg-amber-50 text-amber-800' },
 ]
@@ -106,7 +107,7 @@ export default function RiwayatSaya() {
         )}
 
         {/* Ringkasan status */}
-        <div className="mb-4 grid grid-cols-3 gap-2 sm:mb-5 sm:grid-cols-6">
+        <div className="mb-4 grid grid-cols-3 gap-2 sm:mb-5 sm:grid-cols-7">
           {STATUS.map((s) => (
             <div
               key={s.nama}

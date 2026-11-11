@@ -37,6 +37,7 @@ export function varianJenisIzin(jenis) {
       Sakit: 'sakit',
       Cuti: 'cuti',
       'Dinas Luar': 'dinas',
+      Izin: 'izin',
     }[jenis] ?? 'info'
   )
 }
@@ -49,6 +50,7 @@ export function varianStatusKehadiran(status) {
       Sakit: 'sakit',
       Cuti: 'cuti',
       'Dinas Luar': 'dinas',
+      Izin: 'izin',
       Koreksi: 'peringatan',
     }[status] ?? 'netral'
   )

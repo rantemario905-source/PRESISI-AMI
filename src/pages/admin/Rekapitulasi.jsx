@@ -22,7 +22,7 @@ import { NAMA_RUMAH_SAKIT } from '../../config/constants.js'
 import { Alert, Badge, Button, Spinner } from '../../components/ui/index.js'
 import KepalaHalaman from '../../components/admin/KepalaHalaman.jsx'
 
-const KOLOM_STATUS = ['Hadir', 'Sakit', 'Cuti', 'Dinas Luar', 'Alfa', 'Koreksi']
+const KOLOM_STATUS = ['Hadir', 'Sakit', 'Cuti', 'Dinas Luar', 'Izin', 'Alfa', 'Koreksi']
 
 export default function Rekapitulasi() {
   const [periode, setPeriode] = useState(periodeBulanIni())

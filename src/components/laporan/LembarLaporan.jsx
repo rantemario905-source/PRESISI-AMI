@@ -8,25 +8,40 @@ import {
 } from '../../utils/format.js'
 import {
   STATUS_KEHADIRAN,
+  kelasStatusLaporan,
   labelPolaKerja,
   labelShift,
   ringkasKehadiran,
+  susunBarisLaporan,
 } from '../../utils/laporan.js'
 
 const jamSingkat = (iso) => (iso ? formatJam(iso).replace(' WITA', '') : '—')
+const JAM_KERJA_KOSONG = { global: {}, unit: {} }
 
 export default function LembarLaporan({
   pegawai,
   presensi = [],
   jadwal = {},
+  hariLibur = {},
+  jamKerja = JAM_KERJA_KOSONG,
   periode,
   waktuCetak,
 }) {
-  const ringkasan = ringkasKehadiran(presensi)
+  const barisLaporan = susunBarisLaporan({
+    periode,
+    presensi,
+    jadwal,
+    hariLibur,
+    jamKerja,
+    userId: pegawai.id,
+    unitKerja: pegawai.unit_kerja,
+    polaKerja: pegawai.pola_kerja,
+  })
+  const presensiTampil = barisLaporan.filter((hari) => hari.baris).map((hari) => hari.baris)
+  const ringkasan = ringkasKehadiran(presensiTampil)
+  const jumlahLibur = barisLaporan.filter((hari) => hari.libur).length
   const polaShift = pegawai.pola_kerja !== 'reguler'
   const jumlahKolom = polaShift ? 7 : 6
-  const shiftHari = (baris) =>
-    labelShift(jadwal[`${baris.user_id}|${baris.tanggal}`])
 
   return (
     <article className="lembar-laporan">
@@ -62,7 +77,7 @@ export default function LembarLaporan({
           ))}
         </p>
         <p>
-          {`Terlambat: ${ringkasan.terlambat} kali (${ringkasan.totalMenitTerlambat} menit) · Total hari tercatat: ${ringkasan.total}`}
+          {`Terlambat: ${ringkasan.terlambat} kali (${ringkasan.totalMenitTerlambat} menit) · Total hari tercatat: ${ringkasan.total} · Libur: ${jumlahLibur} hari`}
         </p>
       </div>
 
@@ -88,30 +103,36 @@ export default function LembarLaporan({
           </tr>
         </thead>
         <tbody>
-          {presensi.length === 0 ? (
+          {barisLaporan.length === 0 ? (
             <tr>
               <td colSpan={jumlahKolom} className="kosong">
-                Belum ada catatan presensi pada periode ini.
+                Belum ada data pada periode ini.
               </td>
             </tr>
           ) : (
-            presensi.map((baris, indeks) => (
-              <tr key={baris.id}>
-                <td className="tengah">{indeks + 1}</td>
-                <td>{formatTanggalHari(baris.tanggal)}</td>
-                {polaShift && (
-                  <td className="tengah">{shiftHari(baris)}</td>
-                )}
-                <td className="tengah">{jamSingkat(baris.jam_masuk)}</td>
-                <td className="tengah">{jamSingkat(baris.jam_pulang)}</td>
-                <td className="tengah">{baris.status_kehadiran}</td>
-                <td className="tengah">
-                  {Number(baris.menit_terlambat) > 0
-                    ? `${baris.menit_terlambat} mnt`
-                    : '—'}
-                </td>
-              </tr>
-            ))
+            barisLaporan.map((hari) => {
+              const baris = hari.baris
+              const status = hari.libur
+                ? 'Libur'
+                : (baris?.status_kehadiran ?? '—')
+              const terlambat = Number(baris?.menit_terlambat) > 0
+                ? `${baris.menit_terlambat} mnt`
+                : '—'
+
+              return (
+                <tr key={hari.tanggal}>
+                  <td className="tengah">{hari.nomor}</td>
+                  <td>{formatTanggalHari(hari.tanggal)}</td>
+                  {polaShift && (
+                    <td className="tengah">{labelShift(hari.shift)}</td>
+                  )}
+                  <td className="tengah">{jamSingkat(baris?.jam_masuk)}</td>
+                  <td className="tengah">{jamSingkat(baris?.jam_pulang)}</td>
+                  <td className={`tengah ${kelasStatusLaporan(status)}`}>{status}</td>
+                  <td className="tengah">{terlambat}</td>
+                </tr>
+              )
+            })
           )}
         </tbody>
       </table>

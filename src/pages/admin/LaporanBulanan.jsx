@@ -22,6 +22,8 @@ const DATA_KOSONG = {
   pegawai: [],
   presensi: [],
   jadwal: {},
+  hariLibur: {},
+  jamKerja: { global: {}, unit: {} },
 }
 
 export default function LaporanBulanan({ mode = 'superadmin' }) {
@@ -238,6 +240,8 @@ export default function LaporanBulanan({ mode = 'superadmin' }) {
               pegawai={p}
               presensi={petaPresensi.get(p.id) ?? []}
               jadwal={data.jadwal}
+              hariLibur={data.hariLibur}
+              jamKerja={data.jamKerja}
               periode={periode}
               waktuCetak={waktuCetak}
             />

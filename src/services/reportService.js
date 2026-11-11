@@ -49,7 +49,7 @@ export async function ambilRekapBulanan({ periode, unit = 'semua' }) {
  * Kepala ruangan otomatis dibatasi RLS ke unitnya sendiri.
  *
  * @param {{ periode: string, unit: string }} params
- * @returns {Promise<{ pegawai: object[], presensi: object[], jadwal: Record<string, string|null>, mulai: string, selesai: string }>}
+ * @returns {Promise<{ pegawai: object[], presensi: object[], jadwal: Record<string, string|null>, hariLibur: Record<string, string>, jamKerja: { global: Record<number, boolean>, unit: Record<string, Record<number, boolean>> }, mulai: string, selesai: string }>}
  */
 export async function ambilLaporanBulanan({ periode, unit }) {
   const mulai = `${periode}-01`
@@ -66,6 +66,8 @@ export async function ambilLaporanBulanan({ periode, unit }) {
       pegawai: [],
       presensi: [],
       jadwal: {},
+      hariLibur: {},
+      jamKerja: { global: {}, unit: {} },
       mulai,
       selesai,
     }
@@ -84,16 +86,72 @@ export async function ambilLaporanBulanan({ periode, unit }) {
       .order('tanggal', { ascending: true })
       .order('user_id', { ascending: true })
 
-  const presensi = await ambilSemuaHalaman(buatKueri)
-  const jadwal = await ambilJadwalPeta(pegawai, mulai, selesai)
+  const [presensi, jadwal, hariLibur, jamKerja] = await Promise.all([
+    ambilSemuaHalaman(buatKueri),
+    ambilJadwalPeta(pegawai, mulai, selesai),
+    ambilHariLibur(mulai, selesai),
+    ambilJamKerja(pegawai.map((p) => p.unit_kerja)),
+  ])
 
   return {
     pegawai,
     presensi,
     jadwal,
+    hariLibur,
+    jamKerja,
     mulai,
     selesai,
   }
+}
+
+/** Peta "YYYY-MM-DD" → nama hari libur nasional/cuti bersama pada periode. */
+async function ambilHariLibur(mulai, selesai) {
+  const { data, error } = await supabase
+    .from('hari_libur')
+    .select('tanggal, nama')
+    .gte('tanggal', mulai)
+    .lte('tanggal', selesai)
+
+  if (error) throw error
+
+  const peta = {}
+  for (const baris of data ?? []) peta[baris.tanggal] = baris.nama
+  return peta
+}
+
+/**
+ * Aturan libur mingguan: global sebagai fallback, override unit bila ada.
+ * Bentuk hasil: { global: {1..7: boolean}, unit: { [unit]: {1..7: boolean} } }
+ * dengan 1 = Senin ... 7 = Minggu (isodow).
+ */
+async function ambilJamKerja(daftarUnit = []) {
+  const units = [...new Set((daftarUnit ?? []).filter(Boolean))]
+
+  const kueriUnit = units.length
+    ? supabase
+        .from('jam_kerja_unit')
+        .select('unit_kerja, hari, libur')
+        .in('unit_kerja', units)
+    : Promise.resolve({ data: [], error: null })
+
+  const [globalRes, unitRes] = await Promise.all([
+    supabase.from('jam_kerja_reguler').select('hari, libur').order('hari'),
+    kueriUnit,
+  ])
+
+  if (globalRes.error) throw globalRes.error
+  if (unitRes.error) throw unitRes.error
+
+  const global = {}
+  for (const baris of globalRes.data ?? []) global[baris.hari] = Boolean(baris.libur)
+
+  const unit = {}
+  for (const baris of unitRes.data ?? []) {
+    if (!unit[baris.unit_kerja]) unit[baris.unit_kerja] = {}
+    unit[baris.unit_kerja][baris.hari] = Boolean(baris.libur)
+  }
+
+  return { global, unit }
 }
 
 /** Peta "user_id|tanggal" → nama shift terjadwal untuk pegawai pola shift. */

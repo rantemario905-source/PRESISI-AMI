@@ -8,6 +8,7 @@
 
 export const JENIS_DINAS_SAKIT = ['Sakit', 'Dinas Luar']
 export const JENIS_CUTI = ['Cuti']
+export const JENIS_IZIN = ['Izin']
 
 export const STATUS_TANPA_ABSEN = ['Sakit', 'Cuti', 'Dinas Luar', 'Izin']
 
@@ -33,10 +34,21 @@ export const KATEGORI = {
     judul: 'Cuti',
     jenis: JENIS_CUTI,
   },
+  izin: {
+    label: 'Izin',
+    judul: 'Izin',
+    jenis: JENIS_IZIN,
+  },
 }
 
 export function jenisUntukKategori(kategori) {
-  return KATEGORI[kategori]?.jenis ?? [...JENIS_DINAS_SAKIT, ...JENIS_CUTI]
+  return (
+    KATEGORI[kategori]?.jenis ?? [
+      ...JENIS_DINAS_SAKIT,
+      ...JENIS_CUTI,
+      ...JENIS_IZIN,
+    ]
+  )
 }
 
 export function labelJenis(jenis) {

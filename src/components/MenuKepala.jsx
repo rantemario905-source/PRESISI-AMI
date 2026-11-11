@@ -34,6 +34,17 @@ const MENU = [
       </>
     ),
   },
+  {
+    ke: '/kepala-ruangan/izin',
+    label: 'Izin',
+    deskripsi: 'Catat izin pegawai unit',
+    ikon: (
+      <>
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+        <path d="M14 2v6h6M9 15l2 2 4-4" />
+      </>
+    ),
+  },
 ]
 
 export default function MenuKepala({ unitKerja }) {
@@ -50,11 +61,11 @@ export default function MenuKepala({ unitKerja }) {
           Portal Kepala Unit
         </h2>
         <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500 sm:text-xs">
-          Jadwal shift, dinas &amp; sakit, dan cuti unit {unitKerja || 'Anda'}.
+          Jadwal shift, dinas &amp; sakit, cuti, dan izin unit {unitKerja || 'Anda'}.
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {MENU.map((item) => (
           <Link
             key={item.ke}

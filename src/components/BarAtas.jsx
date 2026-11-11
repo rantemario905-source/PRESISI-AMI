@@ -11,7 +11,7 @@ import { NAMA_APLIKASI } from '../config/constants.js'
 
 const MENU_PEGAWAI = [
   { ke: '/', label: 'Absensi', akhir: true },
-  { ke: '/izin-saya', label: 'Dinas & Cuti' },
+  { ke: '/izin-saya', label: 'Dinas, Cuti & Izin' },
   { ke: '/riwayat', label: 'Riwayat' },
   { ke: '/pengaduan', label: 'Pengaduan' },
 ]
