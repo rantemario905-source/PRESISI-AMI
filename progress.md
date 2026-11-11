@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-11 15:21 WITA (migrasi 38 dijalankan) |
+| Terakhir diperbarui | 2026-11-11 15:25 WITA (commit & push hari libur laporan + jenis Izin) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,7 +37,13 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-11 15:21):** **migrasi 38 dijalankan**. User
+**Pekerjaan terbaru (2026-11-11 15:25):** **commit & push**. Seluruh pekerjaan
+hari libur di laporan bulanan, jenis **Izin**, warna status laporan, dan migrasi
+**38** sudah di-commit **`d27493e`** dan di-push ke `origin/main`. Verifikasi:
+`npm run lint` bersih, `npm test` **81/81**, `npm run build` lulus **9,07 dtk**.
+Sisa: `verifikasi_38.sql` dan uji manual Izin.
+
+**Pekerjaan sebelumnya (2026-11-11 15:21):** **migrasi 38 dijalankan**. User
 melaporkan `supabase/migrations/38_jenis_izin.sql` sudah dijalankan di Supabase,
 sehingga constraint jenis **Izin**, `submit_presensi`, `proses_alfa_otomatis`,
 koreksi presensi, dan RPC pengaduan memakai aturan Izin di server. Sisa:
@@ -488,8 +494,8 @@ lanjutan 14,14 dtk).
 | Aspek | Status | Bukti |
 |---|---|---|
 | Kode aplikasi | Selesai sampai Fase 10 + UI navigasi + migrasi 15-38 | `src/`, `supabase/migrations/01-38` |
-| Commit Git | **`8415fb9`** - sinkronisasi dokumen audit commit `79a1368`; pekerjaan **I-142** dan **I-143** belum di-commit | `git log` |
-| Perubahan lokal | **Belum di-commit** - I-142 (hari libur laporan) dan I-143 (jenis Izin & warna status) ada di working tree menunggu perintah user | `git status` |
+| Commit Git | **`d27493e`** - hari libur laporan, jenis Izin, warna status, migrasi 38; sebelumnya `8415fb9` sinkronisasi dokumen audit | `git log` |
+| Perubahan lokal | **Bersih** - semua perubahan sudah di-commit dan di-push (`main...origin/main`) | `git status` |
 | Migrasi DB 01–18 | **Sudah dijalankan** — verifikasi 09–18 lulus | laporan user 2026-10-30 |
 | Migrasi DB 19 | **Sudah dijalankan** di project yang benar | laporan user 2026-10-27 01:03 |
 | Migrasi DB 20 | **Sudah dijalankan** — koordinat server migrasi 20 aktif | laporan user 2026-10-27 09:39 |
@@ -704,6 +710,25 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-11 15:25 WITA — Commit & push hari libur laporan + jenis Izin
+
+**Perubahan**
+- Memverifikasi `npm run lint` bersih, `npm test` **81/81**, dan `npm run build`
+  lulus **9,07 dtk**.
+- Memastikan staged diff tidak memuat rahasia, lalu commit **`d27493e`**
+  (hari libur di laporan bulanan, jenis **Izin**, warna status laporan, migrasi
+  38 + `verifikasi_38.sql`, label navigasi, dan dokumen audit) dan push ke
+  `origin/main`.
+
+**File**
+- Seluruh perubahan I-142/I-143/I-144/I-145 yang sebelumnya ditahan lokal.
+
+**Verifikasi**
+- `npm run lint`, `npm test` **81/81**, `npm run build` **9,07 dtk**.
+
+**Catatan/risiko**
+- `verifikasi_38.sql` dan uji manual Izin masih pending.
 
 ### 2026-11-11 15:21 WITA — Migrasi 38 dijalankan
 
