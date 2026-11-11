@@ -1,5 +1,5 @@
 /**
- * Utilitas bersama untuk pengajuan Dinas & Sakit / Cuti.
+ * Utilitas bersama untuk pengajuan Dinas & Sakit / Cuti / Izin.
  *
  * Satu grup Dinas Luar terdiri dari beberapa baris izin_cuti dengan grup_id
  * yang sama. Helper di sini menyatukan baris-baris tersebut agar UI tidak
@@ -13,7 +13,7 @@ export const JENIS_IZIN = ['Izin']
 export const STATUS_TANPA_ABSEN = ['Sakit', 'Cuti', 'Dinas Luar', 'Izin']
 
 /**
- * Status presensi yang sudah final tanpa jam masuk (Sakit/Cuti/Dinas Luar).
+ * Status presensi yang sudah final tanpa jam masuk (Sakit/Cuti/Dinas Luar/Izin).
  * Mengembalikan null bila pegawai sudah punya jam masuk atau statusnya bukan
  * status izin, sehingga panel absen tidak salah menampilkan Alfa.
  */

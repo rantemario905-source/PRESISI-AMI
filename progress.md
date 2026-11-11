@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-11 15:25 WITA (commit & push hari libur laporan + jenis Izin) |
+| Terakhir diperbarui | 2026-11-11 16:20 WITA (uji manual jenis Izin lulus) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,11 +37,31 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-11 15:25):** **commit & push**. Seluruh pekerjaan
+**Pekerjaan terbaru (2026-11-11 16:20):** **uji manual jenis Izin lulus**. User
+melaporkan uji manual berhasil: alur Izin (Kepala Unit `menunggu`, Super Admin
+langsung `disetujui`), penolakan absensi/Alfa/pengaduan pada hari Izin, dan warna
+status di laporan bulanan berjalan. Menutup **B-45**; tidak ada perubahan kode,
+hanya dokumen audit. Sisa: commit/push menunggu perintah.
+
+**Pekerjaan sebelumnya (2026-11-11 16:10):** **rapikan komentar usang**. Lima
+komentar kode yang masih menulis daftar jenis lama (tanpa **Izin**) diperbarui:
+`src/App.jsx`, `src/utils/izin.js` (2 baris), `src/services/leaveService.js`
+(tipe JSDoc `kategori`), dan `src/components/layout/SidebarKepala.jsx`. Tidak ada
+perubahan logika. Verifikasi: `npm run lint` bersih, `npm test` **81/81**,
+`npm run build` lulus **12,78 dtk**. Sisa: uji manual Izin (B-45) dan
+commit/push menunggu perintah.
+
+**Pekerjaan sebelumnya (2026-11-11 15:30):** **verifikasi 38 dijalankan**. User
+melaporkan `supabase/verifikasi_38.sql` sudah dijalankan; constraint dan RPC
+server untuk jenis **Izin** terkonfirmasi. Sisa hanya uji manual: catat Izin
+(Kepala Unit `menunggu`, Super Admin langsung `disetujui`), pastikan absensi/Alfa/
+pengaduan ditolak pada hari Izin, lalu cek warna status di laporan bulanan. Tidak
+ada perubahan kode; dokumen audit diperbarui (belum di-commit).
+
+**Pekerjaan sebelumnya (2026-11-11 15:25):** **commit & push**. Seluruh pekerjaan
 hari libur di laporan bulanan, jenis **Izin**, warna status laporan, dan migrasi
 **38** sudah di-commit **`d27493e`** dan di-push ke `origin/main`. Verifikasi:
 `npm run lint` bersih, `npm test` **81/81**, `npm run build` lulus **9,07 dtk**.
-Sisa: `verifikasi_38.sql` dan uji manual Izin.
 
 **Pekerjaan sebelumnya (2026-11-11 15:21):** **migrasi 38 dijalankan**. User
 melaporkan `supabase/migrations/38_jenis_izin.sql` sudah dijalankan di Supabase,
@@ -516,14 +536,14 @@ lanjutan 14,14 dtk).
 | Migrasi DB 35 | **Sudah dijalankan** (laporan user 2026-11-05) — pengaduan absen masuk + pulang aktif | `supabase/migrations/35_pengaduan_masuk.sql`, `verifikasi_35.sql` |
 | Migrasi DB 36 | **Sudah dijalankan** — koreksi jam masuk aktif; `verifikasi_36.sql` lulus (laporan user 2026-11-05) | `supabase/migrations/36_koreksi_jam_masuk.sql`, `verifikasi_36.sql` |
 | Migrasi DB 37 | **Sudah dijalankan** — kandidat pengaduan sebelum 1 November 2026 hilang; `verifikasi_37.sql` lulus (laporan user 2026-11-05) | `supabase/migrations/37_batasi_pengaduan_sebelum_golive.sql`, `verifikasi_37.sql` |
-| Migrasi DB 38 | **Sudah dijalankan** (laporan user 2026-11-11 15:21) — jenis **Izin** aktif di server; `verifikasi_38.sql` belum dikonfirmasi | `supabase/migrations/38_jenis_izin.sql`, `verifikasi_38.sql` |
+| Migrasi DB 38 | **Sudah dijalankan** (laporan user 2026-11-11 15:21) — jenis **Izin** aktif di server; `verifikasi_38.sql` lulus (laporan user 2026-11-11 15:30) | `supabase/migrations/38_jenis_izin.sql`, `verifikasi_38.sql` |
 | Data uji | **Sudah dibersihkan ulang setelah uji** — transaksi dihapus, 92 pegawai/grup/master shift dipertahankan | `supabase/cleanup_data_uji.sql`, laporan user 2026-10-30 23:01 |
 | Data testing sebelum go-live | **Sudah dijalankan** (laporan user 2026-11-05) — transaksi sebelum 1 November 2026 terhapus; data go-live utuh | `supabase/hapus_data_testing.sql` |
 | Data operasional | **Lengkap** — jadwal dinas dan pemetaan pegawai sudah diisi | laporan user 2026-10-30 23:04 |
 | Go-live | **Sudah berjalan sejak Minggu, 1 November 2026** — pegawai absen masuk dan pulang; absen akhir pekan hanya untuk pegawai shift yang dijadwalkan | laporan user 2026-11-01 17:58 |
 | Koordinat RSUD AMI | **Ada di kode** — `-0.23805651650343132, 117.41442516465149` di klien dan schema | `src/config/constants.js`, `supabase/schema.sql`, migrasi 21 |
 | Radius absensi | **Aktif 50 meter** — klien (`MAX_RADIUS_METERS`) dan server (migrasi 24 sudah dijalankan) | `src/config/constants.js`, `supabase/migrations/24_radius_50_meter.sql` |
-| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 09-37 dijalankan user**; `verifikasi_38.sql` belum dikonfirmasi | laporan user, `supabase/verifikasi_38.sql` |
+| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 09-38 dijalankan user** (38 laporan 2026-11-11) | laporan user, `supabase/verifikasi_38.sql` |
 | Build produksi | **Lulus** - base `/` **6,74 dtk** (audit I-142/I-143); sebelumnya 7,77 dtk (kolom Shift pegawai shift) | `npm run build` 2026-11-11 |
 | Dependensi frontend | **Diperbarui & di-commit** — Vite 7.3.7, `@vitejs/plugin-react` 5.2.0, React Router 7.18.5; Node CI 22; lockfile sinkron; `npm audit` 0 kerentanan | `package.json`, `package-lock.json`, `.github/workflows/deploy.yml` |
 | Header keamanan (CSP) | **Ada di kode & di-commit** — CSP produksi via `<meta>`: `script-src 'self'`, `connect-src` self + `*.supabase.co`, `frame-src 'none'`, `form-action 'self'`, `object-src 'none'`, `base-uri 'self'`; meta referrer; hanya saat build. Uji headless: script inline diblokir, halaman render | `vite.config.js`, `index.html` |
@@ -710,6 +730,65 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-11 16:20 WITA — Uji manual jenis Izin lulus
+
+**Perubahan**
+- User melaporkan uji manual **jenis Izin** berhasil: pencatatan Kepala Unit
+  berstatus `menunggu`, pencatatan Super Admin langsung `disetujui`, absensi/
+  Alfa otomatis/pengaduan ditolak pada hari Izin, dan warna status tampil benar
+  di laporan bulanan.
+- Menutup backlog **B-45**; memperbarui Status Terkini dan Log Instruksi User.
+
+**File**
+- `progress.md`, `AGENTS.md`.
+
+**Verifikasi**
+- Laporan user 2026-11-11 16:20. Tidak ada perubahan kode.
+
+**Catatan/risiko**
+- Tidak ada utang teknis tersisa untuk jenis Izin.
+- Perubahan dokumen ini belum di-commit.
+
+### 2026-11-11 16:10 WITA — Rapikan komentar usang daftar jenis
+
+**Perubahan**
+- Menambahkan **Izin** pada lima komentar dokumentasi yang masih memakai daftar
+  jenis lama: `src/App.jsx` (riwayat `/izin-saya`), `src/utils/izin.js` (header
+  utilitas dan `statusTanpaAbsen`), `src/services/leaveService.js` (tipe JSDoc
+  `kategori`), dan `src/components/layout/SidebarKepala.jsx` (isi menu).
+- Tidak ada perubahan logika, UI, atau skema DB.
+
+**File**
+- `src/App.jsx`, `src/utils/izin.js`, `src/services/leaveService.js`,
+  `src/components/layout/SidebarKepala.jsx`, `progress.md`, `AGENTS.md`.
+
+**Verifikasi**
+- `npm run lint` bersih.
+- `npm test` **81/81** lulus.
+- `npm run build` lulus **12,78 dtk**.
+
+**Catatan/risiko**
+- Hanya komentar; risiko regresi nol.
+- Sisa pekerjaan: uji manual jenis Izin (B-45); commit/push menunggu perintah.
+
+### 2026-11-11 15:30 WITA — Verifikasi 38 dijalankan
+
+**Perubahan**
+- User melaporkan `supabase/verifikasi_38.sql` sudah dijalankan dan lulus,
+  sehingga constraint jenis **Izin** dan RPC server terkonfirmasi.
+- Memperbarui Status Terkini, tabel migrasi/verifikasi, dan backlog B-44.
+
+**File**
+- `progress.md`, `AGENTS.md`.
+
+**Verifikasi**
+- Laporan user 2026-11-11 15:30. Tidak ada perubahan kode.
+
+**Catatan/risiko**
+- Sisa: uji manual Izin (Kepala Unit menunggu, Super Admin menyetujui, absensi/
+  Alfa/pengaduan ditolak pada hari Izin, warna status di laporan bulanan).
+- Perubahan dokumen ini belum di-commit.
 
 ### 2026-11-11 15:25 WITA — Commit & push hari libur laporan + jenis Izin
 
@@ -3238,8 +3317,8 @@ dan `verifikasi_18` untuk hapus grup kosong.
 | B-41 | ~~Uji manual tombol Absen Masuk nonaktif setelah jam selesai jadwal~~ | - | **Selesai:** tombol Absen Masuk nonaktif sudah berjalan (laporan user 2026-11-05) |
 | B-42 | ~~Laporan bulanan masih menampilkan kolom Shift dan blok Riwayat Tukar Shift~~ | - | **Selesai:** keduanya dihapus 2026-11-06; kolom Shift kemudian dikembalikan khusus pegawai Shift, data tukar tetap tersimpan untuk audit |
 | B-43 | ~~Kolom Keterangan laporan bulanan dan kebutuhan kolom Shift khusus pegawai shift~~ | - | **Selesai:** Keterangan dihapus untuk semua pola kerja; kolom Shift (nama shift hari itu) ditambahkan khusus pegawai Shift pada 2026-11-06 |
-| B-44 | ~~Migrasi 38 (jenis Izin) belum dijalankan di Supabase~~ | - | **Selesai:** migrasi 38 dijalankan user 2026-11-11 15:21; sisa `verifikasi_38.sql` |
-| B-45 | Uji manual jenis Izin dan warna status laporan belum dilakukan | - | **Belum:** catat Izin (Kepala Unit menunggu, Super Admin langsung disetujui), pastikan absensi/Alfa/pengaduan ditolak pada hari Izin, lalu cek warna status di laporan bulanan |
+| B-44 | ~~Migrasi 38 (jenis Izin) dan `verifikasi_38.sql` belum dijalankan di Supabase~~ | - | **Selesai:** migrasi 38 dijalankan 2026-11-11 15:21 dan `verifikasi_38.sql` lulus (laporan user 2026-11-11 15:30) |
+| B-45 | ~~Uji manual jenis Izin dan warna status laporan belum dilakukan~~ | - | **Selesai:** uji manual berhasil (laporan user 2026-11-11 16:20) — alur Izin, penolakan absensi/Alfa/pengaduan, warna status laporan |
 | B-37 | ~~Uji manual tukar shift, laporan, & cetak jadwal F4 landscape~~ | - | **Selesai:** tukar shift, laporan, dan cetak F4 sudah aman (laporan user 2026-11-05) |
 | B-4 | ~~`npm run build` belum dijalankan~~ | — | **Selesai:** lulus 2026-10-25 12:24 |
 | B-5 | ~~README menyebut Fase 1–7 saja~~ | — | **Selesai:** diperbarui ke Fase 1–8 + impor |

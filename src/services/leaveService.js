@@ -27,7 +27,7 @@ const KOLOM_IZIN =
 /**
  * Daftar pengajuan yang sudah dikelompokkan per grup Dinas.
  *
- * @param {{ kategori?: 'dinas-sakit'|'cuti'|'semua', status?: 'semua'|'menunggu'|'disetujui'|'ditolak'|'dibatalkan' }} opsi
+ * @param {{ kategori?: 'dinas-sakit'|'cuti'|'izin'|'semua', status?: 'semua'|'menunggu'|'disetujui'|'ditolak'|'dibatalkan' }} opsi
  * @returns {Promise<Array<object>>}
  */
 export async function ambilDaftarIzin({ kategori = 'semua', status = 'semua' } = {}) {

@@ -1,6 +1,6 @@
 /**
  * Sidebar portal kepala ruangan.
- * Memuat jadwal shift unit, Dinas & Sakit, dan Cuti.
+ * Memuat jadwal shift unit, Dinas & Sakit, Cuti, dan Izin.
  */
 import { NavLink } from 'react-router-dom'
 import { NAMA_APLIKASI, NAMA_RUMAH_SAKIT } from '../../config/constants.js'

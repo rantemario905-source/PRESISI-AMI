@@ -13,13 +13,15 @@ Aplikasi absensi pegawai non-ASN RSUD Aji Muhammad Idris.
 - **Backend:** Supabase (Postgres, Auth, Storage, RPC `SECURITY DEFINER`).
 - **Fitur inti:** geofencing 50 m, anti Fake GPS, device binding satu perangkat
   aktif per pegawai, presensi shift/reguler dengan jendela waktu (masuk dibuka
-  1 jam sebelum jam masuk, pulang dibuka 1 menit setelah dan ditutup 2 jam
-  setelah jam pulang), jam kerja reguler khusus per unit, jadwal shift, hari
-  libur, keterlambatan, Alfa otomatis, Dinas/Sakit/Cuti, koreksi presensi,
+  1 jam sebelum jam masuk, pulang dibuka tepat waktu dan ditutup 2 jam setelah
+  jam pulang), jam kerja reguler khusus per unit, jadwal shift, hari libur di
+  laporan bulanan, keterlambatan per menit penuh (floor), Alfa otomatis,
+  Dinas/Sakit/Cuti/Izin, pengaduan presensi masuk/pulang, koreksi presensi,
   rekapitulasi, laporan presensi bulanan per pegawai (PDF A4), impor jadwal
-  Excel (.xlsx), hapus grup shift kosong, pengecualian radius untuk pegawai tertentu
-  (tanpa mengubah aturan 50 m bagi pegawai lain), serta kepala unit multi-unit
-  dan kepala ASN tanpa baris pegawai.
+  Excel (.xlsx), tukar shift teraudit & cetak jadwal F4 landscape, hapus grup
+  shift kosong, pengecualian radius untuk pegawai tertentu (tanpa mengubah
+  aturan 50 m bagi pegawai lain), serta kepala unit multi-unit dan kepala ASN
+  tanpa baris pegawai.
 - **Peran:** `pegawai`, `superadmin`, dan penugasan `kepala_unit` (satu unit satu
   kepala, satu kepala boleh banyak unit). Kepala ASN memakai metadata
   `jenis_akun = kepala_asn` dan tidak dicatat di `public.pegawai`.
@@ -45,7 +47,7 @@ npm run preview      # pratinjau hasil build
 - Skrip bantu (butuh Secret key, jangan pernah di-commit):
   `node scripts/impor-akun.mjs ...`, `node scripts/verifikasi-impor.mjs ...`.
 
-**Urutan migrasi wajib:** `01 → 02 → ... → 28`, satu per satu. Jangan mengulang
+**Urutan migrasi wajib:** `01 → 02 → ... → 38`, satu per satu. Jangan mengulang
 migrasi lama bila tidak diperlukan. `supabase/schema.sql` adalah gabungan
 seluruh migrasi untuk instalasi sekali jalan.
 
@@ -66,8 +68,8 @@ seluruh migrasi untuk instalasi sekali jalan.
 | Layout | `src/components/layout/*` | Portal admin & kepala ruangan |
 | Laporan bulanan | `src/pages/admin/LaporanBulanan.jsx`, `src/components/laporan/*` | Kop instansi, tabel harian, tanda tangan; cetak A4 portrait |
 | Halaman | `src/pages/**` | `admin/` untuk portal Super Admin/kepala |
-| Database | `supabase/migrations/01–24` | Skema, RLS, RPC, seed |
-| Verifikasi DB | `supabase/verifikasi_*.sql` | Pemeriksaan pasca-migrasi |
+| Database | `supabase/migrations/01–38` | Skema, RLS, RPC, seed |
+| Verifikasi DB | `supabase/verifikasi_*.sql` | Pemeriksaan pasca-migrasi (09–38) |
 | Cron Alfa | `supabase/jadwal_alfa.sql` | Opsional, butuh `pg_cron` |
 
 ---
@@ -286,6 +288,10 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-144 | 2026-11-11 | "ada pekerjaan yang belum selesai karena force close, cari tau progress pekerjan sebelumnya sudah sampai mana dan lanjutkan tanpa ada yang terlewat, pastikan tidak ada bug dan eror pada sistem" | Mengaudit pekerjaan I-142/I-143: memastikan migrasi 38 identik dengan `schema.sql`, diff RPC hanya menambah `Izin`, melengkapi label navigasi **Dinas, Cuti & Izin**, menyinkronkan `README.md` dan tabel Aspek/backlog `progress.md` (B-44/B-45); lint bersih, `npm test` **81/81**, build lulus **6,74 dtk** | selesai (audit kode & dokumen); migrasi 38 belum dijalankan | 2026-11-11 15:15 — Audit pasca force close I-142/I-143 |
 | I-145 | 2026-11-11 15:21 | "migrasi sudah saya jalankan" | Mencatat migrasi **38** (`38_jenis_izin.sql`) sudah dijalankan di Supabase; constraint jenis Izin dan RPC server aktif. Memperbarui Status Terkini, tabel migrasi/verifikasi, backlog B-44, serta log; tidak ada perubahan kode. Sisa: `verifikasi_38.sql` dan uji manual Izin | selesai (dokumen) | 2026-11-11 15:21 — Migrasi 38 dijalankan |
 | I-146 | 2026-11-11 15:25 | "commit dan push" | Memverifikasi `npm run lint` bersih, `npm test` **81/81**, `npm run build` lulus **9,07 dtk**; memastikan staged diff tanpa rahasia; commit **`d27493e`** (hari libur di laporan bulanan, jenis Izin, warna status, migrasi 38 + `verifikasi_38.sql`, label navigasi, dokumen audit) lalu push ke `origin/main` | selesai | 2026-11-11 15:25 — Commit & push hari libur laporan + jenis Izin |
+| I-147 | 2026-11-11 15:30 | "verifikasi 38 sudah saya jalankan" | Mencatat `verifikasi_38.sql` sudah dijalankan dan lulus; constraint jenis Izin dan RPC server terkonfirmasi. Memperbarui Status Terkini, tabel migrasi/verifikasi, dan backlog B-44; tidak ada perubahan kode. Sisa: uji manual Izin | selesai (dokumen); belum di-commit | 2026-11-11 15:30 — Verifikasi 38 dijalankan |
+| I-148 | 2026-11-11 15:42 | "lanjutkan pekerjaan terakhir yaitu update agenst dan progress,[Image 1]" + "kerjakankerjakan" | Melanjutkan pembaruan AGENTS.md dan progress.md yang terhenti: sinkronisasi Fakta Lingkungan AGENTS.md (commit d27493e, 79a1368, 5e48fa0, jenis Izin, hari libur laporan, migrasi 38 + verifikasi 38), tabel aspek progress.md, serta verifikasi build & test | selesai (dokumen); belum di-commit | 2026-11-11 15:42 — Sinkronisasi AGENTS.md & progress.md |
+| I-149 | 2026-11-11 16:10 | "kerjakan" (menyetujui: rapikan 5 komentar usang + `npm run build`) | Menambahkan **Izin** pada komentar usang di `src/App.jsx`, `src/utils/izin.js` (2 baris), `src/services/leaveService.js`, dan `src/components/layout/SidebarKepala.jsx`; `npm run lint` bersih, `npm test` **81/81**, `npm run build` lulus **12,78 dtk**. Sisa: uji manual Izin (B-45) | selesai (kode); belum di-commit | 2026-11-11 16:10 — Rapikan komentar usang daftar jenis |
+| I-150 | 2026-11-11 16:20 | "sudah saya uji dan berhasil" | Mencatat uji manual jenis **Izin** lulus (Kepala Unit `menunggu`, Super Admin `disetujui`, absensi/Alfa/pengaduan ditolak pada hari Izin, warna status laporan benar); menutup backlog **B-45** dan memperbarui Status Terkini. Tidak ada perubahan kode | selesai (dokumen); belum di-commit | 2026-11-11 16:20 — Uji manual jenis Izin lulus |
 
 ---
 
@@ -314,10 +320,16 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   2026-10-27 10:36. Koordinat terbaru
   `-0.23805651650343132, 117.41442516465149` sudah di-commit dan migrasi 21
   **sudah dijalankan di Supabase** (klaim user 2026-10-27 10:39). Commit terbaru
-  **`f1511a2`** (laporan bulanan tanpa Riwayat Tukar Shift dan kolom Keterangan;
-  kolom Shift untuk pegawai Shift) di-push 2026-11-06; sebelumnya `c531502`,
-  `b8ababb`, dan `c14ea34` (pengaduan absen masuk/pulang, koreksi jam masuk,
-  batas pengaduan sejak go-live, skrip `hapus_data_testing.sql`, perapian UI
+  **`d27493e`** (hari libur di laporan bulanan, jenis Izin, warna status laporan,
+  migrasi 38 + `verifikasi_38.sql`) dengan commit sinkronisasi dokumen audit
+  **`8af366e`** di-push 2026-11-11; sebelumnya commit **`79a1368`** (ringkas teks
+  status izin di panel absen; sinkronisasi `8415fb9`) dan **`5e48fa0`** (panel
+  absen mengenali status sakit, cuti, dan dinas luar; sinkronisasi `c417a4e`)
+  di-push 2026-11-06; sebelumnya commit **`f1511a2`** (laporan bulanan tanpa
+  Riwayat Tukar Shift dan kolom Keterangan; kolom Shift untuk pegawai Shift;
+  sinkronisasi `5a3f163`) di-push 2026-11-06; sebelumnya `c531502`, `b8ababb`,
+  dan `c14ea34` (pengaduan absen masuk/pulang, koreksi jam masuk, batas
+  pengaduan sejak go-live, skrip `hapus_data_testing.sql`, perapian UI
   pengaduan; migrasi 35–37) di-push 2026-11-05; sebelumnya `5672fa0` dan
   `0d3a902` (sinkronisasi dokumen & notifikasi Alfa). Commit
   `c1e56f7` (pengaduan absen pulang, migrasi 33) di-push 2026-11-04; sebelumnya
@@ -545,5 +557,21 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   lokasi. Shift malam kemarin yang masih terbuka tetap dapat dipulangkan.
   `submit_presensi` dan `proses_alfa_otomatis` sudah menolak/mengecualikan status
   izin, sehingga perbaikan ini hanya di klien dan tidak memerlukan migrasi.
+- **Hari libur di laporan bulanan (2026-11-11, sudah di-commit `d27493e`):**
+  Laporan Presensi Bulanan merekap seluruh tanggal 1–akhir bulan. Presensi
+  nyata tetap ditampilkan; hari libur (akhir pekan/libur unit, hari libur
+  nasional, dan shift tanpa jadwal) berstatus **Libur**; hari kerja tanpa
+  catatan kehadiran berstatus **—**; ringkasan kehadiran menambah baris jumlah
+  libur. Data jam kerja unit dan `hari_libur` dibaca di klien tanpa migrasi DB.
+- **Jenis Izin & warna status laporan (2026-11-11, sudah di-commit `d27493e`):**
+  Menu dan tab **Izin** mandiri untuk mencatat ketidakhadiran berizin (satu
+  pegawai, bukti file wajib, alur persetujuan sama seperti Sakit/Cuti: pengajuan
+  Kepala Unit `menunggu`, Super Admin langsung `disetujui`). Sel status pada
+  laporan bulanan kini berwarna per status (Hadir hijau, Alfa merah, Sakit rose,
+  Cuti teal, Dinas Luar violet, Izin sky, Koreksi amber, Libur slate). Server
+  menolak absensi, proses Alfa otomatis, dan pengaduan presensi pada hari
+  berstatus Izin. Migrasi **38** dan `verifikasi_38.sql` **sudah dijalankan dan
+  lulus** di Supabase (laporan user 2026-11-11 15:30). Sisa: uji manual alur
+  Izin dan warna status laporan.
 - Timezone aplikasi: `Asia/Makassar` (WITA, UTC+8).
 - `dist/` dan `.env` sudah diabaikan Git.

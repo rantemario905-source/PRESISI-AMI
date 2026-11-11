@@ -4,7 +4,7 @@
  * --------------------------------------------------------------------------
  *   /login                       → seluruh staf
  *   /                            → halaman absensi pegawai  (role: pegawai)
- *   /izin-saya                   → riwayat Dinas & Sakit / Cuti pegawai
+ *   /izin-saya                   → riwayat Dinas & Sakit / Cuti / Izin pegawai
  *   /riwayat                     → riwayat & rekap bulanan pegawai
  *   /kepala-ruangan              → portal kepala ruangan (flag kepala_ruangan)
  *     ├─ /jadwal-shift           → jadwal shift unit sendiri
