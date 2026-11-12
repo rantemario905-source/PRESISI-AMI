@@ -303,6 +303,7 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-159 | 2026-11-11 20:45 | "[Image 1] saya mau ketika hari libur di input oleh admin ... berwarna merah terang dengan font putih merge seperti hari libur biasa, dengan tulisan sesuai inputan di aplikasi semisal Hari Raya Idul Fitri / Hari Pahlawan Nasional, untuk reguler, karena untuk pola shift tetap masuk ..." | Libur nasional di laporan bulanan pegawai reguler tampil sebagai sel gabungan merah `#dc2626` + teks putih berisi nama liburnya; `jenisLibur` (`nasional`/`mingguan`/`shift`) + `rowSpan` hanya untuk jenis sama; `npm run lint` bersih, `npm test` **85/85**, `npm run build` lulus **12,61 dtk** | selesai (kode); belum di-commit | 2026-11-11 20:45 — Libur nasional merah di laporan |
 | I-160 | 2026-11-11 21:05 | "kemudian ada indikasi bug pada pengaduan dimana pengaduan salah satu unit tidak bisa di setujui kepala unitnya dengan notif gagal anda tidak berhak melihat jadwal pegawai ini.[Image 1] , cari karna sebelumnya tidak pernah ada kasus seperti ini" + "kerjakan" | Akar masalah: `jadwal_kerja` masih memakai aturan lama `pegawai.kepala_ruangan` + unit tunggal sehingga kepala unit (via `kepala_unit`, multi-unit/kepala ASN) ditolak saat `putuskan_pengaduan_presensi` memanggilnya. Migrasi **40** mengganti pengecekan ke `bisa_lihat_presensi(p_user)`, ditambah `verifikasi_40.sql`, sinkron `schema.sql` + README; lint bersih, `npm test` **85/85**, `npm run build` lulus **7,89 dtk** | selesai (kode); migrasi 40 belum dijalankan | 2026-11-11 21:05 — Perbaikan hak akses jadwal kepala unit |
 | I-161 | 2026-11-11 21:20 | "sudah sayajalankan migrasi dan verifikasinya" | Mencatat migrasi **40** dan `verifikasi_40.sql` sudah dijalankan; `jadwal_kerja` kini mengenali kepala unit lewat `kepala_unit` (`bisa_lihat_presensi`). Memperbarui Status Terkini, tabel migrasi 40, dan backlog **B-47**. Tidak ada perubahan kode | selesai (dokumen); belum di-commit | 2026-11-11 21:20 — Migrasi 40 dijalankan |
+| I-162 | 2026-11-12 | "commit dan push" | Memverifikasi `npm run lint` bersih, `npm test` **85/85**, `npm run build` lulus **19,14 dtk**; commit **`27525d1`** (status Hadir setelah koreksi + migrasi 39, laporan libur berwarna & header biru, pencarian pegawai pengajuan izin, hak akses `jadwal_kerja` + migrasi 40, verifikasi 39–40) lalu push ke `origin/main` (`3f0c13f..27525d1`) | selesai | 2026-11-12 — Commit & push sesi 11 November |
 
 ---
 
@@ -331,6 +332,9 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   2026-10-27 10:36. Koordinat terbaru
   `-0.23805651650343132, 117.41442516465149` sudah di-commit dan migrasi 21
   **sudah dijalankan di Supabase** (klaim user 2026-10-27 10:39). Commit terbaru
+  **`27525d1`** (status Hadir setelah koreksi + migrasi 39, laporan libur berwarna
+  & header biru, pencarian pegawai pengajuan izin, hak akses `jadwal_kerja` +
+  migrasi 40, verifikasi 39–40) di-push 2026-11-12; sebelumnya
   **`d27493e`** (hari libur di laporan bulanan, jenis Izin, warna status laporan,
   migrasi 38 + `verifikasi_38.sql`) dengan commit sinkronisasi dokumen audit
   **`8af366e`** di-push 2026-11-11; sebelumnya commit **`79a1368`** (ringkas teks

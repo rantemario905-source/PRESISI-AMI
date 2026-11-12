@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-11 21:20 WITA (migrasi 40 dijalankan) |
+| Terakhir diperbarui | 2026-11-12 WITA (commit & push `27525d1`) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,7 +37,15 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-11 21:20):** **migrasi 40 dijalankan**. User
+**Pekerjaan terbaru (2026-11-12):** **commit & push `27525d1`** — seluruh
+pekerjaan sesi 11 November 2026 (status Hadir setelah koreksi + migrasi 39,
+laporan bulanan: sel libur abu & libur nasional merah, header tabel biru,
+pencarian pegawai pada pengajuan izin, perbaikan `jadwal_kerja` + migrasi 40)
+sudah di-push ke
+`origin/main`. Sisa: uji manual Setujui pengaduan dari akun kepala unit dan
+pratinjau/cetak laporan.
+
+**Pekerjaan sebelumnya (2026-11-11 21:20):** **migrasi 40 dijalankan**. User
 melaporkan `40_jadwal_kerja_hak_akses.sql` dan `verifikasi_40.sql` sudah
 dijalankan, sehingga `jadwal_kerja` kini mengenali kepala unit lewat
 `kepala_unit` (`bisa_lihat_presensi`). Tidak ada perubahan kode; dokumen audit
@@ -807,6 +815,31 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-12 WITA — Commit & push sesi 11 November
+
+**Perubahan**
+- Memverifikasi `npm run lint` (bersih), `npm test` **85/85**, `npm run build`
+  lulus **19,14 dtk**; memastikan staged diff tanpa rahasia.
+- Commit **`27525d1`** "PRESISI AMI: status Hadir setelah koreksi, laporan libur
+  berwarna, pencarian pegawai izin, dan hak akses jadwal kepala unit" lalu push
+  ke `origin/main` (`3f0c13f..27525d1`).
+- Isi commit: status **Hadir** setelah koreksi + migrasi **39**; laporan bulanan
+  (sel libur abu `#cbd5e1`, libur nasional merah `#dc2626` + nama libur, header
+  tabel biru `#1a6fb5`, `rowSpan` per jenis libur); pencarian pegawai berketik di
+  pengajuan izin; perbaikan `jadwal_kerja` + migrasi **40**; `verifikasi_39/40`;
+  sinkron `schema.sql`, `README.md`, `AGENTS.md`.
+
+**File**
+- Seluruh perubahan sesi (19 file) + dokumen audit.
+
+**Verifikasi**
+- Lint bersih, `npm test` 85/85, `npm run build` lulus 19,14 dtk.
+- Push berhasil: `3f0c13f..27525d1 main -> main`.
+
+**Catatan/risiko**
+- Sisa uji manual: Setujui satu pengaduan dari akun kepala unit, pratinjau/cetak
+  laporan bulanan (reguler & shift).
 
 ### 2026-11-11 21:20 WITA — Migrasi 40 dijalankan
 
