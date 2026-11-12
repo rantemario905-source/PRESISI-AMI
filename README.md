@@ -105,6 +105,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 | 38 | `supabase/migrations/38_jenis_izin.sql` | Jenis **Izin** dihidupkan kembali: satu pegawai, dokumen wajib, persetujuan sama seperti Sakit/Cuti, ditolak dari absensi/Alfa/pengaduan, dan status `Izin` diterima `izin_cuti` serta `presensi` |
 | 39 | `supabase/migrations/39_status_hadir_setelah_koreksi.sql` | Presensi terkoreksi berakhir berstatus **Hadir** (trigger + backfill `Koreksi` → `Hadir`); jejak koreksi tetap di `dikoreksi_oleh`/`alasan_koreksi`/`koreksi_presensi` |
 | 40 | `supabase/migrations/40_jadwal_kerja_hak_akses.sql` | `jadwal_kerja` memakai `bisa_lihat_presensi()` sehingga kepala unit (multi-unit / kepala ASN via `kepala_unit`) dapat melihat jadwal pegawai unit yang dikelola — memperbaiki galat "Anda tidak berhak melihat jadwal pegawai ini." saat menyetujui pengaduan |
+| 41 | `supabase/migrations/41_audit_jadwal_shift_auth_users.sql` | FK audit `jadwal_shift.dibuat_oleh`, `jadwal_shift.diperbarui_oleh`, dan `tukar_shift.dibuat_oleh` diarahkan ke `auth.users` — memperbaiki Tukar Shift oleh kepala unit ASN yang tidak punya baris `public.pegawai` ("violates foreign key constraint `jadwal_shift_diperbarui_oleh_fkey`") |
 
 > Bila database sudah pernah dijalankan sampai file 08, jalankan **file 09** untuk
 > mengaktifkan alur Dinas & Sakit / Cuti, **file 11** untuk pengaturan kepala
@@ -128,8 +129,10 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > mencakup absen masuk dan pulang, **file 36** agar jam masuk yang sudah
 > tercatat dapat dikoreksi lewat pengaduan, **file 37** agar pengaduan
 > dibatasi sejak go-live 1 November 2026, **file 39** agar presensi terkoreksi
-> kembali berstatus Hadir, serta **file 40** agar `jadwal_kerja` mengenali
-> kepala unit lewat `kepala_unit` (perbaikan persetujuan pengaduan).
+> kembali berstatus Hadir, **file 40** agar `jadwal_kerja` mengenali
+> kepala unit lewat `kepala_unit` (perbaikan persetujuan pengaduan), serta
+> **file 41** agar audit jadwal/tukar shift mengacu ke akun `auth.users`
+> (perbaikan Tukar Shift oleh kepala unit ASN).
 > File 10 hanya berisi RPC perubahan role yang tidak dipakai UI, jadi boleh
 > dilewati. Jalankan migrasi secara bertahap - jangan mengulang file lama bila
 > tidak diperlukan.
@@ -150,8 +153,8 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > **`supabase/verifikasi_32.sql`**, **`supabase/verifikasi_33.sql`**,
 > **`supabase/verifikasi_34.sql`**, **`supabase/verifikasi_35.sql`**,
 > **`supabase/verifikasi_36.sql`**, **`supabase/verifikasi_37.sql`**,
-> **`supabase/verifikasi_38.sql`**, **`supabase/verifikasi_39.sql`**, dan
-> **`supabase/verifikasi_40.sql`** setelah
+> **`supabase/verifikasi_38.sql`**, **`supabase/verifikasi_39.sql`**,
+> **`supabase/verifikasi_40.sql`**, dan **`supabase/verifikasi_41.sql`** setelah
 > migrasi terkait. Seluruh nilai
 > pemeriksaan harus `true`; bila ada yang `false`, jangan lanjutkan pemakaian.
 > `verifikasi_13.sql` dan `verifikasi_14.sql` hanya berlaku sebelum migrasi 15;
@@ -185,6 +188,9 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > Migrasi 32 wajib dijalankan agar **Tukar Shift** di menu Jadwal Shift bekerja
 > (menukar jadwal dua pegawai + mencatat riwayat tukar). Jalankan
 > `verifikasi_32.sql` setelahnya.
+> **Migrasi 41** wajib dijalankan agar **Tukar Shift** (dan perubahan jadwal)
+> oleh **kepala unit ASN** — akun tanpa baris `public.pegawai` — tidak gagal
+> karena FK audit; jalankan `verifikasi_41.sql` setelahnya.
 > Migrasi 33 wajib dijalankan agar menu **Pengaduan Presensi** (pegawai) dan
 > **Pengaduan Presensi** (kepala unit) berfungsi. Foto bukti tetap di bucket
 > privat `dokumen-izin` dengan prefix `pengaduan/<user_id>/`. Jalankan
@@ -218,7 +224,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 **B. Sekaligus**
 
 Salin seluruh isi `supabase/schema.sql`, tempel, lalu **Run**.
-Isinya identik dengan gabungan seluruh 33 file migrasi di atas (termasuk migrasi 15-33).
+Isinya identik dengan gabungan seluruh 41 file migrasi di atas (termasuk migrasi 15-41).
 
 **C. Membuat akun pegawai**
 
@@ -326,6 +332,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 │   ├── verifikasi_38.sql       # Pemeriksaan jenis ketidakhadiran Izin
 │   ├── verifikasi_39.sql       # Pemeriksaan status Hadir setelah koreksi
 │   ├── verifikasi_40.sql       # Pemeriksaan hak akses jadwal_kerja kepala unit
+│   ├── verifikasi_41.sql       # Pemeriksaan FK audit jadwal/tukar shift ke auth.users
 │   ├── hapus_data_testing.sql  # Hapus transaksi sebelum 1 November 2026
 │   └── jadwal_alfa.sql         # Opsional: jadwal pg_cron untuk Alfa
 ├── scripts/

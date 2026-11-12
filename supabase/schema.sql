@@ -4,7 +4,7 @@
 -- Dua cara pakai:
 --   A. Satu file: jalankan seluruh file ini di SQL Editor.
 -- B. Bertahap : jalankan supabase/migrations/01_tabel.sql s.d.
---      32_tukar_shift.sql, satu per satu (disarankan bila ingin
+--      41_audit_jadwal_shift_auth_users.sql, satu per satu (disarankan bila ingin
 --      meminimalisir error).
 --
 -- Urutan PENTING: tabel dibuat lebih dulu, karena fungsi `is_superadmin`
@@ -3473,7 +3473,7 @@ alter table public.jadwal_shift
   drop constraint if exists jadwal_shift_dibuat_oleh_fkey;
 alter table public.jadwal_shift
   add constraint jadwal_shift_dibuat_oleh_fkey
-  foreign key (dibuat_oleh) references public.pegawai (id) on delete set null not valid;
+  foreign key (dibuat_oleh) references auth.users (id) on delete set null not valid;
 alter table public.jadwal_shift
   validate constraint jadwal_shift_dibuat_oleh_fkey;
 
@@ -3481,7 +3481,7 @@ alter table public.jadwal_shift
   drop constraint if exists jadwal_shift_diperbarui_oleh_fkey;
 alter table public.jadwal_shift
   add constraint jadwal_shift_diperbarui_oleh_fkey
-  foreign key (diperbarui_oleh) references public.pegawai (id) on delete set null not valid;
+  foreign key (diperbarui_oleh) references auth.users (id) on delete set null not valid;
 alter table public.jadwal_shift
   validate constraint jadwal_shift_diperbarui_oleh_fkey;
 
@@ -8620,7 +8620,7 @@ create table if not exists public.tukar_shift (
   shift_a_baru uuid not null references public.shift_master (id),
   shift_b_baru uuid not null references public.shift_master (id),
   alasan       text,
-  dibuat_oleh  uuid references public.pegawai (id) on delete set null,
+  dibuat_oleh  uuid references auth.users (id) on delete set null,
   dibuat_pada  timestamptz not null default now(),
   constraint tukar_shift_pegawai_beda check (pegawai_a <> pegawai_b)
 );

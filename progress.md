@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-12 WITA (commit & push `27525d1`) |
+| Terakhir diperbarui | 2026-11-12 09:02 WITA (perbaikan FK audit tukar shift — migrasi 41) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,7 +37,17 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-12):** **commit & push `27525d1`** — seluruh
+**Pekerjaan terbaru (2026-11-12 09:02):** **perbaikan Tukar Shift kepala unit**
+— galat `insert or update on table "jadwal_shift" violates foreign key
+constraint "jadwal_shift_diperbarui_oleh_fkey"` muncul karena kolom audit
+`jadwal_shift.dibuat_oleh`/`diperbarui_oleh` dan `tukar_shift.dibuat_oleh`
+ber-FK ke `public.pegawai`, padahal diisi `auth.uid()`. Kepala unit ASN tidak
+punya baris `pegawai`, sehingga gagal (akun admin berhasil karena punya baris).
+Dibuat migrasi **41** yang mengarahkan ketiga FK ke `auth.users`, plus
+`verifikasi_41.sql`, sinkron `schema.sql` dan README. **Migrasi 41 belum
+dijalankan.** Tidak ada perubahan klien.
+
+**Pekerjaan sebelumnya (2026-11-12):** **commit & push `27525d1`** — seluruh
 pekerjaan sesi 11 November 2026 (status Hadir setelah koreksi + migrasi 39,
 laporan bulanan: sel libur abu & libur nasional merah, header tabel biru,
 pencarian pegawai pada pengajuan izin, perbaikan `jadwal_kerja` + migrasi 40)
@@ -622,6 +632,7 @@ lanjutan 14,14 dtk).
 | Migrasi DB 38 | **Sudah dijalankan** (laporan user 2026-11-11 15:21) — jenis **Izin** aktif di server; `verifikasi_38.sql` lulus (laporan user 2026-11-11 15:30) | `supabase/migrations/38_jenis_izin.sql`, `verifikasi_38.sql` |
 | Migrasi DB 39 | **Sudah dijalankan** (laporan user 2026-11-11 17:40) — trigger `trg_normalisasi_status_koreksi` aktif dan data lama `Koreksi` dinormalkan; `verifikasi_39.sql` lulus | `supabase/migrations/39_status_hadir_setelah_koreksi.sql`, `verifikasi_39.sql` |
 | Migrasi DB 40 | **Sudah dijalankan** (laporan user 2026-11-11 21:20) — `jadwal_kerja` memakai `bisa_lihat_presensi()` sehingga kepala unit (multi-unit/kepala ASN) dapat melihat jadwal pegawai unit yang dikelola; `verifikasi_40.sql` dijalankan | `supabase/migrations/40_jadwal_kerja_hak_akses.sql`, `verifikasi_40.sql` |
+| Migrasi DB 41 | **Belum dijalankan** — FK audit `jadwal_shift.dibuat_oleh`, `jadwal_shift.diperbarui_oleh`, dan `tukar_shift.dibuat_oleh` diarahkan ke `auth.users` agar kepala unit ASN (tanpa baris `pegawai`) dapat Tukar Shift | `supabase/migrations/41_audit_jadwal_shift_auth_users.sql`, `verifikasi_41.sql` |
 | Data uji | **Sudah dibersihkan ulang setelah uji** — transaksi dihapus, 92 pegawai/grup/master shift dipertahankan | `supabase/cleanup_data_uji.sql`, laporan user 2026-10-30 23:01 |
 | Data testing sebelum go-live | **Sudah dijalankan** (laporan user 2026-11-05) — transaksi sebelum 1 November 2026 terhapus; data go-live utuh | `supabase/hapus_data_testing.sql` |
 | Data operasional | **Lengkap** — jadwal dinas dan pemetaan pegawai sudah diisi | laporan user 2026-10-30 23:04 |
@@ -815,6 +826,39 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-12 09:02 WITA — Perbaikan FK audit Tukar Shift (migrasi 41)
+
+**Perubahan**
+- Laporan kepala unit: Tukar Shift gagal dengan galat
+  `insert or update on table "jadwal_shift" violates foreign key constraint
+  "jadwal_shift_diperbarui_oleh_fkey"`. Akun admin berhasil karena memiliki baris
+  `public.pegawai`, sedangkan kepala unit **ASN** hanya punya metadata
+  `jenis_akun = kepala_asn`.
+- Akar masalah: trigger `set_audit_jadwal_shift()` mengisi
+  `dibuat_oleh`/`diperbarui_oleh = auth.uid()`, dan RPC `tukar_shift()` mengisi
+  `tukar_shift.dibuat_oleh = auth.uid()`, tetapi ketiga kolom ber-FK ke
+  `public.pegawai(id)`.
+- Migrasi **41** mengarahkan ketiga FK ke `auth.users(id)` (pola sama dengan
+  `izin_cuti` migrasi 23 dan `pengaduan_presensi`); hanya definisi FK berubah,
+  data lama tetap valid karena berisi UUID akun.
+- Sinkron `supabase/schema.sql` (3 FK + komentar urutan migrasi), tambah
+  `supabase/verifikasi_41.sql`, perbarui `README.md`.
+
+**File**
+- `supabase/migrations/41_audit_jadwal_shift_auth_users.sql` (baru),
+  `supabase/verifikasi_41.sql` (baru), `supabase/schema.sql`, `README.md`,
+  `progress.md`, `AGENTS.md`.
+
+**Verifikasi**
+- `npm run lint` bersih, `npm test` **85/85**, `npm run build` lulus.
+- `verifikasi_41.sql` **belum dijalankan** — menunggu migrasi 41.
+
+**Catatan/risiko**
+- Tanpa migrasi 41, kepala unit ASN tetap tidak bisa Tukar Shift (dan setiap
+  perubahan/penambahan `jadwal_shift` oleh mereka juga gagal di FK yang sama).
+- Sisa: jalankan migrasi 41 + verifikasi 41, lalu uji Tukar Shift dari akun
+  kepala unit terkait.
 
 ### 2026-11-12 WITA — Commit & push sesi 11 November
 
@@ -3698,6 +3742,7 @@ dan `verifikasi_18` untuk hapus grup kosong.
 | B-46 | ~~Migrasi 39 (status Hadir setelah koreksi) belum dijalankan di Supabase~~ | - | **Selesai:** migrasi 39 + `verifikasi_39.sql` dijalankan user 2026-11-11 17:40 dan berhasil; sisa uji manual satu pengaduan disetujui |
 | B-45 | ~~Uji manual jenis Izin dan warna status laporan belum dilakukan~~ | - | **Selesai:** uji manual berhasil (laporan user 2026-11-11 16:20) — alur Izin, penolakan absensi/Alfa/pengaduan, warna status laporan |
 | B-47 | ~~Migrasi 40 (`jadwal_kerja` mengenali `kepala_unit`) belum dijalankan di Supabase~~ | `supabase/migrations/40_jadwal_kerja_hak_akses.sql` | **Selesai:** migrasi 40 + `verifikasi_40.sql` dijalankan user 2026-11-11 21:20; sisa uji Setujui satu pengaduan dari akun kepala unit yang sebelumnya gagal |
+| B-48 | Migrasi 41 (FK audit jadwal/tukar shift → `auth.users`) belum dijalankan di Supabase | `supabase/migrations/41_audit_jadwal_shift_auth_users.sql` | **Belum:** jalankan migrasi 41 lalu `verifikasi_41.sql`, kemudian uji Tukar Shift dari akun kepala unit yang gagal (Eva Setiani ↔ Bdn. Arinda Bella Pratiwi, 12 Nov 2026) |
 | B-37 | ~~Uji manual tukar shift, laporan, & cetak jadwal F4 landscape~~ | - | **Selesai:** tukar shift, laporan, dan cetak F4 sudah aman (laporan user 2026-11-05) |
 | B-4 | ~~`npm run build` belum dijalankan~~ | — | **Selesai:** lulus 2026-10-25 12:24 |
 | B-5 | ~~README menyebut Fase 1–7 saja~~ | — | **Selesai:** diperbarui ke Fase 1–8 + impor |

@@ -47,7 +47,7 @@ npm run preview      # pratinjau hasil build
 - Skrip bantu (butuh Secret key, jangan pernah di-commit):
   `node scripts/impor-akun.mjs ...`, `node scripts/verifikasi-impor.mjs ...`.
 
-**Urutan migrasi wajib:** `01 → 02 → ... → 40`, satu per satu. Jangan mengulang
+**Urutan migrasi wajib:** `01 → 02 → ... → 41`, satu per satu. Jangan mengulang
 migrasi lama bila tidak diperlukan. `supabase/schema.sql` adalah gabungan
 seluruh migrasi untuk instalasi sekali jalan.
 
@@ -68,8 +68,8 @@ seluruh migrasi untuk instalasi sekali jalan.
 | Layout | `src/components/layout/*` | Portal admin & kepala ruangan |
 | Laporan bulanan | `src/pages/admin/LaporanBulanan.jsx`, `src/components/laporan/*` | Kop instansi, tabel harian, tanda tangan; cetak A4 portrait |
 | Halaman | `src/pages/**` | `admin/` untuk portal Super Admin/kepala |
-| Database | `supabase/migrations/01–40` | Skema, RLS, RPC, seed |
-| Verifikasi DB | `supabase/verifikasi_*.sql` | Pemeriksaan pasca-migrasi (09–40) |
+| Database | `supabase/migrations/01–41` | Skema, RLS, RPC, seed |
+| Verifikasi DB | `supabase/verifikasi_*.sql` | Pemeriksaan pasca-migrasi (09–41) |
 | Cron Alfa | `supabase/jadwal_alfa.sql` | Opsional, butuh `pg_cron` |
 
 ---
@@ -304,6 +304,7 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-160 | 2026-11-11 21:05 | "kemudian ada indikasi bug pada pengaduan dimana pengaduan salah satu unit tidak bisa di setujui kepala unitnya dengan notif gagal anda tidak berhak melihat jadwal pegawai ini.[Image 1] , cari karna sebelumnya tidak pernah ada kasus seperti ini" + "kerjakan" | Akar masalah: `jadwal_kerja` masih memakai aturan lama `pegawai.kepala_ruangan` + unit tunggal sehingga kepala unit (via `kepala_unit`, multi-unit/kepala ASN) ditolak saat `putuskan_pengaduan_presensi` memanggilnya. Migrasi **40** mengganti pengecekan ke `bisa_lihat_presensi(p_user)`, ditambah `verifikasi_40.sql`, sinkron `schema.sql` + README; lint bersih, `npm test` **85/85**, `npm run build` lulus **7,89 dtk** | selesai (kode); migrasi 40 belum dijalankan | 2026-11-11 21:05 — Perbaikan hak akses jadwal kepala unit |
 | I-161 | 2026-11-11 21:20 | "sudah sayajalankan migrasi dan verifikasinya" | Mencatat migrasi **40** dan `verifikasi_40.sql` sudah dijalankan; `jadwal_kerja` kini mengenali kepala unit lewat `kepala_unit` (`bisa_lihat_presensi`). Memperbarui Status Terkini, tabel migrasi 40, dan backlog **B-47**. Tidak ada perubahan kode | selesai (dokumen); belum di-commit | 2026-11-11 21:20 — Migrasi 40 dijalankan |
 | I-162 | 2026-11-12 | "commit dan push" | Memverifikasi `npm run lint` bersih, `npm test` **85/85**, `npm run build` lulus **19,14 dtk**; commit **`27525d1`** (status Hadir setelah koreksi + migrasi 39, laporan libur berwarna & header biru, pencarian pegawai pengajuan izin, hak akses `jadwal_kerja` + migrasi 40, verifikasi 39–40) lalu push ke `origin/main` (`3f0c13f..27525d1`) | selesai | 2026-11-12 — Commit & push sesi 11 November |
+| I-163 | 2026-11-12 09:02 | "[Image 1] sebelum saya commit perubahan barusan, ada laporan dari kepala unit kalau tidak bisa tukar shift dengan notif seperti pada gambar" + "tapi barusan saya tukar sendiri dengan akun admin dan berhasil setelah commit barusan, apa tetap perlu kita perbaiki?" + "kerjakan pastikan tidak ada bug dan eror" | Akar masalah FK audit: `jadwal_shift.dibuat_oleh`/`diperbarui_oleh` dan `tukar_shift.dibuat_oleh` diisi `auth.uid()` tetapi ber-FK ke `public.pegawai`, sehingga kepala unit ASN (tanpa baris `pegawai`) gagal; akun admin berhasil karena punya baris. Migrasi **41** mengarahkan ketiga FK ke `auth.users`, ditambah `verifikasi_41.sql`, sinkron `schema.sql` + README; lint bersih, `npm test` **85/85**, `npm run build` lulus | selesai (kode); migrasi 41 belum dijalankan | 2026-11-12 09:02 — Perbaikan FK audit Tukar Shift |
 
 ---
 
@@ -621,5 +622,16 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   `verifikasi_40.sql` sudah dijalankan** di Supabase (laporan user 2026-11-11
   21:20), sehingga kepala unit dapat menyetujui pengaduan pegawai unit yang
   dikelola. Sisa: uji Setujui satu pengaduan dari akun kepala unit.
+- **FK audit Tukar Shift (2026-11-12, belum dijalankan):** Tukar Shift oleh
+  kepala unit ASN gagal dengan
+  `insert or update on table "jadwal_shift" violates foreign key constraint
+  "jadwal_shift_diperbarui_oleh_fkey"` karena `jadwal_shift.dibuat_oleh`,
+  `jadwal_shift.diperbarui_oleh` (trigger `set_audit_jadwal_shift`), dan
+  `tukar_shift.dibuat_oleh` (RPC `tukar_shift`) diisi `auth.uid()` tetapi ber-FK
+  ke `public.pegawai` — akun admin berhasil karena punya baris `pegawai`.
+  Migrasi **41** mengarahkan ketiga FK ke `auth.users` (pola `izin_cuti`
+  migrasi 23 dan `pengaduan_presensi`), plus `verifikasi_41.sql`; `schema.sql`
+  disinkronkan. **Migrasi 41 belum dijalankan** di Supabase. Sisa: jalankan
+  migrasi 41 + verifikasi 41 lalu uji Tukar Shift dari akun kepala unit.
 - Timezone aplikasi: `Asia/Makassar` (WITA, UTC+8).
 - `dist/` dan `.env` sudah diabaikan Git.
