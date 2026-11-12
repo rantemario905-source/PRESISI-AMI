@@ -14,7 +14,7 @@ import {
 import { susunWaktuKoreksi } from '../../utils/koreksiPresensi.js'
 import { Alert, Button } from '../ui/index.js'
 
-const STATUS = ['Hadir', 'Sakit', 'Cuti', 'Dinas Luar', 'Izin', 'Alfa', 'Koreksi']
+const STATUS = ['Hadir', 'Sakit', 'Cuti', 'Dinas Luar', 'Izin', 'Alfa']
 
 export default function FormKoreksiPresensi({ baris, onBatal, onSelesai }) {
   const [form, setForm] = useState({

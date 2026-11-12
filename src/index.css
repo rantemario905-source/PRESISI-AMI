@@ -294,7 +294,8 @@
 }
 
 .tabel-laporan thead th {
-  background: #f3f4f6;
+  background: #1a6fb5;
+  color: #ffffff;
   font-weight: 700;
   text-align: center;
 }
@@ -311,6 +312,27 @@
 .tabel-laporan .status-izin { background: #bae6fd; }
 .tabel-laporan .status-koreksi { background: #fde68a; }
 .tabel-laporan .status-libur { background: #e2e8f0; }
+
+.tabel-laporan .libur-gabung,
+.tabel-laporan .libur-nasional {
+  color: #000000;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 9pt;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.tabel-laporan .libur-gabung {
+  background: #cbd5e1;
+}
+
+.tabel-laporan .libur-nasional {
+  background: #dc2626;
+  color: #ffffff;
+}
 
 .tabel-laporan .kosong {
   padding: 6mm 2mm;

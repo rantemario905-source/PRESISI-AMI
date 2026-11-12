@@ -13,7 +13,9 @@ import {
   labelShift,
   ringkasKehadiran,
   susunBarisLaporan,
+  tandaiLiburBerurutan,
 } from '../../utils/laporan.js'
+import { labelStatusKehadiran } from '../../utils/status.js'
 
 const jamSingkat = (iso) => (iso ? formatJam(iso).replace(' WITA', '') : '—')
 const JAM_KERJA_KOSONG = { global: {}, unit: {} }
@@ -40,6 +42,7 @@ export default function LembarLaporan({
   const presensiTampil = barisLaporan.filter((hari) => hari.baris).map((hari) => hari.baris)
   const ringkasan = ringkasKehadiran(presensiTampil)
   const jumlahLibur = barisLaporan.filter((hari) => hari.libur).length
+  const barisTampil = tandaiLiburBerurutan(barisLaporan)
   const polaShift = pegawai.pola_kerja !== 'reguler'
   const jumlahKolom = polaShift ? 7 : 6
 
@@ -110,26 +113,45 @@ export default function LembarLaporan({
               </td>
             </tr>
           ) : (
-            barisLaporan.map((hari) => {
+            barisTampil.map((hari) => {
               const baris = hari.baris
-              const status = hari.libur
-                ? 'Libur'
-                : (baris?.status_kehadiran ?? '—')
+              const statusMentah = baris?.status_kehadiran ?? '—'
+              const status = labelStatusKehadiran(baris)
               const terlambat = Number(baris?.menit_terlambat) > 0
                 ? `${baris.menit_terlambat} mnt`
                 : '—'
+              const liburNasional = hari.jenisLibur === 'nasional'
+              const teksLibur = liburNasional
+                ? hari.namaLibur
+                : polaShift
+                  ? 'Libur Shift / Off'
+                  : 'Libur / Off'
 
               return (
                 <tr key={hari.tanggal}>
                   <td className="tengah">{hari.nomor}</td>
                   <td>{formatTanggalHari(hari.tanggal)}</td>
-                  {polaShift && (
-                    <td className="tengah">{labelShift(hari.shift)}</td>
+                  {hari.libur ? (
+                    hari.rowSpanLibur > 0 && (
+                      <td
+                        rowSpan={hari.rowSpanLibur}
+                        colSpan={polaShift ? 5 : 4}
+                        className={`tengah ${liburNasional ? 'libur-nasional' : 'libur-gabung'}`}
+                      >
+                        {teksLibur}
+                      </td>
+                    )
+                  ) : (
+                    <>
+                      {polaShift && (
+                        <td className="tengah">{labelShift(hari.shift)}</td>
+                      )}
+                      <td className="tengah">{jamSingkat(baris?.jam_masuk)}</td>
+                      <td className="tengah">{jamSingkat(baris?.jam_pulang)}</td>
+                      <td className={`tengah ${kelasStatusLaporan(statusMentah)}`}>{status}</td>
+                      <td className="tengah">{terlambat}</td>
+                    </>
                   )}
-                  <td className="tengah">{jamSingkat(baris?.jam_masuk)}</td>
-                  <td className="tengah">{jamSingkat(baris?.jam_pulang)}</td>
-                  <td className={`tengah ${kelasStatusLaporan(status)}`}>{status}</td>
-                  <td className="tengah">{terlambat}</td>
                 </tr>
               )
             })

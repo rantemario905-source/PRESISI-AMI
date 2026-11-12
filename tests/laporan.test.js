@@ -6,6 +6,7 @@ import {
   labelShift,
   ringkasKehadiran,
   susunBarisLaporan,
+  tandaiLiburBerurutan,
 } from '../src/utils/laporan.js'
 
 const JAM_KERJA_NORMAL = {
@@ -157,8 +158,52 @@ test('susunBarisLaporan menandai hari libur nasional', () => {
 
   const tanggalLibur = baris.find((item) => item.tanggal === '2026-11-10')
   assert.equal(tanggalLibur.libur, true)
+  assert.equal(tanggalLibur.jenisLibur, 'nasional')
   assert.equal(tanggalLibur.namaLibur, 'Cuti Bersama')
   assert.equal(tanggalLibur.baris, null)
+})
+
+test('susunBarisLaporan membedakan libur nasional, akhir pekan, dan shift', () => {
+  const reguler = susunBarisLaporan({
+    periode: '2026-11',
+    hariLibur: { '2026-11-02': 'Hari Pahlawan Nasional' },
+    jamKerja: JAM_KERJA_NORMAL,
+    userId: 'u1',
+    unitKerja: 'UGD',
+    polaKerja: 'reguler',
+  })
+
+  assert.equal(
+    reguler.find((item) => item.tanggal === '2026-11-02').jenisLibur,
+    'nasional',
+  )
+  assert.equal(
+    reguler.find((item) => item.tanggal === '2026-11-07').jenisLibur,
+    'mingguan',
+  )
+  assert.equal(
+    reguler.find((item) => item.tanggal === '2026-11-03').jenisLibur,
+    null,
+  )
+
+  const shift = susunBarisLaporan({
+    periode: '2026-11',
+    hariLibur: { '2026-11-02': 'Hari Pahlawan Nasional' },
+    jadwal: { 'u2|2026-11-02': 'Pagi' },
+    jamKerja: JAM_KERJA_NORMAL,
+    userId: 'u2',
+    unitKerja: 'UGD',
+    polaKerja: 'shift',
+  })
+
+  const liburNasionalShift = shift.find((item) => item.tanggal === '2026-11-02')
+  assert.equal(liburNasionalShift.libur, false)
+  assert.equal(liburNasionalShift.baris, null)
+  assert.equal(liburNasionalShift.shift, 'Pagi')
+  assert.equal(
+    shift.find((item) => item.tanggal === '2026-11-03').jenisLibur,
+    'shift',
+  )
 })
 
 test('susunBarisLaporan menampilkan presensi nyata walau hari libur', () => {
@@ -221,4 +266,37 @@ test('susunBarisLaporan menandai shift tanpa jadwal sebagai libur', () => {
 test('susunBarisLaporan mengembalikan daftar kosong untuk periode tidak valid', () => {
   assert.deepEqual(susunBarisLaporan({ periode: '2026-13' }), [])
   assert.deepEqual(susunBarisLaporan({}), [])
+})
+
+test('libur berurutan digabung menjadi satu rowSpan', () => {
+  const hasil = tandaiLiburBerurutan([
+    { nomor: 1, libur: false },
+    { nomor: 2, libur: true, jenisLibur: 'mingguan' },
+    { nomor: 3, libur: true, jenisLibur: 'mingguan' },
+    { nomor: 4, libur: false },
+    { nomor: 5, libur: true, jenisLibur: 'mingguan' },
+    { nomor: 6, libur: true, jenisLibur: 'mingguan' },
+    { nomor: 7, libur: true, jenisLibur: 'mingguan' },
+    { nomor: 8, libur: false },
+  ])
+
+  assert.deepEqual(
+    hasil.map((h) => h.rowSpanLibur),
+    [0, 2, 0, 0, 3, 0, 0, 0],
+  )
+  assert.deepEqual(tandaiLiburBerurutan([]), [])
+})
+
+test('libur nasional tidak digabung dengan akhir pekan', () => {
+  const hasil = tandaiLiburBerurutan([
+    { nomor: 1, libur: true, jenisLibur: 'mingguan' },
+    { nomor: 2, libur: true, jenisLibur: 'mingguan' },
+    { nomor: 3, libur: true, jenisLibur: 'nasional', namaLibur: 'Hari Pahlawan Nasional' },
+    { nomor: 4, libur: false },
+  ])
+
+  assert.deepEqual(
+    hasil.map((h) => h.rowSpanLibur),
+    [2, 0, 1, 0],
+  )
 })

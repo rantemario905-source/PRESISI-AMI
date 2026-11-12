@@ -42,6 +42,20 @@ export function varianJenisIzin(jenis) {
   )
 }
 
+/**
+ * Label status presensi untuk tampilan.
+ * Hari yang sudah dikoreksi tetap berstatus `Hadir` (supaya terhitung hadir di
+ * rekap & laporan), cukup ditandai "Hadir (Koreksi)".
+ */
+export function labelStatusKehadiran(baris) {
+  const status = baris?.status_kehadiran
+  if (!status) return '—'
+  if (status === 'Hadir' && (baris?.alasan_koreksi || baris?.dikoreksi_oleh)) {
+    return 'Hadir (Koreksi)'
+  }
+  return status
+}
+
 export function varianStatusKehadiran(status) {
   return (
     {

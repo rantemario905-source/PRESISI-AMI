@@ -13,7 +13,6 @@ export const STATUS_KEHADIRAN = [
   'Dinas Luar',
   'Izin',
   'Alfa',
-  'Koreksi',
 ]
 
 const AWALAN_PERSETUJUAN = [
@@ -119,6 +118,29 @@ function liburMingguan(jamKerja, unitKerja, isodow) {
 }
 
 /**
+ * Tandai libur berurutan (mis. Sabtu+Minggu) agar sel gabungan memakai satu
+ * `rowSpan` dengan satu teks saja. Baris pertama grup mendapat `rowSpanLibur`
+ * sejumlah hari; baris lanjutan 0. Hanya libur dengan jenis sama yang digabung
+ * (libur nasional tetap terpisah dari akhir pekan).
+ */
+export function tandaiLiburBerurutan(baris = []) {
+  return baris.map((hari, indeks) => {
+    const sebelumnya = baris[indeks - 1]
+    if (!hari.libur || (sebelumnya?.libur && sebelumnya.jenisLibur === hari.jenisLibur)) {
+      return { ...hari, rowSpanLibur: 0 }
+    }
+    let jumlah = 1
+    while (
+      baris[indeks + jumlah]?.libur &&
+      baris[indeks + jumlah].jenisLibur === hari.jenisLibur
+    ) {
+      jumlah += 1
+    }
+    return { ...hari, rowSpanLibur: jumlah }
+  })
+}
+
+/**
  * Susun satu baris untuk setiap tanggal dalam periode laporan.
  * - Presensi nyata (Hadir/Koreksi/Sakit/Cuti/Dinas Luar/Izin) selalu ditampilkan.
  * - Libur: akhir pekan/libur unit, hari libur nasional (pegawai reguler),
@@ -152,12 +174,20 @@ export function susunBarisLaporan({
     const namaLibur = hariLibur?.[tgl] ?? null
 
     let libur = false
+    let jenisLibur = null
     if (!presensiNyata) {
       if (polaKerja === 'reguler') {
-        const isodow = indeksHariSenin(tgl) + 1
-        libur = Boolean(namaLibur) || liburMingguan(jamKerja, unitKerja, isodow)
-      } else {
-        libur = !shift
+        if (namaLibur) {
+          libur = true
+          jenisLibur = 'nasional'
+        } else {
+          const isodow = indeksHariSenin(tgl) + 1
+          libur = liburMingguan(jamKerja, unitKerja, isodow)
+          if (libur) jenisLibur = 'mingguan'
+        }
+      } else if (!shift) {
+        libur = true
+        jenisLibur = 'shift'
       }
     }
 
@@ -166,6 +196,7 @@ export function susunBarisLaporan({
       nomor: indeks + 1,
       baris: libur ? null : baris,
       libur,
+      jenisLibur,
       namaLibur,
       shift,
     }

@@ -35,6 +35,7 @@ import {
   Badge,
   Button,
   Modal,
+  PencarianNama,
   PemilihPeriode,
   Spinner,
   TabBar,
@@ -117,11 +118,40 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
   const [batal, setBatal] = useState(null)
   const [alasanBatal, setAlasanBatal] = useState('')
   const [dokumenMembuka, setDokumenMembuka] = useState(null)
+  const [cariPegawai, setCariPegawai] = useState(null)
+  const [bukaPegawai, setBukaPegawai] = useState(false)
+  const [cariDinas, setCariDinas] = useState('')
 
   const pegawaiUnitSaya = adalahKepala
     ? pegawai.filter((p) => unitDikelola.includes(p.unit_kerja))
     : pegawai
   const pegawaiTampil = form.jenis === 'Dinas Luar' ? pegawai : pegawaiUnitSaya
+
+  const kataCari = (cariPegawai ?? '').trim().toLowerCase()
+  const hasilPegawai = kataCari
+    ? pegawaiTampil.filter((p) =>
+        `${p.nama} ${p.unit_kerja}`.toLowerCase().includes(kataCari),
+      )
+    : pegawaiTampil
+  const pegawaiTerpilih = pegawaiTampil.find((p) => p.id === form.singleId)
+  const teksPegawai =
+    cariPegawai !== null
+      ? cariPegawai
+      : pegawaiTerpilih
+        ? `${pegawaiTerpilih.nama} — ${pegawaiTerpilih.unit_kerja}`
+        : ''
+  const kataDinas = cariDinas.trim().toLowerCase()
+  const pegawaiDinasTampil = kataDinas
+    ? pegawaiTampil.filter((p) =>
+        `${p.nama} ${p.unit_kerja}`.toLowerCase().includes(kataDinas),
+      )
+    : pegawaiTampil
+
+  const pilihPegawai = (p) => {
+    setForm((lama) => ({ ...lama, singleId: p.id }))
+    setCariPegawai(null)
+    setBukaPegawai(false)
+  }
 
   const bolehKelolaGrup = (grup) => {
     if (!adalahKepala) return true
@@ -743,7 +773,12 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
       {/* Form catat / ubah */}
       <Modal
         terbuka={modalForm}
-        onTutup={() => setModalForm(false)}
+        onTutup={() => {
+          setModalForm(false)
+          setBukaPegawai(false)
+          setCariPegawai(null)
+          setCariDinas('')
+        }}
         judul={form.grupId ? `Ubah Pengajuan ${judulKategori}` : `Catat ${judulKategori}`}
         lebar="max-w-xl"
       >
@@ -796,13 +831,23 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
                   {form.userIds.length}/4 dipilih
                 </span>
               </div>
+              <div className="mb-2">
+                <PencarianNama
+                  nilai={cariDinas}
+                  onChange={setCariDinas}
+                  label="Cari pegawai dinas luar"
+                  placeholder="Cari nama atau unit…"
+                />
+              </div>
               <div className="max-h-56 overflow-y-auto rounded-xl border border-slate-300 bg-white p-2">
-                {pegawaiTampil.length === 0 ? (
+                {pegawaiDinasTampil.length === 0 ? (
                   <p className="px-2 py-4 text-center text-xs text-slate-500">
-                    Belum ada pegawai yang dapat dipilih.
+                    {pegawaiTampil.length === 0
+                      ? 'Belum ada pegawai yang dapat dipilih.'
+                      : 'Nama tidak ditemukan.'}
                   </p>
                 ) : (
-                  pegawaiTampil.map((p) => {
+                  pegawaiDinasTampil.map((p) => {
                     const dicentang = form.userIds.includes(p.id)
                     const penuh = form.userIds.length >= 4 && !dicentang
                     return (
@@ -834,20 +879,96 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
               <label className="label-input" htmlFor="izin-pegawai">
                 Pegawai
               </label>
-              <select
-                id="izin-pegawai"
-                className="input-dasar"
-                value={form.singleId}
-                onChange={(e) => setForm((lama) => ({ ...lama, singleId: e.target.value }))}
-                required
-              >
-                <option value="">— pilih pegawai —</option>
-                {pegawaiTampil.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.nama} — {p.unit_kerja}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <input
+                  id="izin-pegawai"
+                  type="text"
+                  autoComplete="off"
+                  className="input-dasar pr-10"
+                  placeholder="Ketik nama atau unit…"
+                  role="combobox"
+                  aria-expanded={bukaPegawai}
+                  aria-controls="daftar-pegawai-izin"
+                  aria-autocomplete="list"
+                  value={teksPegawai}
+                  onChange={(e) => {
+                    setCariPegawai(e.target.value)
+                    setBukaPegawai(true)
+                  }}
+                  onFocus={() => {
+                    setCariPegawai('')
+                    setBukaPegawai(true)
+                  }}
+                  onBlur={() => {
+                    setBukaPegawai(false)
+                    setCariPegawai(null)
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      setBukaPegawai(false)
+                      setCariPegawai(null)
+                    }
+                    if (e.key === 'Enter' && bukaPegawai && hasilPegawai[0]) {
+                      e.preventDefault()
+                      pilihPegawai(hasilPegawai[0])
+                    }
+                  }}
+                />
+                {form.singleId && !bukaPegawai && (
+                  <button
+                    type="button"
+                    onClick={() => setForm((lama) => ({ ...lama, singleId: '' }))}
+                    aria-label="Kosongkan pilihan pegawai"
+                    className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-slate-400 transition-colors hover:text-slate-700"
+                  >
+                    <svg
+                      className="h-4 w-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      aria-hidden="true"
+                    >
+                      <path d="M6 6l12 12M18 6L6 18" />
+                    </svg>
+                  </button>
+                )}
+                {bukaPegawai && (
+                  <ul
+                    id="daftar-pegawai-izin"
+                    role="listbox"
+                    className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-lg"
+                  >
+                    {hasilPegawai.length === 0 ? (
+                      <li className="px-3 py-3 text-center text-xs text-slate-500">
+                        Nama tidak ditemukan.
+                      </li>
+                    ) : (
+                      hasilPegawai.map((p) => (
+                        <li key={p.id} role="option" aria-selected={p.id === form.singleId}>
+                          <button
+                            type="button"
+                            onMouseDown={(e) => {
+                              e.preventDefault()
+                              pilihPegawai(p)
+                            }}
+                            className={`flex min-h-[44px] w-full flex-col items-start justify-center rounded-lg px-2.5 py-1.5 text-left ${
+                              p.id === form.singleId ? 'bg-sky-50' : 'hover:bg-slate-50'
+                            }`}
+                          >
+                            <span className="w-full truncate text-sm font-semibold text-slate-700">
+                              {p.nama}
+                            </span>
+                            <span className="w-full truncate text-[11px] text-slate-400">
+                              {p.unit_kerja}
+                            </span>
+                          </button>
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                )}
+              </div>
             </div>
           )}
 

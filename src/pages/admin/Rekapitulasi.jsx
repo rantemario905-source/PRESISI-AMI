@@ -17,12 +17,12 @@ import {
   periodeBulanIni,
 } from '../../utils/format.js'
 import { unduhCsv } from '../../utils/csv.js'
-import { varianStatusKehadiran } from '../../utils/status.js'
+import { labelStatusKehadiran, varianStatusKehadiran } from '../../utils/status.js'
 import { NAMA_RUMAH_SAKIT } from '../../config/constants.js'
 import { Alert, Badge, Button, Spinner } from '../../components/ui/index.js'
 import KepalaHalaman from '../../components/admin/KepalaHalaman.jsx'
 
-const KOLOM_STATUS = ['Hadir', 'Sakit', 'Cuti', 'Dinas Luar', 'Izin', 'Alfa', 'Koreksi']
+const KOLOM_STATUS = ['Hadir', 'Sakit', 'Cuti', 'Dinas Luar', 'Izin', 'Alfa']
 
 export default function Rekapitulasi() {
   const [periode, setPeriode] = useState(periodeBulanIni())
@@ -339,7 +339,7 @@ export default function Rekapitulasi() {
                         </p>
                       </div>
                       <Badge variant={varianStatusKehadiran(baris.status_kehadiran)}>
-                        {baris.status_kehadiran}
+                        {labelStatusKehadiran(baris)}
                       </Badge>
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500">
@@ -403,7 +403,7 @@ export default function Rekapitulasi() {
                         </td>
                         <td className="px-3 py-2">
                           <Badge variant={varianStatusKehadiran(baris.status_kehadiran)}>
-                            {baris.status_kehadiran}
+                            {labelStatusKehadiran(baris)}
                           </Badge>
                         </td>
                         <td className="px-3 py-2 text-center text-xs tabular-nums">

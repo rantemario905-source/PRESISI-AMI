@@ -16,7 +16,7 @@ import {
   namaBulan,
   periodeBulanIni,
 } from '../utils/format.js'
-import { varianStatusKehadiran } from '../utils/status.js'
+import { labelStatusKehadiran, varianStatusKehadiran } from '../utils/status.js'
 import { bersihkanAlasanKoreksi } from '../utils/laporan.js'
 import { Alert, Badge, Spinner, TombolMuatUlang } from '../components/ui/index.js'
 import BarAtas from '../components/BarAtas.jsx'
@@ -28,7 +28,6 @@ const STATUS = [
   { nama: 'Dinas Luar', warna: 'border-violet-200 bg-violet-50 text-violet-800' },
   { nama: 'Izin', warna: 'border-sky-200 bg-sky-50 text-sky-800' },
   { nama: 'Alfa', warna: 'border-red-200 bg-red-50 text-red-800' },
-  { nama: 'Koreksi', warna: 'border-amber-200 bg-amber-50 text-amber-800' },
 ]
 
 /** "20:02 WITA" → "20:02" agar pas di kartu ringkas */
@@ -157,7 +156,7 @@ export default function RiwayatSaya() {
                         {formatTanggalRingkas(baris.tanggal)}
                       </p>
                       <Badge variant={varianStatusKehadiran(baris.status_kehadiran)}>
-                        {baris.status_kehadiran}
+                        {labelStatusKehadiran(baris)}
                       </Badge>
                     </div>
 
@@ -242,7 +241,7 @@ export default function RiwayatSaya() {
                         <td className="px-5 py-3 text-slate-600">{formatJarak(baris.jarak_masuk)}</td>
                         <td className="px-5 py-3">
                           <Badge variant={varianStatusKehadiran(baris.status_kehadiran)}>
-                            {baris.status_kehadiran}
+                            {labelStatusKehadiran(baris)}
                           </Badge>
                         </td>
                         <td className="max-w-[220px] px-5 py-3 text-xs text-slate-500">

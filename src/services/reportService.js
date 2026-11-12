@@ -27,7 +27,7 @@ export async function ambilRekapBulanan({ periode, unit = 'semua' }) {
     let kueri = supabase
       .from('presensi')
       .select(
-        'id, user_id, tanggal, jam_masuk, jam_pulang, status_kehadiran, menit_terlambat, jarak_masuk, pegawai:pegawai!presensi_user_id_fkey!inner ( nama, unit_kerja )',
+        'id, user_id, tanggal, jam_masuk, jam_pulang, status_kehadiran, menit_terlambat, jarak_masuk, alasan_koreksi, pegawai:pegawai!presensi_user_id_fkey!inner ( nama, unit_kerja )',
       )
       .gte('tanggal', mulai)
       .lte('tanggal', selesai)
@@ -78,7 +78,7 @@ export async function ambilLaporanBulanan({ periode, unit }) {
     supabase
       .from('presensi')
       .select(
-        'id, user_id, tanggal, jam_masuk, jam_pulang, status_kehadiran, menit_terlambat',
+        'id, user_id, tanggal, jam_masuk, jam_pulang, status_kehadiran, menit_terlambat, alasan_koreksi',
       )
       .in('user_id', idPegawai)
       .gte('tanggal', mulai)

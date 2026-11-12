@@ -47,7 +47,7 @@ npm run preview      # pratinjau hasil build
 - Skrip bantu (butuh Secret key, jangan pernah di-commit):
   `node scripts/impor-akun.mjs ...`, `node scripts/verifikasi-impor.mjs ...`.
 
-**Urutan migrasi wajib:** `01 → 02 → ... → 38`, satu per satu. Jangan mengulang
+**Urutan migrasi wajib:** `01 → 02 → ... → 40`, satu per satu. Jangan mengulang
 migrasi lama bila tidak diperlukan. `supabase/schema.sql` adalah gabungan
 seluruh migrasi untuk instalasi sekali jalan.
 
@@ -68,8 +68,8 @@ seluruh migrasi untuk instalasi sekali jalan.
 | Layout | `src/components/layout/*` | Portal admin & kepala ruangan |
 | Laporan bulanan | `src/pages/admin/LaporanBulanan.jsx`, `src/components/laporan/*` | Kop instansi, tabel harian, tanda tangan; cetak A4 portrait |
 | Halaman | `src/pages/**` | `admin/` untuk portal Super Admin/kepala |
-| Database | `supabase/migrations/01–38` | Skema, RLS, RPC, seed |
-| Verifikasi DB | `supabase/verifikasi_*.sql` | Pemeriksaan pasca-migrasi (09–38) |
+| Database | `supabase/migrations/01–40` | Skema, RLS, RPC, seed |
+| Verifikasi DB | `supabase/verifikasi_*.sql` | Pemeriksaan pasca-migrasi (09–40) |
 | Cron Alfa | `supabase/jadwal_alfa.sql` | Opsional, butuh `pg_cron` |
 
 ---
@@ -292,6 +292,17 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-148 | 2026-11-11 15:42 | "lanjutkan pekerjaan terakhir yaitu update agenst dan progress,[Image 1]" + "kerjakankerjakan" | Melanjutkan pembaruan AGENTS.md dan progress.md yang terhenti: sinkronisasi Fakta Lingkungan AGENTS.md (commit d27493e, 79a1368, 5e48fa0, jenis Izin, hari libur laporan, migrasi 38 + verifikasi 38), tabel aspek progress.md, serta verifikasi build & test | selesai (dokumen); belum di-commit | 2026-11-11 15:42 — Sinkronisasi AGENTS.md & progress.md |
 | I-149 | 2026-11-11 16:10 | "kerjakan" (menyetujui: rapikan 5 komentar usang + `npm run build`) | Menambahkan **Izin** pada komentar usang di `src/App.jsx`, `src/utils/izin.js` (2 baris), `src/services/leaveService.js`, dan `src/components/layout/SidebarKepala.jsx`; `npm run lint` bersih, `npm test` **81/81**, `npm run build` lulus **12,78 dtk**. Sisa: uji manual Izin (B-45) | selesai (kode); belum di-commit | 2026-11-11 16:10 — Rapikan komentar usang daftar jenis |
 | I-150 | 2026-11-11 16:20 | "sudah saya uji dan berhasil" | Mencatat uji manual jenis **Izin** lulus (Kepala Unit `menunggu`, Super Admin `disetujui`, absensi/Alfa/pengaduan ditolak pada hari Izin, warna status laporan benar); menutup backlog **B-45** dan memperbarui Status Terkini. Tidak ada perubahan kode | selesai (dokumen); belum di-commit | 2026-11-11 16:20 — Uji manual jenis Izin lulus |
+| I-151 | 2026-11-11 17:20 | "Ubah Logika Status: Pastikan status akhir setelah proses approve koreksi mengubah status absensi harian kembali menjadi Hadir ... karna saat ini hari yang sudah dikoreksi tidak dihitung hadir oleh sistem" + pilihan: label **Hadir (Koreksi)**, **normalkan semua** data lama | Menjadikan status akhir presensi terkoreksi **Hadir** (trigger migrasi **39** + backfill), label tampilan **Hadir (Koreksi)** di laporan/rekap/riwayat, menghapus `Koreksi` dari pilihan status & kolom rekap, sinkron `schema.sql` + `verifikasi_39.sql`; `npm run lint` bersih, `npm test` **82/82**, `npm run build` lulus **8,63 dtk**. Migrasi 39 belum dijalankan | selesai (kode); migrasi 39 belum dijalankan | 2026-11-11 17:20 — Status Hadir setelah koreksi |
+| I-152 | 2026-11-11 17:40 | "sudah saya run migrasi dan verifikasi dan berhasil" | Mencatat migrasi **39** dan `verifikasi_39.sql` sudah dijalankan dan berhasil; presensi terkoreksi berstatus **Hadir** di server dan data lama `Koreksi` dinormalkan. Memperbarui Status Terkini, tabel migrasi, backlog **B-46**. Tidak ada perubahan kode. Sisa: uji manual satu pengaduan disetujui | selesai (dokumen); belum di-commit | 2026-11-11 17:40 — Migrasi 39 dijalankan |
+| I-153 | 2026-11-11 18:05 | "statusnya sudah berubah di laporan, kemudian pada hari libur kita coba kita beri warna hitam merge dari kolom jam masuk sampai kolom terlambat, dan dengan font putih garis miring di tengah 'Libur Shift / Off'" + pilihan: reguler **"Libur / Off"** & shift **"Libur Shift / Off"**, huruf **miring** | Menggabungkan sel Jam Masuk–Terlambat pada baris libur laporan bulanan (`colSpan={4}`), latar hitam + teks putih miring, label berbeda per pola kerja; `npm run lint` bersih, `npm test` **82/82**, `npm run build` lulus **7,33 dtk** | selesai (kode); belum di-commit | 2026-11-11 18:05 — Baris libur di laporan bulanan |
+| I-154 | 2026-11-11 18:35 | "[Image 1] SEPERTINYA warna hitamnya tidak hitam pekat, dan juga fontnya ganti menjadi times now roman tanpa bold, dan apakah bisa dibuat ketika libur 2 hari itu otomatis merge 2 baris menjadi 1 yang jadinya textnya juga cukup 1 saja, kemudian untuk pola reguler, merge kolomnya sampai pada kolom shift" + pilihan: reguler tetap Jam Masuk–Terlambat, dua baris tetap, hanya sel hitam digabung | Sel libur jadi hitam pekat `#000000`, font Times New Roman miring non-bold, libur berurutan digabung `rowSpan` dengan satu teks (`tandaiLiburBerurutan()`); `npm run lint` bersih, `npm test` **83/83**, `npm run build` lulus **8,08 dtk** | selesai (kode); belum di-commit | 2026-11-11 18:35 — Penyempurnaan sel libur laporan |
+| I-155 | 2026-11-11 18:55 | "[Image 1] [Image 2] sepertinya warna hitam pekatnya diganti menjadi warna abu2 saja, dengan font hitam, dan untuk pola kerja shift mergenya warnanya dari kolom shift, saya liat belum berubah, dan text pada 2 hari libur masih belum di tengah kolom" | Sel libur jadi abu-abu `#e5e7eb` + teks hitam, `vertical-align: middle` agar teks tepat di tengah sel gabungan, dan pola shift menggabung mulai kolom **Shift** (`colSpan=5`); `npm run lint` bersih, `npm test` **83/83**, `npm run build` lulus **10,13 dtk** | selesai (kode); belum di-commit | 2026-11-11 18:55 — Warna & cakupan sel libur |
+| I-156 | 2026-11-11 19:00 | "coba buat abunya sedikit lebih pekat lagi" | Mengubah latar sel libur laporan bulanan `#e5e7eb` → **`#cbd5e1`**; `npm run build` lulus **7,06 dtk** | selesai (kode); belum di-commit | 2026-11-11 19:00 — Abu sel libur diperpekat |
+| I-157 | 2026-11-11 19:10 | "[Image 1] kemudian pada header kolom no, hari, sampai terlambat, buat menjadi biru seperti pada logo rsud [Image 2]" | Header tabel laporan bulanan jadi biru logo RSUD `#1a6fb5` dengan teks putih; `npm run build` lulus **7,22 dtk** | selesai (kode); belum di-commit | 2026-11-11 19:10 — Header tabel laporan biru |
+| I-158 | 2026-11-11 19:25 | "[Image 1] pada pemilihan pegawai di menu cuti,sakit,dinasluar,izin tambahkan searching pegawai dengan typing agar memudahkan pencarian nama ketika usulan" + "kerjakanpastikan tidak ada bug dan eror" | Pemilihan pegawai tunggal jadi combobox berketik (filter nama/unit, Enter/Esc, tombol kosongkan) dan daftar centang Dinas Luar diberi `PencarianNama`; `npm run lint` bersih, `npm test` **83/83**, `npm run build` lulus **7,36 dtk** | selesai (kode); belum di-commit | 2026-11-11 19:25 — Pencarian pegawai pengajuan izin |
+| I-159 | 2026-11-11 20:45 | "[Image 1] saya mau ketika hari libur di input oleh admin ... berwarna merah terang dengan font putih merge seperti hari libur biasa, dengan tulisan sesuai inputan di aplikasi semisal Hari Raya Idul Fitri / Hari Pahlawan Nasional, untuk reguler, karena untuk pola shift tetap masuk ..." | Libur nasional di laporan bulanan pegawai reguler tampil sebagai sel gabungan merah `#dc2626` + teks putih berisi nama liburnya; `jenisLibur` (`nasional`/`mingguan`/`shift`) + `rowSpan` hanya untuk jenis sama; `npm run lint` bersih, `npm test` **85/85**, `npm run build` lulus **12,61 dtk** | selesai (kode); belum di-commit | 2026-11-11 20:45 — Libur nasional merah di laporan |
+| I-160 | 2026-11-11 21:05 | "kemudian ada indikasi bug pada pengaduan dimana pengaduan salah satu unit tidak bisa di setujui kepala unitnya dengan notif gagal anda tidak berhak melihat jadwal pegawai ini.[Image 1] , cari karna sebelumnya tidak pernah ada kasus seperti ini" + "kerjakan" | Akar masalah: `jadwal_kerja` masih memakai aturan lama `pegawai.kepala_ruangan` + unit tunggal sehingga kepala unit (via `kepala_unit`, multi-unit/kepala ASN) ditolak saat `putuskan_pengaduan_presensi` memanggilnya. Migrasi **40** mengganti pengecekan ke `bisa_lihat_presensi(p_user)`, ditambah `verifikasi_40.sql`, sinkron `schema.sql` + README; lint bersih, `npm test` **85/85**, `npm run build` lulus **7,89 dtk** | selesai (kode); migrasi 40 belum dijalankan | 2026-11-11 21:05 — Perbaikan hak akses jadwal kepala unit |
+| I-161 | 2026-11-11 21:20 | "sudah sayajalankan migrasi dan verifikasinya" | Mencatat migrasi **40** dan `verifikasi_40.sql` sudah dijalankan; `jadwal_kerja` kini mengenali kepala unit lewat `kepala_unit` (`bisa_lihat_presensi`). Memperbarui Status Terkini, tabel migrasi 40, dan backlog **B-47**. Tidak ada perubahan kode | selesai (dokumen); belum di-commit | 2026-11-11 21:20 — Migrasi 40 dijalankan |
 
 ---
 
@@ -549,7 +560,8 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   `jadwal_shift` sehingga mengikuti hasil Tukar Shift. Helper:
   `labelShift()` dan `labelPolaKerja()` di `src/utils/laporan.js`;
   `bersihkanAlasanKoreksi()` tetap dipakai di layar Riwayat Saya dan Koreksi
-  Presensi. Tidak ada migrasi DB.
+  Presensi. Tidak ada migrasi DB. Header tabel (No s/d Terlambat) berlatar biru
+  logo RSUD `#1a6fb5` dengan teks putih (`.tabel-laporan thead th`).
 - **Panel Absen & status izin (2026-11-06):** `statusTanpaAbsen()` di
   `src/utils/izin.js` membaca baris `presensi` hari ini tanpa `jam_masuk` dengan
   status **Sakit/Cuti/Dinas Luar/Izin**; `PanelAbsen` menampilkan status itu dan
@@ -560,9 +572,19 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 - **Hari libur di laporan bulanan (2026-11-11, sudah di-commit `d27493e`):**
   Laporan Presensi Bulanan merekap seluruh tanggal 1–akhir bulan. Presensi
   nyata tetap ditampilkan; hari libur (akhir pekan/libur unit, hari libur
-  nasional, dan shift tanpa jadwal) berstatus **Libur**; hari kerja tanpa
-  catatan kehadiran berstatus **—**; ringkasan kehadiran menambah baris jumlah
-  libur. Data jam kerja unit dan `hari_libur` dibaca di klien tanpa migrasi DB.
+  nasional, dan shift tanpa jadwal) ditampilkan sebagai satu sel gabungan
+  (Jam Masuk–Terlambat, `colSpan={4}`, pola shift `colSpan={5}` mulai kolom
+  Shift) berlatar **abu `#cbd5e1`** dengan teks hitam Times New Roman miring
+  non-bold dan teks tepat di tengah sel (`vertical-align: middle`); libur
+  berurutan digabung `rowSpan` sehingga teks hanya muncul sekali:
+  **"Libur / Off"** untuk pegawai reguler dan **"Libur Shift / Off"** untuk
+  pegawai shift. Hari libur yang diinput admin (`hari_libur`) tampil **merah
+  `#dc2626` dengan teks putih berisi nama liburnya** (mis. `Hari Raya Idul
+  Fitri`) untuk pegawai reguler; penggabungan `rowSpan` hanya untuk
+  `jenisLibur` yang sama (`nasional`/`mingguan`/`shift`). Hari kerja tanpa
+  catatan kehadiran berstatus **—**; ringkasan
+  kehadiran menambah baris jumlah libur. Data jam kerja unit dan `hari_libur`
+  dibaca di klien tanpa migrasi DB.
 - **Jenis Izin & warna status laporan (2026-11-11, sudah di-commit `d27493e`):**
   Menu dan tab **Izin** mandiri untuk mencatat ketidakhadiran berizin (satu
   pegawai, bukti file wajib, alur persetujuan sama seperti Sakit/Cuti: pengajuan
@@ -573,5 +595,27 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   berstatus Izin. Migrasi **38** dan `verifikasi_38.sql` **sudah dijalankan dan
   lulus** di Supabase (laporan user 2026-11-11 15:30). Sisa: uji manual alur
   Izin dan warna status laporan.
+- **Status Hadir setelah koreksi (2026-11-11, belum di-commit):** presensi yang
+  dikoreksi (koreksi manual Super Admin maupun pengaduan disetujui) berakhir
+  berstatus **Hadir** dan terhitung hadir di rekapitulasi serta laporan bulanan.
+  Migrasi **39** memasang trigger `trg_normalisasi_status_koreksi` (`Koreksi` →
+  `Hadir`) dan mem-backfill data lama; jejak koreksi tetap di `dikoreksi_oleh`,
+  `alasan_koreksi`, `koreksi_presensi`, dan `pengaduan_presensi`. Tampilan
+  memakai `labelStatusKehadiran()` → **Hadir (Koreksi)**
+  (`src/utils/status.js`). Migrasi 39 dan `verifikasi_39.sql` **sudah dijalankan
+  dan berhasil** di Supabase (laporan user 2026-11-11 17:40); data lama `Koreksi`
+  sudah dinormalkan. Sisa: uji manual satu pengaduan disetujui.
+- **Hak akses jadwal untuk kepala unit (2026-11-11, sudah dijalankan):** migrasi
+  **40** mendefinisikan ulang `public.jadwal_kerja` agar pengecekan memakai
+  `public.bisa_lihat_presensi(p_user)` (Super Admin, diri sendiri, atau kepala
+  unit pengelola unit pegawai lewat tabel `kepala_unit`, termasuk multi-unit dan
+  kepala ASN). Sebelumnya fungsi memakai aturan lama `pegawai.kepala_ruangan` +
+  unit kerja sama, sehingga kepala unit gagal menyetujui pengaduan dengan pesan
+  "Anda tidak berhak melihat jadwal pegawai ini." (dipanggil dari
+  `putuskan_pengaduan_presensi`). Isi fungsi lain tidak berubah; `schema.sql`
+  disinkronkan dan `verifikasi_40.sql` ditambahkan. **Migrasi 40 dan
+  `verifikasi_40.sql` sudah dijalankan** di Supabase (laporan user 2026-11-11
+  21:20), sehingga kepala unit dapat menyetujui pengaduan pegawai unit yang
+  dikelola. Sisa: uji Setujui satu pengaduan dari akun kepala unit.
 - Timezone aplikasi: `Asia/Makassar` (WITA, UTC+8).
 - `dist/` dan `.env` sudah diabaikan Git.

@@ -7598,18 +7598,8 @@ begin
   end if;
 
   if auth.uid() is not null
-     and p_user <> auth.uid()
-     and not public.is_superadmin() then
-    if not exists (
-      select 1
-        from public.pegawai saya
-        join public.pegawai target on target.id = p_user
-       where saya.id = auth.uid()
-         and saya.kepala_ruangan
-         and saya.unit_kerja = target.unit_kerja
-    ) then
-      raise exception 'Anda tidak berhak melihat jadwal pegawai ini.';
-    end if;
+     and not public.bisa_lihat_presensi(p_user) then
+    raise exception 'Anda tidak berhak melihat jadwal pegawai ini.';
   end if;
 
   select p.pola_kerja, p.unit_kerja into v_pola, v_unit
@@ -12772,5 +12762,49 @@ grant execute on function public.ajukan_pengaduan_presensi(text, date, timestamp
 grant execute on function public.putuskan_pengaduan_presensi(uuid, boolean, timestamptz, timestamptz, text) to authenticated;
 grant execute on function public.kandidat_pengaduan_presensi() to authenticated;
 commit;
+
+-- ==========================================================================
+-- MIGRASI 39 - STATUS KEMBALI HADIR SETELAH KOREKSI
+-- ==========================================================================
+
+-- ==========================================================================
+-- 39 - STATUS KEMBALI HADIR SETELAH KOREKSI
+-- Syarat: 01 s.d. 38 sudah dijalankan.
+--
+-- Ringkasan:
+--   1. Presensi yang dikoreksi (manual Super Admin maupun pengaduan disetujui)
+--      tetap berstatus `Hadir` agar terhitung hadir pada rekap dan laporan.
+--   2. Jejak koreksi disimpan terpisah: dikoreksi_oleh, alasan_koreksi,
+--      tabel koreksi_presensi, dan pengaduan_presensi.
+--   3. Nilai lama `Koreksi` dinormalkan menjadi `Hadir`.
+-- ==========================================================================
+
+begin;
+
+create or replace function public.normalisasi_status_koreksi()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.status_kehadiran = 'Koreksi' then
+    new.status_kehadiran := 'Hadir';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_normalisasi_status_koreksi on public.presensi;
+
+create trigger trg_normalisasi_status_koreksi
+before insert or update on public.presensi
+for each row execute function public.normalisasi_status_koreksi();
+
+update public.presensi
+   set status_kehadiran = 'Hadir'
+ where status_kehadiran = 'Koreksi'
+   and jam_masuk is not null;
+
+commit;
+
 
 

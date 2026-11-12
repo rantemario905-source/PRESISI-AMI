@@ -103,6 +103,8 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 | 36 | `supabase/migrations/36_koreksi_jam_masuk.sql` | Koreksi jam masuk lewat pengaduan: jendela validasi disamakan dengan tombol absen (60 menit sebelum jam masuk), hanya boleh memajukan jam yang sudah tercatat, status hasil koreksi `Koreksi`, dan kandidat koreksi muncul untuk presensi yang terlambat |
 | 37 | `supabase/migrations/37_batasi_pengaduan_sebelum_golive.sql` | Pengaduan dibatasi sejak go-live **1 November 2026**: kandidat, pengajuan, dan keputusan menolak tanggal sebelum tanggal tersebut agar hari kerja lama yang presensinya sudah dihapus tidak muncul lagi |
 | 38 | `supabase/migrations/38_jenis_izin.sql` | Jenis **Izin** dihidupkan kembali: satu pegawai, dokumen wajib, persetujuan sama seperti Sakit/Cuti, ditolak dari absensi/Alfa/pengaduan, dan status `Izin` diterima `izin_cuti` serta `presensi` |
+| 39 | `supabase/migrations/39_status_hadir_setelah_koreksi.sql` | Presensi terkoreksi berakhir berstatus **Hadir** (trigger + backfill `Koreksi` → `Hadir`); jejak koreksi tetap di `dikoreksi_oleh`/`alasan_koreksi`/`koreksi_presensi` |
+| 40 | `supabase/migrations/40_jadwal_kerja_hak_akses.sql` | `jadwal_kerja` memakai `bisa_lihat_presensi()` sehingga kepala unit (multi-unit / kepala ASN via `kepala_unit`) dapat melihat jadwal pegawai unit yang dikelola — memperbaiki galat "Anda tidak berhak melihat jadwal pegawai ini." saat menyetujui pengaduan |
 
 > Bila database sudah pernah dijalankan sampai file 08, jalankan **file 09** untuk
 > mengaktifkan alur Dinas & Sakit / Cuti, **file 11** untuk pengaturan kepala
@@ -124,8 +126,10 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > untuk pengaduan presensi (foto bukti + persetujuan kepala unit), **file 34**
 > agar Super Admin juga dapat memutuskan pengaduan, **file 35** agar pengaduan
 > mencakup absen masuk dan pulang, **file 36** agar jam masuk yang sudah
-> tercatat dapat dikoreksi lewat pengaduan, serta **file 37** agar pengaduan
-> dibatasi sejak go-live 1 November 2026.
+> tercatat dapat dikoreksi lewat pengaduan, **file 37** agar pengaduan
+> dibatasi sejak go-live 1 November 2026, **file 39** agar presensi terkoreksi
+> kembali berstatus Hadir, serta **file 40** agar `jadwal_kerja` mengenali
+> kepala unit lewat `kepala_unit` (perbaikan persetujuan pengaduan).
 > File 10 hanya berisi RPC perubahan role yang tidak dipakai UI, jadi boleh
 > dilewati. Jalankan migrasi secara bertahap - jangan mengulang file lama bila
 > tidak diperlukan.
@@ -145,8 +149,10 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > **`supabase/verifikasi_30.sql`**, **`supabase/verifikasi_31.sql`**,
 > **`supabase/verifikasi_32.sql`**, **`supabase/verifikasi_33.sql`**,
 > **`supabase/verifikasi_34.sql`**, **`supabase/verifikasi_35.sql`**,
-> **`supabase/verifikasi_36.sql`**, **`supabase/verifikasi_37.sql`**, dan
-> **`supabase/verifikasi_38.sql`** setelah migrasi terkait. Seluruh nilai
+> **`supabase/verifikasi_36.sql`**, **`supabase/verifikasi_37.sql`**,
+> **`supabase/verifikasi_38.sql`**, **`supabase/verifikasi_39.sql`**, dan
+> **`supabase/verifikasi_40.sql`** setelah
+> migrasi terkait. Seluruh nilai
 > pemeriksaan harus `true`; bila ada yang `false`, jangan lanjutkan pemakaian.
 > `verifikasi_13.sql` dan `verifikasi_14.sql` hanya berlaku sebelum migrasi 15;
 > setelah migrasi 15, gunakan `verifikasi_15.sql`, `verifikasi_16.sql`,
@@ -200,6 +206,11 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > `verifikasi_37.sql` setelahnya.
 > Migrasi 38 wajib dijalankan agar menu **Izin** dapat mencatat Izin dan laporan
 > bulanan mengenali status Izin. Jalankan `verifikasi_38.sql` setelahnya.
+> Migrasi 39 wajib dijalankan agar presensi yang sudah dikoreksi (koreksi manual
+> maupun pengaduan disetujui) kembali berstatus **Hadir** dan terhitung hadir pada
+> rekap serta laporan bulanan; jejak koreksi tetap tersimpan di
+> `dikoreksi_oleh`, `alasan_koreksi`, dan audit trail. Jalankan
+> `verifikasi_39.sql` setelahnya.
 > Bila muncul `function public.is_superadmin() does not exist`, jalankan versi
 > terbaru migrasi 19 — file ini membuat ulang fungsi inti tersebut sekaligus
 > memeriksa keberadaan tabel `pegawai`/`presensi`.
@@ -282,7 +293,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 ├── index.html
 ├── supabase/
 │   ├── schema.sql              # Skema DB + RLS + RPC (instalasi sekali jalan)
-│   ├── migrations/             # 01–38, dijalankan bertahap
+│   ├── migrations/             # 01–39, dijalankan bertahap
 │   ├── verifikasi_09.sql       # Pemeriksaan fitur Dinas & Sakit / Cuti
 │   ├── verifikasi_10.sql       # Pemeriksaan RPC perubahan role (opsional)
 │   ├── verifikasi_11.sql       # Pemeriksaan pengaturan kepala ruangan
@@ -313,6 +324,8 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 │   ├── verifikasi_36.sql       # Pemeriksaan koreksi jam masuk
 │   ├── verifikasi_37.sql       # Pemeriksaan batas pengaduan sejak go-live
 │   ├── verifikasi_38.sql       # Pemeriksaan jenis ketidakhadiran Izin
+│   ├── verifikasi_39.sql       # Pemeriksaan status Hadir setelah koreksi
+│   ├── verifikasi_40.sql       # Pemeriksaan hak akses jadwal_kerja kepala unit
 │   ├── hapus_data_testing.sql  # Hapus transaksi sebelum 1 November 2026
 │   └── jadwal_alfa.sql         # Opsional: jadwal pg_cron untuk Alfa
 ├── scripts/
