@@ -106,6 +106,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 | 39 | `supabase/migrations/39_status_hadir_setelah_koreksi.sql` | Presensi terkoreksi berakhir berstatus **Hadir** (trigger + backfill `Koreksi` → `Hadir`); jejak koreksi tetap di `dikoreksi_oleh`/`alasan_koreksi`/`koreksi_presensi` |
 | 40 | `supabase/migrations/40_jadwal_kerja_hak_akses.sql` | `jadwal_kerja` memakai `bisa_lihat_presensi()` sehingga kepala unit (multi-unit / kepala ASN via `kepala_unit`) dapat melihat jadwal pegawai unit yang dikelola — memperbaiki galat "Anda tidak berhak melihat jadwal pegawai ini." saat menyetujui pengaduan |
 | 41 | `supabase/migrations/41_audit_jadwal_shift_auth_users.sql` | FK audit `jadwal_shift.dibuat_oleh`, `jadwal_shift.diperbarui_oleh`, dan `tukar_shift.dibuat_oleh` diarahkan ke `auth.users` — memperbaiki Tukar Shift oleh kepala unit ASN yang tidak punya baris `public.pegawai` ("violates foreign key constraint `jadwal_shift_diperbarui_oleh_fkey`") |
+| 42 | `supabase/migrations/42_pengaduan_pulang_setelah_jendela.sql` | Pengaduan **absen pulang** baru ditawarkan setelah jendela absen pulang tertutup (jam selesai jadwal + 2 jam, shift malam H+1). Sebelumnya baris muncul begitu pegawai absen masuk. `ajukan_pengaduan_presensi()` juga menolak pengajuan sebelum batas tersebut; helper `hitung_batas_absen_pulang()` dipakai kedua RPC |
 
 > Bila database sudah pernah dijalankan sampai file 08, jalankan **file 09** untuk
 > mengaktifkan alur Dinas & Sakit / Cuti, **file 11** untuk pengaturan kepala
@@ -132,7 +133,9 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > kembali berstatus Hadir, **file 40** agar `jadwal_kerja` mengenali
 > kepala unit lewat `kepala_unit` (perbaikan persetujuan pengaduan), serta
 > **file 41** agar audit jadwal/tukar shift mengacu ke akun `auth.users`
-> (perbaikan Tukar Shift oleh kepala unit ASN).
+> (perbaikan Tukar Shift oleh kepala unit ASN), serta **file 42** agar pengaduan
+> **absen pulang** baru ditawarkan setelah jendela absen pulang tertutup
+> (jam selesai jadwal + 2 jam, shift malam H+1).
 > File 10 hanya berisi RPC perubahan role yang tidak dipakai UI, jadi boleh
 > dilewati. Jalankan migrasi secara bertahap - jangan mengulang file lama bila
 > tidak diperlukan.
@@ -154,7 +157,8 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > **`supabase/verifikasi_34.sql`**, **`supabase/verifikasi_35.sql`**,
 > **`supabase/verifikasi_36.sql`**, **`supabase/verifikasi_37.sql`**,
 > **`supabase/verifikasi_38.sql`**, **`supabase/verifikasi_39.sql`**,
-> **`supabase/verifikasi_40.sql`**, dan **`supabase/verifikasi_41.sql`** setelah
+> **`supabase/verifikasi_40.sql`**, **`supabase/verifikasi_41.sql`**, dan
+> **`supabase/verifikasi_42.sql`** setelah
 > migrasi terkait. Seluruh nilai
 > pemeriksaan harus `true`; bila ada yang `false`, jangan lanjutkan pemakaian.
 > `verifikasi_13.sql` dan `verifikasi_14.sql` hanya berlaku sebelum migrasi 15;
@@ -217,6 +221,10 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > rekap serta laporan bulanan; jejak koreksi tetap tersimpan di
 > `dikoreksi_oleh`, `alasan_koreksi`, dan audit trail. Jalankan
 > `verifikasi_39.sql` setelahnya.
+> Migrasi 42 wajib dijalankan agar **pengaduan absen pulang** baru muncul setelah
+> jendela absen pulang tertutup (2 jam setelah jam pulang; shift malam keesokan
+> hari) dan agar server menolak pengajuan sebelum batas itu. Jalankan
+> `verifikasi_42.sql` setelahnya.
 > Bila muncul `function public.is_superadmin() does not exist`, jalankan versi
 > terbaru migrasi 19 — file ini membuat ulang fungsi inti tersebut sekaligus
 > memeriksa keberadaan tabel `pegawai`/`presensi`.
@@ -224,7 +232,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 **B. Sekaligus**
 
 Salin seluruh isi `supabase/schema.sql`, tempel, lalu **Run**.
-Isinya identik dengan gabungan seluruh 41 file migrasi di atas (termasuk migrasi 15-41).
+Isinya identik dengan gabungan seluruh 42 file migrasi di atas (termasuk migrasi 15-42).
 
 **C. Membuat akun pegawai**
 
@@ -333,6 +341,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 │   ├── verifikasi_39.sql       # Pemeriksaan status Hadir setelah koreksi
 │   ├── verifikasi_40.sql       # Pemeriksaan hak akses jadwal_kerja kepala unit
 │   ├── verifikasi_41.sql       # Pemeriksaan FK audit jadwal/tukar shift ke auth.users
+│   ├── verifikasi_42.sql       # Pemeriksaan pengaduan pulang setelah jendela tutup
 │   ├── hapus_data_testing.sql  # Hapus transaksi sebelum 1 November 2026
 │   └── jadwal_alfa.sql         # Opsional: jadwal pg_cron untuk Alfa
 ├── scripts/

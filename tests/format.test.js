@@ -5,6 +5,7 @@ import {
   daftarTanggal,
   formatJam,
   formatJarak,
+  formatRentangRingkas,
   formatTanggal,
   formatTanggalRingkas,
   gabungTanggalJam,
@@ -43,6 +44,19 @@ test('akhirBulan dan namaBulan menangani periode valid', () => {
   assert.equal(akhirBulan('2026-13'), '')
   assert.equal(namaBulan('2026-10'), 'Oktober 2026')
   assert.equal(namaBulan('salah'), '—')
+})
+
+test('formatRentangRingkas satu baris untuk tabel', () => {
+  assert.equal(formatRentangRingkas('2026-11-09', '2026-11-09'), '09 Nov 2026')
+  assert.equal(
+    formatRentangRingkas('2026-11-09', '2026-11-13'),
+    '09 Nov – 13 Nov 2026',
+  )
+  assert.equal(
+    formatRentangRingkas('2026-12-30', '2027-01-02'),
+    '30 Des 2026 – 02 Jan 2027',
+  )
+  assert.equal(formatRentangRingkas('', ''), '—')
 })
 
 test('gabungTanggalJam membentuk ISO WITA', () => {

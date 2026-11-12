@@ -66,6 +66,39 @@ export function formatTanggalRingkas(iso) {
   }).format(tanggal)
 }
 
+/**
+ * Rentang tanggal satu baris untuk tabel.
+ * Satu hari → "09 Nov 2026" · setahun → "09 Nov – 13 Nov 2026" ·
+ * lintas tahun → "30 Des 2026 – 02 Jan 2027".
+ */
+export function formatRentangRingkas(mulai, selesai) {
+  if (!mulai && !selesai) return '—'
+  if (!selesai || !mulai || mulai === selesai) {
+    return formatTanggalRingkas(mulai || selesai)
+  }
+
+  const awal = keTanggal(`${String(mulai).slice(0, 10)}T00:00:00+08:00`)
+  const akhir = keTanggal(`${String(selesai).slice(0, 10)}T00:00:00+08:00`)
+  if (!awal || !akhir || selesai < mulai) return '—'
+
+  const tulis = (tanggal, opsi) =>
+    ambilFormatter('id-ID', { timeZone: ZONA_WAKTU, ...opsi }).format(tanggal)
+  const tahunAwal = tulis(awal, { year: 'numeric' })
+  const tahunAkhir = tulis(akhir, { year: 'numeric' })
+
+  if (tahunAwal === tahunAkhir) {
+    const awalRingkas = tulis(awal, { day: '2-digit', month: 'short' })
+    const akhirRingkas = tulis(akhir, {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
+    return `${awalRingkas} – ${akhirRingkas}`
+  }
+
+  return `${formatTanggalRingkas(mulai)} – ${formatTanggalRingkas(selesai)}`
+}
+
 /** "Senin, 21 Okt 2026" — untuk tabel laporan bulanan */
 export function formatTanggalHari(iso) {
   if (!iso) return '—'

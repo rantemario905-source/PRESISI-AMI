@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-12 09:05 WITA (commit & push `dc12aa8` — migrasi 41) |
+| Terakhir diperbarui | 2026-11-12 11:08 WITA (migrasi 42 dijalankan & verifikasi lulus) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,7 +37,56 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-12 09:05):** **commit & push `dc12aa8`** —
+**Pekerjaan terbaru (2026-11-12 11:08):** **migrasi 42 dijalankan & lulus
+verifikasi**. User melaporkan `42_pengaduan_pulang_setelah_jendela.sql` berhasil
+dijalankan di Supabase dan `verifikasi_42.sql` menghasilkan **semua `true`**.
+Sejak saat itu kandidat **absen pulang** hanya ditawarkan setelah jendela absen
+pulang tertutup (jam selesai jadwal + 2 jam; shift malam H+1) dan server menolak
+pengajuan sebelum batas. Sisa: uji manual satu pegawai (kandidat pulang kosong
+sebelum jam tutup, muncul sesudahnya).
+
+**Pekerjaan sebelumnya (2026-11-12 10:53):** **perbaikan galat sintaks migrasi 42 +
+uji SQL nyata**. Migrasi 42 sempat gagal di Supabase dengan
+`ERROR 42601: syntax error at end of input` pada `when v_tutup is not null then
+now() >= v_tutup` karena PL/pgSQL membaca `THEN` milik `CASE` di dalam kondisi
+`IF` sebagai penutup `IF`. Kandidat kini menghitung `v_dibuka boolean` lebih dulu
+lalu `IF ... and v_dibuka`. Migrasi 42 dijalankan **utuh** di Postgres asli
+(PGlite/WASM) bersama `verifikasi_42.sql`: seluruh file tereksekusi dan **19
+pemeriksaan verifikasi `true`**, plus **16 uji perilaku** lulus (kandidat pulang
+muncul/tidak muncul sesuai batas, penolakan server sebelum batas, helper reguler
+16.30 → 18.30 dan shift malam 20.00–08.00 → 10.00 H+1, tanggal lampau tetap
+muncul, absen masuk tidak terpengaruh). Ditambahkan `tests/migrasiPengaduan.test.js`
+(5 uji) agar regresi `CASE`-di-`IF` dan ketidaksinkronan `schema.sql` terdeteksi.
+**Migrasi 42 belum dijalankan** di Supabase.
+
+**Pekerjaan sebelumnya (2026-11-12 09:54):** **pengaduan absen pulang baru muncul
+setelah jendela absen pulang tertutup**. Sebelumnya baris "absen pulang" di
+halaman Pengaduan langsung muncul begitu pegawai absen masuk pagi. Migrasi
+**42** menambahkan helper `hitung_batas_absen_pulang()` (jam selesai jadwal +
+2 jam, shift malam H+1) yang dipakai `kandidat_pengaduan_presensi()` dan
+`ajukan_pengaduan_presensi()`, sehingga kandidat baru ditawarkan setelah batas
+dan pengajuan sebelum batas ditolak server. Bila jadwal tidak tersedia,
+kandidat pulang hanya muncul untuk tanggal lampau. Sinkron `schema.sql` +
+`verifikasi_42.sql`; **migrasi 42 belum dijalankan**.
+
+**Pekerjaan sebelumnya (2026-11-12 09:29):** **perapian UI pengaduan, periode, dan
+tabel admin**. `TampilanPeriode` kini satu baris (`09 Nov – 13 Nov 2026`) lewat
+helper `formatRentangRingkas()`; daftar pengaduan dibuat padat (satu baris meta,
+satu baris waktu, alasan maks. 2 baris dengan garis kiri tipis, footer berisi
+info keputusan + **Lihat Foto**/**Tinjau**); filter Unit + Status tab Riwayat
+Pengaduan digabung ke toolbar pencarian dan Alert biru dihapus; tabel data admin
+memakai kelas `.tabel-data` (pemisah kolom tipis) kecuali Rekapitulasi; tabel
+Dinas & Sakit/Cuti/Izin memakai periode satu baris selebar 190 px, padding lebih
+rapat, dan keterangan 2 baris. Tanpa perubahan logika/DB.
+
+**Pekerjaan sebelumnya (2026-11-12 09:06):** **migrasi 41 dijalankan**. User
+melaporkan `41_audit_jadwal_shift_auth_users.sql` dan `verifikasi_41.sql` sudah
+dijalankan, sehingga FK audit `jadwal_shift`/`tukar_shift` kini mengarah ke
+`auth.users` dan Tukar Shift oleh kepala unit ASN tidak lagi tertahan FK. Uji
+manual belum dilakukan karena belum ada kasus tukar shift yang perlu diuji.
+Tidak ada perubahan kode; dokumen audit diperbarui.
+
+**Pekerjaan sebelumnya (2026-11-12 09:05):** **commit & push `dc12aa8`** —
 perbaikan FK audit Tukar Shift (migrasi **41**) sudah di-push ke `origin/main`.
 Sisa: jalankan migrasi 41 + `verifikasi_41.sql`, lalu uji Tukar Shift dari akun
 kepala unit ASN yang sebelumnya gagal.
@@ -637,7 +686,8 @@ lanjutan 14,14 dtk).
 | Migrasi DB 38 | **Sudah dijalankan** (laporan user 2026-11-11 15:21) — jenis **Izin** aktif di server; `verifikasi_38.sql` lulus (laporan user 2026-11-11 15:30) | `supabase/migrations/38_jenis_izin.sql`, `verifikasi_38.sql` |
 | Migrasi DB 39 | **Sudah dijalankan** (laporan user 2026-11-11 17:40) — trigger `trg_normalisasi_status_koreksi` aktif dan data lama `Koreksi` dinormalkan; `verifikasi_39.sql` lulus | `supabase/migrations/39_status_hadir_setelah_koreksi.sql`, `verifikasi_39.sql` |
 | Migrasi DB 40 | **Sudah dijalankan** (laporan user 2026-11-11 21:20) — `jadwal_kerja` memakai `bisa_lihat_presensi()` sehingga kepala unit (multi-unit/kepala ASN) dapat melihat jadwal pegawai unit yang dikelola; `verifikasi_40.sql` dijalankan | `supabase/migrations/40_jadwal_kerja_hak_akses.sql`, `verifikasi_40.sql` |
-| Migrasi DB 41 | **Belum dijalankan** — FK audit `jadwal_shift.dibuat_oleh`, `jadwal_shift.diperbarui_oleh`, dan `tukar_shift.dibuat_oleh` diarahkan ke `auth.users` agar kepala unit ASN (tanpa baris `pegawai`) dapat Tukar Shift | `supabase/migrations/41_audit_jadwal_shift_auth_users.sql`, `verifikasi_41.sql` |
+| Migrasi DB 41 | **Sudah dijalankan** (laporan user 2026-11-12 09:06) — FK audit `jadwal_shift.dibuat_oleh`, `jadwal_shift.diperbarui_oleh`, dan `tukar_shift.dibuat_oleh` mengarah ke `auth.users`; `verifikasi_41.sql` dijalankan. Uji Tukar Shift kepala unit ASN belum ada kasus | `supabase/migrations/41_audit_jadwal_shift_auth_users.sql`, `verifikasi_41.sql` |
+| Migrasi DB 42 | **Sudah dijalankan** (laporan user 2026-11-12 11:08) — kandidat & pengajuan **absen pulang** baru aktif setelah jendela absen pulang tertutup (jam selesai jadwal + 2 jam, shift malam H+1); helper `hitung_batas_absen_pulang()`; `verifikasi_42.sql` **semua `true`**. Sisa: uji manual kandidat pulang sebelum/sesudah batas | `supabase/migrations/42_pengaduan_pulang_setelah_jendela.sql`, `verifikasi_42.sql` |
 | Data uji | **Sudah dibersihkan ulang setelah uji** — transaksi dihapus, 92 pegawai/grup/master shift dipertahankan | `supabase/cleanup_data_uji.sql`, laporan user 2026-10-30 23:01 |
 | Data testing sebelum go-live | **Sudah dijalankan** (laporan user 2026-11-05) — transaksi sebelum 1 November 2026 terhapus; data go-live utuh | `supabase/hapus_data_testing.sql` |
 | Data operasional | **Lengkap** — jadwal dinas dan pemetaan pegawai sudah diisi | laporan user 2026-10-30 23:04 |
@@ -831,6 +881,164 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-12 11:08 WITA — Migrasi 42 dijalankan & verifikasi lulus
+
+**Perubahan**
+- User menjalankan `42_pengaduan_pulang_setelah_jendela.sql` di Supabase: **berhasil**.
+- `verifikasi_42.sql` dijalankan: **semua pemeriksaan `true`**.
+- Berlaku di server sejak saat ini: kandidat **absen pulang** hanya muncul setelah
+  `now() >= jam_selesai jadwal + 2 jam` (shift malam H+1), dan
+  `ajukan_pengaduan_presensi()` menolak pengajuan jenis `pulang` sebelum batas.
+
+**File**
+- Tidak ada perubahan kode pada entri ini; `progress.md` dan `AGENTS.md` diperbarui.
+
+**Verifikasi**
+- Laporan user 2026-11-12: migrasi 42 sukses, `verifikasi_42.sql` semua `true`.
+- Sebelumnya (2026-11-12 10:53) diuji di Postgres asli (PGlite): 19/19 verifikasi
+  `true`, 16/16 uji perilaku lulus; `npm run lint` bersih, `npm test` **91/91**,
+  `npm run build` lulus **7,18 dtk**.
+
+**Catatan/risiko**
+- Sisa uji manual: buka `/pengaduan` sebagai pegawai yang sudah absen masuk —
+  sebelum jam tutup daftar kandidat pulang harus **kosong**, sesudahnya **muncul**.
+- Pengaduan absen pulang yang sudah terlanjur dikirim sebelum migrasi tetap dapat
+  diputuskan Kepala Unit seperti biasa.
+
+### 2026-11-12 10:53 WITA — Perbaikan galat sintaks migrasi 42 + uji SQL nyata
+
+**Perubahan**
+- Memperbaiki `ERROR 42601: syntax error at end of input` pada migrasi 42.
+  Penyebab: `CASE ... END` dipakai di dalam **kondisi `IF`** — PL/pgSQL membaca
+  `THEN` milik `CASE` sebagai penutup `IF`, sehingga sisa ekspresi menjadi
+  statement liar. Kandidat sekarang menghitung variabel `v_dibuka boolean`
+  (`v_dibuka := case ... end;`) lalu memakai `IF ... and v_dibuka`.
+- `schema.sql` disinkronkan dengan definisi terbaru.
+
+**File**
+- `supabase/migrations/42_pengaduan_pulang_setelah_jendela.sql`,
+  `supabase/schema.sql`, `tests/migrasiPengaduan.test.js` (baru),
+  `progress.md`, `AGENTS.md`.
+
+**Verifikasi**
+- **Uji Postgres asli (PGlite/WASM, bukan tafsir manual):**
+  - Seluruh isi file migrasi 42 dieksekusi tanpa galat (termasuk `do` guard,
+    `begin/commit`, `revoke`/`grant`).
+  - `verifikasi_42.sql` dijalankan: **semua 19 baris `true`**.
+  - **16 uji perilaku lulus:** `hitung_batas_absen_pulang` reguler 16.30 → 18.30,
+    shift malam 20.00–08.00 → 10.00 H+1, jam kosong → `null`; kandidat pulang
+    **tidak muncul** sebelum batas dan **muncul** setelahnya (termasuk tepat di
+    batas `now() >= v_tutup`); tanpa jadwal hari ini → tidak muncul, tanggal
+    lampau → tetap muncul; `ajukan_pengaduan_presensi` menolak sebelum batas
+    ("Pengaduan absen pulang baru dapat diajukan setelah pukul HH:MM WITA.")
+    dan menerima setelah batas; kandidat absen masuk tidak berubah.
+- `npm run lint` bersih, `npm test` **91/91** (bertambah 5 uji migrasi),
+  `npm run build` lulus **7,30 dtk**.
+
+**Catatan/risiko**
+- Uji PGlite memakai stub `jadwal_kerja()`/`validasi_dokumen_pengaduan()` dan
+  tabel minimal, bukan skema penuh; yang divalidasi adalah sintaks PL/pgSQL dan
+  logika kedua RPC.
+- Migrasi 42 **belum dijalankan** di Supabase. Setelah dijalankan, lanjutkan
+  `verifikasi_42.sql` lalu uji manual kandidat pulang.
+
+### 2026-11-12 09:54 WITA — Pengaduan absen pulang setelah jendela tutup
+
+**Perubahan**
+- Kandidat **absen pulang** tidak lagi muncul begitu pegawai absen masuk pagi.
+  Baris baru ditawarkan setelah jendela absen pulang tertutup, yaitu jam selesai
+  jadwal + 2 jam (`MENIT_TUTUP_ABSEN_PULANG = 120`), dengan shift malam
+  (jam selesai ≤ jam mulai) dihitung H+1.
+- Helper baru `public.hitung_batas_absen_pulang(p_tanggal, p_jam_mulai,
+  p_jam_selesai)` (immutable) dipakai `kandidat_pengaduan_presensi()` dan
+  `ajukan_pengaduan_presensi()` agar aturan klien/server konsisten.
+- Server tetap sumber kebenaran: pengajuan jenis `pulang` sebelum batas ditolak
+  dengan pesan "Pengaduan absen pulang baru dapat diajukan setelah pukul % WITA."
+- Bila jadwal kerja tidak tersedia, kandidat pulang hanya muncul untuk tanggal
+  lampau (bukan hari ini). Kandidat absen masuk/koreksi jam masuk tidak berubah.
+- Subjudul daftar kandidat di halaman Pengaduan menjelaskan kapan pengaduan
+  absen pulang dibuka.
+
+**File**
+- `supabase/migrations/42_pengaduan_pulang_setelah_jendela.sql` (baru),
+  `supabase/verifikasi_42.sql` (baru), `supabase/schema.sql` (helper + kedua RPC
+  disamakan dengan migrasi 42), `src/pages/Pengaduan.jsx`, `README.md`,
+  `AGENTS.md`, `progress.md`.
+
+**Verifikasi**
+- `npm run lint` bersih, `npm test` **86/86**, `npm run build` lulus **9,65 dtk**.
+- Fungsi `ajukan_pengaduan_presensi` (219 baris) dan `kandidat_pengaduan_presensi`
+  (135 baris) di `schema.sql` diperiksa identik dengan migrasi 42.
+- Uji DB belum dilakukan: migrasi 42 + `verifikasi_42.sql` belum dijalankan.
+
+**Catatan/risiko**
+- Pengaduan absen pulang yang sudah terlanjur dikirim sebelum migrasi tetap bisa
+  diputuskan Kepala Unit seperti biasa.
+- Panel Absen sudah memakai `tutupAbsenPulang()`, sehingga tombol
+  **Ajukan Pengaduan** memang baru tampil setelah jendela tutup; perbaikan ini
+  menyelaraskan daftar kandidat di halaman Pengaduan.
+- Perubahan ditahan di working tree sampai user memerintahkan commit/push.
+
+### 2026-11-12 09:29 WITA — Perapian UI pengaduan, periode, dan tabel admin
+
+**Perubahan**
+- `TampilanPeriode` menjadi satu baris dengan ikon kalender inline kecil dan
+  jumlah hari di bawahnya; rentang memakai helper baru
+  `formatRentangRingkas()` (satu hari, satu tahun, lintas tahun).
+- Daftar pengaduan dirapikan: satu baris meta (jenis · tanggal · unit), satu
+  baris waktu (Diajukan/Tercatat/Disetujui), alasan maks. 2 baris dengan garis
+  kiri tipis, catatan admin satu baris, dan footer berisi info keputusan +
+  **Lihat Foto** (tautan) serta **Tinjau** (tombol kecil).
+- Tab Riwayat Pengaduan di Koreksi Presensi: filter Unit + Status digabung ke
+  toolbar pencarian dan Alert biru panjang dihapus.
+- Tabel Dinas & Sakit/Cuti/Izin: kolom Periode 190 px, padding `px-4`, keterangan
+  `line-clamp-2` + `title`, catatan admin satu baris.
+- Kelas `.tabel-data` di `src/index.css` menambahkan pemisah tipis antarkolom;
+  diterapkan pada tabel Data Pegawai, Grup Shift, Master Shift, Hari Libur,
+  Verifikasi Perangkat, Pengajuan Izin, Koreksi/Audit Trail, Dashboard, preview
+  impor Jadwal Shift, dan daftar presensi koreksi. Rekapitulasi dikecualikan
+  karena dipakai untuk cetak.
+- Modal pengaduan pegawai memakai judul sesuai jenis (absen masuk/pulang).
+
+**File**
+- `src/utils/format.js`, `tests/format.test.js`,
+  `src/components/ui/TampilanPeriode.jsx`,
+  `src/components/pengaduan/DaftarPengaduan.jsx`,
+  `src/pages/Pengaduan.jsx`, `src/pages/admin/KoreksiPresensi.jsx`,
+  `src/pages/admin/PengajuanIzin.jsx`, `src/index.css`, serta kelas tabel di
+  `DataPegawai`, `GrupShift`, `MasterShift`, `HariLibur`, `JadwalShift`,
+  `DashboardUtama`, `VerifikasiPerangkat`, `DaftarPresensiKoreksi`.
+
+**Verifikasi**
+- `npm run lint` bersih, `npm test` **86/86**, `npm run build` lulus
+  **10,09 dtk**. Uji manual tampilan belum dilakukan.
+
+**Catatan/risiko**
+- Murni tampilan; tidak ada perubahan RPC, status, atau migrasi DB.
+- Perubahan ditahan di working tree sampai user memerintahkan commit/push.
+
+### 2026-11-12 09:06 WITA — Migrasi 41 dijalankan
+
+**Perubahan**
+- User melaporkan `supabase/migrations/41_audit_jadwal_shift_auth_users.sql` dan
+  `supabase/verifikasi_41.sql` sudah dijalankan.
+- FK `jadwal_shift.dibuat_oleh`, `jadwal_shift.diperbarui_oleh`, dan
+  `tukar_shift.dibuat_oleh` kini mengarah ke `auth.users`, sehingga Tukar Shift
+  oleh kepala unit ASN tidak lagi tertahan foreign key.
+- Uji manual belum dilakukan karena belum ada kasus tukar shift yang perlu diuji.
+- Memperbarui Status Terkini, tabel migrasi baris 41, dan backlog **B-48**.
+
+**File**
+- `progress.md`, `AGENTS.md` (dokumen saja).
+
+**Verifikasi**
+- Laporan user 2026-11-12 09:06. Tidak ada perubahan kode; verifikasi lokal
+  terakhir tetap lint bersih, `npm test` 85/85, build lulus.
+
+**Catatan/risiko**
+- Sisa: uji Tukar Shift dari akun kepala unit ASN begitu ada kasus nyata.
+- Perubahan dokumen ini belum di-commit.
 
 ### 2026-11-12 09:05 WITA — Commit & push perbaikan FK audit Tukar Shift
 
@@ -3771,7 +3979,10 @@ dan `verifikasi_18` untuk hapus grup kosong.
 | B-46 | ~~Migrasi 39 (status Hadir setelah koreksi) belum dijalankan di Supabase~~ | - | **Selesai:** migrasi 39 + `verifikasi_39.sql` dijalankan user 2026-11-11 17:40 dan berhasil; sisa uji manual satu pengaduan disetujui |
 | B-45 | ~~Uji manual jenis Izin dan warna status laporan belum dilakukan~~ | - | **Selesai:** uji manual berhasil (laporan user 2026-11-11 16:20) — alur Izin, penolakan absensi/Alfa/pengaduan, warna status laporan |
 | B-47 | ~~Migrasi 40 (`jadwal_kerja` mengenali `kepala_unit`) belum dijalankan di Supabase~~ | `supabase/migrations/40_jadwal_kerja_hak_akses.sql` | **Selesai:** migrasi 40 + `verifikasi_40.sql` dijalankan user 2026-11-11 21:20; sisa uji Setujui satu pengaduan dari akun kepala unit yang sebelumnya gagal |
-| B-48 | Migrasi 41 (FK audit jadwal/tukar shift → `auth.users`) belum dijalankan di Supabase | `supabase/migrations/41_audit_jadwal_shift_auth_users.sql` | **Belum:** jalankan migrasi 41 lalu `verifikasi_41.sql`, kemudian uji Tukar Shift dari akun kepala unit yang gagal (Eva Setiani ↔ Bdn. Arinda Bella Pratiwi, 12 Nov 2026) |
+| B-48 | ~~Migrasi 41 (FK audit jadwal/tukar shift → `auth.users`) belum dijalankan di Supabase~~ | `supabase/migrations/41_audit_jadwal_shift_auth_users.sql` | **Selesai:** migrasi 41 + `verifikasi_41.sql` dijalankan user 2026-11-12 09:06. Sisa: uji Tukar Shift dari akun kepala unit ASN saat ada kasus nyata |
+| B-49 | Uji manual tampilan pengaduan, periode satu baris, dan pemisah kolom tabel admin | `src/components/pengaduan/DaftarPengaduan.jsx`, `src/components/ui/TampilanPeriode.jsx` | **Belum:** menunggu uji lokal user (desktop & HP) |
+| B-50 | ~~Migrasi 42 (pengaduan absen pulang setelah jendela tutup) belum dijalankan di Supabase~~ | `supabase/migrations/42_pengaduan_pulang_setelah_jendela.sql` | **Selesai:** migrasi 42 dijalankan & `verifikasi_42.sql` semua `true` (laporan user 2026-11-12 11:08). Sintaks + logika sebelumnya diuji di Postgres asli (PGlite): 19/19 verifikasi `true`, 16/16 uji perilaku lulus |
+| B-51 | Uji manual kandidat absen pulang: belum muncul sebelum jam tutup, muncul setelahnya (reguler & shift malam) | `src/pages/Pengaduan.jsx` | **Belum:** server sudah aktif; menunggu uji manual user |
 | B-37 | ~~Uji manual tukar shift, laporan, & cetak jadwal F4 landscape~~ | - | **Selesai:** tukar shift, laporan, dan cetak F4 sudah aman (laporan user 2026-11-05) |
 | B-4 | ~~`npm run build` belum dijalankan~~ | — | **Selesai:** lulus 2026-10-25 12:24 |
 | B-5 | ~~README menyebut Fase 1–7 saja~~ | — | **Selesai:** diperbarui ke Fase 1–8 + impor |

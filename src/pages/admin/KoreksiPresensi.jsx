@@ -218,18 +218,48 @@ export default function KoreksiPresensi() {
       />
 
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <PencarianNama
-          nilai={cari}
-          onChange={setCari}
-          placeholder={
-            tab === 'audit'
-              ? 'Cari nama pegawai atau admin…'
-              : tab === 'pengaduan'
-                ? 'Cari nama pegawai atau unit…'
-                : 'Cari nama pegawai…'
-          }
-          className="w-full sm:max-w-xs"
-        />
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <PencarianNama
+            nilai={cari}
+            onChange={setCari}
+            placeholder={
+              tab === 'audit'
+                ? 'Cari nama pegawai atau admin…'
+                : tab === 'pengaduan'
+                  ? 'Cari nama pegawai atau unit…'
+                  : 'Cari nama pegawai…'
+            }
+            className="w-full sm:w-64"
+          />
+          {tab === 'pengaduan' && (
+            <>
+              <select
+                aria-label="Filter unit kerja pengaduan"
+                className="input-dasar sm:w-44"
+                value={unit}
+                onChange={(event) => setUnit(event.target.value)}
+              >
+                <option value="semua">Semua unit</option>
+                {units.map((u) => (
+                  <option key={u} value={u}>
+                    {u}
+                  </option>
+                ))}
+              </select>
+              <select
+                aria-label="Filter status pengaduan"
+                className="input-dasar sm:w-40"
+                value={statusPengaduan}
+                onChange={(event) => setStatusPengaduan(event.target.value)}
+              >
+                <option value="semua">Semua status</option>
+                <option value="menunggu">Menunggu</option>
+                <option value="disetujui">Disetujui</option>
+                <option value="ditolak">Ditolak</option>
+              </select>
+            </>
+          )}
+        </div>
         <p className="text-[11px] font-semibold text-slate-500 sm:text-xs">
           {tab === 'data'
             ? cari
@@ -307,66 +337,22 @@ export default function KoreksiPresensi() {
       )}
 
       {tab === 'pengaduan' && (
-        <>
-          <div className="mb-4 grid gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-kartu sm:grid-cols-2 sm:p-4 lg:max-w-xl">
-            <div>
-              <label className="label-input" htmlFor="pengaduan-unit-admin">
-                Unit Kerja
-              </label>
-              <select
-                id="pengaduan-unit-admin"
-                className="input-dasar"
-                value={unit}
-                onChange={(event) => setUnit(event.target.value)}
-              >
-                <option value="semua">Semua unit</option>
-                {units.map((u) => (
-                  <option key={u} value={u}>
-                    {u}
-                  </option>
-                ))}
-              </select>
+        <section className="rounded-2xl border border-slate-200 bg-white shadow-kartu">
+          {memuatPengaduan ? (
+            <div className="flex items-center justify-center gap-2 py-14 text-sm text-slate-500">
+              <Spinner /> Memuat pengaduan…
             </div>
-            <div>
-              <label className="label-input" htmlFor="pengaduan-status-admin">
-                Status
-              </label>
-              <select
-                id="pengaduan-status-admin"
-                className="input-dasar"
-                value={statusPengaduan}
-                onChange={(event) => setStatusPengaduan(event.target.value)}
-              >
-                <option value="semua">Semua status</option>
-                <option value="menunggu">Menunggu</option>
-                <option value="disetujui">Disetujui</option>
-                <option value="ditolak">Ditolak</option>
-              </select>
-            </div>
-          </div>
-
-          <Alert variant="info" className="mb-4">
-            Super Admin dapat menyetujui atau menolak pengaduan. Pengaduan milik sendiri
-            tetap tidak dapat diputuskan.
-          </Alert>
-
-          <section className="rounded-2xl border border-slate-200 bg-white shadow-kartu">
-            {memuatPengaduan ? (
-              <div className="flex items-center justify-center gap-2 py-14 text-sm text-slate-500">
-                <Spinner /> Memuat pengaduan…
-              </div>
-            ) : (
-              <DaftarPengaduan
-                daftar={pengaduanTersaring}
-                bolehPutuskan
-                idSaya={profil?.id}
-                onPutuskan={setPilihPengaduan}
-                onLihatFoto={lihatFotoPengaduan}
-                pesanKosong="Belum ada pengaduan pada filter ini."
-              />
-            )}
-          </section>
-        </>
+          ) : (
+            <DaftarPengaduan
+              daftar={pengaduanTersaring}
+              bolehPutuskan
+              idSaya={profil?.id}
+              onPutuskan={setPilihPengaduan}
+              onLihatFoto={lihatFotoPengaduan}
+              pesanKosong="Belum ada pengaduan pada filter ini."
+            />
+          )}
+        </section>
       )}
 
       {pilihPengaduan && (
@@ -438,7 +424,7 @@ export default function KoreksiPresensi() {
 
               {/* Desktop: tabel */}
               <div className="hidden overflow-x-auto md:block">
-                <table className="w-full min-w-[860px] text-left text-sm">
+                <table className="tabel-data w-full min-w-[860px] text-left text-sm">
                   <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                     <tr>
                       <th className="px-5 py-3 font-semibold">Waktu Koreksi</th>

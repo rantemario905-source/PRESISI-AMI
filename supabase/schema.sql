@@ -4,7 +4,7 @@
 -- Dua cara pakai:
 --   A. Satu file: jalankan seluruh file ini di SQL Editor.
 -- B. Bertahap : jalankan supabase/migrations/01_tabel.sql s.d.
---      41_audit_jadwal_shift_auth_users.sql, satu per satu (disarankan bila ingin
+--      42_pengaduan_pulang_setelah_jendela.sql, satu per satu (disarankan bila ingin
 --      meminimalisir error).
 --
 -- Urutan PENTING: tabel dibuat lebih dulu, karena fungsi `is_superadmin`
@@ -2234,6 +2234,28 @@ set search_path = public
 as $$
   select ((p_tanggal + p_jam) at time zone 'Asia/Makassar');
 $$;
+
+-- Batas tutup absen pulang = jam selesai jadwal + 2 jam (shift malam +1 hari).
+create or replace function public.hitung_batas_absen_pulang(
+  p_tanggal date,
+  p_jam_mulai time,
+  p_jam_selesai time
+) returns timestamptz
+language sql immutable
+set search_path = public
+as $$
+  select case
+    when p_tanggal is null or p_jam_mulai is null or p_jam_selesai is null then null
+    else public.waktu_wita(p_tanggal, p_jam_selesai)
+      + case
+          when p_jam_selesai <= p_jam_mulai then interval '1 day'
+          else interval '0'
+        end
+      + interval '2 hours'
+  end;
+$$;
+
+revoke execute on function public.hitung_batas_absen_pulang(date, time, time) from public, anon;
 
 create or replace function public.jadwal_kerja(
   p_user uuid default auth.uid(),
@@ -12183,6 +12205,7 @@ declare
   v_buka timestamptz;
   v_mulai timestamptz;
   v_selesai timestamptz;
+  v_tutup timestamptz;
   v_ada boolean := false;
   v_koreksi boolean := false;
   v_id uuid;
@@ -12265,6 +12288,24 @@ begin
 
     if p_jam <= v_p.jam_masuk then
       raise exception 'Jam pulang harus setelah jam masuk.';
+    end if;
+
+    -- Pengaduan baru dibuka setelah jendela absen pulang tertutup.
+    select * into v_jadwal from public.jadwal_kerja(v_uid, p_tanggal);
+
+    if found
+       and coalesce(v_jadwal.terjadwal, false)
+       and coalesce(v_jadwal.boleh_absen, false)
+       and v_jadwal.jam_mulai is not null
+       and v_jadwal.jam_selesai is not null then
+      v_tutup := public.hitung_batas_absen_pulang(
+        p_tanggal, v_jadwal.jam_mulai, v_jadwal.jam_selesai
+      );
+
+      if v_tutup is not null and now() < v_tutup then
+        raise exception 'Pengaduan absen pulang baru dapat diajukan setelah pukul % WITA.',
+          to_char(v_tutup at time zone 'Asia/Makassar', 'HH24:MI');
+      end if;
     end if;
 
     insert into public.pengaduan_presensi (
@@ -12639,6 +12680,9 @@ declare
   v_batas_awal date := date '2026-11-01';
   v_hasil jsonb := '[]'::jsonb;
   v_jadwal record;
+  v_jadwal_ada boolean := false;
+  v_tutup timestamptz;
+  v_dibuka boolean := false;
   v_p public.presensi%rowtype;
   v_ada boolean := false;
   v_i integer;
@@ -12661,11 +12705,33 @@ begin
        and tanggal = v_tgl;
     v_ada := found;
 
-    -- Kandidat absen pulang
+    -- Jadwal kerja tanggal ini (dipakai absen pulang, absen masuk, dan koreksi)
+    select * into v_jadwal from public.jadwal_kerja(v_uid, v_tgl);
+    v_jadwal_ada := found
+      and coalesce(v_jadwal.terjadwal, false)
+      and coalesce(v_jadwal.boleh_absen, false)
+      and v_jadwal.jam_mulai is not null
+      and v_jadwal.jam_selesai is not null;
+
+    v_tutup := case
+      when v_jadwal_ada then public.hitung_batas_absen_pulang(
+        v_tgl, v_jadwal.jam_mulai, v_jadwal.jam_selesai
+      )
+      else null
+    end;
+
+    -- Jendela absen pulang sudah tertutup? Tanpa jadwal: hanya tanggal lampau.
+    v_dibuka := case
+      when v_tutup is not null then now() >= v_tutup
+      else v_tgl < v_hari_ini
+    end;
+
+    -- Kandidat absen pulang: baru muncul setelah jendela absen pulang tertutup.
     if v_ada
        and v_p.jam_masuk is not null
        and v_p.jam_pulang is null
        and v_p.status_kehadiran in ('Hadir', 'Koreksi')
+       and v_dibuka
        and not exists (
          select 1
            from public.pengaduan_presensi q
@@ -12686,14 +12752,7 @@ begin
       ));
     end if;
 
-    -- Jadwal kerja tanggal ini (untuk absen masuk / koreksi jam masuk)
-    select * into v_jadwal from public.jadwal_kerja(v_uid, v_tgl);
-
-    if found
-       and coalesce(v_jadwal.terjadwal, false)
-       and coalesce(v_jadwal.boleh_absen, false)
-       and v_jadwal.jam_mulai is not null
-       and v_jadwal.jam_selesai is not null then
+    if v_jadwal_ada then
 
       if (not v_ada)
          or (v_p.jam_masuk is null and v_p.status_kehadiran = 'Alfa') then

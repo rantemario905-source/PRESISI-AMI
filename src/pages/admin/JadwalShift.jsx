@@ -1390,7 +1390,7 @@ export default function JadwalShift({ mode = 'admin' }) {
 
               {hasilTemplate.perubahan.length > 0 && (
                 <div className="overflow-x-auto rounded-xl border border-slate-200">
-                  <table className="w-full min-w-[520px] text-left text-xs">
+                  <table className="tabel-data w-full min-w-[520px] text-left text-xs">
                     <thead className="bg-slate-50 text-slate-600">
                       <tr>
                         <th className="px-3 py-2 font-semibold">Pegawai</th>

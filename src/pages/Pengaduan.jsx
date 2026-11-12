@@ -129,7 +129,8 @@ export default function Pengaduan() {
                   Presensi Bisa Diadukan
                 </h2>
                 <p className="text-[11px] text-slate-500 sm:text-xs">
-                  Absen yang belum tercatat atau perlu dikoreksi.
+                  Absen yang belum tercatat atau perlu dikoreksi. Pengaduan absen
+                  pulang dibuka setelah jendela absen pulang tertutup.
                 </p>
               </div>
 
@@ -197,7 +198,11 @@ export default function Pengaduan() {
       <Modal
         terbuka={Boolean(pilih)}
         onTutup={() => setPilih(null)}
-        judul="Ajukan Pengaduan Absen Pulang"
+        judul={
+          pilih?.jenis === 'masuk'
+            ? 'Ajukan Pengaduan Absen Masuk'
+            : 'Ajukan Pengaduan Absen Pulang'
+        }
       >
         {pilih && (
           <FormPengaduan

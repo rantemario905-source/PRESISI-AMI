@@ -669,42 +669,47 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
 
             {/* Desktop: tabel per grup */}
             <div className="hidden overflow-x-auto md:block">
-              <table className="w-full min-w-[980px] text-left text-sm">
+              <table className="tabel-data w-full min-w-[980px] text-left text-sm">
                 <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                   <tr>
-                    <th className="px-5 py-3 font-semibold">Pegawai</th>
-                    <th className="px-5 py-3 font-semibold">Jenis</th>
-                    <th className="px-5 py-3 font-semibold">Periode</th>
-                    <th className="px-5 py-3 font-semibold">Keterangan</th>
-                    <th className="px-5 py-3 font-semibold">Dokumen</th>
-                    <th className="px-5 py-3 font-semibold">Status</th>
-                    <th className="px-5 py-3 text-right font-semibold">Aksi</th>
+                    <th className="px-4 py-3 font-semibold">Pegawai</th>
+                    <th className="px-4 py-3 font-semibold">Jenis</th>
+                    <th className="px-4 py-3 font-semibold">Periode</th>
+                    <th className="px-4 py-3 font-semibold">Keterangan</th>
+                    <th className="px-4 py-3 font-semibold">Dokumen</th>
+                    <th className="px-4 py-3 font-semibold">Status</th>
+                    <th className="px-4 py-3 text-right font-semibold">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {daftar.map((grup) => (
                     <tr key={grup.grup_id} className="align-top hover:bg-slate-50/70">
-                      <td className="px-5 py-3">
+                      <td className="px-4 py-3">
                         <p className="max-w-[260px] font-semibold text-slate-800">
                           {namaAnggota(grup)}
                         </p>
                         <p className="text-xs text-slate-500">{unitAnggota(grup)}</p>
                       </td>
-                      <td className="px-5 py-3">
+                      <td className="px-4 py-3">
                         <Badge variant={varianJenisIzin(grup.jenis)}>{labelJenis(grup.jenis)}</Badge>
                       </td>
-                      <td className="px-5 py-3">
+                      <td className="w-[190px] px-4 py-3">
                         <TampilanPeriode mulai={grup.tanggal_mulai} selesai={grup.tanggal_selesai} />
                       </td>
-                      <td className="max-w-[220px] px-5 py-3 text-xs text-slate-600">
-                        {grup.alasan || '—'}
+                      <td className="max-w-[220px] px-4 py-3 text-xs text-slate-600">
+                        <p className="line-clamp-2 leading-relaxed" title={grup.alasan || undefined}>
+                          {grup.alasan || '—'}
+                        </p>
                         {grup.catatan_admin && (
-                          <p className="mt-1 text-[11px] font-semibold text-slate-500">
+                          <p
+                            className="mt-1 line-clamp-1 text-[11px] font-semibold text-slate-500"
+                            title={grup.catatan_admin}
+                          >
                             Catatan admin: {grup.catatan_admin}
                           </p>
                         )}
                       </td>
-                      <td className="px-5 py-3 text-xs">
+                      <td className="px-4 py-3 text-xs">
                         {grup.dokumen_path ? (
                           <button
                             type="button"
@@ -720,12 +725,12 @@ export default function PengajuanIzin({ mode = 'superadmin', kategori = 'dinas-s
                           </span>
                         )}
                       </td>
-                      <td className="px-5 py-3">
+                      <td className="px-4 py-3">
                         <Badge variant={varianStatusIzin(grup.status)}>
                           {labelStatusIzin(grup.status)}
                         </Badge>
                       </td>
-                      <td className="px-5 py-3">
+                      <td className="px-4 py-3">
                         <div className="flex flex-wrap justify-end gap-2">
                           {grup.status === 'menunggu' && bolehKelolaGrup(grup) && (
                             <Button size="sm" variant="sekunder" onClick={() => bukaFormUbah(grup)}>

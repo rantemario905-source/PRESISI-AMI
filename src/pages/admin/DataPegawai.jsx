@@ -260,7 +260,7 @@ export default function DataPegawai() {
 
             {/* Desktop: tabel */}
             <div className="hidden overflow-x-auto md:block">
-              <table className="w-full min-w-[860px] text-left text-sm">
+              <table className="tabel-data w-full min-w-[860px] text-left text-sm">
                 <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                   <tr>
                     <th className="px-5 py-3 font-semibold">Nama</th>
