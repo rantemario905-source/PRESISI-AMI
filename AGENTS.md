@@ -305,6 +305,7 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-161 | 2026-11-11 21:20 | "sudah sayajalankan migrasi dan verifikasinya" | Mencatat migrasi **40** dan `verifikasi_40.sql` sudah dijalankan; `jadwal_kerja` kini mengenali kepala unit lewat `kepala_unit` (`bisa_lihat_presensi`). Memperbarui Status Terkini, tabel migrasi 40, dan backlog **B-47**. Tidak ada perubahan kode | selesai (dokumen); belum di-commit | 2026-11-11 21:20 — Migrasi 40 dijalankan |
 | I-162 | 2026-11-12 | "commit dan push" | Memverifikasi `npm run lint` bersih, `npm test` **85/85**, `npm run build` lulus **19,14 dtk**; commit **`27525d1`** (status Hadir setelah koreksi + migrasi 39, laporan libur berwarna & header biru, pencarian pegawai pengajuan izin, hak akses `jadwal_kerja` + migrasi 40, verifikasi 39–40) lalu push ke `origin/main` (`3f0c13f..27525d1`) | selesai | 2026-11-12 — Commit & push sesi 11 November |
 | I-163 | 2026-11-12 09:02 | "[Image 1] sebelum saya commit perubahan barusan, ada laporan dari kepala unit kalau tidak bisa tukar shift dengan notif seperti pada gambar" + "tapi barusan saya tukar sendiri dengan akun admin dan berhasil setelah commit barusan, apa tetap perlu kita perbaiki?" + "kerjakan pastikan tidak ada bug dan eror" | Akar masalah FK audit: `jadwal_shift.dibuat_oleh`/`diperbarui_oleh` dan `tukar_shift.dibuat_oleh` diisi `auth.uid()` tetapi ber-FK ke `public.pegawai`, sehingga kepala unit ASN (tanpa baris `pegawai`) gagal; akun admin berhasil karena punya baris. Migrasi **41** mengarahkan ketiga FK ke `auth.users`, ditambah `verifikasi_41.sql`, sinkron `schema.sql` + README; lint bersih, `npm test` **85/85**, `npm run build` lulus | selesai (kode); migrasi 41 belum dijalankan | 2026-11-12 09:02 — Perbaikan FK audit Tukar Shift |
+| I-164 | 2026-11-12 09:05 | "commit dan push" | Memverifikasi `npm run lint` bersih, `npm test` **85/85**, `npm run build` lulus **8,72 dtk**; memastikan staged diff tanpa rahasia; commit **`dc12aa8`** (FK audit `jadwal_shift`/`tukar_shift` → `auth.users`, migrasi 41 + `verifikasi_41.sql`, sinkron `schema.sql`/README) lalu push ke `origin/main` (`c48e64c..dc12aa8`) | selesai | 2026-11-12 09:05 — Commit & push perbaikan FK audit Tukar Shift |
 
 ---
 
@@ -333,7 +334,9 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   2026-10-27 10:36. Koordinat terbaru
   `-0.23805651650343132, 117.41442516465149` sudah di-commit dan migrasi 21
   **sudah dijalankan di Supabase** (klaim user 2026-10-27 10:39). Commit terbaru
-  **`27525d1`** (status Hadir setelah koreksi + migrasi 39, laporan libur berwarna
+  **`dc12aa8`** (FK audit `jadwal_shift`/`tukar_shift` → `auth.users`, migrasi 41 +
+  `verifikasi_41.sql`) di-push 2026-11-12; sebelumnya **`27525d1`** (status Hadir
+  setelah koreksi + migrasi 39, laporan libur berwarna
   & header biru, pencarian pegawai pengajuan izin, hak akses `jadwal_kerja` +
   migrasi 40, verifikasi 39–40) di-push 2026-11-12; sebelumnya
   **`d27493e`** (hari libur di laporan bulanan, jenis Izin, warna status laporan,

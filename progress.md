@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-12 09:02 WITA (perbaikan FK audit tukar shift — migrasi 41) |
+| Terakhir diperbarui | 2026-11-12 09:05 WITA (commit & push `dc12aa8` — migrasi 41) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,7 +37,12 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-12 09:02):** **perbaikan Tukar Shift kepala unit**
+**Pekerjaan terbaru (2026-11-12 09:05):** **commit & push `dc12aa8`** —
+perbaikan FK audit Tukar Shift (migrasi **41**) sudah di-push ke `origin/main`.
+Sisa: jalankan migrasi 41 + `verifikasi_41.sql`, lalu uji Tukar Shift dari akun
+kepala unit ASN yang sebelumnya gagal.
+
+**Pekerjaan sebelumnya (2026-11-12 09:02):** **perbaikan Tukar Shift kepala unit**
 — galat `insert or update on table "jadwal_shift" violates foreign key
 constraint "jadwal_shift_diperbarui_oleh_fkey"` muncul karena kolom audit
 `jadwal_shift.dibuat_oleh`/`diperbarui_oleh` dan `tukar_shift.dibuat_oleh`
@@ -826,6 +831,30 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-12 09:05 WITA — Commit & push perbaikan FK audit Tukar Shift
+
+**Perubahan**
+- Memverifikasi ulang `npm run lint` (bersih), `npm test` **85/85**, `npm run build`
+  lulus **8,72 dtk**; memastikan staged diff tanpa rahasia.
+- Commit **`dc12aa8`** "PRESISI AMI: FK audit jadwal dan tukar shift mengacu ke
+  auth.users (migrasi 41)" lalu push ke `origin/main` (`c48e64c..dc12aa8`).
+- Isi commit: migrasi **41** (FK `jadwal_shift.dibuat_oleh`,
+  `jadwal_shift.diperbarui_oleh`, `tukar_shift.dibuat_oleh` → `auth.users`),
+  `verifikasi_41.sql`, sinkron `schema.sql`, README, dan dokumen audit.
+
+**File**
+- 6 file: `supabase/migrations/41_audit_jadwal_shift_auth_users.sql`,
+  `supabase/verifikasi_41.sql`, `supabase/schema.sql`, `README.md`,
+  `AGENTS.md`, `progress.md`.
+
+**Verifikasi**
+- Lint bersih, `npm test` 85/85, `npm run build` lulus 8,72 dtk.
+- Push berhasil: `c48e64c..dc12aa8 main -> main`.
+
+**Catatan/risiko**
+- Sisa: jalankan migrasi 41 + `verifikasi_41.sql`, lalu uji Tukar Shift dari akun
+  kepala unit ASN yang sebelumnya gagal.
 
 ### 2026-11-12 09:02 WITA — Perbaikan FK audit Tukar Shift (migrasi 41)
 
