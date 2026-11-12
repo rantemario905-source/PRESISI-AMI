@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-12 11:08 WITA (migrasi 42 dijalankan & verifikasi lulus) |
+| Terakhir diperbarui | 2026-11-12 11:20 WITA (commit & push `6ac6f2c`) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,7 +37,12 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-12 11:08):** **migrasi 42 dijalankan & lulus
+**Pekerjaan terbaru (2026-11-12 11:20):** **commit & push `6ac6f2c`**. Seluruh
+pekerjaan pengaduan absen pulang setelah jendela tutup (migrasi 42), perapian UI
+pengaduan/periode/tabel admin, dan dokumen audit sudah di-push ke `origin/main`
+(`2fa718a..6ac6f2c`). Sisa: uji manual kandidat pulang sebelum/sesudah batas.
+
+**Pekerjaan sebelumnya (2026-11-12 11:08):** **migrasi 42 dijalankan & lulus
 verifikasi**. User melaporkan `42_pengaduan_pulang_setelah_jendela.sql` berhasil
 dijalankan di Supabase dan `verifikasi_42.sql` menghasilkan **semua `true`**.
 Sejak saat itu kandidat **absen pulang** hanya ditawarkan setelah jendela absen
@@ -881,6 +886,30 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-12 11:20 WITA — Commit & push `6ac6f2c`
+
+**Perubahan**
+- Commit `6ac6f2c` “PRESISI AMI: pengaduan absen pulang setelah jendela tutup”
+  berisi 23 berkas (1.155 insertions, 249 deletions): migrasi **42** +
+  `verifikasi_42.sql`, sinkron `schema.sql`, `tests/migrasiPengaduan.test.js`,
+  perapian UI pengaduan/periode/tabel admin, serta dokumen audit
+  (`README.md`, `AGENTS.md`, `progress.md`).
+- Push ke `origin/main` (`2fa718a..6ac6f2c`).
+
+**File**
+- 23 berkas pada commit `6ac6f2c`.
+
+**Verifikasi**
+- `npm run lint` bersih, `npm test` **91/91**, `npm run build` lulus **9,96 dtk**.
+- Pemeriksaan staged diff & berkas baru: tidak ada kredensial, token, atau
+  service key.
+- `git fetch` pasca-push: `origin/main` = **`6ac6f2c`**, working tree bersih.
+
+**Catatan/risiko**
+- Migrasi 42 sudah dijalankan user dan `verifikasi_42.sql` semua `true`.
+- Sisa uji manual: kandidat absen pulang kosong sebelum jam tutup, muncul
+  sesudahnya (reguler & shift malam).
 
 ### 2026-11-12 11:08 WITA — Migrasi 42 dijalankan & verifikasi lulus
 
