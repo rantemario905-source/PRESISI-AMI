@@ -4,7 +4,7 @@
  */
 import { NavLink } from 'react-router-dom'
 import { NAMA_APLIKASI, NAMA_RUMAH_SAKIT } from '../../config/constants.js'
-import LogoRSUD from '../LogoRSUD.jsx'
+import LogoAplikasi from '../LogoAplikasi.jsx'
 
 const MENU = [
   {
@@ -89,7 +89,7 @@ export default function SidebarKepala({ terbuka, onTutup, tampilkanAbsensi = tru
         aria-label="Menu Kepala Unit"
       >
         <div className="flex min-h-16 items-center gap-3 border-b border-slate-200 px-4 sm:px-5">
-          <LogoRSUD className="h-10 w-10 shrink-0 drop-shadow-sm" />
+          <LogoAplikasi className="h-10 w-10 shrink-0 drop-shadow-sm" />
           <div className="min-w-0">
             <p className="truncate text-sm font-extrabold tracking-tight text-slate-900">
               {NAMA_APLIKASI}

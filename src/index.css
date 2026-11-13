@@ -69,6 +69,22 @@
     @apply rounded-2xl border border-slate-200 bg-white p-4 shadow-kartu sm:p-5;
   }
 
+  /* Kartu login: garis tepi gradasi biru pada desktop */
+  .kartu-login {
+    @apply rounded-2xl border border-slate-200 bg-white shadow-kartu;
+  }
+
+  @media (min-width: 1024px) {
+    .kartu-login {
+      border: 3px solid transparent;
+      background-image:
+        linear-gradient(#ffffff, #ffffff),
+        linear-gradient(135deg, #0f66a3 0%, #1170b3 45%, #5fb8ec 100%);
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+    }
+  }
+
   /* Label input baku */
   .label-input {
     @apply mb-1.5 block text-[13px] font-semibold text-slate-700 sm:text-sm;

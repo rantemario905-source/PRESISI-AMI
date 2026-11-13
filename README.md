@@ -348,9 +348,9 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 │   ├── impor-akun.mjs          # Impor akun massal via Supabase Admin API
 │   └── verifikasi-impor.mjs    # Verifikasi hasil impor + uji login
 ├── public/
-│   ├── favicon.svg            # Ikon lama (tidak dirujuk)
-│   ├── favicon-32x32.png      # Ikon tab dari logo resmi
-│   └── apple-touch-icon.png   # Ikon iOS dari logo resmi
+│   ├── favicon.ico            # Ikon tab multi-ukuran (16/32/48)
+│   ├── favicon-32x32.png      # Ikon tab dari logo aplikasi
+│   └── apple-touch-icon.png   # Ikon iOS dari logo aplikasi
 └── src/
     ├── main.jsx                # Entry point React
     ├── App.jsx                 # Router & pemisahan hak akses
@@ -444,7 +444,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 | **Pengaduan presensi** | Hanya untuk presensi yang sudah masuk tetapi belum pulang, maksimal 7 hari, alasan min. 10 karakter, dan **foto bukti wajib**; satu pengaduan menunggu per presensi; persetujuan oleh kepala unit yang mengelola unit pegawai atau Super Admin (bukan pengaduan sendiri) |
 | **Audit trail** | Koreksi presensi wajib alasan (min. 5 karakter) dan mencatat admin, nilai lama/baru, serta waktu |
 | **Bilah progres** | Bilah tipis biru muda di atas layar saat navigasi menu, login, logout, dan muat ulang profil |
-| **Logo aplikasi** | Logo resmi RSUD AMI (`src/assets/logo-rsud-ami.png`) di halaman login, header pegawai, sidebar Super Admin/kepala ruangan, favicon tab, dan apple-touch-icon |
+| **Logo aplikasi** | Logo PRESISI AMI (`src/assets/logo-aplikasi.png`) di header pegawai serta sidebar Super Admin/kepala ruangan; versi lengkap (`logo-aplikasi.v2.png`) khusus halaman login (split screen: panel biru brand + plakat logo di desktop dengan kartu berbingkai gradasi biru, pita biru penuh + kartu menumpuk di HP); favicon tab dan apple-touch-icon memakai logo yang sama. Kop laporan tetap memakai `logo-rsud-ami.png` |
 | **Menu akun** | Klik avatar di kanan atas untuk membuka menu **Keluar** dengan animasi buka/tutup halus; tersedia di portal pegawai, Super Admin, dan kepala ruangan, termasuk tampilan HP |
 | **Grup sidebar** | Grup **Data & Struktur**, **Penjadwalan & Presensi**, **Layanan & Laporan**, dan **Keamanan** dapat dibuka/tutup dengan animasi gulir ke bawah; grup aktif terbuka otomatis |
 | **Privasi** | Promosi/penurunan role Super Admin hanya lewat SQL Admin IT; penugasan kepala unit diatur Super Admin dari menu **Kepala Unit**, satu kepala per unit, dan kepala ASN tidak dicatat sebagai pegawai |

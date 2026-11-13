@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-12 11:20 WITA (commit & push `6ac6f2c`) |
+| Terakhir diperbarui | 2026-11-13 11:17 WITA (login: panel biru lebih luas, logo +25%, teks mobile) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,7 +37,56 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-12 11:20):** **commit & push `6ac6f2c`**. Seluruh
+**Pekerjaan terbaru (2026-11-13 11:17):** **penyesuaian proporsi login**. Desktop:
+kolom biru diperlebar dari 50% menjadi **`1.3fr : 1`** (±57% layar), plakat logo
+diperbesar `w-64` → **`w-80`** (+25%), padding panel kanan `px-10` → `px-8` agar
+kartu tetap lega. Mobile: teks di pita biru menjadi **"Presensi Sistem Informasi
+RSUD AMI"**. Logika login tidak berubah; diuji 320/375/390/768/1024/1440 px tanpa
+luberan.
+
+**Pekerjaan sebelumnya (2026-11-13 11:08):** **penyempurnaan halaman login**. Mobile:
+pita biru dibuat `flex-1` (mengisi tinggi layar) dengan plakat logo + teks
+"Sistem Absensi Pegawai RSUD AMI", sehingga tidak ada lagi ruang kosong di bawah
+kartu; kartu tetap menumpuk `-mt-10` di batas pita. Desktop: teks di panel kiri
+**dihapus**, plakat logo diperbesar (`w-64`), dan kartu form diberi **bingkai
+gradasi biru** (3 px, `.kartu-login`). Logika login tidak berubah; diuji visual
+320/375/390/768/1024/1440 px tanpa luberan.
+
+**Pekerjaan sebelumnya (2026-11-13 10:35):** **redesign halaman login — split screen**.
+Desktop (≥1024 px) memakai dua kolom: panel kiri biru brand `#1170B3` berisi
+**plakat putih** dengan `logo-aplikasi.v2.png` (`w-56`) dan teks
+"Sistem Absensi Pegawai RSUD AMI", panel kanan putih berisi kartu form
+(`max-w-sm`, `xl` 26 rem). Mobile (<1024 px) memakai pita biru di atas dengan
+plakat logo (`w-44 sm:w-52`) dan kartu form menumpuk `-mt-10`. Teks footer
+menjadi "Lupa kata sandi? Hubungi Admin/IT" dan tetap di bawah kartu. Logika
+login tidak berubah. Diuji visual 320/375/390/768/1024/1440 px: tanpa luberan
+horizontal.
+
+**Pekerjaan sebelumnya (2026-11-13 10:10):** **redesign halaman login — satu kartu**.
+Logo, judul, dan form kini berada dalam **satu kartu putih** (`max-w-md`): logo
+v2 di tengah selebar 192 px (HP) / 224 px (desktop), garis pemisah tipis, lalu
+"Masuk ke Akun Anda" dan form. Latar gradasi biru muda dipasang **penuh layar**
+(menggantikan pita gradasi 256 px). Tanpa perubahan logika. Diuji visual di
+viewport 320/375/390/768/1440 px: tidak ada luberan horizontal, kartu 288–448 px.
+
+**Pekerjaan sebelumnya (2026-11-13 09:58):** **kepala halaman login dirapikan**.
+Deskripsi "Presensi Sistem Informasi Staf Integrasi" dan badge "RSUD Aji Muhammad
+Idris" dihapus; kepala halaman kini hanya berisi logo `logo-aplikasi.v2.png`
+dengan lebar **penuh mengikuti kartu login** (`w-full`, `max-w-md` = 448 px).
+`h1` "PRESISI AMI" tetap ada sebagai `sr-only`. Import `DESKRIPSI_APLIKASI` dan
+`NAMA_RUMAH_SAKIT` dibuang dari `Login.jsx`. Tanpa migrasi DB.
+
+**Pekerjaan sebelumnya (2026-11-13 09:49):** **logo aplikasi PRESISI AMI & favicon
+baru**. Logo resmi aplikasi diganti ke `src/assets/logo-aplikasi.png` (ikon jam
+biru + daun hijau) di header pegawai serta sidebar Super Admin dan Kepala Unit,
+sedangkan `src/assets/logo-aplikasi.v2.png` (versi lengkap dengan tulisan
+"PRESISI AMI") dipakai khusus **halaman login**. Favicon tab (`favicon.ico`
+multi-ukuran), `favicon-32x32.png`, dan `apple-touch-icon.png` dibuat dari logo
+yang sama; `theme-color` menjadi `#1170B3`. **Kop laporan tidak diubah** — tetap
+memakai `src/assets/logo-rsud-ami.png`. Komponen `LogoRSUD.jsx` di-rename menjadi
+`LogoAplikasi.jsx`. Tanpa migrasi DB. Sisa: uji visual di browser.
+
+**Pekerjaan sebelumnya (2026-11-12 11:20):** **commit & push `6ac6f2c`**. Seluruh
 pekerjaan pengaduan absen pulang setelah jendela tutup (migrasi 42), perapian UI
 pengaduan/periode/tabel admin, dan dokumen audit sudah di-push ke `origin/main`
 (`2fa718a..6ac6f2c`). Sisa: uji manual kandidat pulang sebelum/sesudah batas.
@@ -715,7 +764,7 @@ lanjutan 14,14 dtk).
 | Buka dokumen izin | **Ada di kode & di-commit** — tab dokumen memutus `window.opener` dan memakai `location.replace` agar tidak membuka halaman Supabase dengan konteks pembuka | `src/pages/IzinSaya.jsx`, `src/pages/admin/PengajuanIzin.jsx` |
 | Hapus grup kosong | **Ada di kode** — semua grup 0 pegawai; "Belum ditentukan" (akun sistem) disembunyikan bila kosong | migrasi 18, `GrupShift.jsx` |
 | Bilah progres | **Ada di kode** — bilah biru muda di atas layar saat navigasi, login, logout, dan muat ulang profil | `ProgressContext.jsx`, `BilahProgres.jsx`, `PengamatRute.jsx` |
-| Logo aplikasi | **Ada di kode** — logo resmi RSUD AMI dipakai di login, header pegawai, sidebar admin/kepala ruangan, favicon, dan apple-touch-icon | `src/assets/logo-rsud-ami.png`, `LogoRSUD.jsx`, `favicon-32x32.png`, `apple-touch-icon.png` |
+| Logo aplikasi | **Ada di kode** — logo PRESISI AMI (`logo-aplikasi.png`) di header pegawai serta sidebar admin/kepala unit; versi lengkap (`logo-aplikasi.v2.png`) khusus halaman login; favicon tab & apple-touch-icon dari logo yang sama. Kop laporan tetap `logo-rsud-ami.png` | `src/assets/logo-aplikasi.png`, `src/assets/logo-aplikasi.v2.png`, `LogoAplikasi.jsx`, `favicon.ico`, `favicon-32x32.png`, `apple-touch-icon.png` |
 | Dashboard admin | **Ada di kode** — “Dashboard”, “Total Pegawai” (Non ASN), “Hadir Hari Ini” dan “Sudah Absen Pulang” dengan tanggal aktual, “Perlu Verifikasi” | `DashboardUtama.jsx`, `SidebarAdmin.jsx`, `PortalAdminLayout.jsx` |
 | Menu akun | **Ada di kode** — avatar kanan atas membuka menu **Keluar** dengan animasi buka/tutup di portal pegawai, Super Admin, dan kepala ruangan; tampil di desktop dan HP | `MenuAkun.jsx`, `BarAtas.jsx`, `PortalAdminLayout.jsx`, `PortalKepalaLayout.jsx`, `tailwind.config.js` |
 | Animasi sidebar | **Ada di kode** — submenu grup Super Admin dibuka/tutup dengan animasi gulir; grup aktif terbuka otomatis; submenu tertutup tidak dapat difokuskan | `SidebarAdmin.jsx` |
@@ -886,6 +935,260 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-13 11:17 WITA — Login: panel biru lebih luas, logo +25%, teks mobile
+
+**Perubahan**
+- **Desktop:** grid diubah dari `lg:grid-cols-2` menjadi
+  **`lg:grid-cols-[1.3fr_1fr]`** sehingga kolom biru ±57% layar (1440 px: 814 px;
+  1024 px: 579 px). Padding panel form `lg:px-10` → `lg:px-8` agar kartu tetap
+  lega di 1024 px (381 px).
+- **Logo panel biru:** `w-64` (256 px) → **`w-80`** (320 px), ≈ **+25%**;
+  plakat putih tetap `px-8 py-7`.
+- **Mobile:** teks di pita biru diganti dari "Sistem Absensi Pegawai RSUD AMI"
+  menjadi **"Presensi Sistem Informasi RSUD AMI"**.
+- Tidak ada perubahan state, validasi, `Alert`, tombol lihat sandi, bilah
+  progres, atau alur `masuk()`.
+
+**File**
+- `src/pages/Login.jsx`, `progress.md`, `AGENTS.md`.
+
+**Verifikasi**
+- `npm run lint` bersih (exit 0); `npm test` **91/91** lulus; `npm run build`
+  lulus **9,40 dtk** (exit 0).
+- **Uji visual headless:**
+
+  | Viewport | `scrollWidth` | Kartu | Panel biru | Hasil |
+  |---|---|---|---|---|
+  | 320 px | 320 | 288 px | tidak tampil | aman |
+  | 375 px | 375 | 343 px | tidak tampil | aman |
+  | 390 px | 390 | 358 px | tidak tampil | aman |
+  | 768 px | 768 | 448 px | tidak tampil | aman |
+  | 1024 px | 1024 | 381 px | 579 px | aman |
+  | 1440 px | 1440 | 416 px | 814 px | aman |
+
+  Tidak ada luberan horizontal; teks baru tetap terbaca satu baris di 320 px.
+- Tidak ada migrasi DB.
+
+**Catatan/risiko**
+- Tulisan "--Presensi Sistem Informasi RSUD AMI--" pada instruksi user
+  ditafsirkan sebagai penekanan, bukan bagian teks; teks dipasang tanpa tanda
+  hubung.
+- Uji visual di perangkat asli belum dilakukan user.
+
+### 2026-11-13 11:08 WITA — Login: pita mobile penuh & kartu berbingkai gradasi
+
+**Perubahan**
+- **Mobile:** pita biru diganti menjadi `flex flex-1 flex-col items-center
+  justify-center` sehingga mengisi sisa tinggi layar; isi pita = plakat logo
+  (`w-44 sm:w-56`) + teks **"Sistem Absensi Pegawai RSUD AMI"**
+  (`text-white/85`). Kartu tetap menumpuk `-mt-10` di batas pita, sehingga
+  ruang kosong di bawah kartu hilang.
+- **Desktop:** teks "Sistem Absensi Pegawai RSUD AMI" di panel kiri **dihapus**;
+  plakat logo diperbesar (logo `w-56` → `w-64`, padding plakat `px-8 py-7`).
+- **Kartu form:** kelas baru `.kartu-login` (`src/index.css`) — pada
+  `min-width: 1024px` memakai teknik *gradient border*
+  (`border: 3px solid transparent` + dua lapis `background-image`,
+  `background-clip: padding-box, border-box`) dengan gradasi
+  `#0f66a3 → #1170b3 → #5fb8ec`; di bawah 1024 px tetap kartu putih bergaris
+  `slate-200` seperti sebelumnya.
+- Struktur pembungkus dirapikan: `w-full px-4 pb-8 lg:px-0 lg:pb-0` + inner
+  `mx-auto ... max-w-md lg:max-w-sm xl:max-w-[26rem]`.
+- Tidak ada perubahan state, validasi, `Alert`, tombol lihat sandi, bilah
+  progres, atau alur `masuk()`.
+
+**File**
+- `src/pages/Login.jsx`, `src/index.css`, `progress.md`, `AGENTS.md`,
+  `README.md`.
+
+**Verifikasi**
+- `npm run lint` bersih (exit 0); `npm test` **91/91** lulus; `npm run build`
+  lulus **7,07 dtk** (exit 0).
+- **Uji visual headless (Chrome 157 + puppeteer-core):**
+
+  | Viewport | `scrollWidth` | Kartu | Panel kiri | Kartu mulai (y) | Hasil |
+  |---|---|---|---|---|---|
+  | 320 px | 320 | 288 px | tidak tampil | 403 | aman |
+  | 375 px | 375 | 343 px | tidak tampil | 415 | aman |
+  | 390 px | 390 | 358 px | tidak tampil | 447 | aman |
+  | 768 px | 768 | 448 px | tidak tampil | 508 | aman |
+  | 1024 px | 1024 | 384 px | 512 px | 174 | aman |
+  | 1440 px | 1440 | 416 px | 720 px | 264 | aman |
+
+  Tidak ada luberan horizontal; footer "Lupa kata sandi? Hubungi Admin/IT"
+  berada di dasar area kartu sehingga tidak ada ruang kosong menganga.
+- Tidak ada migrasi DB.
+
+**Catatan/risiko**
+- Pita biru mobile kini mengisi sisa tinggi (di 375×812 ≈ 55% layar); bila
+  terasa terlalu dominan, cukup beri `sm:max-h-[…]` pada pita.
+- Gradient border memakai CSS kustom di `index.css` (bukan utilitas Tailwind)
+  agar tidak menambah elemen pembungkus di `Login.jsx`.
+- Uji visual di perangkat asli belum dilakukan user.
+
+### 2026-11-13 10:35 WITA — Redesign halaman login: split screen
+
+**Perubahan**
+- `src/pages/Login.jsx` diubah menjadi **split screen**:
+  - **Desktop (≥1024 px):** `lg:grid lg:grid-cols-2`. Panel kiri
+    `bg-[#1170B3]` dengan ornamen blur hijau `#88BD41/20` dan putih `10%`
+    (`aria-hidden`), berisi **plakat putih** (`rounded-2xl px-7 py-6`) dengan
+    `logo-aplikasi.v2.png` (`w-56`), lalu teks
+    **"Sistem Absensi Pegawai RSUD AMI"** (`text-white/85`).
+  - **Mobile (<1024 px):** pita biru `bg-[#1170B3] px-4 pb-16 pt-10` dengan
+    plakat logo (`w-44 sm:w-52`); kartu form menumpuk `-mt-10`.
+  - Kartu form: `max-w-md` (mobile) / `max-w-sm` (lg) / `26rem` (xl), latar putih,
+    `shadow-kartu` + border `slate-200`.
+  - Footer **"Lupa kata sandi? Hubungi Admin/IT"** tetap **di bawah kartu**
+    (sebelumnya: "Lupa kata sandi? Hubungi Admin IT untuk reset akun.").
+  - `h1` "PRESISI AMI" tetap `sr-only`; logo `alt=""`.
+- Tidak ada perubahan state, validasi, `Alert`, tombol lihat sandi, bilah
+  progres, atau alur `masuk()`.
+
+**File**
+- `src/pages/Login.jsx`, `progress.md`, `AGENTS.md`.
+
+**Verifikasi**
+- `npm run lint` bersih; `npm test` **91/91** lulus; `npm run build` lulus
+  **10,46 dtk**.
+- **Uji visual headless (Chrome 157 + puppeteer-core, viewport sesungguhnya):**
+
+  | Viewport | `scrollWidth` | Kartu | Panel kiri | Hasil |
+  |---|---|---|---|---|
+  | 320 px | 320 | 288 px | tidak tampil | aman |
+  | 375 px | 375 | 343 px | tidak tampil | aman |
+  | 390 px | 390 | 358 px | tidak tampil | aman |
+  | 768 px | 768 | 416 px | tidak tampil | aman |
+  | 1024 px | 1024 | 384 px | 512 px | aman |
+  | 1440 px | 1440 | 416 px | 720 px | aman |
+
+  Tidak ada luberan horizontal di semua ukuran; titik pecah 1024 px bersih
+  (panel biru muncul, form pindah ke kolom kanan, pita mobile hilang).
+- Tidak ada migrasi DB.
+
+**Catatan/risiko**
+- Logo v2 berlatar transparan dengan tulisan biru, sehingga di panel biru
+  ditempatkan di **plakat putih** agar tetap kontras (tanpa perlu versi putih).
+- Panel kanan pada layar sangat lebar menyisakan ruang kosong; ini konsekuensi
+  desain split screen dan bisa diisi ilustrasi bila diminta.
+- Uji visual di perangkat asli belum dilakukan user.
+
+### 2026-11-13 10:10 WITA — Redesign halaman login: satu kartu
+
+**Perubahan**
+- `src/pages/Login.jsx` disusun ulang menjadi **satu kartu putih** (`max-w-md`):
+  logo `logo-aplikasi.v2.png` di tengah (`w-48 sm:w-56`), garis pemisah tipis
+  `h-px bg-slate-200` (`my-4 sm:my-5`), lalu judul **Masuk ke Akun Anda** dan
+  form.
+- Latar halaman memakai gradasi biru muda **penuh layar**
+  (`bg-gradient-to-b from-sky-100 via-sky-50 to-slate-100`) pada kontainer
+  `min-h-[100dvh]`; pita gradasi absolut setinggi 256 px dihapus.
+- Padding kartu dirapikan: `px-5 pb-6 pt-5 sm:px-6 sm:pb-7 sm:pt-6`.
+- `h1` "PRESISI AMI" tetap `sr-only`; gambar logo `alt=""`.
+- Tidak ada perubahan state, validasi, `Alert`, tombol, atau alur login.
+
+**File**
+- `src/pages/Login.jsx`, `progress.md`, `AGENTS.md`.
+
+**Verifikasi**
+- `npm run lint` bersih; `npm test` **91/91** lulus; `npm run build` lulus
+  **10,95 dtk**.
+- **Uji visual headless (Chrome + puppeteer-core, viewport sesungguhnya):**
+
+  | Viewport | scrollWidth | Lebar kartu | Hasil |
+  |---|---|---|---|
+  | 320 px | 320 | 288 px (16–304) | tidak meluber |
+  | 375 px | 375 | 343 px (16–359) | tidak meluber |
+  | 390 px | 390 | 358 px (16–374) | tidak meluber |
+  | 768 px | 768 | 448 px (160–608) | tidak meluber |
+  | 1440 px | 1440 | 448 px (496–944) | tidak meluber |
+
+  Tangkapan layar 320/375/390/768/1440 diperiksa: logo, garis pemisah, judul,
+  dan form tersusun rapi tanpa terpotong.
+- Tidak ada migrasi DB.
+
+**Catatan/risiko**
+- Tangkapan pertama dengan `chrome --headless --window-size=375` sempat tampak
+  terpotong; itu artefak batas lebar jendela Chrome di Windows (layout dirender
+  ±500 px lalu dipotong). Pengukuran `scrollWidth` via puppeteer memastikan tidak
+  ada overflow nyata.
+- Uji visual di perangkat asli belum dilakukan user.
+
+### 2026-11-13 09:58 WITA — Kepala halaman login: logo selebar kartu, teks & badge dihapus
+
+**Perubahan**
+- `src/pages/Login.jsx`: menghapus paragraf deskripsi
+  (`DESKRIPSI_APLIKASI` — "Presensi Sistem Informasi Staf Integrasi") dan badge
+  biru rumah sakit (`NAMA_RUMAH_SAKIT` — "RSUD Aji Muhammad Idris") dari kepala
+  halaman login.
+- Logo `logo-aplikasi.v2.png` kini memakai `w-full` sehingga lebarnya mengikuti
+  kartu login (`max-w-md` = 448 px; tinggi otomatis ±165 px, rasio 2,71:1).
+- `h1` "PRESISI AMI" tetap ada sebagai `sr-only` agar struktur judul halaman
+  tidak hilang; gambar tetap `alt=""` agar tidak terbaca ganda.
+- Import `DESKRIPSI_APLIKASI` dan `NAMA_RUMAH_SAKIT` dibuang dari `Login.jsx`.
+
+**File**
+- `src/pages/Login.jsx`, `progress.md`, `AGENTS.md`.
+
+**Verifikasi**
+- `npm run lint` bersih; `npm test` **91/91** lulus; `npm run build` lulus
+  **8,44 dtk**.
+- `grep` memastikan `DESKRIPSI_APLIKASI`/`NAMA_RUMAH_SAKIT` tidak lagi dipakai di
+  `Login.jsx`.
+- Tidak ada migrasi DB.
+
+**Catatan/risiko**
+- Logo selebar 448 px membuat tinggi kepala halaman ±165 px; bila terasa terlalu
+  besar di HP, cukup batasi `max-w` pada gambar.
+- Uji visual di browser belum dilakukan user.
+
+### 2026-11-13 09:49 WITA — Logo aplikasi PRESISI AMI & favicon baru
+
+**Perubahan**
+- Logo aplikasi diganti dari `logo-rsud-ami.png` (lambang RSUD) ke **logo
+  PRESISI AMI** `src/assets/logo-aplikasi.png` (ikon jam biru + daun hijau,
+  591×591) untuk header pegawai, sidebar Super Admin, dan sidebar Kepala Unit.
+- **Halaman login** memakai versi lengkap `src/assets/logo-aplikasi.v2.png`
+  (1594×588, memuat tulisan "PRESISI AMI" dan "Absensi Online RSUD AMI").
+  Judul `h1` "PRESISI AMI" tidak lagi ditampilkan agar tidak dobel, tetapi tetap
+  ada sebagai `sr-only` untuk pembaca layar. Deskripsi dan badge rumah sakit
+  dipertahankan.
+- Komponen `src/components/LogoRSUD.jsx` di-rename menjadi
+  `src/components/LogoAplikasi.jsx` (alt: "Logo PRESISI AMI").
+- **Favicon**: `public/favicon.ico` (multi-ukuran 16/32/48, dari
+  `src/assets/favicon.ico`), `public/favicon-32x32.png` (32×32, latar
+  transparan), dan `public/apple-touch-icon.png` (180×180, latar putih, isi 84%)
+  dibuat dari `logo-aplikasi.png`. `public/favicon.svg` dihapus karena tidak
+  dirujuk.
+- `index.html`: menambah `<link rel="icon" href="%BASE_URL%favicon.ico"
+  sizes="any" />`, dan `theme-color` `#0284c7` → **`#1170B3`** (biru dominan logo).
+- **Kop laporan tidak berubah**: `KopLaporan.jsx` tetap memakai
+  `logo-rsud-ami.png`, sesuai keputusan user.
+
+**File**
+- Baru: `src/components/LogoAplikasi.jsx`, `public/favicon.ico`.
+- Diubah: `src/pages/Login.jsx`, `src/components/BarAtas.jsx`,
+  `src/components/layout/SidebarAdmin.jsx`,
+  `src/components/layout/SidebarKepala.jsx`, `index.html`,
+  `public/favicon-32x32.png`, `public/apple-touch-icon.png`, `README.md`,
+  `progress.md`, `AGENTS.md`.
+- Dihapus: `src/components/LogoRSUD.jsx`, `public/favicon.svg`.
+
+**Verifikasi**
+- `npm run lint` bersih; `npm test` **91/91** lulus; `npm run build` lulus
+  **8,60 dtk**.
+- `dist/` berisi `favicon.ico` (4.870 B), `favicon-32x32.png` (1.817 B),
+  `apple-touch-icon.png` (10.100 B); `dist/index.html` memuat ketiga tautan ikon
+  dan `theme-color #1170B3`.
+- Hasil build memuat `logo-aplikasi-*.png`, `logo-aplikasi.v2-*.png`, dan
+  `logo-rsud-ami-*.png`; `logo-rsud-ami` hanya diimpor `KopLaporan.jsx`.
+- Tidak ada migrasi DB.
+
+**Catatan/risiko**
+- Browser meng-cache favicon sangat agresif; uji dengan **hard refresh**
+  (Ctrl+Shift+R) atau mode incognito. Setelah deploy, GitHub Pages juga
+  menyimpan `Cache-Control: max-age=600`.
+- Uji visual (login, header, dua sidebar, ikon tab) belum dilakukan user.
 
 ### 2026-11-12 11:20 WITA — Commit & push `6ac6f2c`
 

@@ -9,7 +9,7 @@
 import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { NAMA_APLIKASI, NAMA_RUMAH_SAKIT } from '../../config/constants.js'
-import LogoRSUD from '../LogoRSUD.jsx'
+import LogoAplikasi from '../LogoAplikasi.jsx'
 
 const IKON = {
   dashboard: <path d="M3 12l9-9 9 9M5 10v10h5v-6h4v6h5V10" />,
@@ -204,7 +204,7 @@ export default function SidebarAdmin({ terbuka, onTutup }) {
         aria-label="Menu Super Admin"
       >
         <div className="flex min-h-16 items-center gap-3 border-b border-slate-200 px-4 sm:px-5">
-          <LogoRSUD className="h-10 w-10 shrink-0 drop-shadow-sm" />
+          <LogoAplikasi className="h-10 w-10 shrink-0 drop-shadow-sm" />
           <div className="min-w-0">
             <p className="truncate text-sm font-extrabold tracking-tight text-slate-900">
               {NAMA_APLIKASI}

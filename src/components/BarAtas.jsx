@@ -4,7 +4,7 @@
  */
 import { Link, NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
-import LogoRSUD from './LogoRSUD.jsx'
+import LogoAplikasi from './LogoAplikasi.jsx'
 import MenuAkun from './layout/MenuAkun.jsx'
 import NavigasiBawah from './NavigasiBawah.jsx'
 import { NAMA_APLIKASI } from '../config/constants.js'
@@ -34,7 +34,7 @@ export default function BarAtas({ onKeluar }) {
             to={apakahSuperadmin ? '/superadmin-portal' : '/'}
             className="flex min-w-0 items-center gap-2.5 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
           >
-            <LogoRSUD className="h-9 w-9 shrink-0 sm:h-10 sm:w-10" />
+            <LogoAplikasi className="h-9 w-9 shrink-0 sm:h-10 sm:w-10" />
             <div className="min-w-0">
               <p className="truncate text-[13px] font-extrabold tracking-tight text-slate-800 sm:text-sm">
                 {NAMA_APLIKASI}
