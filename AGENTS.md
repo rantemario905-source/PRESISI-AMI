@@ -320,7 +320,7 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-176 | 2026-11-13 (WITA) | "pada tmpilan mobil tulisan Sistem Absensi Pegawai RSUD AMI ganti menjadi ---Presensi SIstem InformaSI RSUD AMI--- , dan untuk deskop [Image 1] bagian warna biru itu digeser lagi ke kanan agar lebih luas warna biru, dan logo dibagian biru itu besarkan lagi 20/30%" | Teks pita biru mobile menjadi **"Presensi Sistem Informasi RSUD AMI"**; grid desktop `lg:grid-cols-2` → **`lg:grid-cols-[1.3fr_1fr]`** (panel biru ±57%: 579 px di 1024, 814 px di 1440); padding panel form `lg:px-10` → `lg:px-8`; logo panel biru `w-64` → **`w-80`** (+25%). Uji headless 320/375/390/768/1024/1440 px tanpa luberan. Lint bersih, `npm test` **91/91**, build lulus **9,40 dtk** | selesai (kode); belum di-commit | 2026-11-13 11:17 - Panel biru lebih luas, logo +25%, teks mobile |
 | I-177 | 2026-11-13 11:27 | "commit dan push" | Memverifikasi `npm run lint` (bersih), `npm test` **91/91**, `npm run build` (lulus **8,55 dtk**); memastikan staged diff tanpa kredensial; commit **`981113e`** (logo aplikasi baru + favicon + redesign login split screen, panel biru `1.3fr : 1`, logo `w-80`, `.kartu-login`, teks mobile "Presensi Sistem Informasi RSUD AMI"; `LogoRSUD.jsx` dihapus, `LogoAplikasi.jsx` ditambahkan; kop laporan tidak berubah) lalu push ke `origin/main` (`ef548cd..981113e`); `git fetch` mengonfirmasi `HEAD` = `origin/main` = `981113e` | selesai | 2026-11-13 11:27 - Commit & push logo aplikasi + redesign login |
 | I-178 | 2026-11-13 (WITA) | "radius dtambahkan menjadi 80 meter" | Menaikkan radius geofencing dari 50 m menjadi **80 meter** di klien (`MAX_RADIUS_METERS`) dan teks radius terkait; membuat migrasi **43** (`43_radius_80_meter.sql`) yang mendefinisikan ulang `submit_presensi` dengan `v_jarak > 80` + pesan "radius 80 meter", `verifikasi_43.sql`, dan sinkron `schema.sql`; menambah 2 uji radius; `npm run lint` bersih, `npm test` **93/93**, `npm run build` lulus | selesai (kode); migrasi 43 belum dijalankan | 2026-11-13 11:43 - Radius absensi 80 meter |
-| I-179 | 2026-11-13 (WITA) | "commit dan push" | Memverifikasi `npm run lint`, `npm test` **93/93**, `npm run build`; memastikan staged diff tanpa kredensial; commit pekerjaan radius 80 m (migrasi 43 + `verifikasi_43.sql`, `schema.sql`, konstanta klien, uji, dokumen audit) lalu push ke `origin/main` | selesai | 2026-11-13 11:43 - Radius absensi 80 meter |
+| I-179 | 2026-11-13 11:55 | "commit dan push" | Memverifikasi `npm run lint` (bersih), `npm test` **93/93**, `npm run build` (lulus **8,13 dtk**); memastikan staged diff tanpa kredensial; commit **`4c1f1b0`** (radius absensi 80 m: migrasi 43 + `verifikasi_43.sql`, sinkron `schema.sql`, `MAX_RADIUS_METERS`, uji, dokumen audit) lalu push ke `origin/main` (`981113e..4c1f1b0`) | selesai | 2026-11-13 11:43 - Radius absensi 80 meter |
 
 ---
 
@@ -349,7 +349,10 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   2026-10-27 10:36. Koordinat terbaru
   `-0.23805651650343132, 117.41442516465149` sudah di-commit dan migrasi 21
   **sudah dijalankan di Supabase** (klaim user 2026-10-27 10:39). Commit terbaru
-  **`981113e`** (logo aplikasi baru + favicon baru + redesign halaman login split
+  **`4c1f1b0`** (radius absensi **80 meter**: migrasi 43 +
+  `verifikasi_43.sql`, sinkron `schema.sql`, `MAX_RADIUS_METERS`) di-push
+  2026-11-13; sebelumnya **`981113e`** (logo aplikasi baru + favicon baru +
+  redesign halaman login split
   screen; `LogoRSUD.jsx` diganti `LogoAplikasi.jsx`; kop laporan tidak berubah)
   di-push 2026-11-13; sebelumnya **`ef548cd`** (sinkronisasi dokumen audit commit
   `6ac6f2c`); sebelumnya **`dc12aa8`** (FK audit `jadwal_shift`/`tukar_shift` → `auth.users`, migrasi 41 +

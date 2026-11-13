@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-13 11:43 WITA (radius absensi 80 meter: migrasi 43 + `verifikasi_43.sql`) |
+| Terakhir diperbarui | 2026-11-13 11:55 WITA (radius absensi 80 meter di-commit `4c1f1b0` & di-push) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -980,11 +980,13 @@ dan `verifikasi_18` untuk hapus grup kosong.
 - `npm run lint` bersih (exit 0).
 - `npm test` **93/93** lulus (2 uji radius baru: 67 m diterima, 81 m ditolak,
   plus uji kesesuaian angka radius klien vs migrasi 43 + `schema.sql`).
-- `npm run build` lulus (exit 0).
+- `npm run build` lulus **8,13 dtk** (exit 0).
 - Uji PGlite/WASM tidak dapat dijalankan (RAM bebas 2,2 GB →
   `WebAssembly.instantiate(): Out of memory`), diganti uji struktural: migrasi 43
   dinormalisasi (`80 → 50`) **identik** dengan definisi `submit_presensi`
   migrasi 38, dan definisi terakhir `schema.sql` **identik** dengan migrasi 43.
+- Di-commit **`4c1f1b0`** lalu di-push ke `origin/main` (`981113e..4c1f1b0`);
+  `git rev-parse` mengonfirmasi `HEAD` = `origin/main` = `4c1f1b0`.
 
 **Catatan/risiko**
 - Migrasi 43 belum dijalankan di Supabase; selama belum, server masih menolak
