@@ -19,7 +19,7 @@ export const RSUD_AMI = {
 }
 
 /** Batas maksimal radius absensi dalam meter */
-export const MAX_RADIUS_METERS = 50
+export const MAX_RADIUS_METERS = 80
 
 /**
  * Batas akurasi GPS yang masih dianggap wajar (meter).

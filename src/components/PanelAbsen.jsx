@@ -4,7 +4,7 @@
  * --------------------------------------------------------------------------
  * Alur saat tombol diklik:
  *   1. Minta izin lokasi browser (Geolocation API, enableHighAccuracy: true)
- *   2. Validasi mock location + radius 50 m (utils/geofencing.js)
+ *   2. Validasi mock location + radius 80 m (utils/geofencing.js)
  *   3. Kirim ke RPC server `submit_presensi` (validasi ulang di server)
  *   4. Notifikasi sukses / gagal + jarak aktual
  * ==========================================================================

@@ -3,7 +3,7 @@
  * Service: Presensi & Jadwal Shift
  * --------------------------------------------------------------------------
  * Penulisan presensi HANYA melalui RPC `submit_presensi` (validasi
- * server-side: device binding, anti-Fake GPS, radius 50 m).
+ * server-side: device binding, anti-Fake GPS, radius 80 m).
  * ==========================================================================
  */
 import { supabase } from '../utils/supabaseClient.js'

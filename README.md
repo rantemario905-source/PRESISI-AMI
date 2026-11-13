@@ -3,7 +3,7 @@
 **P**resensi **S**istem **I**nformasi **S**taf **I**ntegrasi — RSUD Aji Muhammad Idris (RSUD AMI)
 
 Aplikasi web absensi pegawai non-ASN berbasis **React (Vite) + Tailwind CSS + Supabase**,
-dengan geofencing radius 50 m, proteksi Fake GPS, penguncian perangkat (device binding),
+dengan geofencing radius 80 m, proteksi Fake GPS, penguncian perangkat (device binding),
 dan pemisahan hak akses antara **Pegawai** dan **Super Admin**.
 
 > Status: **Fase 1–10 selesai di kode** — fondasi, database + RLS, login, geofencing,
@@ -97,16 +97,17 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 | 30 | `supabase/migrations/30_hitung_ulang_menit_terlambat.sql` | Hitung ulang `menit_terlambat` data lama sejak go-live 1 November 2026 memakai aturan menit penuh; hanya baris ber-`jam_masuk`, idempoten, tidak mengubah data lain |
 | 31 | `supabase/migrations/31_auto_setujui_superadmin.sql` | Pengajuan Sakit/Dinas Luar/Cuti yang dicatat atau diubah Super Admin langsung berstatus `disetujui` dan presensi terkait ditandai; pengajuan kepala ruangan tetap `menunggu` |
 | 32 | `supabase/migrations/32_tukar_shift.sql` | Tukar shift teraudit: tabel `tukar_shift` + RPC `tukar_shift()` yang menukar dua baris `jadwal_shift` secara atomik dan mencatat riwayat (shift asal/pengganti, alasan, pelaku) |
-| 33 | `supabase/migrations/33_pengaduan_presensi.sql` | Pengaduan absen pulang: tabel `pengaduan_presensi` + foto bukti wajib (maks. 7 hari), persetujuan kepala unit; persetujuan mengisi `jam_pulang` dan status `Koreksi` |
+| 33 | `supabase/migrations/33_pengaduan_presensi.sql` | Pengaduan absen pulang: tabel `pengaduan_presensi` + foto bukti wajib (maks. 7 hari), persetujuan kepala unit; persetujuan mengisi `jam_pulang` dan status `Koreksi` *(setelah migrasi 39 menjadi Hadir)* |
 | 34 | `supabase/migrations/34_superadmin_putuskan_pengaduan.sql` | Super Admin dapat menyetujui/menolak pengaduan presensi (tanpa cek unit, tetap tidak dapat memutuskan pengaduan sendiri) |
 | 35 | `supabase/migrations/35_pengaduan_masuk.sql` | Pengaduan multi-jenis: absen masuk + pulang dalam satu alur. `presensi_id` boleh kosong, `jenis` + `jam_masuk_diajukan/disetujui`, RPC `kandidat_pengaduan_presensi()`, dan persetujuan absen masuk mengisi jam masuk serta menghitung keterlambatan |
-| 36 | `supabase/migrations/36_koreksi_jam_masuk.sql` | Koreksi jam masuk lewat pengaduan: jendela validasi disamakan dengan tombol absen (60 menit sebelum jam masuk), hanya boleh memajukan jam yang sudah tercatat, status hasil koreksi `Koreksi`, dan kandidat koreksi muncul untuk presensi yang terlambat |
+| 36 | `supabase/migrations/36_koreksi_jam_masuk.sql` | Koreksi jam masuk lewat pengaduan: jendela validasi disamakan dengan tombol absen (60 menit sebelum jam masuk), hanya boleh memajukan jam yang sudah tercatat, status hasil koreksi `Koreksi`, dan kandidat koreksi muncul untuk presensi yang terlambat; status akhir setelah migrasi 39 adalah **Hadir** |
 | 37 | `supabase/migrations/37_batasi_pengaduan_sebelum_golive.sql` | Pengaduan dibatasi sejak go-live **1 November 2026**: kandidat, pengajuan, dan keputusan menolak tanggal sebelum tanggal tersebut agar hari kerja lama yang presensinya sudah dihapus tidak muncul lagi |
 | 38 | `supabase/migrations/38_jenis_izin.sql` | Jenis **Izin** dihidupkan kembali: satu pegawai, dokumen wajib, persetujuan sama seperti Sakit/Cuti, ditolak dari absensi/Alfa/pengaduan, dan status `Izin` diterima `izin_cuti` serta `presensi` |
 | 39 | `supabase/migrations/39_status_hadir_setelah_koreksi.sql` | Presensi terkoreksi berakhir berstatus **Hadir** (trigger + backfill `Koreksi` → `Hadir`); jejak koreksi tetap di `dikoreksi_oleh`/`alasan_koreksi`/`koreksi_presensi` |
 | 40 | `supabase/migrations/40_jadwal_kerja_hak_akses.sql` | `jadwal_kerja` memakai `bisa_lihat_presensi()` sehingga kepala unit (multi-unit / kepala ASN via `kepala_unit`) dapat melihat jadwal pegawai unit yang dikelola — memperbaiki galat "Anda tidak berhak melihat jadwal pegawai ini." saat menyetujui pengaduan |
 | 41 | `supabase/migrations/41_audit_jadwal_shift_auth_users.sql` | FK audit `jadwal_shift.dibuat_oleh`, `jadwal_shift.diperbarui_oleh`, dan `tukar_shift.dibuat_oleh` diarahkan ke `auth.users` — memperbaiki Tukar Shift oleh kepala unit ASN yang tidak punya baris `public.pegawai` ("violates foreign key constraint `jadwal_shift_diperbarui_oleh_fkey`") |
 | 42 | `supabase/migrations/42_pengaduan_pulang_setelah_jendela.sql` | Pengaduan **absen pulang** baru ditawarkan setelah jendela absen pulang tertutup (jam selesai jadwal + 2 jam, shift malam H+1). Sebelumnya baris muncul begitu pegawai absen masuk. `ajukan_pengaduan_presensi()` juga menolak pengajuan sebelum batas tersebut; helper `hitung_batas_absen_pulang()` dipakai kedua RPC |
+| 43 | `supabase/migrations/43_radius_80_meter.sql` | Radius geofencing absensi diubah dari 50 meter menjadi **80 meter** pada `submit_presensi` (titik pusat tetap). Validasi perangkat, anti Fake GPS, akurasi 50 m, jadwal, jendela absen, dan pengecualian `bebas_radius` tidak berubah |
 
 > Bila database sudah pernah dijalankan sampai file 08, jalankan **file 09** untuk
 > mengaktifkan alur Dinas & Sakit / Cuti, **file 11** untuk pengaturan kepala
@@ -135,7 +136,8 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > **file 41** agar audit jadwal/tukar shift mengacu ke akun `auth.users`
 > (perbaikan Tukar Shift oleh kepala unit ASN), serta **file 42** agar pengaduan
 > **absen pulang** baru ditawarkan setelah jendela absen pulang tertutup
-> (jam selesai jadwal + 2 jam, shift malam H+1).
+> (jam selesai jadwal + 2 jam, shift malam H+1), serta **file 43** agar radius
+> absensi menjadi **80 meter**.
 > File 10 hanya berisi RPC perubahan role yang tidak dipakai UI, jadi boleh
 > dilewati. Jalankan migrasi secara bertahap - jangan mengulang file lama bila
 > tidak diperlukan.
@@ -157,8 +159,8 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > **`supabase/verifikasi_34.sql`**, **`supabase/verifikasi_35.sql`**,
 > **`supabase/verifikasi_36.sql`**, **`supabase/verifikasi_37.sql`**,
 > **`supabase/verifikasi_38.sql`**, **`supabase/verifikasi_39.sql`**,
-> **`supabase/verifikasi_40.sql`**, **`supabase/verifikasi_41.sql`**, dan
-> **`supabase/verifikasi_42.sql`** setelah
+> **`supabase/verifikasi_40.sql`**, **`supabase/verifikasi_41.sql`**,
+> **`supabase/verifikasi_42.sql`**, dan **`supabase/verifikasi_43.sql`** setelah
 > migrasi terkait. Seluruh nilai
 > pemeriksaan harus `true`; bila ada yang `false`, jangan lanjutkan pemakaian.
 > `verifikasi_13.sql` dan `verifikasi_14.sql` hanya berlaku sebelum migrasi 15;
@@ -225,6 +227,9 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > jendela absen pulang tertutup (2 jam setelah jam pulang; shift malam keesokan
 > hari) dan agar server menolak pengajuan sebelum batas itu. Jalankan
 > `verifikasi_42.sql` setelahnya.
+> Migrasi 43 melebarkan radius absensi menjadi **80 meter** (klien + server).
+> Setelah menjalankannya, jalankan `verifikasi_43.sql`; radius lama 50 m tidak
+> lagi berlaku untuk absensi baru.
 > Bila muncul `function public.is_superadmin() does not exist`, jalankan versi
 > terbaru migrasi 19 — file ini membuat ulang fungsi inti tersebut sekaligus
 > memeriksa keberadaan tabel `pegawai`/`presensi`.
@@ -232,7 +237,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 **B. Sekaligus**
 
 Salin seluruh isi `supabase/schema.sql`, tempel, lalu **Run**.
-Isinya identik dengan gabungan seluruh 42 file migrasi di atas (termasuk migrasi 15-42).
+Isinya identik dengan gabungan seluruh 43 file migrasi di atas (termasuk migrasi 15-43).
 
 **C. Membuat akun pegawai**
 
@@ -342,6 +347,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 │   ├── verifikasi_40.sql       # Pemeriksaan hak akses jadwal_kerja kepala unit
 │   ├── verifikasi_41.sql       # Pemeriksaan FK audit jadwal/tukar shift ke auth.users
 │   ├── verifikasi_42.sql       # Pemeriksaan pengaduan pulang setelah jendela tutup
+├── verifikasi_43.sql       # Pemeriksaan radius absensi 80 meter
 │   ├── hapus_data_testing.sql  # Hapus transaksi sebelum 1 November 2026
 │   └── jadwal_alfa.sql         # Opsional: jadwal pg_cron untuk Alfa
 ├── scripts/
@@ -356,7 +362,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
     ├── App.jsx                 # Router & pemisahan hak akses
     ├── index.css               # Tailwind + gaya dasar + gaya cetak (print)
     ├── config/
-    │   └── constants.js        # Koordinat RSUD AMI, radius 50 m, zona waktu
+    │   └── constants.js        # Koordinat RSUD AMI, radius 80 m, zona waktu
     ├── utils/
     │   ├── supabaseClient.js   # Klien Supabase dari .env
     │   ├── geofencing.js       # Haversine + anti Mock Location + radius
@@ -425,7 +431,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 
 | Lapisan | Implementasi |
 |---|---|
-| **Geofencing** | Haversine ke titik pusat RSUD AMI; tolak jika jarak > 50 m (klien + server) |
+| **Geofencing** | Haversine ke titik pusat RSUD AMI; tolak jika jarak > 80 m (klien + server) |
 | **Fake GPS** | Tolak bila `coords.isMocked === true` atau `accuracy === 0`; akurasi > 50 m ditolak |
 | **Device binding** | `device_token` UUID di `localStorage`; hanya perangkat `approved` Admin IT yang bisa absen; 1 pegawai = 1 perangkat aktif (`pending`/`approved`) dijaga unique index dan RLS |
 | **Server-side** | Penulisan presensi hanya lewat RPC `submit_presensi` (`SECURITY DEFINER`) yang memvalidasi ulang semuanya |
@@ -478,8 +484,9 @@ jam pulang seharusnya, alasan (min. 10 karakter), dan **foto bukti JPG/PNG**
 (maks. 1 MB, dikompres otomatis), dalam **7 hari** sejak tanggal presensi. Kepala
 unit meninjau di portal kepala (**Pengaduan Presensi**) dan dapat menyesuaikan jam
 pulang sebelum menyetujui; penolakan wajib catatan. Persetujuan mengisi
-`presensi.jam_pulang` dan mengubah status menjadi **Koreksi**. Super Admin hanya
-melihat riwayat di **Koreksi Presensi → Riwayat Pengaduan**.
+`presensi.jam_pulang` dan mengubah status menjadi **Hadir** (sebelumnya
+**Koreksi**; migrasi 39 menormalkannya, jejak koreksi tetap tersimpan). Super
+Admin juga dapat memutuskan di **Koreksi Presensi → Riwayat Pengaduan**.
 
 ## 7. Portal Super Admin (Fase 2–10)
 

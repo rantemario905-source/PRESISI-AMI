@@ -11,7 +11,7 @@ Aplikasi absensi pegawai non-ASN RSUD Aji Muhammad Idris.
 
 - **Frontend:** React 18 + Vite 7 + Tailwind CSS 3 + React Router 7.
 - **Backend:** Supabase (Postgres, Auth, Storage, RPC `SECURITY DEFINER`).
-- **Fitur inti:** geofencing 50 m, anti Fake GPS, device binding satu perangkat
+- **Fitur inti:** geofencing 80 m, anti Fake GPS, device binding satu perangkat
   aktif per pegawai, presensi shift/reguler dengan jendela waktu (masuk dibuka
   1 jam sebelum jam masuk, pulang dibuka tepat waktu dan ditutup 2 jam setelah
   jam pulang), jam kerja reguler khusus per unit, jadwal shift, hari libur di
@@ -20,7 +20,7 @@ Aplikasi absensi pegawai non-ASN RSUD Aji Muhammad Idris.
   rekapitulasi, laporan presensi bulanan per pegawai (PDF A4), impor jadwal
   Excel (.xlsx), tukar shift teraudit & cetak jadwal F4 landscape, hapus grup
   shift kosong, pengecualian radius untuk pegawai tertentu (tanpa mengubah
-  aturan 50 m bagi pegawai lain), serta kepala unit multi-unit dan kepala ASN
+  aturan 80 m bagi pegawai lain), serta kepala unit multi-unit dan kepala ASN
   tanpa baris pegawai.
 - **Peran:** `pegawai`, `superadmin`, dan penugasan `kepala_unit` (satu unit satu
   kepala, satu kepala boleh banyak unit). Kepala ASN memakai metadata
@@ -318,6 +318,9 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-174 | 2026-11-13 (WITA) | "[Image 1] saya masih tidak suka dengan hasilnya, apak perlu kita redesign bentuk menu login agar bisa menyesuaikan dengan logo baru kita, mengubah bentuk , tata letak. bagaimana menurutmu?" + jawaban: "Opsi 1 — Split screen (Recommended)", "Render pratinjau dulu (Recommended)" + "dibawahnya lupa kata sandi ganti menjadi Lupa kata sandi? Hubungi Admin/IT" + "Sistem Absensi Pegawai Non-ASN RSUD AMI diganti Sistem Absensi Pegawai RSUD AMI" | Redesign `Login.jsx` menjadi **split screen**: desktop grid 2 kolom (panel biru `#1170B3` + plakat putih berisi logo v2 + teks "Sistem Absensi Pegawai RSUD AMI"/form kanan), mobile pita biru + kartu menumpuk `-mt-10`. Footer menjadi **"Lupa kata sandi? Hubungi Admin/IT"**. Logika login tidak berubah. Uji headless 320/375/390/768/1024/1440 px: `scrollWidth` = viewport, titik pecah 1024 px bersih. Lint bersih, `npm test` **91/91**, build lulus **10,46 dtk** | selesai (kode); belum di-commit | 2026-11-13 10:35 - Redesign login split screen |
 | I-175 | 2026-11-13 (WITA) | "[Image 1] pada tampilan mobile masih banyak ruang kosong dibawah kartu login, [Image 2] pada deskop hapus 'Sistem Absensi Pegawai RSUD AMI' dan kartu berikan gradasi biru di pinggiran kartu login, dan logo di kiri itu lebih besarkan lagi ukurannya sedikit" | Pita biru mobile dibuat `flex-1` (mengisi tinggi layar) dengan plakat logo (`w-44 sm:w-56`) + teks "Sistem Absensi Pegawai RSUD AMI", sehingga tidak ada ruang kosong di bawah kartu; kartu tetap menumpuk `-mt-10`. Desktop: teks panel kiri dihapus, logo `w-56` → `w-64`, kartu diberi **gradient border** biru 3 px lewat kelas `.kartu-login` di `index.css` (`border: 3px solid transparent` + `background-clip: padding-box, border-box`, `#0f66a3 → #1170b3 → #5fb8ec`). Uji headless 320/375/390/768/1024/1440 px tanpa luberan. Lint bersih, `npm test` **91/91**, build lulus **7,07 dtk** | selesai (kode); belum di-commit | 2026-11-13 11:08 - Pita mobile penuh & kartu berbingkai gradasi |
 | I-176 | 2026-11-13 (WITA) | "pada tmpilan mobil tulisan Sistem Absensi Pegawai RSUD AMI ganti menjadi ---Presensi SIstem InformaSI RSUD AMI--- , dan untuk deskop [Image 1] bagian warna biru itu digeser lagi ke kanan agar lebih luas warna biru, dan logo dibagian biru itu besarkan lagi 20/30%" | Teks pita biru mobile menjadi **"Presensi Sistem Informasi RSUD AMI"**; grid desktop `lg:grid-cols-2` → **`lg:grid-cols-[1.3fr_1fr]`** (panel biru ±57%: 579 px di 1024, 814 px di 1440); padding panel form `lg:px-10` → `lg:px-8`; logo panel biru `w-64` → **`w-80`** (+25%). Uji headless 320/375/390/768/1024/1440 px tanpa luberan. Lint bersih, `npm test` **91/91**, build lulus **9,40 dtk** | selesai (kode); belum di-commit | 2026-11-13 11:17 - Panel biru lebih luas, logo +25%, teks mobile |
+| I-177 | 2026-11-13 11:27 | "commit dan push" | Memverifikasi `npm run lint` (bersih), `npm test` **91/91**, `npm run build` (lulus **8,55 dtk**); memastikan staged diff tanpa kredensial; commit **`981113e`** (logo aplikasi baru + favicon + redesign login split screen, panel biru `1.3fr : 1`, logo `w-80`, `.kartu-login`, teks mobile "Presensi Sistem Informasi RSUD AMI"; `LogoRSUD.jsx` dihapus, `LogoAplikasi.jsx` ditambahkan; kop laporan tidak berubah) lalu push ke `origin/main` (`ef548cd..981113e`); `git fetch` mengonfirmasi `HEAD` = `origin/main` = `981113e` | selesai | 2026-11-13 11:27 - Commit & push logo aplikasi + redesign login |
+| I-178 | 2026-11-13 (WITA) | "radius dtambahkan menjadi 80 meter" | Menaikkan radius geofencing dari 50 m menjadi **80 meter** di klien (`MAX_RADIUS_METERS`) dan teks radius terkait; membuat migrasi **43** (`43_radius_80_meter.sql`) yang mendefinisikan ulang `submit_presensi` dengan `v_jarak > 80` + pesan "radius 80 meter", `verifikasi_43.sql`, dan sinkron `schema.sql`; menambah 2 uji radius; `npm run lint` bersih, `npm test` **93/93**, `npm run build` lulus | selesai (kode); migrasi 43 belum dijalankan | 2026-11-13 11:43 - Radius absensi 80 meter |
+| I-179 | 2026-11-13 (WITA) | "commit dan push" | Memverifikasi `npm run lint`, `npm test` **93/93**, `npm run build`; memastikan staged diff tanpa kredensial; commit pekerjaan radius 80 m (migrasi 43 + `verifikasi_43.sql`, `schema.sql`, konstanta klien, uji, dokumen audit) lalu push ke `origin/main` | selesai | 2026-11-13 11:43 - Radius absensi 80 meter |
 
 ---
 
@@ -346,7 +349,10 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   2026-10-27 10:36. Koordinat terbaru
   `-0.23805651650343132, 117.41442516465149` sudah di-commit dan migrasi 21
   **sudah dijalankan di Supabase** (klaim user 2026-10-27 10:39). Commit terbaru
-  **`dc12aa8`** (FK audit `jadwal_shift`/`tukar_shift` → `auth.users`, migrasi 41 +
+  **`981113e`** (logo aplikasi baru + favicon baru + redesign halaman login split
+  screen; `LogoRSUD.jsx` diganti `LogoAplikasi.jsx`; kop laporan tidak berubah)
+  di-push 2026-11-13; sebelumnya **`ef548cd`** (sinkronisasi dokumen audit commit
+  `6ac6f2c`); sebelumnya **`dc12aa8`** (FK audit `jadwal_shift`/`tukar_shift` → `auth.users`, migrasi 41 +
   `verifikasi_41.sql`) di-push 2026-11-12; sebelumnya **`27525d1`** (status Hadir
   setelah koreksi + migrasi 39, laporan libur berwarna
   & header biru, pencarian pegawai pengajuan izin, hak akses `jadwal_kerja` +
@@ -426,13 +432,16 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   **Migrasi 27 sudah dijalankan** di Supabase (laporan user 2026-10-29);
   `verifikasi_27.sql` lulus (laporan user 2026-10-30). Tampilan jam Admisi di akun pegawai
   sudah diuji dan berubah (laporan user 2026-10-29).
-- **Radius absensi (2026-10-28, sudah di-commit & di-push):** radius geofencing
-  kini **50 meter**
-  di klien (`MAX_RADIUS_METERS`) dan server (migrasi **24** yang mendefinisikan
-  ulang `submit_presensi`, plus `schema.sql`). `verifikasi_24.sql` memeriksa
-  radius 50 m dipakai dan radius 100 m hilang. Migrasi 24 **sudah dijalankan**
-  di Supabase (laporan user 2026-10-28), sehingga server memakai radius 50 m;
-  `verifikasi_24.sql` lulus (laporan user 2026-10-30).
+- **Radius absensi (2026-11-13):** radius geofencing kini **80 meter** di klien
+  (`MAX_RADIUS_METERS` di `src/config/constants.js`) dan server. Migrasi **43**
+  (`43_radius_80_meter.sql`) mendefinisikan ulang `submit_presensi` — isinya sama
+  dengan migrasi 38 kecuali angka radius (`v_jarak > 80`, pesan "radius 80
+  meter"). `schema.sql` disinkronkan dan `verifikasi_43.sql` memeriksa radius
+  80 m dipakai, radius 50 m hilang, akurasi 50 m + `bebas_radius` tetap, serta
+  koordinat tetap. **Migrasi 43 belum dijalankan** di Supabase; selama belum,
+  server masih memakai radius 50 m dari migrasi 24/38. Sebelumnya migrasi **24**
+  menurunkan radius 100 m → 50 m (sudah dijalankan 2026-10-28, `verifikasi_24.sql`
+  lulus 2026-10-30); file dan verifikasi 24 kini historis.
 - **Deploy:** GitHub Pages lewat `.github/workflows/deploy.yml`; URL live
   `https://presisiami.my.id/` (custom domain, DNS di Rumahweb); base path `/`;
   `public/CNAME` berisi `presisiami.my.id`; `www` redirect ke domain utama;

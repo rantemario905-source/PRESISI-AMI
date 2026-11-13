@@ -402,7 +402,7 @@ export default function DataPegawai() {
                   Boleh absen dari luar area (bebas radius)
                 </span>
                 <span className="mt-0.5 block text-[11px] leading-relaxed text-slate-400">
-                  Pengecualian radius 50 meter untuk pegawai tertentu. Jam kerja, jendela
+                  Pengecualian radius 80 meter untuk pegawai tertentu. Jam kerja, jendela
                   absen, anti Fake GPS, dan verifikasi perangkat tetap berlaku.
                 </span>
               </span>

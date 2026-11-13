@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-13 11:17 WITA (login: panel biru lebih luas, logo +25%, teks mobile) |
+| Terakhir diperbarui | 2026-11-13 11:43 WITA (radius absensi 80 meter: migrasi 43 + `verifikasi_43.sql`) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,7 +37,22 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-13 11:17):** **penyesuaian proporsi login**. Desktop:
+**Pekerjaan terbaru (2026-11-13 11:43):** **radius absensi 80 meter**. Radius
+geofencing dinaikkan dari 50 m menjadi **80 meter** di klien
+(`MAX_RADIUS_METERS` di `src/config/constants.js`) dan server. Server memakai
+migrasi **43** (`supabase/migrations/43_radius_80_meter.sql`) yang mendefinisikan
+ulang `submit_presensi` — isi fungsi sama dengan migrasi 38 kecuali angka radius
+(`v_jarak > 80`, pesan "radius 80 meter") dan `di_luar_radius`. `schema.sql`
+disinkronkan. Validasi perangkat, anti Fake GPS, akurasi 50 m, jadwal/hari libur,
+jendela absen, serta pengecualian `bebas_radius` tidak berubah. Migrasi 43
+**belum dijalankan** di Supabase.
+
+**Pekerjaan sebelumnya (2026-11-13 11:27):** **commit & push** pekerjaan logo aplikasi
++ favicon baru + redesign halaman login (split screen, panel biru `1.3fr : 1`,
+logo `w-80`, kartu berbingkai gradasi, teks mobile "Presensi Sistem Informasi
+RSUD AMI") sebagai commit **`981113e`** ke `origin/main`.
+
+**Pekerjaan sebelumnya (2026-11-13 11:17):** **penyesuaian proporsi login**. Desktop:
 kolom biru diperlebar dari 50% menjadi **`1.3fr : 1`** (±57% layar), plakat logo
 diperbesar `w-64` → **`w-80`** (+25%), padding panel kanan `px-10` → `px-8` agar
 kartu tetap lega. Mobile: teks di pita biru menjadi **"Presensi Sistem Informasi
@@ -742,13 +757,14 @@ lanjutan 14,14 dtk).
 | Migrasi DB 40 | **Sudah dijalankan** (laporan user 2026-11-11 21:20) — `jadwal_kerja` memakai `bisa_lihat_presensi()` sehingga kepala unit (multi-unit/kepala ASN) dapat melihat jadwal pegawai unit yang dikelola; `verifikasi_40.sql` dijalankan | `supabase/migrations/40_jadwal_kerja_hak_akses.sql`, `verifikasi_40.sql` |
 | Migrasi DB 41 | **Sudah dijalankan** (laporan user 2026-11-12 09:06) — FK audit `jadwal_shift.dibuat_oleh`, `jadwal_shift.diperbarui_oleh`, dan `tukar_shift.dibuat_oleh` mengarah ke `auth.users`; `verifikasi_41.sql` dijalankan. Uji Tukar Shift kepala unit ASN belum ada kasus | `supabase/migrations/41_audit_jadwal_shift_auth_users.sql`, `verifikasi_41.sql` |
 | Migrasi DB 42 | **Sudah dijalankan** (laporan user 2026-11-12 11:08) — kandidat & pengajuan **absen pulang** baru aktif setelah jendela absen pulang tertutup (jam selesai jadwal + 2 jam, shift malam H+1); helper `hitung_batas_absen_pulang()`; `verifikasi_42.sql` **semua `true`**. Sisa: uji manual kandidat pulang sebelum/sesudah batas | `supabase/migrations/42_pengaduan_pulang_setelah_jendela.sql`, `verifikasi_42.sql` |
+| Migrasi DB 43 | **Belum dijalankan** — radius absensi 80 m pada `submit_presensi`; setelah dijalankan, jalankan `verifikasi_43.sql` | `supabase/migrations/43_radius_80_meter.sql`, `verifikasi_43.sql` |
 | Data uji | **Sudah dibersihkan ulang setelah uji** — transaksi dihapus, 92 pegawai/grup/master shift dipertahankan | `supabase/cleanup_data_uji.sql`, laporan user 2026-10-30 23:01 |
 | Data testing sebelum go-live | **Sudah dijalankan** (laporan user 2026-11-05) — transaksi sebelum 1 November 2026 terhapus; data go-live utuh | `supabase/hapus_data_testing.sql` |
 | Data operasional | **Lengkap** — jadwal dinas dan pemetaan pegawai sudah diisi | laporan user 2026-10-30 23:04 |
 | Go-live | **Sudah berjalan sejak Minggu, 1 November 2026** — pegawai absen masuk dan pulang; absen akhir pekan hanya untuk pegawai shift yang dijadwalkan | laporan user 2026-11-01 17:58 |
 | Koordinat RSUD AMI | **Ada di kode** — `-0.23805651650343132, 117.41442516465149` di klien dan schema | `src/config/constants.js`, `supabase/schema.sql`, migrasi 21 |
-| Radius absensi | **Aktif 50 meter** — klien (`MAX_RADIUS_METERS`) dan server (migrasi 24 sudah dijalankan) | `src/config/constants.js`, `supabase/migrations/24_radius_50_meter.sql` |
-| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 09-38 dijalankan user** (38 laporan 2026-11-11) | laporan user, `supabase/verifikasi_38.sql` |
+| Radius absensi | **80 meter di kode** — klien `MAX_RADIUS_METERS = 80`; server menunggu migrasi 43 dijalankan (sebelumnya 50 m dari migrasi 24) | `src/config/constants.js`, `supabase/migrations/43_radius_80_meter.sql`, `verifikasi_43.sql` |
+| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 09-42 dijalankan user** (42 dilaporkan 2026-11-12, semua `true`); `verifikasi_43.sql` menunggu migrasi 43 | laporan user, `supabase/verifikasi_43.sql` |
 | Build produksi | **Lulus** - base `/` **6,74 dtk** (audit I-142/I-143); sebelumnya 7,77 dtk (kolom Shift pegawai shift) | `npm run build` 2026-11-11 |
 | Dependensi frontend | **Diperbarui & di-commit** — Vite 7.3.7, `@vitejs/plugin-react` 5.2.0, React Router 7.18.5; Node CI 22; lockfile sinkron; `npm audit` 0 kerentanan | `package.json`, `package-lock.json`, `.github/workflows/deploy.yml` |
 | Header keamanan (CSP) | **Ada di kode & di-commit** — CSP produksi via `<meta>`: `script-src 'self'`, `connect-src` self + `*.supabase.co`, `frame-src 'none'`, `form-action 'self'`, `object-src 'none'`, `base-uri 'self'`; meta referrer; hanya saat build. Uji headless: script inline diblokir, halaman render | `vite.config.js`, `index.html` |
@@ -935,6 +951,91 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-13 11:43 WITA — Radius absensi 80 meter
+
+**Perubahan**
+- Radius geofencing dinaikkan **50 m → 80 m** di klien
+  (`MAX_RADIUS_METERS` di `src/config/constants.js`) beserta teks radius pada
+  `geofencing.js`, `attendanceService.js`, `PanelAbsen.jsx`, dan
+  `DataPegawai.jsx`.
+- Migrasi **43** (`supabase/migrations/43_radius_80_meter.sql`) mendefinisikan
+  ulang `submit_presensi`: `v_jarak > 80`, pesan *"Anda berada di luar radius 80
+  meter…"*, dan `di_luar_radius` dihitung dengan 80 m. Isi fungsi identik dengan
+  migrasi 38 kecuali angka radius.
+- `supabase/schema.sql` disinkronkan (definisi terakhir = migrasi 43, header dan
+  komentar `bebas_radius` menjadi 80 m).
+- `supabase/verifikasi_43.sql` memeriksa radius 80 m dipakai, radius 50 m hilang,
+  akurasi 50 m dan `bebas_radius` tetap, koordinat tetap, serta hak eksekusi
+  `authenticated`/`anon`.
+
+**File**
+- `src/config/constants.js`, `src/utils/geofencing.js`,
+  `src/services/attendanceService.js`, `src/components/PanelAbsen.jsx`,
+  `src/pages/admin/DataPegawai.jsx`, `tests/geofencing.test.js`,
+  `supabase/migrations/43_radius_80_meter.sql` (baru), `supabase/schema.sql`,
+  `supabase/verifikasi_43.sql` (baru), `README.md`, `AGENTS.md`, `progress.md`.
+
+**Verifikasi**
+- `npm run lint` bersih (exit 0).
+- `npm test` **93/93** lulus (2 uji radius baru: 67 m diterima, 81 m ditolak,
+  plus uji kesesuaian angka radius klien vs migrasi 43 + `schema.sql`).
+- `npm run build` lulus (exit 0).
+- Uji PGlite/WASM tidak dapat dijalankan (RAM bebas 2,2 GB →
+  `WebAssembly.instantiate(): Out of memory`), diganti uji struktural: migrasi 43
+  dinormalisasi (`80 → 50`) **identik** dengan definisi `submit_presensi`
+  migrasi 38, dan definisi terakhir `schema.sql` **identik** dengan migrasi 43.
+
+**Catatan/risiko**
+- Migrasi 43 belum dijalankan di Supabase; selama belum, server masih menolak
+  jarak > 50 m. Jalankan migrasi 43 lalu `verifikasi_43.sql`.
+- Tidak ada backfill: baris presensi lama tetap menyimpan `jarak_masuk`/
+  `jarak_pulang` dan `di_luar_radius` sesuai radius saat itu.
+- Pegawai **Bebas Radius** tidak terpengaruh.
+
+### 2026-11-13 11:27 WITA — Commit & push logo aplikasi + redesign login
+
+**Perubahan**
+- Meng-commit seluruh pekerjaan logo aplikasi baru, favicon baru, dan redesign
+  halaman login (I-171 s/d I-176) sebagai commit **`981113e`** dengan pesan
+  *“PRESISI AMI: logo aplikasi baru dan redesign halaman login”*, lalu push ke
+  `origin/main` (`ef548cd..981113e`).
+- Isi commit: `src/components/LogoAplikasi.jsx` (baru), penghapusan
+  `src/components/LogoRSUD.jsx`, pemakaian logo di `BarAtas.jsx`,
+  `SidebarAdmin.jsx`, `SidebarKepala.jsx`; aset `logo-aplikasi.png`,
+  `logo-aplikasi.v2.png`, `favicon.ico`; `public/favicon.ico`,
+  `favicon-32x32.png`, `apple-touch-icon.png`, `favicon.svg` dihapus;
+  `index.html` (favicon + `theme-color #1170B3`); `src/pages/Login.jsx`
+  (split screen, panel biru `1.3fr : 1`, logo `w-80`, teks mobile
+  “Presensi Sistem Informasi RSUD AMI”); `src/index.css` (`.kartu-login`);
+  dokumen audit `README.md`, `AGENTS.md`, `progress.md`.
+
+**File**
+- `AGENTS.md`, `README.md`, `index.html`, `progress.md`, `public/*` (favicon),
+  `src/assets/*` (logo & favicon), `src/components/LogoAplikasi.jsx`,
+  `src/components/BarAtas.jsx`, `src/components/layout/SidebarAdmin.jsx`,
+  `src/components/layout/SidebarKepala.jsx`, `src/index.css`,
+  `src/pages/Login.jsx`.
+
+**Verifikasi**
+- `npm run lint` bersih (exit 0).
+- `npm test` **91/91** lulus, 0 gagal.
+- `npm run build` lulus **8,55 dtk** (exit 0).
+- Diff staged diperiksa: hanya aset gambar, komponen, CSS, halaman login, dan
+  dokumen — tidak ada `.env`, kunci, atau kredensial.
+- `git fetch` + `git rev-parse`: `HEAD` = `origin/main` =
+  `981113e0f5ca7ea4eb3cfdba71912ecccd733408`; `git status` bersih
+  (`## main...origin/main`).
+
+**Catatan/risiko**
+- Deploy GitHub Pages otomatis berjalan dari push ini; favicon baru butuh
+  hard-refresh di browser yang sudah menyimpan ikon lama.
+- Pekerjaan ini tidak menyentuh logika login maupun kop laporan.
+- **Sinkronisasi dokumen (belum di-commit):** `README.md` masih menyebut status
+  pengaduan disetujui = **Koreksi** dan Super Admin hanya membaca riwayat;
+  dikoreksi menjadi status **Hadir** (migrasi 39) dan Super Admin dapat
+  memutuskan (migrasi 34). `AGENTS.md` Fakta Lingkungan mencatat commit
+  terbaru `981113e`.
 
 ### 2026-11-13 11:17 WITA — Login: panel biru lebih luas, logo +25%, teks mobile
 
@@ -4315,6 +4416,7 @@ dan `verifikasi_18` untuk hapus grup kosong.
 | B-49 | Uji manual tampilan pengaduan, periode satu baris, dan pemisah kolom tabel admin | `src/components/pengaduan/DaftarPengaduan.jsx`, `src/components/ui/TampilanPeriode.jsx` | **Belum:** menunggu uji lokal user (desktop & HP) |
 | B-50 | ~~Migrasi 42 (pengaduan absen pulang setelah jendela tutup) belum dijalankan di Supabase~~ | `supabase/migrations/42_pengaduan_pulang_setelah_jendela.sql` | **Selesai:** migrasi 42 dijalankan & `verifikasi_42.sql` semua `true` (laporan user 2026-11-12 11:08). Sintaks + logika sebelumnya diuji di Postgres asli (PGlite): 19/19 verifikasi `true`, 16/16 uji perilaku lulus |
 | B-51 | Uji manual kandidat absen pulang: belum muncul sebelum jam tutup, muncul setelahnya (reguler & shift malam) | `src/pages/Pengaduan.jsx` | **Belum:** server sudah aktif; menunggu uji manual user |
+| B-52 | Migrasi 43 (radius absensi 80 m) belum dijalankan di Supabase | `supabase/migrations/43_radius_80_meter.sql` | **Belum:** jalankan migrasi 43 lalu `verifikasi_43.sql`; selama belum, server tetap menolak jarak > 50 m |
 | B-37 | ~~Uji manual tukar shift, laporan, & cetak jadwal F4 landscape~~ | - | **Selesai:** tukar shift, laporan, dan cetak F4 sudah aman (laporan user 2026-11-05) |
 | B-4 | ~~`npm run build` belum dijalankan~~ | — | **Selesai:** lulus 2026-10-25 12:24 |
 | B-5 | ~~README menyebut Fase 1–7 saja~~ | — | **Selesai:** diperbarui ke Fase 1–8 + impor |

@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { RSUD_AMI } from '../src/config/constants.js'
+import { readFileSync } from 'node:fs'
+import { RSUD_AMI, MAX_RADIUS_METERS } from '../src/config/constants.js'
 import { haversineMeter, periksaLokasi } from '../src/utils/geofencing.js'
 
 function posisi(lat, lng, akurasi = 10) {
@@ -23,10 +24,17 @@ test('periksaLokasi menerima posisi di pusat rumah sakit', () => {
   assert.ok(hasil.jarak < 1)
 })
 
-test('periksaLokasi menolak lokasi di luar radius 50 meter', () => {
+test('periksaLokasi menolak lokasi di luar radius 80 meter', () => {
   const hasil = periksaLokasi(posisi(RSUD_AMI.lat + 0.001, RSUD_AMI.lng))
   assert.equal(hasil.valid, false)
   assert.equal(hasil.kode, 'LUAR_RADIUS')
+})
+
+test('periksaLokasi menerima lokasi ±67 meter (dalam radius 80 meter)', () => {
+  const hasil = periksaLokasi(posisi(RSUD_AMI.lat + 0.0006, RSUD_AMI.lng))
+  assert.equal(hasil.valid, true)
+  assert.equal(hasil.kode, 'VALID')
+  assert.ok(hasil.jarak > 60 && hasil.jarak < 75)
 })
 
 test('periksaLokasi mengizinkan luar radius untuk pegawai dengan pengecualian', () => {
@@ -67,4 +75,22 @@ test('periksaLokasi menolak Fake GPS dan akurasi tidak wajar', () => {
 test('periksaLokasi menolak data lokasi yang tidak lengkap', () => {
   assert.equal(periksaLokasi(null).kode, 'LOKASI_TIDAK_SAH')
   assert.equal(periksaLokasi({ coords: { latitude: 'x', longitude: 1 } }).kode, 'LOKASI_TIDAK_SAH')
+})
+
+test('radius klien dan server sama-sama 80 meter', () => {
+  assert.equal(MAX_RADIUS_METERS, 80)
+
+  const baca = (p) => readFileSync(new URL(`../supabase/${p}`, import.meta.url), 'utf8')
+  const sumber = [
+    baca('migrations/43_radius_80_meter.sql'),
+    baca('schema.sql'),
+  ]
+
+  for (const sql of sumber) {
+    const awal = sql.lastIndexOf('create or replace function public.submit_presensi(')
+    assert.ok(awal >= 0, 'submit_presensi tidak ditemukan')
+    const fungsi = sql.slice(awal)
+    assert.match(fungsi, /v_jarak > 80/)
+    assert.doesNotMatch(fungsi, /v_jarak > 50/)
+  }
 })
