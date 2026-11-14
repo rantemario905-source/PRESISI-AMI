@@ -972,6 +972,26 @@ dan `verifikasi_18` untuk hapus grup kosong.
 
 ## 3. Log Kronologis Pekerjaan
 
+### 2026-11-14 WITA — Lonceng opsi A (marimba/kalimba)
+
+**Perubahan**
+- Nada sukses diganti menjadi **G5–B5–D6** (marimba), jeda 140 ms, harmonik
+  3× tipis (0.10), decay 0,40/0,40/0,55 dtk, volume puncak 0.16.
+- Ditambah `BiquadFilter` lowpass 5 kHz + `DynamicsCompressor` agar nada lembut
+  saat bertumpuk dan tidak tajam di speaker HP.
+- Overlay, Dashboard, dan server tidak berubah.
+
+**File**
+- `src/utils/suaraAbsen.js`, `tests/suaraAbsen.test.js`, `AGENTS.md`, `progress.md`
+
+**Verifikasi**
+- `npm run lint` bersih, `npm test` **96/96**, `npm run build` lulus **11,16 dtk**.
+- Uji dengar menunggu user; bila masih kurang pas tersedia opsi B (bell
+  ding-dong) dan C (glass sparkle).
+
+**Catatan/risiko**
+- Belum di-commit; menunggu perintah user.
+
 ### 2026-11-14 WITA — Perbaikan overlay centang & lonceng sukses
 
 **Perubahan**
