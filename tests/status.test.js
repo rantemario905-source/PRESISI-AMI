@@ -26,11 +26,11 @@ test('hari yang dikoreksi tetap berlabel Hadir', () => {
       status_kehadiran: 'Hadir',
       alasan_koreksi: 'Pengaduan disetujui oleh Kepala Unit: lupa absen pulang',
     }),
-    'Hadir (Koreksi)',
+    'Hadir',
   )
   assert.equal(
     labelStatusKehadiran({ status_kehadiran: 'Hadir', dikoreksi_oleh: 'uuid-admin' }),
-    'Hadir (Koreksi)',
+    'Hadir',
   )
   assert.equal(labelStatusKehadiran({ status_kehadiran: 'Alfa' }), 'Alfa')
   assert.equal(labelStatusKehadiran(null), '—')

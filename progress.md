@@ -972,6 +972,50 @@ dan `verifikasi_18` untuk hapus grup kosong.
 
 ## 3. Log Kronologis Pekerjaan
 
+### 2026-11-14 WITA — Kembalikan abu & font Times pada sel libur
+
+**Perubahan**
+- Warna sel **Libur / Off** dikembalikan ke **`#cbd5e1`** dan font ke
+  **Times New Roman** (mewarisi aturan `.libur-gabung, .libur-nasional`),
+  karena versi `#808080` + Arial tidak disukai user.
+- Yang tetap dipertahankan dari I-187: teks **tidak miring** dan
+  `letter-spacing: 0.1em`.
+- Libur nasional merah tidak berubah.
+
+**File**
+- `src/index.css`, `AGENTS.md`, `progress.md`
+
+**Verifikasi**
+- `npm run lint` bersih, `npm test` **96/96**, `npm run build` lulus **9,53 dtk**.
+
+**Catatan/risiko**
+- Belum di-commit; menunggu perintah user.
+
+### 2026-11-14 WITA — Status Hadir, abu libur, footer biru
+
+**Perubahan**
+- `labelStatusKehadiran()` (`src/utils/status.js`) kini hanya mengembalikan
+  `status_kehadiran` (atau `—`). Baris terkoreksi tampil **Hadir** di laporan
+  bulanan, rekapitulasi, dan riwayat — tanpa akhiran *(Koreksi)*. Jejak koreksi
+  tetap tersimpan di database.
+- Sel **Libur / Off** di laporan bulanan: latar `#cbd5e1` → **`#808080`**, font
+  Times New Roman → **Arial**, tidak miring, huruf direnggangkan
+  (`letter-spacing: 0.1em`). Libur nasional (merah `#dc2626` + nama libur)
+  tidak berubah.
+- `.footer-laporan` `#374151` → **`#1a6fb5`** (biru header kolom), sehingga
+  footer Laporan Bulanan dan Cetak Jadwal F4 seragam.
+- Uji `tests/status.test.js` menyesuaikan label tanpa akhiran koreksi.
+
+**File**
+- `src/utils/status.js`, `src/index.css`, `tests/status.test.js`,
+  `AGENTS.md`, `progress.md`
+
+**Verifikasi**
+- `npm run lint` bersih, `npm test` **96/96**, `npm run build` lulus **10,20 dtk**.
+
+**Catatan/risiko**
+- Belum di-commit; menunggu perintah user.
+
 ### 2026-11-14 WITA — Hapus teks "area absensi 120 m"
 
 **Perubahan**

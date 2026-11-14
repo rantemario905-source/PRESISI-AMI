@@ -349,6 +349,8 @@
 
 .tabel-laporan .libur-gabung {
   background: #cbd5e1;
+  font-style: normal;
+  letter-spacing: 0.1em;
 }
 
 .tabel-laporan .libur-nasional {
@@ -392,7 +394,7 @@
   padding-top: 1.5mm;
   border-top: 0.5pt solid #9ca3af;
   font-size: 8pt;
-  color: #374151;
+  color: #1a6fb5;
   break-inside: avoid;
 }
 
