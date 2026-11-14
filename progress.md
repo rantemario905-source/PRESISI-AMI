@@ -1009,7 +1009,7 @@ dan `verifikasi_18` untuk hapus grup kosong.
 **Catatan/risiko**
 - Migrasi 44 **sudah dijalankan** di Supabase dan `verifikasi_44.sql` lulus
   (laporan user 2026-11-14), sehingga server memakai radius 120 m.
-- Pekerjaan di-commit dan di-push pada 2026-11-14 (setelah perintah user).
+- Pekerjaan di-commit **`091a56e`** dan di-push ke `origin/main` pada 2026-11-14.
 
 ### 2026-11-13 11:43 WITA — Radius absensi 80 meter
 
