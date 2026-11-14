@@ -124,36 +124,29 @@ export default function PengaduanKepala() {
         aksi={<TombolMuatUlang onClick={muat} memuat={memuat} />}
       />
 
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex w-full flex-col gap-2 sm:max-w-xl sm:flex-row">
-          <PencarianNama
-            nilai={cari}
-            onChange={setCari}
-            placeholder="Cari nama pegawai atau unit…"
-            className="w-full sm:max-w-xs"
-          />
-          {units.length > 1 && (
-            <div className="w-full sm:max-w-[220px]">
-              <label className="label-input" htmlFor="pengaduan-unit">
-                Unit
-              </label>
-              <select
-                id="pengaduan-unit"
-                className="input-dasar"
-                value={unit}
-                onChange={(event) => setUnit(event.target.value)}
-              >
-                <option value="semua">Semua unit saya</option>
-                {units.map((nama) => (
-                  <option key={nama} value={nama}>
-                    {nama}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-        </div>
-        <p className="text-[11px] font-semibold text-slate-500 sm:text-xs">
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+        <PencarianNama
+          nilai={cari}
+          onChange={setCari}
+          placeholder="Cari nama pegawai atau unit…"
+          className="w-full sm:max-w-xs"
+        />
+        {units.length > 1 && (
+          <select
+            aria-label="Unit"
+            className="input-dasar sm:max-w-[220px]"
+            value={unit}
+            onChange={(event) => setUnit(event.target.value)}
+          >
+            <option value="semua">Semua unit saya</option>
+            {units.map((nama) => (
+              <option key={nama} value={nama}>
+                {nama}
+              </option>
+            ))}
+          </select>
+        )}
+        <p className="text-[11px] font-semibold text-slate-500 sm:ml-auto sm:text-xs">
           {cari
             ? `${tersaring.length} dari ${daftar.length} pengaduan`
             : `${daftar.length} pengaduan`}

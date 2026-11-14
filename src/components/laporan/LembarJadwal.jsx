@@ -17,7 +17,7 @@ export default function LembarJadwal({
 
       <h1 className="judul-laporan">JADWAL SHIFT PEGAWAI</h1>
 
-      <dl className="meta-laporan">
+      <dl className="meta-laporan meta-jadwal">
         <div className="meta-item">
           <dt>Unit / Instalasi</dt>
           <dd>{unit || '—'}</dd>

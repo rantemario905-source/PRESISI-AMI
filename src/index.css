@@ -253,6 +253,13 @@
   font-size: 9.5pt;
 }
 
+/* Cetak jadwal: Unit/Instalasi dan Periode ditumpuk satu kolom. */
+.meta-jadwal {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.6mm;
+  margin-bottom: 1.5mm;
+}
+
 .meta-item {
   display: flex;
   gap: 1mm;

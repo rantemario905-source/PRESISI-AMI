@@ -37,7 +37,27 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-14):** **perbaikan overlay centang & lonceng sukses**.
+**Pekerjaan terbaru (2026-11-15, belum di-commit):** **posisi Periode pada cetak
+jadwal shift**. Kepala cetak jadwal F4 (`LembarJadwal.jsx`) memakai varian
+`.meta-jadwal` sehingga **Unit / Instalasi** dan **Periode** ditumpuk satu kolom
+(Periode tepat di bawah Unit / Instalasi), bukan berdampingan. Jarak baris
+dirapatkan (`gap 0.6mm`, `margin-bottom 1.5mm`) agar tabel tetap muat satu
+halaman F4. Laporan presensi bulanan tidak berubah.
+`npm run lint` bersih, `npm test` **96/96**, `npm run build` lulus **12,25 dtk**.
+
+**Pekerjaan sebelumnya (2026-11-14, belum di-commit):** **badge jumlah menunggu di
+sidebar + perapian filter Pengaduan Presensi**. Sidebar admin & kepala unit kini
+menampilkan angka pengajuan `menunggu` (pengaduan presensi, Dinas & Sakit, Cuti,
+Izin, perangkat pending) lewat `src/hooks/useJumlahMenunggu.js` — dihitung di server
+dengan `count` head-only, dibatasi RLS, diperbarui tiap 60 dtk dan setiap pindah
+menu. Badge biru `#1a6fb5`, hilang bila 0, dibatasi `99+`, ada teks `sr-only`.
+Pada `/kepala-ruangan/pengaduan`, baris filter dirapikan menjadi satu baris
+(`sm:items-center`), label "Unit" diganti `aria-label` sehingga input cari dan
+select sejajar, counter pengaduan `sm:ml-auto`, dan ikon `TombolMuatUlang` diganti
+satu panah melingkar agar tidak berantakan di ukuran kecil.
+`npm run lint` bersih, `npm test` **96/96**, `npm run build` lulus **8,30 dtk**.
+
+**Pekerjaan sebelumnya (2026-11-14):** **perbaikan overlay centang & lonceng sukses**.
 Overlay centang sebelumnya tidak pernah tampil karena `onBerhasil={muatData}` di
 `Dashboard.jsx` menyalakan `setMemuatData(true)` sehingga `PanelAbsen` di-unmount
 tepat setelah absen sukses (lonceng tetap bunyi karena Web Audio berjalan di luar
@@ -971,6 +991,76 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-15 WITA — Posisi Periode pada cetak jadwal shift
+
+**Perubahan**
+- `LembarJadwal.jsx` memakai kelas tambahan `meta-jadwal` pada blok identitas,
+  sehingga **Unit / Instalasi** dan **Periode** ditumpuk satu kolom (Periode
+  berada di bawah Unit / Instalasi) alih-alih berdampingan.
+- CSS `.meta-jadwal`: `grid-template-columns: minmax(0, 1fr)`, `gap: 0.6mm`,
+  `margin-bottom: 1.5mm` agar penambahan satu baris tidak mendorong tabel keluar
+  halaman F4.
+- Laporan presensi bulanan (`LembarLaporan`) tetap memakai grid 2 kolom.
+
+**File**
+- `src/components/laporan/LembarJadwal.jsx`, `src/index.css`
+
+**Verifikasi**
+- `npm run lint` bersih, `npm test` **96/96**, `npm run build` lulus **12,25 dtk**.
+- Cetak ulang PDF (jangan buka PDF lama) untuk memastikan tabel tetap satu halaman.
+
+**Catatan/risiko**
+- Belum di-commit; menunggu perintah user.
+
+### 2026-11-14 WITA — Perapian filter Pengaduan Presensi
+
+**Perubahan**
+- Baris filter `/kepala-ruangan/pengaduan` disederhanakan menjadi satu baris flex
+  (`sm:items-center`), input cari dan select unit kini sejajar karena label
+  "Unit" dihapus dan diganti `aria-label="Unit"` (label di atas select membuat
+  keduanya tidak sejajar).
+- Counter pengaduan dipindah ke kanan dengan `sm:ml-auto`.
+- Ikon `TombolMuatUlang` diganti satu panah melingkar (sebelumnya dua panah
+  berpotongan yang terlihat berantakan di ukuran kecil).
+
+**File**
+- `src/pages/admin/PengaduanKepala.jsx`, `src/components/ui/TombolMuatUlang.jsx`
+
+**Verifikasi**
+- `npm run lint` bersih, `npm test` **96/96**, `npm run build` lulus **8,30 dtk**.
+- Ikon baru dipakai bersama menu lain yang memakai `TombolMuatUlang`.
+
+**Catatan/risiko**
+- Belum di-commit; menunggu perintah user.
+
+### 2026-11-14 WITA — Badge jumlah menunggu di sidebar
+
+**Perubahan**
+- Baru `src/hooks/useJumlahMenunggu.js`: menghitung pengajuan `menunggu` lewat
+  `count: 'exact', head: true` (hanya angka, bukan baris) untuk **pengaduan
+  presensi** (kecuali milik sendiri), **Dinas & Sakit**, **Cuti**, **Izin**, dan
+  **perangkat pending**. RLS membatasi per unit; galat jaringan diabaikan dan
+  angka terakhir dipertahankan.
+- Badge diperbarui saat sidebar dimuat, tiap **60 detik**, dan setiap pindah
+  menu (deps `pathname`).
+- `SidebarAdmin.jsx`: peta `MENU_TUNGGU` (koreksi → pengaduan, dinas-sakit, cuti,
+  izin, perangkat). `SidebarKepala.jsx`: kunci `tugas` per item menu +
+  **Pengaduan Presensi**.
+- Tampilan: angka biru `#1a6fb5`, teks putih, `ml-auto`, disembunyikan bila 0,
+  dibatasi `99+`, dengan teks `sr-only` "N menunggu".
+- Tanpa migrasi DB dan tanpa perubahan halaman.
+
+**File**
+- `src/hooks/useJumlahMenunggu.js` (baru), `src/components/layout/SidebarAdmin.jsx`,
+  `src/components/layout/SidebarKepala.jsx`, `AGENTS.md`, `progress.md`
+
+**Verifikasi**
+- `npm run lint` bersih, `npm test` **96/96**, `npm run build` lulus **9,60 dtk**.
+- Uji manual angka badge menunggu user.
+
+**Catatan/risiko**
+- Belum di-commit; menunggu perintah user.
 
 ### 2026-11-14 WITA — Kembalikan abu & font Times pada sel libur
 

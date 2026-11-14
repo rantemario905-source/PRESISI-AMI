@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { NAMA_APLIKASI, NAMA_RUMAH_SAKIT } from '../../config/constants.js'
 import LogoAplikasi from '../LogoAplikasi.jsx'
+import { useJumlahMenunggu } from '../../hooks/useJumlahMenunggu.js'
 
 const IKON = {
   dashboard: <path d="M3 12l9-9 9 9M5 10v10h5v-6h4v6h5V10" />,
@@ -160,6 +161,15 @@ function Ikon({ nama }) {
   )
 }
 
+/** Menu yang menampilkan jumlah pengajuan menunggu (kunci dari hook). */
+const MENU_TUNGGU = {
+  '/superadmin-portal/koreksi': 'pengaduan',
+  '/superadmin-portal/dinas-sakit': 'dinasSakit',
+  '/superadmin-portal/cuti': 'cuti',
+  '/superadmin-portal/izin': 'izin',
+  '/superadmin-portal/perangkat': 'perangkat',
+}
+
 function grupAktif(pathname) {
   return GRUP_MENU.find((grup) =>
     grup.items.some(
@@ -170,6 +180,7 @@ function grupAktif(pathname) {
 
 export default function SidebarAdmin({ terbuka, onTutup }) {
   const { pathname } = useLocation()
+  const jumlahMenunggu = useJumlahMenunggu()
   const [grupTerbuka, setGrupTerbuka] = useState(() => {
     const aktif = grupAktif(pathname)
     return aktif ? { [aktif]: true } : {}
@@ -282,24 +293,33 @@ export default function SidebarAdmin({ terbuka, onTutup }) {
                       dibuka ? 'translate-y-0 opacity-100' : '-translate-y-1 opacity-0'
                     }`}
                   >
-                    {grup.items.map((item) => (
-                      <NavLink
-                        key={item.ke}
-                        to={item.ke}
-                        onClick={onTutup}
-                        tabIndex={dibuka ? undefined : -1}
-                        className={({ isActive }) =>
-                          `flex min-h-[38px] items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:text-sm ${
-                            isActive
-                              ? 'bg-sky-50 text-sky-700 ring-1 ring-inset ring-sky-100'
-                              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                          }`
-                        }
-                      >
-                        <Ikon nama={item.ikon} />
-                        <span className="truncate">{item.label}</span>
-                      </NavLink>
-                    ))}
+                    {grup.items.map((item) => {
+                      const jumlah = jumlahMenunggu[MENU_TUNGGU[item.ke]] ?? 0
+                      return (
+                        <NavLink
+                          key={item.ke}
+                          to={item.ke}
+                          onClick={onTutup}
+                          tabIndex={dibuka ? undefined : -1}
+                          className={({ isActive }) =>
+                            `flex min-h-[38px] items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:text-sm ${
+                              isActive
+                                ? 'bg-sky-50 text-sky-700 ring-1 ring-inset ring-sky-100'
+                                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                            }`
+                          }
+                        >
+                          <Ikon nama={item.ikon} />
+                          <span className="truncate">{item.label}</span>
+                          {jumlah > 0 && (
+                            <span className="ml-auto shrink-0 rounded-full bg-[#1a6fb5] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white tabular-nums">
+                              {jumlah > 99 ? '99+' : jumlah}
+                              <span className="sr-only"> menunggu</span>
+                            </span>
+                          )}
+                        </NavLink>
+                      )
+                    })}
                   </div>
                 </div>
               </div>

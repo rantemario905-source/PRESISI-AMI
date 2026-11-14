@@ -40,10 +40,8 @@ export default function TombolMuatUlang({
           strokeLinejoin="round"
           aria-hidden="true"
         >
-          <path d="M20 11a8.1 8.1 0 00-14.9-4.7L3 9" />
-          <path d="M3 4v5h5" />
-          <path d="M4 13a8.1 8.1 0 0014.9 4.7L21 15" />
-          <path d="M21 20v-5h-5" />
+          <path d="M21 12a9 9 0 11-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+          <path d="M21 3v5h-5" />
         </svg>
       )}
       <span>{memuat ? 'Memuat…' : label}</span>

@@ -5,6 +5,7 @@
 import { NavLink } from 'react-router-dom'
 import { NAMA_APLIKASI, NAMA_RUMAH_SAKIT } from '../../config/constants.js'
 import LogoAplikasi from '../LogoAplikasi.jsx'
+import { useJumlahMenunggu } from '../../hooks/useJumlahMenunggu.js'
 
 const MENU = [
   {
@@ -20,6 +21,7 @@ const MENU = [
   {
     label: 'Dinas & Sakit',
     ke: '/kepala-ruangan/dinas-sakit',
+    tugas: 'dinasSakit',
     ikon: (
       <>
         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
@@ -30,6 +32,7 @@ const MENU = [
   {
     label: 'Cuti',
     ke: '/kepala-ruangan/cuti',
+    tugas: 'cuti',
     ikon: (
       <>
         <rect x="3" y="4" width="18" height="17" rx="3" />
@@ -40,6 +43,7 @@ const MENU = [
   {
     label: 'Izin',
     ke: '/kepala-ruangan/izin',
+    tugas: 'izin',
     ikon: (
       <>
         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
@@ -50,6 +54,7 @@ const MENU = [
   {
     label: 'Pengaduan Presensi',
     ke: '/kepala-ruangan/pengaduan',
+    tugas: 'pengaduan',
     ikon: (
       <>
         <path d="M21 15a4 4 0 01-4 4H7l-4 3V5a2 2 0 012-2h12a4 4 0 014 4z" />
@@ -70,6 +75,7 @@ const MENU = [
 ]
 
 export default function SidebarKepala({ terbuka, onTutup, tampilkanAbsensi = true }) {
+  const jumlahMenunggu = useJumlahMenunggu()
   return (
     <>
       {terbuka && (
@@ -110,34 +116,43 @@ export default function SidebarKepala({ terbuka, onTutup, tampilkanAbsensi = tru
           <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
             Administrasi Unit
           </p>
-          {MENU.map((item) => (
-            <NavLink
-              key={item.ke}
-              to={item.ke}
-              onClick={onTutup}
-              className={({ isActive }) =>
-                `flex min-h-[40px] items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:text-sm ${
-                  isActive
-                    ? 'bg-sky-50 text-sky-700'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`
-              }
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-[18px] w-[18px] shrink-0"
-                aria-hidden="true"
+          {MENU.map((item) => {
+            const jumlah = jumlahMenunggu[item.tugas] ?? 0
+            return (
+              <NavLink
+                key={item.ke}
+                to={item.ke}
+                onClick={onTutup}
+                className={({ isActive }) =>
+                  `flex min-h-[40px] items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:text-sm ${
+                    isActive
+                      ? 'bg-sky-50 text-sky-700'
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  }`
+                }
               >
-                {item.ikon}
-              </svg>
-              <span className="truncate">{item.label}</span>
-            </NavLink>
-          ))}
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-[18px] w-[18px] shrink-0"
+                  aria-hidden="true"
+                >
+                  {item.ikon}
+                </svg>
+                <span className="truncate">{item.label}</span>
+                {jumlah > 0 && (
+                  <span className="ml-auto shrink-0 rounded-full bg-[#1a6fb5] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white tabular-nums">
+                    {jumlah > 99 ? '99+' : jumlah}
+                    <span className="sr-only"> menunggu</span>
+                  </span>
+                )}
+              </NavLink>
+            )
+          })}
 
           {tampilkanAbsensi && (
             <div className="pt-2">
