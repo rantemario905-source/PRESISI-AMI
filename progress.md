@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-14 WITA (radius absensi 120 meter + konfirmasi absen berhasil di-commit & di-push) |
+| Terakhir diperbarui | 2026-11-15 WITA (badge jumlah menunggu, filter pengaduan, posisi Periode cetak jadwal — commit `4ac8edf`) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,7 +37,7 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-15, belum di-commit):** **posisi Periode pada cetak
+**Pekerjaan terbaru (2026-11-15, di-commit `4ac8edf`):** **posisi Periode pada cetak
 jadwal shift**. Kepala cetak jadwal F4 (`LembarJadwal.jsx`) memakai varian
 `.meta-jadwal` sehingga **Unit / Instalasi** dan **Periode** ditumpuk satu kolom
 (Periode tepat di bawah Unit / Instalasi), bukan berdampingan. Jarak baris
@@ -45,7 +45,7 @@ dirapatkan (`gap 0.6mm`, `margin-bottom 1.5mm`) agar tabel tetap muat satu
 halaman F4. Laporan presensi bulanan tidak berubah.
 `npm run lint` bersih, `npm test` **96/96**, `npm run build` lulus **12,25 dtk**.
 
-**Pekerjaan sebelumnya (2026-11-14, belum di-commit):** **badge jumlah menunggu di
+**Pekerjaan sebelumnya (2026-11-14, di-commit `4ac8edf`):** **badge jumlah menunggu di
 sidebar + perapian filter Pengaduan Presensi**. Sidebar admin & kepala unit kini
 menampilkan angka pengajuan `menunggu` (pengaduan presensi, Dinas & Sakit, Cuti,
 Izin, perangkat pending) lewat `src/hooks/useJumlahMenunggu.js` — dihitung di server
@@ -1011,7 +1011,7 @@ dan `verifikasi_18` untuk hapus grup kosong.
 - Cetak ulang PDF (jangan buka PDF lama) untuk memastikan tabel tetap satu halaman.
 
 **Catatan/risiko**
-- Belum di-commit; menunggu perintah user.
+- Di-commit **`4ac8edf`** & di-push 2026-11-15.
 
 ### 2026-11-14 WITA — Perapian filter Pengaduan Presensi
 
@@ -1032,7 +1032,7 @@ dan `verifikasi_18` untuk hapus grup kosong.
 - Ikon baru dipakai bersama menu lain yang memakai `TombolMuatUlang`.
 
 **Catatan/risiko**
-- Belum di-commit; menunggu perintah user.
+- Di-commit **`4ac8edf`** & di-push 2026-11-15.
 
 ### 2026-11-14 WITA — Badge jumlah menunggu di sidebar
 
@@ -1060,7 +1060,7 @@ dan `verifikasi_18` untuk hapus grup kosong.
 - Uji manual angka badge menunggu user.
 
 **Catatan/risiko**
-- Belum di-commit; menunggu perintah user.
+- Di-commit **`4ac8edf`** & di-push 2026-11-15.
 
 ### 2026-11-14 WITA — Kembalikan abu & font Times pada sel libur
 
