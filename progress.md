@@ -10,7 +10,7 @@
 | Proyek | PRESISI AMI — Presensi Sistem Informasi Staf Integrasi RSUD Aji Muhammad Idris |
 | Stack | React 18 (Vite) + Tailwind CSS 3 + Supabase (Postgres, Auth, Storage, RPC) |
 | Repo | `D:\TRAE\PRESISI AMI` (branch `main`) |
-| Terakhir diperbarui | 2026-11-13 11:55 WITA (radius absensi 80 meter di-commit `4c1f1b0` & di-push) |
+| Terakhir diperbarui | 2026-11-14 WITA (radius absensi 120 meter + konfirmasi absen berhasil di-commit & di-push) |
 | Dokumen terkait | [`README.md`](README.md), [`AGENTS.md`](AGENTS.md) |
 
 ---
@@ -37,15 +37,24 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-13 11:43):** **radius absensi 80 meter**. Radius
-geofencing dinaikkan dari 50 m menjadi **80 meter** di klien
-(`MAX_RADIUS_METERS` di `src/config/constants.js`) dan server. Server memakai
-migrasi **43** (`supabase/migrations/43_radius_80_meter.sql`) yang mendefinisikan
-ulang `submit_presensi` — isi fungsi sama dengan migrasi 38 kecuali angka radius
-(`v_jarak > 80`, pesan "radius 80 meter") dan `di_luar_radius`. `schema.sql`
-disinkronkan. Validasi perangkat, anti Fake GPS, akurasi 50 m, jadwal/hari libur,
-jendela absen, serta pengecualian `bebas_radius` tidak berubah. Migrasi 43
-**belum dijalankan** di Supabase.
+**Pekerjaan terbaru (2026-11-14):** **radius absensi 120 meter + konfirmasi absen
+berhasil**. Radius dinaikkan dari 80 m menjadi **120 meter** karena area kantor
+belakang berjarak ±94 m dari titik pusat. Klien memakai
+`MAX_RADIUS_METERS = 120`; server memakai migrasi **44**
+(`supabase/migrations/44_radius_120_meter.sql`) yang mendefinisikan ulang
+`submit_presensi` — isi fungsi identik migrasi 43 kecuali angka radius
+(`v_jarak > 120`, pesan "radius 120 meter"). `schema.sql` disinkronkan dan
+`verifikasi_44.sql` ditambahkan. Absen sukses kini menampilkan overlay singkat
+(`AbsenBerhasil.jsx`: tirai 25 %, centang hijau, satu baris teks, tutup otomatis
+±1,4 dtk, bisa ditutup ketuk/`Esc`, hormati `prefers-reduced-motion`) dan nada
+lonceng Web Audio (`src/utils/suaraAbsen.js`). Absen gagal tetap Alert merah
+menetap dengan auto-scroll. Migrasi **44 sudah dijalankan** dan
+`verifikasi_44.sql` lulus (laporan user 2026-11-14); pekerjaan lalu di-commit &
+di-push.
+
+**Pekerjaan sebelumnya (2026-11-13 11:43):** **radius absensi 80 meter**. Migrasi
+**43** menaikkan radius 50 m → 80 m; migrasi ini **sudah dijalankan** di Supabase
+dan `verifikasi_43.sql` lulus, lalu di-commit **`4c1f1b0`** (2026-11-13 11:55).
 
 **Pekerjaan sebelumnya (2026-11-13 11:27):** **commit & push** pekerjaan logo aplikasi
 + favicon baru + redesign halaman login (split screen, panel biru `1.3fr : 1`,
@@ -757,14 +766,15 @@ lanjutan 14,14 dtk).
 | Migrasi DB 40 | **Sudah dijalankan** (laporan user 2026-11-11 21:20) — `jadwal_kerja` memakai `bisa_lihat_presensi()` sehingga kepala unit (multi-unit/kepala ASN) dapat melihat jadwal pegawai unit yang dikelola; `verifikasi_40.sql` dijalankan | `supabase/migrations/40_jadwal_kerja_hak_akses.sql`, `verifikasi_40.sql` |
 | Migrasi DB 41 | **Sudah dijalankan** (laporan user 2026-11-12 09:06) — FK audit `jadwal_shift.dibuat_oleh`, `jadwal_shift.diperbarui_oleh`, dan `tukar_shift.dibuat_oleh` mengarah ke `auth.users`; `verifikasi_41.sql` dijalankan. Uji Tukar Shift kepala unit ASN belum ada kasus | `supabase/migrations/41_audit_jadwal_shift_auth_users.sql`, `verifikasi_41.sql` |
 | Migrasi DB 42 | **Sudah dijalankan** (laporan user 2026-11-12 11:08) — kandidat & pengajuan **absen pulang** baru aktif setelah jendela absen pulang tertutup (jam selesai jadwal + 2 jam, shift malam H+1); helper `hitung_batas_absen_pulang()`; `verifikasi_42.sql` **semua `true`**. Sisa: uji manual kandidat pulang sebelum/sesudah batas | `supabase/migrations/42_pengaduan_pulang_setelah_jendela.sql`, `verifikasi_42.sql` |
-| Migrasi DB 43 | **Belum dijalankan** — radius absensi 80 m pada `submit_presensi`; setelah dijalankan, jalankan `verifikasi_43.sql` | `supabase/migrations/43_radius_80_meter.sql`, `verifikasi_43.sql` |
+| Migrasi DB 43 | **Sudah dijalankan** (laporan user 2026-11-13) — radius absensi 80 m pada `submit_presensi`; digantikan migrasi 44 | `supabase/migrations/43_radius_80_meter.sql`, `verifikasi_43.sql` |
+| Migrasi DB 44 | **Sudah dijalankan** (laporan user 2026-11-14) — radius absensi **120 m** pada `submit_presensi` (isi sama dengan migrasi 43, hanya angka radius); `verifikasi_44.sql` lulus | `supabase/migrations/44_radius_120_meter.sql`, `verifikasi_44.sql` |
 | Data uji | **Sudah dibersihkan ulang setelah uji** — transaksi dihapus, 92 pegawai/grup/master shift dipertahankan | `supabase/cleanup_data_uji.sql`, laporan user 2026-10-30 23:01 |
 | Data testing sebelum go-live | **Sudah dijalankan** (laporan user 2026-11-05) — transaksi sebelum 1 November 2026 terhapus; data go-live utuh | `supabase/hapus_data_testing.sql` |
 | Data operasional | **Lengkap** — jadwal dinas dan pemetaan pegawai sudah diisi | laporan user 2026-10-30 23:04 |
 | Go-live | **Sudah berjalan sejak Minggu, 1 November 2026** — pegawai absen masuk dan pulang; absen akhir pekan hanya untuk pegawai shift yang dijadwalkan | laporan user 2026-11-01 17:58 |
 | Koordinat RSUD AMI | **Ada di kode** — `-0.23805651650343132, 117.41442516465149` di klien dan schema | `src/config/constants.js`, `supabase/schema.sql`, migrasi 21 |
-| Radius absensi | **80 meter di kode** — klien `MAX_RADIUS_METERS = 80`; server menunggu migrasi 43 dijalankan (sebelumnya 50 m dari migrasi 24) | `src/config/constants.js`, `supabase/migrations/43_radius_80_meter.sql`, `verifikasi_43.sql` |
-| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 09-42 dijalankan user** (42 dilaporkan 2026-11-12, semua `true`); `verifikasi_43.sql` menunggu migrasi 43 | laporan user, `supabase/verifikasi_43.sql` |
+| Radius absensi | **120 meter aktif** — klien `MAX_RADIUS_METERS = 120`; server migrasi 44 sudah dijalankan (sebelumnya 80 m dari migrasi 43) | `src/config/constants.js`, `supabase/migrations/44_radius_120_meter.sql`, `verifikasi_44.sql` |
+| Skrip `supabase/verifikasi_*.sql` | **Verifikasi 09-42 dijalankan user** (42 dilaporkan 2026-11-12, semua `true`); migrasi 43 dijalankan 2026-11-13; **migrasi 44 + `verifikasi_44.sql` dijalankan & lulus** (laporan user 2026-11-14) | laporan user, `supabase/verifikasi_44.sql` |
 | Build produksi | **Lulus** - base `/` **6,74 dtk** (audit I-142/I-143); sebelumnya 7,77 dtk (kolom Shift pegawai shift) | `npm run build` 2026-11-11 |
 | Dependensi frontend | **Diperbarui & di-commit** — Vite 7.3.7, `@vitejs/plugin-react` 5.2.0, React Router 7.18.5; Node CI 22; lockfile sinkron; `npm audit` 0 kerentanan | `package.json`, `package-lock.json`, `.github/workflows/deploy.yml` |
 | Header keamanan (CSP) | **Ada di kode & di-commit** — CSP produksi via `<meta>`: `script-src 'self'`, `connect-src` self + `*.supabase.co`, `frame-src 'none'`, `form-action 'self'`, `object-src 'none'`, `base-uri 'self'`; meta referrer; hanya saat build. Uji headless: script inline diblokir, halaman render | `vite.config.js`, `index.html` |
@@ -951,6 +961,55 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-14 WITA — Radius absensi 120 meter & konfirmasi absen berhasil
+
+**Perubahan**
+- Radius geofencing dinaikkan **80 m → 120 meter** karena area kantor belakang
+  berjarak ±94 m dari titik pusat. Klien `MAX_RADIUS_METERS = 120`; teks radius
+  di komentar `geofencing.js`, `attendanceService.js`, `PanelAbsen.jsx`, dan
+  `DataPegawai.jsx` disesuaikan.
+- Migrasi **44** (`44_radius_120_meter.sql`) dibuat dari badan migrasi 43 dengan
+  `v_jarak > 120`, pesan *"Anda berada di luar radius 120 meter"*, dan comment
+  `bebas_radius` 120 m. Migrasi 43 **tidak diubah** karena sudah dijalankan.
+- `verifikasi_44.sql` memeriksa radius 120 m dipakai, radius 80 m hilang,
+  akurasi 50 m + `bebas_radius` + koordinat tetap, serta hak `authenticated`/`anon`.
+- `schema.sql` disinkronkan: header radius 120 m, comment `bebas_radius` 120 m,
+  blok MIGRASI 44 di akhir; definisi terakhir **identik** dengan migrasi 44
+  (line ending dikembalikan ke CRLF).
+- Absen berhasil kini menampilkan **overlay konfirmasi**: `AbsenBerhasil.jsx`
+  (portal karena panel `overflow-hidden`, tirai `bg-slate-900/25`, kartu putih,
+  centang hijau 72 px, satu baris teks, tutup otomatis ±1,4 dtk, bisa ditutup
+  ketuk/`Esc`) dan nada lonceng `mainkanLonceng()` di `src/utils/suaraAbsen.js`
+  (Web Audio C6→G6, gain 0.12, ±290 ms, tanpa berkas audio). Keyframe
+  `absen-tirai`/`absen-kartu`/`absen-centang` + blok `prefers-reduced-motion`
+  ditambahkan ke `src/index.css`.
+- `PanelAbsen.jsx`: state `berhasil`, `refHasil` + auto-scroll saat galat,
+  memanggil overlay & lonceng hanya saat sukses. Absen gagal tetap Alert merah
+  menetap.
+
+**File**
+- `src/config/constants.js`, `src/utils/geofencing.js`,
+  `src/services/attendanceService.js`, `src/pages/admin/DataPegawai.jsx`
+- `src/components/PanelAbsen.jsx`, `src/components/AbsenBerhasil.jsx` (baru),
+  `src/utils/suaraAbsen.js` (baru), `src/index.css`
+- `supabase/migrations/44_radius_120_meter.sql` (baru), `supabase/verifikasi_44.sql` (baru),
+  `supabase/schema.sql`
+- `tests/geofencing.test.js`, `tests/suaraAbsen.test.js` (baru)
+- `README.md`, `AGENTS.md`, `progress.md`
+
+**Verifikasi**
+- `npm run lint` bersih.
+- `npm test` **95/95** lulus (uji radius 120 m: tolak 121 m, terima 95 m, batas
+  119/121 m, bebas radius 222 m, kesesuaian klien ↔ migrasi 44 ↔ `schema.sql`).
+- `npm run build` lulus **10,45 dtk**.
+- Uji PGlite/WASM tidak dipakai (RAM tidak cukup); kesetaraan migrasi 44 dengan
+  migrasi 43 diverifikasi struktural (normalisasi 120→80 **identik**).
+
+**Catatan/risiko**
+- Migrasi 44 **sudah dijalankan** di Supabase dan `verifikasi_44.sql` lulus
+  (laporan user 2026-11-14), sehingga server memakai radius 120 m.
+- Pekerjaan di-commit dan di-push pada 2026-11-14 (setelah perintah user).
 
 ### 2026-11-13 11:43 WITA — Radius absensi 80 meter
 
@@ -4418,7 +4477,8 @@ dan `verifikasi_18` untuk hapus grup kosong.
 | B-49 | Uji manual tampilan pengaduan, periode satu baris, dan pemisah kolom tabel admin | `src/components/pengaduan/DaftarPengaduan.jsx`, `src/components/ui/TampilanPeriode.jsx` | **Belum:** menunggu uji lokal user (desktop & HP) |
 | B-50 | ~~Migrasi 42 (pengaduan absen pulang setelah jendela tutup) belum dijalankan di Supabase~~ | `supabase/migrations/42_pengaduan_pulang_setelah_jendela.sql` | **Selesai:** migrasi 42 dijalankan & `verifikasi_42.sql` semua `true` (laporan user 2026-11-12 11:08). Sintaks + logika sebelumnya diuji di Postgres asli (PGlite): 19/19 verifikasi `true`, 16/16 uji perilaku lulus |
 | B-51 | Uji manual kandidat absen pulang: belum muncul sebelum jam tutup, muncul setelahnya (reguler & shift malam) | `src/pages/Pengaduan.jsx` | **Belum:** server sudah aktif; menunggu uji manual user |
-| B-52 | Migrasi 43 (radius absensi 80 m) belum dijalankan di Supabase | `supabase/migrations/43_radius_80_meter.sql` | **Belum:** jalankan migrasi 43 lalu `verifikasi_43.sql`; selama belum, server tetap menolak jarak > 50 m |
+| B-52 | ~~Migrasi 43 (radius absensi 80 m) belum dijalankan di Supabase~~ | `supabase/migrations/43_radius_80_meter.sql` | **Selesai:** migrasi 43 dijalankan user 2026-11-13; digantikan migrasi 44 |
+| B-53 | ~~Migrasi 44 (radius absensi 120 m) belum dijalankan di Supabase~~ | `supabase/migrations/44_radius_120_meter.sql` | **Selesai:** migrasi 44 dijalankan & `verifikasi_44.sql` lulus (laporan user 2026-11-14) |
 | B-37 | ~~Uji manual tukar shift, laporan, & cetak jadwal F4 landscape~~ | - | **Selesai:** tukar shift, laporan, dan cetak F4 sudah aman (laporan user 2026-11-05) |
 | B-4 | ~~`npm run build` belum dijalankan~~ | — | **Selesai:** lulus 2026-10-25 12:24 |
 | B-5 | ~~README menyebut Fase 1–7 saja~~ | — | **Selesai:** diperbarui ke Fase 1–8 + impor |

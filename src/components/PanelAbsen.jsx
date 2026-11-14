@@ -4,15 +4,16 @@
  * --------------------------------------------------------------------------
  * Alur saat tombol diklik:
  *   1. Minta izin lokasi browser (Geolocation API, enableHighAccuracy: true)
- *   2. Validasi mock location + radius 80 m (utils/geofencing.js)
+ *   2. Validasi mock location + radius 120 m (utils/geofencing.js)
  *   3. Kirim ke RPC server `submit_presensi` (validasi ulang di server)
  *   4. Notifikasi sukses / gagal + jarak aktual
  * ==========================================================================
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { MAX_RADIUS_METERS } from '../config/constants.js'
 import { dapatkanLokasi, periksaLokasi } from '../utils/geofencing.js'
+import { mainkanLonceng } from '../utils/suaraAbsen.js'
 import { kirimPresensi } from '../services/attendanceService.js'
 import { formatJam, formatJarak, formatTanggalRingkas, hariIni } from '../utils/format.js'
 import { statusTanpaAbsen } from '../utils/izin.js'
@@ -24,6 +25,7 @@ import {
   tutupAbsenPulang,
 } from '../utils/jadwalAbsen.js'
 import Alert from './ui/Alert.jsx'
+import AbsenBerhasil from './AbsenBerhasil.jsx'
 import Button from './ui/Button.jsx'
 import Spinner from './ui/Spinner.jsx'
 
@@ -116,7 +118,16 @@ export default function PanelAbsen({
 }) {
   const [proses, setProses] = useState(null) // 'masuk' | 'pulang' | null
   const [hasil, setHasil] = useState(null) // { tipe: 'sukses'|'galat', pesan }
+  const [berhasil, setBerhasil] = useState(null) // 'masuk' | 'pulang' | null
   const [sekarang, setSekarang] = useState(() => Date.now())
+  const refHasil = useRef(null)
+
+  // Pesan gagal bisa berada di luar layar setelah tombol ditekan di HP.
+  useEffect(() => {
+    if (hasil?.tipe === 'galat') {
+      refHasil.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    }
+  }, [hasil])
 
   // Perbarui status tombol saat jendela waktu absensi terbuka.
   useEffect(() => {
@@ -290,6 +301,8 @@ export default function PanelAbsen({
           data?.jarak != null ? formatJarak(Number(data.jarak)) : formatJarak(cek.jarak)
         } dari rumah sakit${diLuarRadius ? ' (di luar area)' : ''}.`,
       })
+      setBerhasil(tipe)
+      mainkanLonceng()
       onBerhasil?.()
     } catch (err) {
       setHasil({
@@ -426,12 +439,14 @@ export default function PanelAbsen({
         )}
 
         {hasil && (
-          <Alert
-            variant={hasil.tipe === 'sukses' ? 'sukses' : 'bahaya'}
-            className="mb-4"
-          >
-            {hasil.pesan}
-          </Alert>
+          <div ref={refHasil}>
+            <Alert
+              variant={hasil.tipe === 'sukses' ? 'sukses' : 'bahaya'}
+              className="mb-4"
+            >
+              {hasil.pesan}
+            </Alert>
+          </div>
         )}
 
         {izinHariIni ? (
@@ -525,6 +540,10 @@ export default function PanelAbsen({
           </p>
         )}
       </div>
+
+      {berhasil && (
+        <AbsenBerhasil jenis={berhasil} onSelesai={() => setBerhasil(null)} />
+      )}
     </section>
   )
 }

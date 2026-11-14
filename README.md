@@ -3,7 +3,7 @@
 **P**resensi **S**istem **I**nformasi **S**taf **I**ntegrasi — RSUD Aji Muhammad Idris (RSUD AMI)
 
 Aplikasi web absensi pegawai non-ASN berbasis **React (Vite) + Tailwind CSS + Supabase**,
-dengan geofencing radius 80 m, proteksi Fake GPS, penguncian perangkat (device binding),
+dengan geofencing radius 120 m, proteksi Fake GPS, penguncian perangkat (device binding),
 dan pemisahan hak akses antara **Pegawai** dan **Super Admin**.
 
 > Status: **Fase 1–10 selesai di kode** — fondasi, database + RLS, login, geofencing,
@@ -108,6 +108,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 | 41 | `supabase/migrations/41_audit_jadwal_shift_auth_users.sql` | FK audit `jadwal_shift.dibuat_oleh`, `jadwal_shift.diperbarui_oleh`, dan `tukar_shift.dibuat_oleh` diarahkan ke `auth.users` — memperbaiki Tukar Shift oleh kepala unit ASN yang tidak punya baris `public.pegawai` ("violates foreign key constraint `jadwal_shift_diperbarui_oleh_fkey`") |
 | 42 | `supabase/migrations/42_pengaduan_pulang_setelah_jendela.sql` | Pengaduan **absen pulang** baru ditawarkan setelah jendela absen pulang tertutup (jam selesai jadwal + 2 jam, shift malam H+1). Sebelumnya baris muncul begitu pegawai absen masuk. `ajukan_pengaduan_presensi()` juga menolak pengajuan sebelum batas tersebut; helper `hitung_batas_absen_pulang()` dipakai kedua RPC |
 | 43 | `supabase/migrations/43_radius_80_meter.sql` | Radius geofencing absensi diubah dari 50 meter menjadi **80 meter** pada `submit_presensi` (titik pusat tetap). Validasi perangkat, anti Fake GPS, akurasi 50 m, jadwal, jendela absen, dan pengecualian `bebas_radius` tidak berubah |
+| 44 | `supabase/migrations/44_radius_120_meter.sql` | Radius geofencing dinaikkan dari 80 meter (migrasi 43) menjadi **120 meter** — area kantor belakang berjarak ±94 m dari titik pusat sebelumnya tidak terjangkau. Hanya angka radius yang berubah; validasi lain tetap |
 
 > Bila database sudah pernah dijalankan sampai file 08, jalankan **file 09** untuk
 > mengaktifkan alur Dinas & Sakit / Cuti, **file 11** untuk pengaturan kepala
@@ -137,7 +138,8 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > (perbaikan Tukar Shift oleh kepala unit ASN), serta **file 42** agar pengaduan
 > **absen pulang** baru ditawarkan setelah jendela absen pulang tertutup
 > (jam selesai jadwal + 2 jam, shift malam H+1), serta **file 43** agar radius
-> absensi menjadi **80 meter**.
+> absensi menjadi **80 meter**, lalu **file 44** agar radius absensi menjadi
+> **120 meter**.
 > File 10 hanya berisi RPC perubahan role yang tidak dipakai UI, jadi boleh
 > dilewati. Jalankan migrasi secara bertahap - jangan mengulang file lama bila
 > tidak diperlukan.
@@ -160,7 +162,8 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > **`supabase/verifikasi_36.sql`**, **`supabase/verifikasi_37.sql`**,
 > **`supabase/verifikasi_38.sql`**, **`supabase/verifikasi_39.sql`**,
 > **`supabase/verifikasi_40.sql`**, **`supabase/verifikasi_41.sql`**,
-> **`supabase/verifikasi_42.sql`**, dan **`supabase/verifikasi_43.sql`** setelah
+> **`supabase/verifikasi_42.sql`**, **`supabase/verifikasi_43.sql`**, dan
+> **`supabase/verifikasi_44.sql`** setelah
 > migrasi terkait. Seluruh nilai
 > pemeriksaan harus `true`; bila ada yang `false`, jangan lanjutkan pemakaian.
 > `verifikasi_13.sql` dan `verifikasi_14.sql` hanya berlaku sebelum migrasi 15;
@@ -228,7 +231,10 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 > hari) dan agar server menolak pengajuan sebelum batas itu. Jalankan
 > `verifikasi_42.sql` setelahnya.
 > Migrasi 43 melebarkan radius absensi menjadi **80 meter** (klien + server).
-> Setelah menjalankannya, jalankan `verifikasi_43.sql`; radius lama 50 m tidak
+> Setelah menjalankannya, jalankan `verifikasi_43.sql`. Migrasi **44** kemudian
+> menaikkannya ke **120 meter** karena area kantor belakang berjarak ±94 m dari
+> titik pusat; jalankan `verifikasi_44.sql` setelahnya. Hanya angka radius yang
+> berubah — radius lama 50 m tidak
 > lagi berlaku untuk absensi baru.
 > Bila muncul `function public.is_superadmin() does not exist`, jalankan versi
 > terbaru migrasi 19 — file ini membuat ulang fungsi inti tersebut sekaligus
@@ -237,7 +243,7 @@ Buka **Supabase Dashboard → SQL Editor**, lalu jalankan file berikut
 **B. Sekaligus**
 
 Salin seluruh isi `supabase/schema.sql`, tempel, lalu **Run**.
-Isinya identik dengan gabungan seluruh 43 file migrasi di atas (termasuk migrasi 15-43).
+Isinya identik dengan gabungan seluruh 44 file migrasi di atas (termasuk migrasi 15-44).
 
 **C. Membuat akun pegawai**
 
@@ -348,6 +354,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 │   ├── verifikasi_41.sql       # Pemeriksaan FK audit jadwal/tukar shift ke auth.users
 │   ├── verifikasi_42.sql       # Pemeriksaan pengaduan pulang setelah jendela tutup
 ├── verifikasi_43.sql       # Pemeriksaan radius absensi 80 meter
+├── verifikasi_44.sql       # Pemeriksaan radius absensi 120 meter
 │   ├── hapus_data_testing.sql  # Hapus transaksi sebelum 1 November 2026
 │   └── jadwal_alfa.sql         # Opsional: jadwal pg_cron untuk Alfa
 ├── scripts/
@@ -362,7 +369,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
     ├── App.jsx                 # Router & pemisahan hak akses
     ├── index.css               # Tailwind + gaya dasar + gaya cetak (print)
     ├── config/
-    │   └── constants.js        # Koordinat RSUD AMI, radius 80 m, zona waktu
+    │   └── constants.js        # Koordinat RSUD AMI, radius 120 m, zona waktu
     ├── utils/
     │   ├── supabaseClient.js   # Klien Supabase dari .env
     │   ├── geofencing.js       # Haversine + anti Mock Location + radius
@@ -431,7 +438,7 @@ on conflict (user_id, unit_kerja) do update set nama_kepala = excluded.nama_kepa
 
 | Lapisan | Implementasi |
 |---|---|
-| **Geofencing** | Haversine ke titik pusat RSUD AMI; tolak jika jarak > 80 m (klien + server) |
+| **Geofencing** | Haversine ke titik pusat RSUD AMI; tolak jika jarak > 120 m (klien + server) |
 | **Fake GPS** | Tolak bila `coords.isMocked === true` atau `accuracy === 0`; akurasi > 50 m ditolak |
 | **Device binding** | `device_token` UUID di `localStorage`; hanya perangkat `approved` Admin IT yang bisa absen; 1 pegawai = 1 perangkat aktif (`pending`/`approved`) dijaga unique index dan RLS |
 | **Server-side** | Penulisan presensi hanya lewat RPC `submit_presensi` (`SECURITY DEFINER`) yang memvalidasi ulang semuanya |

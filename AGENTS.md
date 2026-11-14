@@ -11,7 +11,7 @@ Aplikasi absensi pegawai non-ASN RSUD Aji Muhammad Idris.
 
 - **Frontend:** React 18 + Vite 7 + Tailwind CSS 3 + React Router 7.
 - **Backend:** Supabase (Postgres, Auth, Storage, RPC `SECURITY DEFINER`).
-- **Fitur inti:** geofencing 80 m, anti Fake GPS, device binding satu perangkat
+- **Fitur inti:** geofencing 120 m, anti Fake GPS, device binding satu perangkat
   aktif per pegawai, presensi shift/reguler dengan jendela waktu (masuk dibuka
   1 jam sebelum jam masuk, pulang dibuka tepat waktu dan ditutup 2 jam setelah
   jam pulang), jam kerja reguler khusus per unit, jadwal shift, hari libur di
@@ -20,7 +20,7 @@ Aplikasi absensi pegawai non-ASN RSUD Aji Muhammad Idris.
   rekapitulasi, laporan presensi bulanan per pegawai (PDF A4), impor jadwal
   Excel (.xlsx), tukar shift teraudit & cetak jadwal F4 landscape, hapus grup
   shift kosong, pengecualian radius untuk pegawai tertentu (tanpa mengubah
-  aturan 80 m bagi pegawai lain), serta kepala unit multi-unit dan kepala ASN
+  aturan 120 m bagi pegawai lain), serta kepala unit multi-unit dan kepala ASN
   tanpa baris pegawai.
 - **Peran:** `pegawai`, `superadmin`, dan penugasan `kepala_unit` (satu unit satu
   kepala, satu kepala boleh banyak unit). Kepala ASN memakai metadata
@@ -321,6 +321,8 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
 | I-177 | 2026-11-13 11:27 | "commit dan push" | Memverifikasi `npm run lint` (bersih), `npm test` **91/91**, `npm run build` (lulus **8,55 dtk**); memastikan staged diff tanpa kredensial; commit **`981113e`** (logo aplikasi baru + favicon + redesign login split screen, panel biru `1.3fr : 1`, logo `w-80`, `.kartu-login`, teks mobile "Presensi Sistem Informasi RSUD AMI"; `LogoRSUD.jsx` dihapus, `LogoAplikasi.jsx` ditambahkan; kop laporan tidak berubah) lalu push ke `origin/main` (`ef548cd..981113e`); `git fetch` mengonfirmasi `HEAD` = `origin/main` = `981113e` | selesai | 2026-11-13 11:27 - Commit & push logo aplikasi + redesign login |
 | I-178 | 2026-11-13 (WITA) | "radius dtambahkan menjadi 80 meter" | Menaikkan radius geofencing dari 50 m menjadi **80 meter** di klien (`MAX_RADIUS_METERS`) dan teks radius terkait; membuat migrasi **43** (`43_radius_80_meter.sql`) yang mendefinisikan ulang `submit_presensi` dengan `v_jarak > 80` + pesan "radius 80 meter", `verifikasi_43.sql`, dan sinkron `schema.sql`; menambah 2 uji radius; `npm run lint` bersih, `npm test` **93/93**, `npm run build` lulus | selesai (kode); migrasi 43 belum dijalankan | 2026-11-13 11:43 - Radius absensi 80 meter |
 | I-179 | 2026-11-13 11:55 | "commit dan push" | Memverifikasi `npm run lint` (bersih), `npm test` **93/93**, `npm run build` (lulus **8,13 dtk**); memastikan staged diff tanpa kredensial; commit **`4c1f1b0`** (radius absensi 80 m: migrasi 43 + `verifikasi_43.sql`, sinkron `schema.sql`, `MAX_RADIUS_METERS`, uji, dokumen audit) lalu push ke `origin/main` (`981113e..4c1f1b0`) | selesai | 2026-11-13 11:43 - Radius absensi 80 meter |
+| I-180 | 2026-11-14 (WITA) | "kantor belakang jaraknya 94 meter dari titik pusat, jadi radius 80 masih terlalu kecil, ubah jadi 120 meter, dan tambahkan animasi centang + suara lonceng saat absen berhasil" + "kerjakan pastikan tidak ada bug dan eror pada sistem, pastikan semuanya fitur dan menu tidak ada gangguan" | Menaikkan radius geofencing 80 m → **120 meter** di klien (`MAX_RADIUS_METERS`) dan server (migrasi **44** `44_radius_120_meter.sql` + `verifikasi_44.sql`, sinkron `schema.sql`; migrasi 43 tidak diubah karena sudah dijalankan). Menambahkan overlay konfirmasi absensi berhasil: `AbsenBerhasil.jsx` (portal, tirai 25 %, centang 72 px, satu baris teks, tutup otomatis ±1,4 dtk, ketuk/`Esc`, hormati `prefers-reduced-motion`), `src/utils/suaraAbsen.js` (`mainkanLonceng()` Web Audio: C6→G6, ±290 ms), keyframe `absen-*` di `index.css`, dan integrasi di `PanelAbsen.jsx` (auto-scroll ke pesan gagal). Uji: radius 120 m (tolak 121 m, terima 95 m, batas 119/121, kesesuaian klien↔migrasi 44↔`schema.sql`) + `tests/suaraAbsen.test.js`. `npm run lint` bersih, `npm test` **95/95**, `npm run build` lulus **10,45 dtk** | selesai (kode); migrasi 44 belum dijalankan; belum di-commit | 2026-11-14 - Radius 120 m & konfirmasi absen berhasil |
+| I-181 | 2026-11-14 (WITA) | "migrasi dan verifikasi sudah saya jalankan selanjutnya commit dan push" | Mencatat migrasi **44** dan `verifikasi_44.sql` sudah dijalankan user (server radius 120 m aktif); memverifikasi `npm run lint` (bersih), `npm test` **95/95**, `npm run build` (lulus **10,40 dtk**); commit radius 120 m + overlay konfirmasi absen berhasil (`AbsenBerhasil.jsx`, `suaraAbsen.js`, keyframe `index.css`) beserta migrasi 44, `verifikasi_44.sql`, `schema.sql`, uji, dan dokumen audit lalu push ke `origin/main` | selesai | 2026-11-14 - Commit & push radius 120 m |
 
 ---
 
@@ -435,16 +437,17 @@ Larangan ini berlaku juga untuk pembaruan `progress.md` dan `AGENTS.md`.
   **Migrasi 27 sudah dijalankan** di Supabase (laporan user 2026-10-29);
   `verifikasi_27.sql` lulus (laporan user 2026-10-30). Tampilan jam Admisi di akun pegawai
   sudah diuji dan berubah (laporan user 2026-10-29).
-- **Radius absensi (2026-11-13):** radius geofencing kini **80 meter** di klien
-  (`MAX_RADIUS_METERS` di `src/config/constants.js`) dan server. Migrasi **43**
-  (`43_radius_80_meter.sql`) mendefinisikan ulang `submit_presensi` — isinya sama
-  dengan migrasi 38 kecuali angka radius (`v_jarak > 80`, pesan "radius 80
-  meter"). `schema.sql` disinkronkan dan `verifikasi_43.sql` memeriksa radius
-  80 m dipakai, radius 50 m hilang, akurasi 50 m + `bebas_radius` tetap, serta
-  koordinat tetap. **Migrasi 43 belum dijalankan** di Supabase; selama belum,
-  server masih memakai radius 50 m dari migrasi 24/38. Sebelumnya migrasi **24**
-  menurunkan radius 100 m → 50 m (sudah dijalankan 2026-10-28, `verifikasi_24.sql`
-  lulus 2026-10-30); file dan verifikasi 24 kini historis.
+- **Radius absensi (2026-11-14):** radius geofencing kini **120 meter** di klien
+  (`MAX_RADIUS_METERS` di `src/config/constants.js`) dan server. Migrasi **44**
+  (`44_radius_120_meter.sql`) mendefinisikan ulang `submit_presensi` — isinya
+  sama dengan migrasi 43 kecuali angka radius (`v_jarak > 120`, pesan "radius
+  120 meter"). Alasan: area kantor belakang berjarak ±94 m dari titik pusat
+  sehingga tidak terjangkau pada 80 m. `schema.sql` disinkronkan dan
+  `verifikasi_44.sql` memeriksa radius 120 m dipakai, radius 80 m hilang,
+  akurasi 50 m + `bebas_radius` + koordinat tetap. **Migrasi 43** (80 m) dan
+  **migrasi 44** (120 m) **sudah dijalankan** di Supabase; `verifikasi_44.sql`
+  lulus (laporan user 2026-11-14). File 43 dan `verifikasi_43.sql` kini
+  historis; radius 50 m (migrasi 24) bahkan lebih lama.
 - **Deploy:** GitHub Pages lewat `.github/workflows/deploy.yml`; URL live
   `https://presisiami.my.id/` (custom domain, DNS di Rumahweb); base path `/`;
   `public/CNAME` berisi `presisiami.my.id`; `www` redirect ke domain utama;

@@ -625,3 +625,50 @@
     break-inside: avoid;
   }
 }
+
+/* Konfirmasi absensi berhasil (overlay singkat) */
+@keyframes absen-tirai-masuk {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes absen-tirai-tutup {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes absen-kartu-masuk {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes absen-centang-gambar {
+  from { stroke-dashoffset: 26; }
+  to { stroke-dashoffset: 0; }
+}
+
+.absen-tirai {
+  animation: absen-tirai-masuk 140ms ease-out both;
+}
+
+.absen-tirai.absen-tutup {
+  animation: absen-tirai-tutup 180ms ease-in forwards;
+}
+
+.absen-kartu {
+  animation: absen-kartu-masuk 200ms ease-out both;
+}
+
+.absen-centang path {
+  stroke-dasharray: 26;
+  animation: absen-centang-gambar 350ms 120ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .absen-tirai,
+  .absen-tirai.absen-tutup,
+  .absen-kartu,
+  .absen-centang path {
+    animation: none;
+  }
+}
