@@ -989,7 +989,7 @@ dan `verifikasi_18` untuk hapus grup kosong.
 - `npm run lint` bersih, `npm test` **96/96**, `npm run build` lulus **9,53 dtk**.
 
 **Catatan/risiko**
-- Belum di-commit; menunggu perintah user.
+- Di-commit **`b0b96a5`** & di-push atas perintah user (2026-11-14).
 
 ### 2026-11-14 WITA — Status Hadir, abu libur, footer biru
 
