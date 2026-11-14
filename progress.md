@@ -990,7 +990,7 @@ dan `verifikasi_18` untuk hapus grup kosong.
   ding-dong) dan C (glass sparkle).
 
 **Catatan/risiko**
-- Belum di-commit; menunggu perintah user.
+- Di-commit **`4606459`** dan di-push ke `origin/main` pada 2026-11-14.
 
 ### 2026-11-14 WITA — Perbaikan overlay centang & lonceng sukses
 
