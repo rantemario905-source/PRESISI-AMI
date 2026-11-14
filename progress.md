@@ -989,7 +989,7 @@ dan `verifikasi_18` untuk hapus grup kosong.
 - `npm run lint` bersih, `npm test` **96/96**, `npm run build` lulus **9,62 dtk**.
 
 **Catatan/risiko**
-- Langsung di-commit & di-push atas perintah user (2026-11-14).
+- Langsung di-commit **`290ff41`** & di-push atas perintah user (2026-11-14).
 
 ### 2026-11-14 WITA — Lonceng opsi A (marimba/kalimba)
 
