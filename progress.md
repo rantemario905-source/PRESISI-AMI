@@ -37,7 +37,17 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-14):** **radius absensi 120 meter + konfirmasi absen
+**Pekerjaan terbaru (2026-11-14):** **perbaikan overlay centang & lonceng sukses**.
+Overlay centang sebelumnya tidak pernah tampil karena `onBerhasil={muatData}` di
+`Dashboard.jsx` menyalakan `setMemuatData(true)` sehingga `PanelAbsen` di-unmount
+tepat setelah absen sukses (lonceng tetap bunyi karena Web Audio berjalan di luar
+React). Kini `muatData` menerima opsi `{ senyap: true }` dan `onBerhasil` memakai
+muat ulang senyap, sehingga panel tetap terpasang dan overlay sempat tampil.
+Lonceng diubah menjadi chime 4 nada naik E5–G#5–B5–E6 (jeda 100 ms, harmonik 2×
+tipis, volume 0.2, denting akhir ±700 ms) agar terdengar seperti konfirmasi
+transaksi berhasil dan selaras dengan animasi centang.
+
+**Pekerjaan sebelumnya (2026-11-14):** **radius absensi 120 meter + konfirmasi absen
 berhasil**. Radius dinaikkan dari 80 m menjadi **120 meter** karena area kantor
 belakang berjarak ±94 m dari titik pusat. Klien memakai
 `MAX_RADIUS_METERS = 120`; server memakai migrasi **44**
@@ -961,6 +971,32 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-14 WITA — Perbaikan overlay centang & lonceng sukses
+
+**Perubahan**
+- Akar masalah overlay tidak tampil: `Dashboard.jsx` memakai
+  `onBerhasil={muatData}`, dan `muatData()` selalu `setMemuatData(true)` sehingga
+  `PanelAbsen` (beserta overlay portalnya) di-unmount tepat setelah absen
+  sukses; lonceng tetap bunyi karena Web Audio tidak bergantung pada React.
+- `muatData` kini menerima `{ senyap: true }` → tidak menyalakan spinner dan
+  tidak mereset `memuatData`; `onBerhasil` memakai muat ulang senyap sehingga
+  panel tetap terpasang dan overlay sempat tampil ±1,4 dtk.
+- `src/utils/suaraAbsen.js` dirombak: chime 4 nada naik **E5–G#5–B5–E6**, jeda
+  100 ms, sine + harmonik 2× (0.22) agar berbunyi seperti bell/glockenspiel,
+  volume puncak 0.2, denting terakhir meredup sampai ±700 ms. Ekspor
+  `NADA_SUKSES`, `JEDA_NADA`, `DURASI_LONCENG` untuk uji.
+
+**File**
+- `src/utils/suaraAbsen.js`, `src/pages/Dashboard.jsx`,
+  `tests/suaraAbsen.test.js`, `AGENTS.md`, `progress.md`
+
+**Verifikasi**
+- `npm run lint` bersih, `npm test` **96/96**, `npm run build` lulus **8,82 dtk**.
+- Uji manual (suara + centang + panel langsung berubah) menunggu user.
+
+**Catatan/risiko**
+- Belum di-commit; menunggu perintah user.
 
 ### 2026-11-14 WITA — Radius absensi 120 meter & konfirmasi absen berhasil
 

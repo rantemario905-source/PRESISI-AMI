@@ -46,9 +46,10 @@ export default function Dashboard() {
 
   const deviceToken = ambilDeviceToken()
 
-  const muatData = useCallback(async () => {
+  const muatData = useCallback(async (opsi) => {
     if (!profil) return
-    setMemuatData(true)
+    const senyap = opsi?.senyap === true
+    if (!senyap) setMemuatData(true)
     setGalatData(null)
     try {
       const [status, dataPresensi, dataJadwal, dataJadwalKemarin, dataRiwayat] =
@@ -69,7 +70,7 @@ export default function Dashboard() {
     } catch (err) {
       setGalatData(err?.message || 'Gagal memuat data dashboard.')
     } finally {
-      setMemuatData(false)
+      if (!senyap) setMemuatData(false)
     }
   }, [profil, deviceToken])
 
@@ -170,7 +171,7 @@ export default function Dashboard() {
               jadwalKemarin={jadwalKemarin}
               deviceToken={deviceToken}
               bebasRadius={profil?.bebas_radius === true}
-              onBerhasil={muatData}
+              onBerhasil={() => muatData({ senyap: true })}
             />
 
             <div className="flex flex-col gap-4 lg:grid lg:grid-cols-3 lg:gap-5">
