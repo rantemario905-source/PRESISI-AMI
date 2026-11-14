@@ -972,6 +972,25 @@ dan `verifikasi_18` untuk hapus grup kosong.
 
 ## 3. Log Kronologis Pekerjaan
 
+### 2026-11-14 WITA — Kembali ke nada 4 nada (E5–G#5–B5–E6)
+
+**Perubahan**
+- Atas permintaan user, nada konfirmasi absen dikembalikan ke versi sebelum
+  opsi marimba (commit `f56d0c3`): 4 nada naik **E5–G#5–B5–E6**, jeda 100 ms,
+  harmonik 2× tipis 0.22, volume puncak 0.2, denting terakhir ±700 ms.
+- `src/utils/suaraAbsen.js` dan `tests/suaraAbsen.test.js` dikembalikan dengan
+  `git checkout f56d0c3 -- ...`; versi marimba (`4606459`) tetap di riwayat.
+- Overlay, Dashboard, dan server tidak berubah.
+
+**File**
+- `src/utils/suaraAbsen.js`, `tests/suaraAbsen.test.js`, `AGENTS.md`, `progress.md`
+
+**Verifikasi**
+- `npm run lint` bersih, `npm test` **96/96**, `npm run build` lulus **9,62 dtk**.
+
+**Catatan/risiko**
+- Langsung di-commit & di-push atas perintah user (2026-11-14).
+
 ### 2026-11-14 WITA — Lonceng opsi A (marimba/kalimba)
 
 **Perubahan**
