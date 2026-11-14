@@ -344,7 +344,7 @@ export default function PanelAbsen({
             )}
           </div>
           {!izinHariIni && (
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold sm:text-[11px]">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold tabular-nums sm:text-[11px]">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -353,10 +353,10 @@ export default function PanelAbsen({
                 className="h-3.5 w-3.5"
                 aria-hidden="true"
               >
-                <path d="M12 21s7-5.1 7-11a7 7 0 10-14 0c0 5.9 7 11 7 11z" />
-                <circle cx="12" cy="10" r="2.5" />
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l3 2" />
               </svg>
-              {bebasRadius ? 'Bebas Radius' : `Radius ${MAX_RADIUS_METERS} m`}
+              {formatJam(new Date(sekarang).toISOString())}
             </span>
           )}
         </div>
@@ -536,7 +536,8 @@ export default function PanelAbsen({
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               <path d="M9 12l2 2 4-4" />
             </svg>
-            Lokasi dan perangkat diverifikasi otomatis.
+            Lokasi dan perangkat diverifikasi otomatis
+            {!bebasRadius && ` · area absensi ${MAX_RADIUS_METERS} m`}.
           </p>
         )}
       </div>

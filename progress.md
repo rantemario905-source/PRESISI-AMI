@@ -972,6 +972,29 @@ dan `verifikasi_18` untuk hapus grup kosong.
 
 ## 3. Log Kronologis Pekerjaan
 
+### 2026-11-14 WITA — Jam WITA menggantikan badge radius
+
+**Perubahan**
+- Badge kanan header `PanelAbsen` yang semula **"Radius 120 m" / "Bebas Radius"**
+  diganti **jam berjalan WITA** (`formatJam(new Date(sekarang).toISOString())`)
+  dengan ikon jam dan `tabular-nums`. Alasan: badge lama terbaca sebagai posisi
+  pengguna, padahal itu angka aturan tetap.
+- Jam memakai state `sekarang` yang sudah ada dan diperbarui tiap 15 detik —
+  tidak ada interval baru.
+- Info radius dipindah ke baris catatan bawah: *"Lokasi dan perangkat
+  diverifikasi otomatis · area absensi 120 m"*; untuk pegawai **Bebas Radius**
+  akhiran radius tidak ditampilkan.
+- Logika absen, jendela waktu, dan server tidak berubah.
+
+**File**
+- `src/components/PanelAbsen.jsx`, `AGENTS.md`, `progress.md`
+
+**Verifikasi**
+- `npm run lint` bersih, `npm test` **96/96**, `npm run build` lulus **9,13 dtk**.
+
+**Catatan/risiko**
+- Di-commit & di-push atas perintah user (2026-11-14).
+
 ### 2026-11-14 WITA — Kembali ke nada 4 nada (E5–G#5–B5–E6)
 
 **Perubahan**
