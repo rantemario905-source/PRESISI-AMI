@@ -996,7 +996,7 @@ dan `verifikasi_18` untuk hapus grup kosong.
 - Uji manual (suara + centang + panel langsung berubah) menunggu user.
 
 **Catatan/risiko**
-- Belum di-commit; menunggu perintah user.
+- Di-commit **`f56d0c3`** dan di-push ke `origin/main` pada 2026-11-14.
 
 ### 2026-11-14 WITA — Radius absensi 120 meter & konfirmasi absen berhasil
 
