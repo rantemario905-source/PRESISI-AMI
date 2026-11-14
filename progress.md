@@ -972,6 +972,24 @@ dan `verifikasi_18` untuk hapus grup kosong.
 
 ## 3. Log Kronologis Pekerjaan
 
+### 2026-11-14 WITA — Hapus teks "area absensi 120 m"
+
+**Perubahan**
+- Baris catatan bawah `PanelAbsen` kembali menjadi *"Lokasi dan perangkat
+  diverifikasi otomatis."* — akhiran `· area absensi 120 m` dihapus, sehingga
+  angkanya tidak lagi tampil di layar.
+- Import `MAX_RADIUS_METERS` dibuang karena tidak terpakai lagi.
+- Logika absen, validasi radius server, dan jendela waktu tidak berubah.
+
+**File**
+- `src/components/PanelAbsen.jsx`, `AGENTS.md`, `progress.md`
+
+**Verifikasi**
+- `npm run lint` bersih, `npm test` **96/96**, `npm run build` lulus **8,81 dtk**.
+
+**Catatan/risiko**
+- Langsung di-commit & di-push atas perintah user (2026-11-14).
+
 ### 2026-11-14 WITA — Jam WITA menggantikan badge radius
 
 **Perubahan**

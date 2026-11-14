@@ -11,7 +11,6 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { MAX_RADIUS_METERS } from '../config/constants.js'
 import { dapatkanLokasi, periksaLokasi } from '../utils/geofencing.js'
 import { mainkanLonceng } from '../utils/suaraAbsen.js'
 import { kirimPresensi } from '../services/attendanceService.js'
@@ -536,8 +535,7 @@ export default function PanelAbsen({
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               <path d="M9 12l2 2 4-4" />
             </svg>
-            Lokasi dan perangkat diverifikasi otomatis
-            {!bebasRadius && ` · area absensi ${MAX_RADIUS_METERS} m`}.
+            Lokasi dan perangkat diverifikasi otomatis.
           </p>
         )}
       </div>
