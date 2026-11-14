@@ -993,7 +993,7 @@ dan `verifikasi_18` untuk hapus grup kosong.
 - `npm run lint` bersih, `npm test` **96/96**, `npm run build` lulus **9,13 dtk**.
 
 **Catatan/risiko**
-- Di-commit & di-push atas perintah user (2026-11-14).
+- Di-commit **`ac6a8fa`** dan di-push atas perintah user (2026-11-14).
 
 ### 2026-11-14 WITA — Kembali ke nada 4 nada (E5–G#5–B5–E6)
 
