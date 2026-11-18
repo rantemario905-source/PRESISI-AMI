@@ -37,7 +37,17 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-15, di-commit `4ac8edf`):** **posisi Periode pada cetak
+**Pekerjaan terbaru (2026-11-15, belum di-commit):** **teks peringatan Jadwal
+Shift**. Kalimat "Sel kosong berarti belum dijadwalkan, bukan libur" bertentangan
+dengan laporan: `susunBarisLaporan()` menandai pegawai shift tanpa `jadwal_shift`
+sebagai `libur: true` (`jenisLibur: 'shift'`) sehingga dicetak **Libur Shift /
+Off**. Teks kini: *"Perubahan sel langsung tersimpan. Sel kosong = belum
+dijadwalkan, dan laporan bulanan menuliskannya sebagai Libur Shift / Off.
+Tanggal hari ini dan seterusnya bisa diubah."* Hanya teks; logika jadwal/laporan
+dan DB tidak berubah. `npm run lint` bersih, `npm test` **96/96**,
+`npm run build` lulus **7,90 dtk**.
+
+**Pekerjaan sebelumnya (2026-11-15, di-commit `4ac8edf`):** **posisi Periode pada cetak
 jadwal shift**. Kepala cetak jadwal F4 (`LembarJadwal.jsx`) memakai varian
 `.meta-jadwal` sehingga **Unit / Instalasi** dan **Periode** ditumpuk satu kolom
 (Periode tepat di bawah Unit / Instalasi), bukan berdampingan. Jarak baris
@@ -991,6 +1001,26 @@ dan `verifikasi_18` untuk hapus grup kosong.
 ---
 
 ## 3. Log Kronologis Pekerjaan
+
+### 2026-11-15 WITA — Teks peringatan Jadwal Shift
+
+**Perubahan**
+- Teks peringatan di halaman Jadwal Shift (mode kepala unit, periode masa depan/
+  berjalan) diselaraskan dengan perilaku laporan: sel kosong **belum
+  dijadwalkan**, dan laporan bulanan mencetaknya sebagai **Libur Shift / Off**.
+  Sebelumnya teks menulis "bukan libur", bertentangan dengan
+  `susunBarisLaporan()` di `src/utils/laporan.js` (`polaKerja !== 'reguler'`
+  dan tanpa `jadwal_shift` → `libur: true`, `jenisLibur: 'shift'`).
+- Hanya teks; logika jadwal, laporan, dan DB tidak berubah.
+
+**File**
+- `src/pages/admin/JadwalShift.jsx`, `AGENTS.md`, `progress.md`
+
+**Verifikasi**
+- `npm run lint` bersih, `npm test` **96/96**, `npm run build` lulus **7,90 dtk**.
+
+**Catatan/risiko**
+- Belum di-commit; menunggu perintah user.
 
 ### 2026-11-15 WITA — Posisi Periode pada cetak jadwal shift
 

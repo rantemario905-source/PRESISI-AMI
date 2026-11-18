@@ -902,9 +902,9 @@ export default function JadwalShift({ mode = 'admin' }) {
             >
               {periodeMasaDepan ? (
                 <>
-                  Setiap perubahan sel langsung disimpan. Sel kosong berarti belum
-                  dijadwalkan, bukan libur. Tanggal hari ini dan seterusnya dapat
-                  diubah.
+                  Perubahan sel langsung tersimpan. Sel kosong = belum dijadwalkan,
+                  dan laporan bulanan menuliskannya sebagai Libur Shift / Off.
+                  Tanggal hari ini dan seterusnya bisa diubah.
                 </>
               ) : (
                 <>
