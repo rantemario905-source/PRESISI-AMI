@@ -37,7 +37,7 @@
 
 ## 1. Status Terkini
 
-**Pekerjaan terbaru (2026-11-15, belum di-commit):** **teks peringatan Jadwal
+**Pekerjaan terbaru (2026-11-15, di-commit `1593693` & di-push 2026-11-18):** **teks peringatan Jadwal
 Shift**. Kalimat "Sel kosong berarti belum dijadwalkan, bukan libur" bertentangan
 dengan laporan: `susunBarisLaporan()` menandai pegawai shift tanpa `jadwal_shift`
 sebagai `libur: true` (`jenisLibur: 'shift'`) sehingga dicetak **Libur Shift /
@@ -45,7 +45,7 @@ Off**. Teks kini: *"Perubahan sel langsung tersimpan. Sel kosong = belum
 dijadwalkan, dan laporan bulanan menuliskannya sebagai Libur Shift / Off.
 Tanggal hari ini dan seterusnya bisa diubah."* Hanya teks; logika jadwal/laporan
 dan DB tidak berubah. `npm run lint` bersih, `npm test` **96/96**,
-`npm run build` lulus **7,90 dtk**.
+`npm run build` lulus **7,90 dtk** (verifikasi ulang 2026-11-18: **18,58 dtk**).
 
 **Pekerjaan sebelumnya (2026-11-15, di-commit `4ac8edf`):** **posisi Periode pada cetak
 jadwal shift**. Kepala cetak jadwal F4 (`LembarJadwal.jsx`) memakai varian
@@ -1002,6 +1002,23 @@ dan `verifikasi_18` untuk hapus grup kosong.
 
 ## 3. Log Kronologis Pekerjaan
 
+### 2026-11-18 WITA — Commit & push teks peringatan Jadwal Shift
+
+**Perubahan**
+- Meng-commit sisa pekerjaan I-192 (teks peringatan Jadwal Shift) beserta
+  pembaruan dokumen audit, lalu push ke `origin/main`.
+
+**File**
+- `src/pages/admin/JadwalShift.jsx`, `AGENTS.md`, `progress.md`
+
+**Verifikasi**
+- `npm run lint` bersih, `npm test` **96/96**, `npm run build` lulus **18,58 dtk**.
+- Commit **`1593693`**; `git rev-parse HEAD origin/main` → keduanya `1593693`
+  setelah `git fetch` (`6573a5d..1593693`).
+
+**Catatan/risiko**
+- Push memicu deploy GitHub Pages; teks baru terlihat setelah deploy selesai.
+
 ### 2026-11-15 WITA — Teks peringatan Jadwal Shift
 
 **Perubahan**
@@ -1017,10 +1034,12 @@ dan `verifikasi_18` untuk hapus grup kosong.
 - `src/pages/admin/JadwalShift.jsx`, `AGENTS.md`, `progress.md`
 
 **Verifikasi**
-- `npm run lint` bersih, `npm test` **96/96**, `npm run build` lulus **7,90 dtk**.
+- `npm run lint` bersih, `npm test` **96/96**, `npm run build` lulus **7,90 dtk**
+  (verifikasi ulang sebelum commit 2026-11-18: lint bersih, `npm test` **96/96**,
+  `npm run build` lulus **18,58 dtk**).
 
 **Catatan/risiko**
-- Belum di-commit; menunggu perintah user.
+- Di-commit **`1593693`** dan di-push ke `origin/main` 2026-11-18.
 
 ### 2026-11-15 WITA — Posisi Periode pada cetak jadwal shift
 
